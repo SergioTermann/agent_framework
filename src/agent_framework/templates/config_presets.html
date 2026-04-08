@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>配置预设管理 - Agent Framework</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/base-theme.css">
+    <style>
+        :root {
+            --theme-accent: #1363df;
+            --theme-accent-deep: #0f4eb3;
+            --theme-accent-soft: rgba(19, 99, 223, 0.10);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            background: linear-gradient(135deg, var(--theme-accent-deep), var(--theme-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-primary {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--theme-accent), var(--theme-accent-deep));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            padding: 20px;
+            height: fit-content;
+        }
+
+        .category-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .category-item {
+            padding: 12px;
+            margin: 4px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .category-item:hover {
+            background: var(--theme-accent-soft);
+            color: var(--theme-accent);
+        }
+
+        .category-item.active {
+            background: var(--theme-accent-soft);
+            color: var(--theme-accent);
+            font-weight: 600;
+        }
+
+        .category-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--theme-accent-soft);
+            border-radius: 6px;
+            color: var(--theme-accent);
+        }
+
+        .preset-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .preset-card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s;
+        }
+
+        .preset-card:hover {
+            box-shadow: 0 4px 16px rgba(19, 99, 223, 0.15);
+            border-color: var(--theme-accent);
+        }
+
+        .preset-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .preset-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .preset-badge {
+            padding: 4px 12px;
+            background: var(--theme-accent-soft);
+            color: var(--theme-accent);
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .preset-description {
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .preset-config {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .config-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 13px;
+        }
+
+        .config-label {
+            color: #64748b;
+        }
+
+        .config-value {
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .preset-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-small {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .btn-small:hover {
+            background: #f8fafc;
+            border-color: var(--theme-accent);
+        }
+
+        .btn-small.primary {
+            background: var(--theme-accent);
+            color: white;
+            border-color: var(--theme-accent);
+        }
+
+        .btn-small.primary:hover {
+            background: var(--theme-accent-deep);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>⚙️ 配置预设管理</h1>
+                <p>管理和复用配置模板，快速应用到不同场景</p>
+            </div>
+            <button class="btn-primary" onclick="createPreset()">
+                <i class="fas fa-plus"></i> 创建预设
+            </button>
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <h3 style="margin-bottom: 16px;">配置分类</h3>
+                <ul class="category-list">
+                    <li class="category-item active" onclick="filterCategory('all')">
+                        <div class="category-icon"><i class="fas fa-th"></i></div>
+                        <span>全部预设</span>
+                    </li>
+                    <li class="category-item" onclick="filterCategory('model')">
+                        <div class="category-icon"><i class="fas fa-brain"></i></div>
+                        <span>模型配置</span>
+                    </li>
+                    <li class="category-item" onclick="filterCategory('agent')">
+                        <div class="category-icon"><i class="fas fa-robot"></i></div>
+                        <span>Agent配置</span>
+                    </li>
+                    <li class="category-item" onclick="filterCategory('workflow')">
+                        <div class="category-icon"><i class="fas fa-project-diagram"></i></div>
+                        <span>工作流配置</span>
+                    </li>
+                    <li class="category-item" onclick="filterCategory('retrieval')">
+                        <div class="category-icon"><i class="fas fa-search"></i></div>
+                        <span>检索配置</span>
+                    </li>
+                    <li class="category-item" onclick="filterCategory('custom')">
+                        <div class="category-icon"><i class="fas fa-cog"></i></div>
+                        <span>自定义配置</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="preset-grid" id="presetGrid">
+                <!-- 预设卡片将通过 JavaScript 动态加载 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 加载配置预设
+        async function loadPresets() {
+            try {
+                const response = await fetch('/api/config-presets');
+                const presets = await response.json();
+                renderPresets(presets);
+            } catch (error) {
+                console.error('加载配置预设失败:', error);
+                renderPlaceholder();
+            }
+        }
+
+        function renderPresets(presets) {
+            const grid = document.getElementById('presetGrid');
+            if (!presets || presets.length === 0) {
+                renderPlaceholder();
+                return;
+            }
+
+            grid.innerHTML = presets.map(preset => `
+                <div class="preset-card">
+                    <div class="preset-header">
+                        <div class="preset-title">${preset.name}</div>
+                        <div class="preset-badge">${preset.category || '通用'}</div>
+                    </div>
+                    <div class="preset-description">${preset.description || '暂无描述'}</div>
+                    <div class="preset-config">
+                        ${renderConfig(preset.config)}
+                    </div>
+                    <div class="preset-actions">
+                        <button class="btn-small primary" onclick="applyPreset('${preset.id}')">
+                            <i class="fas fa-check"></i> 应用
+                        </button>
+                        <button class="btn-small" onclick="editPreset('${preset.id}')">
+                            <i class="fas fa-edit"></i> 编辑
+                        </button>
+                        <button class="btn-small" onclick="duplicatePreset('${preset.id}')">
+                            <i class="fas fa-copy"></i> 复制
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderConfig(config) {
+            if (!config) return '<div class="config-row"><span class="config-label">暂无配置</span></div>';
+
+            return Object.entries(config).slice(0, 4).map(([key, value]) => `
+                <div class="config-row">
+                    <span class="config-label">${key}</span>
+                    <span class="config-value">${value}</span>
+                </div>
+            `).join('');
+        }
+
+        function renderPlaceholder() {
+            const grid = document.getElementById('presetGrid');
+            grid.innerHTML = `
+                <div class="preset-card">
+                    <div class="preset-header">
+                        <div class="preset-title">GPT-4 标准配置</div>
+                        <div class="preset-badge">模型配置</div>
+                    </div>
+                    <div class="preset-description">适用于大多数对话场景的GPT-4配置</div>
+                    <div class="preset-config">
+                        <div class="config-row">
+                            <span class="config-label">模型</span>
+                            <span class="config-value">gpt-4</span>
+                        </div>
+                        <div class="config-row">
+                            <span class="config-label">温度</span>
+                            <span class="config-value">0.7</span>
+                        </div>
+                        <div class="config-row">
+                            <span class="config-label">最大Token</span>
+                            <span class="config-value">2048</span>
+                        </div>
+                    </div>
+                    <div class="preset-actions">
+                        <button class="btn-small primary" onclick="applyPreset('demo')">
+                            <i class="fas fa-check"></i> 应用
+                        </button>
+                        <button class="btn-small" onclick="editPreset('demo')">
+                            <i class="fas fa-edit"></i> 编辑
+                        </button>
+                        <button class="btn-small" onclick="duplicatePreset('demo')">
+                            <i class="fas fa-copy"></i> 复制
+                        </button>
+                    </div>
+                </div>
+                <div class="preset-card">
+                    <div class="preset-header">
+                        <div class="preset-title">高精度检索</div>
+                        <div class="preset-badge">检索配置</div>
+                    </div>
+                    <div class="preset-description">适用于需要高准确率的知识检索场景</div>
+                    <div class="preset-config">
+                        <div class="config-row">
+                            <span class="config-label">Top K</span>
+                            <span class="config-value">5</span>
+                        </div>
+                        <div class="config-row">
+                            <span class="config-label">相似度阈值</span>
+                            <span class="config-value">0.85</span>
+                        </div>
+                        <div class="config-row">
+                            <span class="config-label">重排序</span>
+                            <span class="config-value">启用</span>
+                        </div>
+                    </div>
+                    <div class="preset-actions">
+                        <button class="btn-small primary" onclick="applyPreset('demo2')">
+                            <i class="fas fa-check"></i> 应用
+                        </button>
+                        <button class="btn-small" onclick="editPreset('demo2')">
+                            <i class="fas fa-edit"></i> 编辑
+                        </button>
+                        <button class="btn-small" onclick="duplicatePreset('demo2')">
+                            <i class="fas fa-copy"></i> 复制
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function filterCategory(category) {
+            document.querySelectorAll('.category-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.category-item').classList.add('active');
+
+            // 这里可以添加过滤逻辑
+            console.log('过滤分类:', category);
+        }
+
+        function createPreset() {
+            alert('创建新配置预设');
+            // 这里可以打开创建对话框
+        }
+
+        function applyPreset(id) {
+            alert('应用配置预设: ' + id);
+            // 这里调用 API 应用配置
+        }
+
+        function editPreset(id) {
+            alert('编辑配置预设: ' + id);
+            // 这里打开编辑对话框
+        }
+
+        function duplicatePreset(id) {
+            alert('复制配置预设: ' + id);
+            // 这里调用 API 复制配置
+        }
+
+        // 页面加载时获取配置预设
+        document.addEventListener('DOMContentLoaded', loadPresets);
+    </script>
+</body>
+</html>

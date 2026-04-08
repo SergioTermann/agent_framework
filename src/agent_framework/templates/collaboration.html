@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>协作管理 - Agent Framework</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/base-theme.css">
+    <style>
+        :root {
+            --theme-accent: #1363df;
+            --theme-accent-deep: #0f4eb3;
+            --theme-accent-soft: rgba(19, 99, 223, 0.10);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            background: linear-gradient(135deg, var(--theme-accent-deep), var(--theme-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-primary {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--theme-accent), var(--theme-accent-deep));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            padding: 20px;
+            height: fit-content;
+        }
+
+        .team-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .team-member {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .team-member:hover {
+            background: var(--theme-accent-soft);
+        }
+
+        .team-member.active {
+            background: var(--theme-accent-soft);
+            border: 1px solid var(--theme-accent);
+        }
+
+        .member-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--theme-accent), var(--theme-accent-deep));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+        }
+
+        .member-info {
+            flex: 1;
+        }
+
+        .member-name {
+            font-weight: 600;
+            color: #0f172a;
+            font-size: 14px;
+        }
+
+        .member-status {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 4px;
+        }
+
+        .status-online {
+            background: #10b981;
+        }
+
+        .status-offline {
+            background: #94a3b8;
+        }
+
+        .content-area {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            padding: 24px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #64748b;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .tab.active {
+            color: var(--theme-accent);
+            border-bottom-color: var(--theme-accent);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .activity-feed {
+            display: grid;
+            gap: 16px;
+        }
+
+        .activity-item {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 4px solid var(--theme-accent);
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--theme-accent-soft);
+            border-radius: 8px;
+            color: var(--theme-accent);
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+
+        .activity-description {
+            font-size: 14px;
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        .activity-time {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 8px;
+        }
+
+        .shared-resources {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 16px;
+        }
+
+        .resource-card {
+            padding: 16px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .resource-card:hover {
+            border-color: var(--theme-accent);
+            box-shadow: 0 2px 8px rgba(19, 99, 223, 0.1);
+        }
+
+        .resource-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .resource-icon {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--theme-accent-soft);
+            border-radius: 6px;
+            color: var(--theme-accent);
+        }
+
+        .resource-title {
+            font-weight: 600;
+            color: #0f172a;
+            font-size: 14px;
+        }
+
+        .resource-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 8px;
+        }
+
+        .comment-section {
+            display: grid;
+            gap: 16px;
+        }
+
+        .comment-item {
+            display: flex;
+            gap: 12px;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+
+        .comment-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--theme-accent), var(--theme-accent-deep));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .comment-content {
+            flex: 1;
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .comment-author {
+            font-weight: 600;
+            color: #0f172a;
+            font-size: 14px;
+        }
+
+        .comment-time {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .comment-text {
+            font-size: 14px;
+            color: #475569;
+            line-height: 1.6;
+        }
+
+        .comment-input {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .comment-input textarea {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .btn-send {
+            padding: 12px 24px;
+            background: var(--theme-accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            align-self: flex-end;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>👥 协作管理</h1>
+                <p>团队协作、资源共享和实时沟通</p>
+            </div>
+            <button class="btn-primary" onclick="inviteMembers()">
+                <i class="fas fa-user-plus"></i> 邀请成员
+            </button>
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <h3 style="margin-bottom: 16px;">团队成员</h3>
+                <div class="team-list" id="teamList">
+                    <!-- 团队成员列表将通过 JavaScript 动态加载 -->
+                </div>
+            </div>
+
+            <div class="content-area">
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('activity')">活动动态</button>
+                    <button class="tab" onclick="switchTab('resources')">共享资源</button>
+                    <button class="tab" onclick="switchTab('comments')">讨论区</button>
+                </div>
+
+                <div id="activityTab" class="tab-content active">
+                    <div class="activity-feed" id="activityFeed">
+                        <!-- 活动动态将通过 JavaScript 动态加载 -->
+                    </div>
+                </div>
+
+                <div id="resourcesTab" class="tab-content">
+                    <div class="shared-resources" id="sharedResources">
+                        <!-- 共享资源将通过 JavaScript 动态加载 -->
+                    </div>
+                </div>
+
+                <div id="commentsTab" class="tab-content">
+                    <div class="comment-section" id="commentSection">
+                        <!-- 评论将通过 JavaScript 动态加载 -->
+                    </div>
+                    <div class="comment-input">
+                        <textarea id="commentInput" placeholder="输入你的评论..."></textarea>
+                        <button class="btn-send" onclick="postComment()">
+                            <i class="fas fa-paper-plane"></i> 发送
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 加载团队成员
+        async function loadTeamMembers() {
+            try {
+                const response = await fetch('/api/collaboration/members');
+                const members = await response.json();
+                renderTeamMembers(members);
+            } catch (error) {
+                console.error('加载团队成员失败:', error);
+                renderPlaceholderMembers();
+            }
+        }
+
+        function renderTeamMembers(members) {
+            const list = document.getElementById('teamList');
+            if (!members || members.length === 0) {
+                renderPlaceholderMembers();
+                return;
+            }
+
+            list.innerHTML = members.map(member => `
+                <div class="team-member ${member.active ? 'active' : ''}" onclick="selectMember('${member.id}')">
+                    <div class="member-avatar">${member.name.charAt(0)}</div>
+                    <div class="member-info">
+                        <div class="member-name">${member.name}</div>
+                        <div class="member-status">
+                            <span class="status-indicator ${member.online ? 'status-online' : 'status-offline'}"></span>
+                            ${member.online ? '在线' : '离线'}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderPlaceholderMembers() {
+            const list = document.getElementById('teamList');
+            list.innerHTML = `
+                <div class="team-member active">
+                    <div class="member-avatar">张</div>
+                    <div class="member-info">
+                        <div class="member-name">张三</div>
+                        <div class="member-status">
+                            <span class="status-indicator status-online"></span>在线
+                        </div>
+                    </div>
+                </div>
+                <div class="team-member">
+                    <div class="member-avatar">李</div>
+                    <div class="member-info">
+                        <div class="member-name">李四</div>
+                        <div class="member-status">
+                            <span class="status-indicator status-online"></span>在线
+                        </div>
+                    </div>
+                </div>
+                <div class="team-member">
+                    <div class="member-avatar">王</div>
+                    <div class="member-info">
+                        <div class="member-name">王五</div>
+                        <div class="member-status">
+                            <span class="status-indicator status-offline"></span>离线
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 加载活动动态
+        async function loadActivities() {
+            try {
+                const response = await fetch('/api/collaboration/activities');
+                const activities = await response.json();
+                renderActivities(activities);
+            } catch (error) {
+                console.error('加载活动失败:', error);
+                renderPlaceholderActivities();
+            }
+        }
+
+        function renderActivities(activities) {
+            const feed = document.getElementById('activityFeed');
+            if (!activities || activities.length === 0) {
+                renderPlaceholderActivities();
+                return;
+            }
+
+            feed.innerHTML = activities.map(activity => `
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-${activity.icon}"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">${activity.title}</div>
+                        <div class="activity-description">${activity.description}</div>
+                        <div class="activity-time">${activity.time}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderPlaceholderActivities() {
+            const feed = document.getElementById('activityFeed');
+            feed.innerHTML = `
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">张三 上传了新文档</div>
+                        <div class="activity-description">上传了"项目需求文档 v2.0.pdf"到共享资源</div>
+                        <div class="activity-time">5分钟前</div>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-comment"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">李四 发表了评论</div>
+                        <div class="activity-description">在"工作流优化方案"中添加了新评论</div>
+                        <div class="activity-time">1小时前</div>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">王五 完成了任务</div>
+                        <div class="activity-description">完成了"API接口文档编写"任务</div>
+                        <div class="activity-time">3小时前</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 加载共享资源
+        async function loadResources() {
+            try {
+                const response = await fetch('/api/collaboration/resources');
+                const resources = await response.json();
+                renderResources(resources);
+            } catch (error) {
+                console.error('加载资源失败:', error);
+                renderPlaceholderResources();
+            }
+        }
+
+        function renderResources(resources) {
+            const container = document.getElementById('sharedResources');
+            if (!resources || resources.length === 0) {
+                renderPlaceholderResources();
+                return;
+            }
+
+            container.innerHTML = resources.map(resource => `
+                <div class="resource-card">
+                    <div class="resource-header">
+                        <div class="resource-icon">
+                            <i class="fas fa-${resource.icon}"></i>
+                        </div>
+                        <div class="resource-title">${resource.name}</div>
+                    </div>
+                    <div class="resource-meta">
+                        <span>${resource.owner}</span>
+                        <span>${resource.date}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderPlaceholderResources() {
+            const container = document.getElementById('sharedResources');
+            container.innerHTML = `
+                <div class="resource-card">
+                    <div class="resource-header">
+                        <div class="resource-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <div class="resource-title">项目需求文档.pdf</div>
+                    </div>
+                    <div class="resource-meta">
+                        <span>张三</span>
+                        <span>今天</span>
+                    </div>
+                </div>
+                <div class="resource-card">
+                    <div class="resource-header">
+                        <div class="resource-icon">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <div class="resource-title">代码片段集合</div>
+                    </div>
+                    <div class="resource-meta">
+                        <span>李四</span>
+                        <span>昨天</span>
+                    </div>
+                </div>
+                <div class="resource-card">
+                    <div class="resource-header">
+                        <div class="resource-icon">
+                            <i class="fas fa-image"></i>
+                        </div>
+                        <div class="resource-title">UI设计稿</div>
+                    </div>
+                    <div class="resource-meta">
+                        <span>王五</span>
+                        <span>2天前</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 加载评论
+        async function loadComments() {
+            try {
+                const response = await fetch('/api/collaboration/comments');
+                const comments = await response.json();
+                renderComments(comments);
+            } catch (error) {
+                console.error('加载评论失败:', error);
+                renderPlaceholderComments();
+            }
+        }
+
+        function renderComments(comments) {
+            const section = document.getElementById('commentSection');
+            if (!comments || comments.length === 0) {
+                renderPlaceholderComments();
+                return;
+            }
+
+            section.innerHTML = comments.map(comment => `
+                <div class="comment-item">
+                    <div class="comment-avatar">${comment.author.charAt(0)}</div>
+                    <div class="comment-content">
+                        <div class="comment-header">
+                            <span class="comment-author">${comment.author}</span>
+                            <span class="comment-time">${comment.time}</span>
+                        </div>
+                        <div class="comment-text">${comment.text}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderPlaceholderComments() {
+            const section = document.getElementById('commentSection');
+            section.innerHTML = `
+                <div class="comment-item">
+                    <div class="comment-avatar">张</div>
+                    <div class="comment-content">
+                        <div class="comment-header">
+                            <span class="comment-author">张三</span>
+                            <span class="comment-time">10分钟前</span>
+                        </div>
+                        <div class="comment-text">这个方案看起来不错，我们可以先做一个原型验证一下。</div>
+                    </div>
+                </div>
+                <div class="comment-item">
+                    <div class="comment-avatar">李</div>
+                    <div class="comment-content">
+                        <div class="comment-header">
+                            <span class="comment-author">李四</span>
+                            <span class="comment-time">30分钟前</span>
+                        </div>
+                        <div class="comment-text">同意，我可以负责前端部分的开发。</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 切换标签页
+        function switchTab(tabName) {
+            // 隐藏所有标签页
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // 显示选中的标签页
+            if (tabName === 'activity') {
+                document.getElementById('activityTab').classList.add('active');
+                document.querySelectorAll('.tab')[0].classList.add('active');
+            } else if (tabName === 'resources') {
+                document.getElementById('resourcesTab').classList.add('active');
+                document.querySelectorAll('.tab')[1].classList.add('active');
+                loadResources();
+            } else if (tabName === 'comments') {
+                document.getElementById('commentsTab').classList.add('active');
+                document.querySelectorAll('.tab')[2].classList.add('active');
+                loadComments();
+            }
+        }
+
+        // 选择成员
+        function selectMember(memberId) {
+            document.querySelectorAll('.team-member').forEach(member => {
+                member.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+        }
+
+        // 邀请成员
+        function inviteMembers() {
+            alert('邀请成员功能开发中...');
+        }
+
+        // 发表评论
+        async function postComment() {
+            const input = document.getElementById('commentInput');
+            const text = input.value.trim();
+
+            if (!text) {
+                alert('请输入评论内容');
+                return;
+            }
+
+            try {
+                await fetch('/api/collaboration/comments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text })
+                });
+
+                input.value = '';
+                loadComments();
+            } catch (error) {
+                console.error('发表评论失败:', error);
+                alert('发表评论失败，请重试');
+            }
+        }
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTeamMembers();
+            loadActivities();
+        });
+    </script>
+</body>
+</html>

@@ -87,138 +87,146 @@ MODULE_WORKSPACES = {
         "slug": "weather-siting",
         "index": "01",
         "name": "气象选址",
-        "tagline": "风资源评估与候选站址筛选",
-        "description": "面向风资源分析、测风数据整理、候选区域初筛和选址建议输出，先把气象与地理信息拉到一个统一工作台。",
+        "tagline": "风资源评估与智能选址决策",
+        "description": "基于气象数据、地形地貌、电网接入条件的综合分析，提供科学的风电场选址建议和风资源评估报告。",
         "status": "模块工作台",
         "primary_label": "进入知识与数据",
         "primary_href": "/knowledge",
         "secondary_label": "查看分析面板",
         "secondary_href": "/analytics",
         "scenes": [
-            "风资源数据汇总",
-            "候选站址初筛",
-            "测风资料比对",
-            "选址建议输出",
+            "风资源数据分析",
+            "地形地貌评估",
+            "候选站址筛选",
+            "接入条件核查",
+            "选址报告生成",
         ],
         "capabilities": [
-            {"title": "数据接入", "desc": "整合气象观测、测风塔、历史功率和外部资料。"},
-            {"title": "选址分析", "desc": "围绕风速、地形、道路和接入条件进行站址筛选。"},
-            {"title": "报告输出", "desc": "把阶段性分析沉淀成评估摘要与选址建议。"},
+            {"title": "数据整合", "desc": "整合测风塔数据、气象观测、卫星遥感和历史发电数据。"},
+            {"title": "智能分析", "desc": "基于风速、风向、湍流强度、地形坡度等多维度智能评估。"},
+            {"title": "选址优化", "desc": "综合考虑风资源、道路交通、电网接入和环境约束条件。"},
         ],
     },
     "smart-workorder": {
         "slug": "smart-workorder",
         "index": "02",
         "name": "智能工单",
-        "tagline": "工单生成、流转与闭环追踪",
-        "description": "面向缺陷上报、派单执行、处理回执和闭环追踪，集中处理工单创建、流转和闭环记录。",
+        "tagline": "智能派单与全流程闭环管理",
+        "description": "从缺陷识别、工单生成、智能派单到执行追踪、闭环归档，实现设备维护全流程数字化管理。",
         "status": "在线业务模块",
         "primary_label": "进入工单处理台",
         "primary_href": "/workflow",
         "secondary_label": "查看工单日志",
         "secondary_href": "/logs",
         "scenes": [
-            "异常自动建单",
-            "处理流程分派",
-            "执行进度追踪",
-            "工单闭环归档",
+            "智能建单",
+            "自动派单",
+            "执行追踪",
+            "质量复核",
+            "闭环归档",
         ],
         "capabilities": [
-            {"title": "建单入口", "desc": "按设备异常、人工上报或批量任务创建工单。"},
-            {"title": "流程编排", "desc": "把派单、审批、复核和归档串成标准流程。"},
-            {"title": "工单视图", "desc": "在统一面板里查看状态、负责人和处理结果。"},
+            {"title": "智能建单", "desc": "基于设备告警、巡检发现自动生成工单，支持批量建单。"},
+            {"title": "流程编排", "desc": "可配置审批流、派单规则、超时提醒和升级机制。"},
+            {"title": "全程追踪", "desc": "实时查看工单状态、处理进度、现场照片和验收结果。"},
         ],
     },
     "guide-assistant": {
         "slug": "guide-assistant",
         "index": "03",
         "name": "智导助手",
-        "tagline": "故障问答与现场辅助决策",
-        "description": "这是主业务入口，围绕知识问答、故障诊断、操作引导和经验复用展开。",
+        "tagline": "智能故障诊断与现场辅助决策",
+        "description": "基于知识图谱和专家经验的智能问答系统，提供故障诊断、操作指导、应急预案和决策建议。",
         "status": "已接入现有能力",
         "primary_label": "进入业务助手",
         "primary_href": "/maintenance-assistant",
         "secondary_label": "进入开发版助手",
         "secondary_href": "/developer/assistant",
         "scenes": [
-            "故障诊断问答",
-            "现场处置建议",
-            "知识增强检索",
-            "辅助决策输出",
+            "故障智能诊断",
+            "操作步骤指导",
+            "应急预案推荐",
+            "知识检索增强",
+            "经验案例复用",
         ],
         "capabilities": [
-            {"title": "对话入口", "desc": "直接进入现有智导助手页面发起问题。"},
-            {"title": "知识增强", "desc": "结合知识库与记忆系统提升回答质量。"},
-            {"title": "开发调试", "desc": "需要调 prompt 和参数时切到开发版助手。"},
+            {"title": "智能问答", "desc": "结合知识库、历史案例和实时数据的多轮对话问答。"},
+            {"title": "故障诊断", "desc": "基于症状描述和设备数据，快速定位故障原因和解决方案。"},
+            {"title": "决策支持", "desc": "提供操作建议、风险评估和应急处置方案。"},
         ],
     },
     "smart-guard": {
         "slug": "smart-guard",
         "index": "04",
         "name": "智能值守",
-        "tagline": "告警联动与运行监测",
-        "description": "面向值班巡检、告警汇总、异常态势和重点设备监控，把值守信息聚合成统一面板。",
+        "tagline": "全天候智能监控与告警联动",
+        "description": "实时监控设备运行状态、智能告警分级处理、巡检任务管理，打造无人值守的智能运维中心。",
         "status": "模块工作台",
-        "primary_label": "进入平台总览",
-        "primary_href": "/dashboard",
+        "primary_label": "进入值守大屏",
+        "primary_href": "/data-platform",
         "secondary_label": "查看性能监控",
         "secondary_href": "/performance",
         "scenes": [
-            "值班态势总览",
-            "告警分级处理",
-            "巡检任务跟踪",
-            "重点设备监控",
+            "实时监控大屏",
+            "智能告警分级",
+            "巡检任务调度",
+            "异常态势分析",
+            "值班日志记录",
         ],
         "capabilities": [
-            {"title": "值守面板", "desc": "按班次、区域和设备维度查看当前值守态势。"},
-            {"title": "告警联动", "desc": "把告警汇总、排序和处置建议放在同一界面。"},
-            {"title": "巡检跟踪", "desc": "把巡检任务、完成度和异常记录集中呈现。"},
+            {"title": "态势感知", "desc": "多维度展示设备状态、告警分布、巡检进度和关键指标。"},
+            {"title": "智能告警", "desc": "告警自动分级、关联分析、处置建议和升级提醒。"},
+            {"title": "巡检管理", "desc": "巡检路线规划、任务分配、完成度追踪和异常上报。"},
         ],
     },
     "power-trading": {
         "slug": "power-trading",
         "index": "05",
         "name": "电力交易",
-        "tagline": "报价分析与交易辅助",
-        "description": "面向交易数据分析、报价建议、市场研判和经营辅助，集中查看行情、报价和经营指标。",
+        "tagline": "智能报价与市场分析",
+        "description": "实时市场监控、智能报价建议、风险评估与收益优化，为电力交易决策提供全方位数据支持和AI辅助分析。",
         "status": "在线业务模块",
         "primary_label": "进入交易分析台",
         "primary_href": "/analytics",
-        "secondary_label": "查看运行状态",
+        "secondary_label": "查看市场动态",
         "secondary_href": "/system-status",
         "scenes": [
-            "交易数据汇总",
-            "报价辅助分析",
-            "市场趋势判断",
-            "经营指标跟踪",
+            "实时市场监控",
+            "智能报价优化",
+            "风险评估分析",
+            "收益预测建模",
+            "历史数据对比",
+            "市场趋势研判",
         ],
         "capabilities": [
-            {"title": "交易总览", "desc": "把价格、负荷和成交数据集中到业务入口。"},
-            {"title": "报价建议", "desc": "围绕历史数据和当前状态生成分析建议。"},
-            {"title": "经营视图", "desc": "为交易、运营和管理层提供统一的观察口。"},
+            {"title": "实时行情", "desc": "多市场价格监控、负荷预测和成交数据实时更新。"},
+            {"title": "智能报价", "desc": "基于历史数据和AI模型生成最优报价策略建议。"},
+            {"title": "风险管控", "desc": "识别价格波动风险、负荷偏差和市场异常情况。"},
+            {"title": "收益分析", "desc": "交易收益追踪、成本分析和经营指标可视化。"},
         ],
     },
     "smart-office": {
         "slug": "smart-office",
         "index": "06",
         "name": "智慧办公",
-        "tagline": "协同办公与通用助手",
-        "description": "面向流程协同、文档整理、通用事务和部门办公助手，让办公场景也有独立模块入口。",
+        "tagline": "AI 赋能的协同办公平台",
+        "description": "智能文档处理、会议纪要生成、任务协同管理，让 AI 成为办公场景的得力助手。",
         "status": "模块工作台",
         "primary_label": "进入应用中心",
         "primary_href": "/apps",
         "secondary_label": "查看代码片段",
         "secondary_href": "/code-snippets",
         "scenes": [
-            "会议纪要整理",
-            "待办任务汇总",
-            "文档抽取生成",
-            "部门协同助手",
+            "智能文档处理",
+            "会议纪要生成",
+            "任务协同管理",
+            "知识沉淀整理",
+            "部门助手定制",
         ],
         "capabilities": [
-            {"title": "办公入口", "desc": "收纳日常办公场景下的通用 AI 助手能力。"},
-            {"title": "应用连接", "desc": "通过应用中心接入更多办公型工具和页面。"},
-            {"title": "文档处理", "desc": "围绕摘要、整理和知识沉淀做统一入口。"},
+            {"title": "文档智能", "desc": "文档摘要、信息抽取、格式转换和智能生成。"},
+            {"title": "协同办公", "desc": "待办提醒、任务分配、进度追踪和团队协作。"},
+            {"title": "知识管理", "desc": "会议纪要、经验总结、知识库构建和智能检索。"},
         ],
     },
 }
@@ -227,147 +235,167 @@ MODULE_WORKSPACES = {
 MODULE_FRONTENDS = {
     "weather-siting": {
         "route": "/modules/weather-siting/app",
-        "headline": "气象选址前端工作台",
-        "summary": "把风资源、候选区域和接入条件收进一个前端页面，先完成选址分析入口、结果面板和候选站址清单。",
+        "headline": "气象选址智能分析平台",
+        "summary": "整合风资源数据、地形地貌、电网接入条件，提供科学的选址决策支持和风资源评估报告。",
         "metrics": [
             {"label": "候选区域", "value": "12", "note": "待评估地块"},
-            {"label": "已筛站址", "value": "4", "note": "进入复核"},
-            {"label": "气象数据", "value": "18 份", "note": "已接入资料"},
+            {"label": "优选站址", "value": "4", "note": "推荐方案"},
+            {"label": "测风数据", "value": "18 组", "note": "已接入分析"},
         ],
         "fields": [
-            {"label": "项目名称", "type": "text", "name": "project", "placeholder": "例如：华北沿海风场一期"},
-            {"label": "区域范围", "type": "text", "name": "region", "placeholder": "例如：河北沿海 80km 范围"},
-            {"label": "分析目标", "type": "textarea", "name": "goal", "placeholder": "说明本次要完成的选址判断、对比或报告任务"},
+            {"label": "项目名称", "type": "text", "name": "project", "placeholder": "例如：华北沿海风电场一期"},
+            {"label": "区域范围", "type": "text", "name": "region", "placeholder": "例如：河北沿海 80km 半径范围"},
+            {"label": "分析需求", "type": "textarea", "name": "goal", "placeholder": "描述选址目标、容量规划、重点关注因素（如风速要求、接入距离等）"},
         ],
-        "quick_actions": ["风资源初筛", "候选站址对比", "接入条件核查"],
-        "result_title": "选址分析输出",
+        "quick_actions": ["风资源评估", "地形分析", "接入条件核查"],
+        "result_title": "选址分析结果",
         "result_lines": [
-            "优先关注年平均风速、极端天气和道路接入约束。",
-            "适合先形成候选站址清单，再进入人工复核。",
-            "结果页后续可继续接地图、测风和外部数据接口。",
+            "综合评估年平均风速、风功率密度、湍流强度和极端气象条件。",
+            "分析地形坡度、海拔高度、地表粗糙度对风资源的影响。",
+            "核查道路交通、电网接入距离、环境保护区等约束条件。",
+            "生成候选站址清单，标注优先级和关键风险点。",
         ],
-        "board_title": "候选站址清单",
-        "board_columns": ["站址", "区域", "状态", "说明"],
+        "board_title": "候选站址评估清单",
+        "board_columns": ["站址编号", "区域位置", "风速等级", "综合评价"],
         "board_rows": [
-            ["A-01", "沿海北段", "待复核", "风资源好，接入条件待确认"],
-            ["A-02", "沿海中段", "推荐", "道路条件较好，测风资料完整"],
-            ["B-01", "丘陵西侧", "观察", "风速稳定，但地形复杂"],
+            ["WS-A01", "沿海北段", "7.2 m/s", "优选 - 风资源优异，接入条件良好"],
+            ["WS-A02", "沿海中段", "6.8 m/s", "推荐 - 测风数据完整，道路可达"],
+            ["WS-B01", "丘陵西侧", "6.5 m/s", "备选 - 风速稳定，地形需详细勘察"],
+            ["WS-B02", "平原东部", "6.2 m/s", "观察 - 接入距离较远，经济性待评估"],
         ],
     },
     "smart-workorder": {
         "route": "/modules/smart-workorder/app",
-        "headline": "智能工单处理台",
-        "summary": "集中完成建单、派单、处理和闭环追踪，页面内直接查看工单状态、处理进度和记录列表。",
+        "headline": "智能工单管理系统",
+        "summary": "从缺陷识别到闭环归档的全流程数字化管理，支持智能派单、进度追踪和质量验收。",
         "metrics": [
-            {"label": "待处理工单", "value": "9", "note": "需要分派"},
-            {"label": "处理中", "value": "14", "note": "现场执行中"},
-            {"label": "已闭环", "value": "126", "note": "本月累计"},
+            {"label": "待处理", "value": "9", "note": "需要派单"},
+            {"label": "处理中", "value": "14", "note": "现场执行"},
+            {"label": "已完成", "value": "126", "note": "本月累计"},
         ],
         "fields": [
             {"label": "设备名称", "type": "text", "name": "asset", "placeholder": "例如：3# 风机变桨系统"},
-            {"label": "异常级别", "type": "text", "name": "severity", "placeholder": "例如：高 / 中 / 低"},
-            {"label": "问题描述", "type": "textarea", "name": "issue", "placeholder": "描述故障现象、影响范围和当前处理诉求"},
+            {"label": "故障等级", "type": "text", "name": "severity", "placeholder": "紧急 / 重要 / 一般 / 计划"},
+            {"label": "问题描述", "type": "textarea", "name": "issue", "placeholder": "详细描述故障现象、影响范围、已采取措施和处理需求"},
         ],
-        "quick_actions": ["生成处理工单", "派发检修任务", "查看闭环记录"],
-        "result_title": "工单处理建议",
+        "quick_actions": ["生成工单", "智能派单", "查看历史"],
+        "result_title": "工单处理方案",
         "result_lines": [
-            "支持根据异常描述生成工单标题、处理建议和派单信息。",
-            "可继续补充责任人、审批节点和消息通知等流程配置。",
-            "页面内已经保留工单录入、状态查看和闭环跟踪入口。",
+            "基于故障描述自动生成工单标题、优先级和处理建议。",
+            "智能匹配责任人、预估处理时长和所需备件。",
+            "自动关联历史相似工单和处理经验。",
+            "支持审批流程配置、超时提醒和自动升级。",
         ],
-        "board_title": "工单队列",
-        "board_columns": ["工单号", "设备", "状态", "负责人"],
+        "board_title": "工单处理队列",
+        "board_columns": ["工单编号", "设备名称", "状态", "负责人"],
         "board_rows": [
-            ["WO-24031", "3# 风机", "待派单", "未分配"],
-            ["WO-24028", "升压站保护柜", "处理中", "王工"],
-            ["WO-24015", "箱变温控", "待复核", "李工"],
+            ["WO-240315", "3# 风机变桨", "待派单", "待分配"],
+            ["WO-240312", "升压站保护", "处理中", "王工 - 预计今日完成"],
+            ["WO-240308", "箱变温控", "待验收", "李工 - 等待复核"],
+            ["WO-240305", "SCADA通讯", "已完成", "张工 - 已闭环归档"],
         ],
     },
     "smart-guard": {
-        "route": "/modules/smart-guard/app",
-        "headline": "智能值守前端工作台",
-        "summary": "把值守态势、告警优先级和巡检任务集中成统一值班面板，先补值守前端页面和告警看板。",
+        "route": "/data-platform",
+        "headline": "智能值守监控中心",
+        "summary": "实时监控设备运行状态，智能告警分级处理，巡检任务全程管理，打造无人值守运维体系。",
         "metrics": [
             {"label": "实时告警", "value": "6", "note": "需重点关注"},
-            {"label": "待巡检点位", "value": "11", "note": "本班次"},
-            {"label": "在线设备", "value": "98%", "note": "设备在线率"},
+            {"label": "巡检任务", "value": "11", "note": "本班次待完成"},
+            {"label": "设备在线", "value": "98.2%", "note": "运行正常"},
         ],
         "fields": [
-            {"label": "值守班次", "type": "text", "name": "shift", "placeholder": "例如：白班 / 夜班"},
-            {"label": "关注设备", "type": "text", "name": "focus", "placeholder": "例如：升压站、风机群、箱变"},
-            {"label": "值守目标", "type": "textarea", "name": "goal", "placeholder": "输入本班次重点关注问题、告警或巡检安排"},
+            {"label": "值班班次", "type": "text", "name": "shift", "placeholder": "例如：早班 / 中班 / 夜班"},
+            {"label": "监控区域", "type": "text", "name": "area", "placeholder": "例如：1# 风场 / 升压站 / 全场"},
+            {"label": "关注重点", "type": "textarea", "name": "focus", "placeholder": "描述本班次重点关注的设备、告警类型或特殊事项"},
         ],
-        "quick_actions": ["汇总当前告警", "生成值守摘要", "安排巡检任务"],
-        "result_title": "值守建议输出",
+        "quick_actions": ["告警处理", "巡检记录", "交接班"],
+        "result_title": "值守态势分析",
         "result_lines": [
-            "优先按影响范围和设备等级给告警排序。",
-            "适合把值守摘要、巡检计划和处置记录放在一页。",
-            "后续可继续接系统状态和实时告警接口。",
+            "实时展示设备运行状态、告警分布和巡检完成情况。",
+            "智能识别高优先级告警，推荐处置方案和联动操作。",
+            "自动生成巡检路线，记录巡检发现和异常上报。",
+            "支持值班日志自动生成和交接班信息推送。",
         ],
-        "board_title": "值守看板",
-        "board_columns": ["对象", "告警", "状态", "动作"],
+        "board_title": "告警处理清单",
+        "board_columns": ["告警时间", "设备名称", "告警等级", "处理状态"],
         "board_rows": [
-            ["1# 风机群", "偏航异常", "关注", "安排现场巡检"],
-            ["升压站", "温度波动", "处理中", "等待复测"],
-            ["箱变区", "通信抖动", "观察", "继续监视"],
+            ["14:23", "5# 风机齿轮箱", "紧急", "处理中 - 已派单"],
+            ["13:45", "箱变温度异常", "重要", "已确认 - 持续观察"],
+            ["12:10", "SCADA通讯中断", "一般", "已恢复 - 待归档"],
+            ["11:30", "测风仪数据缺失", "提示", "已记录 - 计划检修"],
         ],
     },
     "power-trading": {
         "route": "/modules/power-trading/app",
-        "headline": "电力交易分析台",
-        "summary": "集中查看交易分析入口、报价建议面板和经营数据看板，用一页完成主要交易判断。",
+        "headline": "电力交易智能分析台",
+        "summary": "实时监控多市场行情动态，AI驱动的智能报价建议，风险预警与收益优化分析，为交易决策提供全方位数据支持。",
         "metrics": [
-            {"label": "今日均价", "value": "428", "note": "元/MWh"},
-            {"label": "预测负荷", "value": "86%", "note": "达成率"},
-            {"label": "报价方案", "value": "3", "note": "待选择"},
+            {"label": "实时均价", "value": "428.5", "note": "元/MWh"},
+            {"label": "负荷预测", "value": "92.3%", "note": "准确率"},
+            {"label": "今日收益", "value": "+18.6", "note": "万元"},
+            {"label": "风险等级", "value": "中", "note": "可控范围"},
         ],
         "fields": [
-            {"label": "交易周期", "type": "text", "name": "period", "placeholder": "例如：明日现货 / 本周中长期"},
-            {"label": "关注市场", "type": "text", "name": "market", "placeholder": "例如：华北现货市场"},
-            {"label": "分析需求", "type": "textarea", "name": "goal", "placeholder": "输入报价、趋势、风险或收益分析需求"},
+            {"label": "交易时段", "type": "text", "name": "period", "placeholder": "例如：明日日前 / 本周现货 / 月度中长期"},
+            {"label": "目标市场", "type": "text", "name": "market", "placeholder": "例如：华北现货 / 华东日前 / 南方电网"},
+            {"label": "交易容量", "type": "text", "name": "capacity", "placeholder": "例如：500 MW / 全部可用容量"},
+            {"label": "分析目标", "type": "textarea", "name": "goal", "placeholder": "描述报价策略、风险偏好、收益目标或市场研判需求"},
         ],
-        "quick_actions": ["生成报价建议", "查看市场趋势", "汇总经营指标"],
-        "result_title": "交易分析建议",
+        "quick_actions": [
+            "生成智能报价方案",
+            "分析市场价格趋势",
+            "评估交易风险等级",
+            "优化收益策略",
+            "对比历史同期数据",
+            "预测负荷曲线"
+        ],
+        "result_title": "AI交易分析报告",
         "result_lines": [
-            "适合集中查看报价建议、风险提示和市场摘要。",
-            "可继续接入实时行情、成交结果和负荷预测数据。",
-            "页面内已预留交易输入、结果摘要和经营看板区域。",
+            "基于实时市场数据和历史模式，AI模型已生成最优报价建议。",
+            "当前市场波动处于正常范围，建议采用稳健型报价策略。",
+            "负荷预测准确率达92.3%，可信度较高，建议参考执行。",
+            "已识别3个潜在风险点和2个套利机会，详见风险评估面板。",
         ],
-        "board_title": "交易看板",
-        "board_columns": ["市场", "指标", "状态", "说明"],
+        "board_title": "实时交易看板",
+        "board_columns": ["市场/时段", "当前价格", "预测趋势", "建议操作"],
         "board_rows": [
-            ["日前交易", "价格波动", "关注", "建议观察午后区间"],
-            ["现货交易", "负荷偏差", "处理中", "需要修正预测"],
-            ["中长期", "合约收益", "稳定", "按计划执行"],
+            ["日前市场 08:00-12:00", "¥435/MWh", "↗ 上涨5%", "适度增加报量"],
+            ["日前市场 12:00-18:00", "¥520/MWh", "→ 平稳", "按计划执行"],
+            ["日前市场 18:00-22:00", "¥680/MWh", "↗ 峰值", "优先高价时段"],
+            ["现货市场 实时", "¥428/MWh", "↘ 回落3%", "观察后续走势"],
+            ["中长期合约", "¥395/MWh", "→ 稳定", "按合约履约"],
         ],
     },
     "smart-office": {
         "route": "/modules/smart-office/app",
-        "headline": "智慧办公前端工作台",
-        "summary": "把会议纪要、待办汇总、文档处理和协同事务做成一个统一办公入口，先补齐前端页面。",
+        "headline": "智慧办公协同平台",
+        "summary": "AI 驱动的文档处理、会议纪要生成、任务协同管理，让办公更高效智能。",
         "metrics": [
-            {"label": "今日待办", "value": "17", "note": "待整理事项"},
-            {"label": "会议纪要", "value": "5", "note": "待生成摘要"},
-            {"label": "协同任务", "value": "8", "note": "跨部门事项"},
+            {"label": "待办任务", "value": "17", "note": "今日需处理"},
+            {"label": "会议纪要", "value": "5", "note": "待生成"},
+            {"label": "协同事项", "value": "8", "note": "跨部门"},
         ],
         "fields": [
-            {"label": "办公主题", "type": "text", "name": "topic", "placeholder": "例如：周例会整理 / 任务分派"},
+            {"label": "办公场景", "type": "text", "name": "topic", "placeholder": "例如：周例会 / 项目协同 / 文档整理"},
             {"label": "参与部门", "type": "text", "name": "team", "placeholder": "例如：运维部、交易部、综合部"},
-            {"label": "处理需求", "type": "textarea", "name": "goal", "placeholder": "输入纪要整理、任务提炼或文档生成需求"},
+            {"label": "处理需求", "type": "textarea", "name": "goal", "placeholder": "描述会议纪要生成、任务分配、文档摘要或知识整理需求"},
         ],
-        "quick_actions": ["生成会议纪要", "整理待办事项", "汇总部门协同"],
-        "result_title": "办公助手输出",
+        "quick_actions": ["生成会议纪要", "任务分配", "文档摘要"],
+        "result_title": "智能办公助手",
         "result_lines": [
-            "适合沉淀会议纪要、待办清单和协同记录。",
-            "后续可继续连接知识库、应用中心和文档接口。",
-            "当前先完成独立办公前端入口。",
+            "自动提取会议关键信息，生成结构化纪要和待办清单。",
+            "智能识别任务优先级，推荐责任人和完成时限。",
+            "文档智能摘要、信息抽取和格式转换。",
+            "支持知识沉淀、经验总结和团队协作。",
         ],
-        "board_title": "办公面板",
-        "board_columns": ["事项", "部门", "状态", "说明"],
+        "board_title": "办公任务看板",
+        "board_columns": ["任务名称", "负责部门", "状态", "截止时间"],
         "board_rows": [
-            ["周例会纪要", "综合部", "待整理", "下午 4 点前完成"],
-            ["运维待办汇总", "运维部", "处理中", "需补充责任人"],
-            ["交易简报", "交易部", "待确认", "等待最新数据"],
+            ["周例会纪要整理", "综合部", "进行中", "今日 16:00"],
+            ["运维月报生成", "运维部", "待开始", "本周五"],
+            ["交易策略文档", "交易部", "待审核", "明日 10:00"],
+            ["知识库更新", "技术部", "已完成", "已归档"],
         ],
     },
 }
@@ -712,6 +740,12 @@ def chat():
     return render_template('chat.html')
 
 
+@app.route('/chat-interface')
+def chat_interface():
+    """自适应对话界面"""
+    return render_template('chat_interface.html')
+
+
 @app.route('/api/chat', methods=['POST'])
 def api_chat():
     """对话API"""
@@ -993,6 +1027,78 @@ def webhooks_dashboard():
 def code_snippets():
     """代码片段管理"""
     return render_template('code_snippets.html')
+
+
+@app.route('/prompts')
+def prompts_page():
+    """提示词库管理"""
+    return render_template('prompts.html')
+
+
+@app.route('/documents')
+def documents_page():
+    """文档中心"""
+    return render_template('documents.html')
+
+
+@app.route('/ab-testing')
+def ab_testing_page():
+    """A/B 测试平台"""
+    return render_template('ab_testing.html')
+
+
+@app.route('/reasoning')
+def reasoning_page():
+    """高级推理实验室"""
+    return render_template('reasoning.html')
+
+
+@app.route('/publish')
+def publish_page():
+    """发布管理"""
+    return render_template('publish.html')
+
+
+@app.route('/config-presets')
+def config_presets_page():
+    """配置预设管理"""
+    return render_template('config_presets.html')
+
+
+@app.route('/http-tools')
+def http_tools_page():
+    """HTTP 请求工具"""
+    return render_template('http_tools.html')
+
+
+@app.route('/workflow-advanced')
+def workflow_advanced_page():
+    """高级工作流编排"""
+    return render_template('workflow_advanced.html')
+
+
+@app.route('/collaboration')
+def collaboration_page():
+    """协作管理"""
+    return render_template('collaboration.html')
+
+
+@app.route('/monitoring')
+def monitoring_page():
+    """监控面板"""
+    return render_template('monitoring.html')
+
+
+@app.route('/multimodal')
+def multimodal_page():
+    """多模态处理"""
+    return render_template('multimodal.html')
+
+
+@app.route('/extensions')
+def extensions_page():
+    """扩展管理"""
+    return render_template('extensions.html')
 
 
 @app.route('/health')

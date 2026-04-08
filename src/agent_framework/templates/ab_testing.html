@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A/B 测试平台 - Agent Framework</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/base-theme.css">
+    <style>
+        :root {
+            --theme-accent: #1363df;
+            --theme-accent-deep: #0f4eb3;
+            --theme-accent-soft: rgba(19, 99, 223, 0.10);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            background: linear-gradient(135deg, var(--theme-accent-deep), var(--theme-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-primary {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--theme-accent), var(--theme-accent-deep));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .experiment-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .experiment-card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .experiment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 20px;
+        }
+
+        .experiment-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 8px;
+        }
+
+        .experiment-status {
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-running {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .status-completed {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .status-draft {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .variants-comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .variant-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            background: #f8fafc;
+        }
+
+        .variant-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .variant-name {
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .variant-badge {
+            padding: 4px 8px;
+            background: var(--theme-accent-soft);
+            color: var(--theme-accent);
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .metric-row:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .metric-value {
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .winner-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 12px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: white;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .experiment-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .btn-secondary {
+            padding: 8px 16px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-secondary:hover {
+            background: #f8fafc;
+            border-color: var(--theme-accent);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--theme-accent);
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>🧪 A/B 测试平台</h1>
+                <p>对比不同模型、提示词的效果，数据驱动优化AI性能</p>
+            </div>
+            <button class="btn-primary" onclick="createExperiment()">
+                <i class="fas fa-flask"></i> 创建实验
+            </button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalExperiments">0</div>
+                <div class="stat-label">总实验数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="runningExperiments">0</div>
+                <div class="stat-label">进行中</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="completedExperiments">0</div>
+                <div class="stat-label">已完成</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgImprovement">0%</div>
+                <div class="stat-label">平均提升</div>
+            </div>
+        </div>
+
+        <div class="experiment-grid" id="experimentGrid">
+            <!-- 实验卡片将通过 JavaScript 动态加载 -->
+        </div>
+    </div>
+
+    <script>
+        // 加载实验列表
+        async function loadExperiments() {
+            try {
+                const response = await fetch('/api/ab-testing/experiments');
+                const experiments = await response.json();
+                renderExperiments(experiments);
+                updateStats(experiments);
+            } catch (error) {
+                console.error('加载实验失败:', error);
+                renderPlaceholder();
+            }
+        }
+
+        function renderExperiments(experiments) {
+            const grid = document.getElementById('experimentGrid');
+            if (!experiments || experiments.length === 0) {
+                renderPlaceholder();
+                return;
+            }
+
+            grid.innerHTML = experiments.map(exp => `
+                <div class="experiment-card">
+                    <div class="experiment-header">
+                        <div>
+                            <div class="experiment-title">${exp.name}</div>
+                            <div style="color: #64748b; font-size: 14px;">${exp.description || '无描述'}</div>
+                        </div>
+                        <div class="experiment-status status-${exp.status}">
+                            ${getStatusText(exp.status)}
+                        </div>
+                    </div>
+
+                    <div class="variants-comparison">
+                        ${exp.variants.map(variant => `
+                            <div class="variant-card">
+                                <div class="variant-header">
+                                    <div class="variant-name">${variant.name}</div>
+                                    ${variant.is_winner ? '<span class="winner-badge"><i class="fas fa-trophy"></i> 获胜</span>' : ''}
+                                    ${variant.is_control ? '<span class="variant-badge">对照组</span>' : '<span class="variant-badge">实验组</span>'}
+                                </div>
+                                <div class="metric-row">
+                                    <span class="metric-label">样本数</span>
+                                    <span class="metric-value">${variant.sample_count || 0}</span>
+                                </div>
+                                <div class="metric-row">
+                                    <span class="metric-label">转化率</span>
+                                    <span class="metric-value">${variant.conversion_rate || '0%'}</span>
+                                </div>
+                                <div class="metric-row">
+                                    <span class="metric-label">平均得分</span>
+                                    <span class="metric-value">${variant.avg_score || '0.0'}</span>
+                                </div>
+                                <div class="metric-row">
+                                    <span class="metric-label">置信度</span>
+                                    <span class="metric-value">${variant.confidence || '0%'}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="experiment-actions">
+                        <button class="btn-secondary" onclick="viewDetails('${exp.id}')">
+                            <i class="fas fa-chart-line"></i> 查看详情
+                        </button>
+                        <button class="btn-secondary" onclick="exportResults('${exp.id}')">
+                            <i class="fas fa-download"></i> 导出结果
+                        </button>
+                        ${exp.status === 'running' ? `
+                            <button class="btn-secondary" onclick="stopExperiment('${exp.id}')">
+                                <i class="fas fa-stop"></i> 停止实验
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderPlaceholder() {
+            document.getElementById('experimentGrid').innerHTML = `
+                <div class="experiment-card" style="text-align: center; padding: 60px;">
+                    <i class="fas fa-flask" style="font-size: 64px; color: #cbd5e1; margin-bottom: 20px;"></i>
+                    <h3 style="color: #64748b; margin-bottom: 12px;">暂无实验</h3>
+                    <p style="color: #94a3b8; margin-bottom: 24px;">创建你的第一个 A/B 测试实验，开始优化AI性能</p>
+                    <button class="btn-primary" onclick="createExperiment()">
+                        <i class="fas fa-plus"></i> 创建实验
+                    </button>
+                </div>
+            `;
+        }
+
+        function updateStats(experiments) {
+            const total = experiments.length;
+            const running = experiments.filter(e => e.status === 'running').length;
+            const completed = experiments.filter(e => e.status === 'completed').length;
+
+            document.getElementById('totalExperiments').textContent = total;
+            document.getElementById('runningExperiments').textContent = running;
+            document.getElementById('completedExperiments').textContent = completed;
+        }
+
+        function getStatusText(status) {
+            const statusMap = {
+                'running': '进行中',
+                'completed': '已完成',
+                'draft': '草稿'
+            };
+            return statusMap[status] || status;
+        }
+
+        function createExperiment() {
+            alert('创建实验功能开发中...');
+        }
+
+        function viewDetails(id) {
+            window.location.href = `/ab-testing/${id}`;
+        }
+
+        function exportResults(id) {
+            window.location.href = `/api/ab-testing/experiments/${id}/export`;
+        }
+
+        function stopExperiment(id) {
+            if (confirm('确定要停止这个实验吗？')) {
+                fetch(`/api/ab-testing/experiments/${id}/stop`, { method: 'POST' })
+                    .then(() => loadExperiments());
+            }
+        }
+
+        // 页面加载时获取数据
+        loadExperiments();
+    </script>
+</body>
+</html>

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文档中心 - Agent Framework</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/base-theme.css">
+    <style>
+        :root {
+            --theme-accent: #1363df;
+            --theme-accent-deep: #0f4eb3;
+            --theme-accent-soft: rgba(19, 99, 223, 0.10);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            background: linear-gradient(135deg, var(--theme-accent-deep), var(--theme-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-primary {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--theme-accent), var(--theme-accent-deep));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 20px;
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            padding: 20px;
+            height: fit-content;
+        }
+
+        .folder-tree {
+            list-style: none;
+            padding: 0;
+        }
+
+        .folder-item {
+            padding: 8px 12px;
+            margin: 4px 0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .folder-item:hover {
+            background: var(--theme-accent-soft);
+            color: var(--theme-accent);
+        }
+
+        .folder-item.active {
+            background: var(--theme-accent-soft);
+            color: var(--theme-accent);
+            font-weight: 600;
+        }
+
+        .document-list {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            padding: 20px;
+        }
+
+        .search-bar {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 12px 40px 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .search-bar i {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+
+        .doc-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            transition: all 0.2s;
+        }
+
+        .doc-item:hover {
+            border-color: var(--theme-accent);
+            box-shadow: 0 2px 8px rgba(19, 99, 223, 0.1);
+        }
+
+        .doc-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--theme-accent-soft);
+            border-radius: 8px;
+            color: var(--theme-accent);
+            font-size: 24px;
+        }
+
+        .doc-info {
+            flex: 1;
+        }
+
+        .doc-name {
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+
+        .doc-meta {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .doc-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #e2e8f0;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn-icon:hover {
+            background: #f8fafc;
+            border-color: var(--theme-accent);
+            color: var(--theme-accent);
+        }
+
+        .upload-zone {
+            border: 2px dashed #e2e8f0;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--theme-accent);
+            background: var(--theme-accent-soft);
+        }
+
+        .upload-zone i {
+            font-size: 48px;
+            color: var(--theme-accent);
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>📁 文档中心</h1>
+                <p>上传、管理和检索文档，为知识库提供内容支撑</p>
+            </div>
+            <button class="btn-primary" onclick="document.getElementById('fileInput').click()">
+                <i class="fas fa-upload"></i> 上传文档
+            </button>
+            <input type="file" id="fileInput" style="display: none" multiple onchange="handleFileUpload(event)">
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <h3 style="margin-bottom: 16px;">文档分类</h3>
+                <ul class="folder-tree">
+                    <li class="folder-item active" onclick="filterByFolder('all')">
+                        <i class="fas fa-folder"></i> 全部文档
+                    </li>
+                    <li class="folder-item" onclick="filterByFolder('pdf')">
+                        <i class="fas fa-file-pdf"></i> PDF 文档
+                    </li>
+                    <li class="folder-item" onclick="filterByFolder('word')">
+                        <i class="fas fa-file-word"></i> Word 文档
+                    </li>
+                    <li class="folder-item" onclick="filterByFolder('excel')">
+                        <i class="fas fa-file-excel"></i> Excel 表格
+                    </li>
+                    <li class="folder-item" onclick="filterByFolder('text')">
+                        <i class="fas fa-file-alt"></i> 文本文件
+                    </li>
+                    <li class="folder-item" onclick="filterByFolder('markdown')">
+                        <i class="fas fa-file-code"></i> Markdown
+                    </li>
+                </ul>
+            </div>
+
+            <div class="document-list">
+                <div class="search-bar">
+                    <input type="text" placeholder="搜索文档..." onkeyup="searchDocuments(this.value)">
+                    <i class="fas fa-search"></i>
+                </div>
+
+                <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">拖拽文件到此处或点击上传</div>
+                    <div style="font-size: 14px; color: #94a3b8;">支持 PDF, Word, Excel, TXT, Markdown 等格式</div>
+                </div>
+
+                <div id="documentList">
+                    <!-- 文档列表将通过 JavaScript 动态加载 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadDocuments() {
+            try {
+                const response = await fetch('/api/documents');
+                const documents = await response.json();
+                renderDocuments(documents);
+            } catch (error) {
+                console.error('加载文档失败:', error);
+                renderPlaceholder();
+            }
+        }
+
+        function renderDocuments(documents) {
+            const list = document.getElementById('documentList');
+            if (!documents || documents.length === 0) {
+                renderPlaceholder();
+                return;
+            }
+
+            list.innerHTML = documents.map(doc => `
+                <div class="doc-item">
+                    <div class="doc-icon">
+                        <i class="fas ${getFileIcon(doc.type)}"></i>
+                    </div>
+                    <div class="doc-info">
+                        <div class="doc-name">${doc.name}</div>
+                        <div class="doc-meta">
+                            ${doc.size} · ${doc.updated_at} · ${doc.status || '已索引'}
+                        </div>
+                    </div>
+                    <div class="doc-actions">
+                        <button class="btn-icon" onclick="viewDocument('${doc.id}')" title="查看">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn-icon" onclick="downloadDocument('${doc.id}')" title="下载">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <button class="btn-icon" onclick="deleteDocument('${doc.id}')" title="删除">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderPlaceholder() {
+            const list = document.getElementById('documentList');
+            list.innerHTML = `
+                <div style="text-align: center; padding: 60px 20px; color: #94a3b8;">
+                    <i class="fas fa-folder-open" style="font-size: 64px; margin-bottom: 20px; opacity: 0.3;"></i>
+                    <div style="font-size: 16px;">暂无文档</div>
+                    <div style="font-size: 14px; margin-top: 8px;">点击上传按钮开始添加文档</div>
+                </div>
+            `;
+        }
+
+        function getFileIcon(type) {
+            const icons = {
+                'pdf': 'fa-file-pdf',
+                'doc': 'fa-file-word',
+                'docx': 'fa-file-word',
+                'xls': 'fa-file-excel',
+                'xlsx': 'fa-file-excel',
+                'txt': 'fa-file-alt',
+                'md': 'fa-file-code'
+            };
+            return icons[type] || 'fa-file';
+        }
+
+        async function handleFileUpload(event) {
+            const files = event.target.files;
+            if (!files.length) return;
+
+            const formData = new FormData();
+            for (let file of files) {
+                formData.append('files', file);
+            }
+
+            try {
+                const response = await fetch('/api/documents/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                alert('上传成功！');
+                loadDocuments();
+            } catch (error) {
+                console.error('上传失败:', error);
+                alert('上传失败，请重试');
+            }
+        }
+
+        function filterByFolder(type) {
+            document.querySelectorAll('.folder-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.folder-item').classList.add('active');
+            // 实现过滤逻辑
+        }
+
+        function searchDocuments(query) {
+            // 实现搜索逻辑
+        }
+
+        function viewDocument(id) {
+            window.open(`/api/documents/${id}/view`, '_blank');
+        }
+
+        function downloadDocument(id) {
+            window.location.href = `/api/documents/${id}/download`;
+        }
+
+        async function deleteDocument(id) {
+            if (!confirm('确定要删除这个文档吗？')) return;
+
+            try {
+                await fetch(`/api/documents/${id}`, { method: 'DELETE' });
+                alert('删除成功！');
+                loadDocuments();
+            } catch (error) {
+                console.error('删除失败:', error);
+                alert('删除失败，请重试');
+            }
+        }
+
+        // 页面加载时获取文档列表
+        loadDocuments();
+    </script>
+</body>
+</html>

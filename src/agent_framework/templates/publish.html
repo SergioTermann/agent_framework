@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>发布管理 - Agent Framework</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/base-theme.css">
+    <style>
+        :root {
+            --theme-accent: #1363df;
+            --theme-accent-deep: #0f4eb3;
+            --theme-accent-soft: rgba(19, 99, 223, 0.10);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            background: linear-gradient(135deg, var(--theme-accent-deep), var(--theme-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-primary {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--theme-accent), var(--theme-accent-deep));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #64748b;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            color: var(--theme-accent);
+        }
+
+        .tab.active {
+            color: var(--theme-accent);
+            border-bottom-color: var(--theme-accent);
+        }
+
+        .release-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .release-card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .release-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 16px;
+        }
+
+        .release-info {
+            flex: 1;
+        }
+
+        .release-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 8px;
+        }
+
+        .release-version {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            background: var(--theme-accent-soft);
+            color: var(--theme-accent);
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .release-status {
+            padding: 6px 16px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-deployed {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .status-staging {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .status-draft {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .release-meta {
+            display: flex;
+            gap: 24px;
+            margin: 16px 0;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .meta-label {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .meta-value {
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .release-description {
+            color: #475569;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .release-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-secondary {
+            padding: 8px 16px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-secondary:hover {
+            background: #f8fafc;
+            border-color: var(--theme-accent);
+        }
+
+        .btn-danger {
+            padding: 8px 16px;
+            border: 1px solid #fee2e2;
+            background: white;
+            color: #dc2626;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-danger:hover {
+            background: #fef2f2;
+            border-color: #dc2626;
+        }
+
+        .pipeline-stages {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .stage {
+            flex: 1;
+            padding: 12px;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            text-align: center;
+            position: relative;
+        }
+
+        .stage.completed {
+            background: #dcfce7;
+            border-color: #16a34a;
+        }
+
+        .stage.active {
+            background: var(--theme-accent-soft);
+            border-color: var(--theme-accent);
+        }
+
+        .stage-name {
+            font-weight: 600;
+            font-size: 13px;
+            color: #0f172a;
+        }
+
+        .stage-arrow {
+            color: #cbd5e1;
+            font-size: 20px;
+        }
+
+        .changelog {
+            margin-top: 16px;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+
+        .changelog-title {
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #0f172a;
+        }
+
+        .changelog-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .changelog-item {
+            padding: 8px 0;
+            padding-left: 24px;
+            position: relative;
+            color: #475569;
+            font-size: 14px;
+        }
+
+        .changelog-item::before {
+            content: "•";
+            position: absolute;
+            left: 8px;
+            color: var(--theme-accent);
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>🚀 发布管理</h1>
+                <p>管理应用和模型的发布流程，版本控制和部署</p>
+            </div>
+            <button class="btn-primary" onclick="createRelease()">
+                <i class="fas fa-plus"></i> 创建发布
+            </button>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('all')">全部发布</button>
+            <button class="tab" onclick="switchTab('deployed')">已部署</button>
+            <button class="tab" onclick="switchTab('staging')">预发布</button>
+            <button class="tab" onclick="switchTab('draft')">草稿</button>
+        </div>
+
+        <div class="release-grid" id="releaseGrid">
+            <!-- 发布卡片将通过 JavaScript 动态加载 -->
+        </div>
+    </div>
+
+    <script>
+        let currentTab = 'all';
+
+        // 加载发布列表
+        async function loadReleases() {
+            try {
+                const response = await fetch('/api/publish');
+                const releases = await response.json();
+                renderReleases(releases);
+            } catch (error) {
+                console.error('加载发布列表失败:', error);
+                renderPlaceholder();
+            }
+        }
+
+        function renderReleases(releases) {
+            const grid = document.getElementById('releaseGrid');
+
+            if (!releases || releases.length === 0) {
+                renderPlaceholder();
+                return;
+            }
+
+            const filtered = currentTab === 'all' ? releases :
+                releases.filter(r => r.status === currentTab);
+
+            grid.innerHTML = filtered.map(release => `
+                <div class="release-card">
+                    <div class="release-header">
+                        <div class="release-info">
+                            <div class="release-name">${release.name}</div>
+                            <span class="release-version">
+                                <i class="fas fa-tag"></i> ${release.version}
+                            </span>
+                        </div>
+                        <span class="release-status status-${release.status}">
+                            ${getStatusText(release.status)}
+                        </span>
+                    </div>
+
+                    <div class="release-meta">
+                        <div class="meta-item">
+                            <span class="meta-label">发布时间</span>
+                            <span class="meta-value">${release.created_at || '2024-01-15'}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">发布者</span>
+                            <span class="meta-value">${release.author || 'Admin'}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">环境</span>
+                            <span class="meta-value">${release.environment || 'Production'}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">实例数</span>
+                            <span class="meta-value">${release.instances || '3'}</span>
+                        </div>
+                    </div>
+
+                    <div class="pipeline-stages">
+                        <div class="stage ${release.build_status === 'completed' ? 'completed' : ''}">
+                            <div class="stage-name">构建</div>
+                        </div>
+                        <span class="stage-arrow">→</span>
+                        <div class="stage ${release.test_status === 'completed' ? 'completed' : ''}">
+                            <div class="stage-name">测试</div>
+                        </div>
+                        <span class="stage-arrow">→</span>
+                        <div class="stage ${release.deploy_status === 'completed' ? 'completed' : release.deploy_status === 'active' ? 'active' : ''}">
+                            <div class="stage-name">部署</div>
+                        </div>
+                        <span class="stage-arrow">→</span>
+                        <div class="stage ${release.status === 'deployed' ? 'completed' : ''}">
+                            <div class="stage-name">上线</div>
+                        </div>
+                    </div>
+
+                    <div class="release-description">
+                        ${release.description || '暂无描述'}
+                    </div>
+
+                    ${release.changelog ? `
+                        <div class="changelog">
+                            <div class="changelog-title">更新日志</div>
+                            <ul class="changelog-list">
+                                ${release.changelog.map(item => `<li class="changelog-item">${item}</li>`).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+
+                    <div class="release-actions">
+                        ${release.status === 'draft' ? `
+                            <button class="btn-secondary" onclick="deployRelease('${release.id}')">
+                                <i class="fas fa-rocket"></i> 部署到预发布
+                            </button>
+                        ` : ''}
+                        ${release.status === 'staging' ? `
+                            <button class="btn-secondary" onclick="promoteRelease('${release.id}')">
+                                <i class="fas fa-check"></i> 发布到生产
+                            </button>
+                        ` : ''}
+                        <button class="btn-secondary" onclick="viewLogs('${release.id}')">
+                            <i class="fas fa-file-alt"></i> 查看日志
+                        </button>
+                        <button class="btn-secondary" onclick="rollbackRelease('${release.id}')">
+                            <i class="fas fa-undo"></i> 回滚
+                        </button>
+                        ${release.status === 'draft' ? `
+                            <button class="btn-danger" onclick="deleteRelease('${release.id}')">
+                                <i class="fas fa-trash"></i> 删除
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderPlaceholder() {
+            const grid = document.getElementById('releaseGrid');
+            grid.innerHTML = `
+                <div class="release-card" style="text-align: center; padding: 60px;">
+                    <i class="fas fa-rocket" style="font-size: 48px; color: var(--theme-accent); margin-bottom: 16px;"></i>
+                    <h3 style="margin-bottom: 8px;">暂无发布记录</h3>
+                    <p style="color: #64748b; margin-bottom: 24px;">创建第一个发布，开始管理应用部署流程</p>
+                    <button class="btn-primary" onclick="createRelease()">
+                        <i class="fas fa-plus"></i> 创建发布
+                    </button>
+                </div>
+            `;
+        }
+
+        function getStatusText(status) {
+            const statusMap = {
+                'deployed': '已部署',
+                'staging': '预发布',
+                'draft': '草稿'
+            };
+            return statusMap[status] || status;
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            loadReleases();
+        }
+
+        function createRelease() {
+            alert('创建发布功能开发中...');
+        }
+
+        function deployRelease(id) {
+            if (confirm('确定要部署到预发布环境吗？')) {
+                alert(`部署发布 ${id} 到预发布环境...`);
+            }
+        }
+
+        function promoteRelease(id) {
+            if (confirm('确定要发布到生产环境吗？')) {
+                alert(`发布 ${id} 到生产环境...`);
+            }
+        }
+
+        function viewLogs(id) {
+            window.location.href = `/logs?release=${id}`;
+        }
+
+        function rollbackRelease(id) {
+            if (confirm('确定要回滚此发布吗？')) {
+                alert(`回滚发布 ${id}...`);
+            }
+        }
+
+        function deleteRelease(id) {
+            if (confirm('确定要删除此发布吗？此操作不可恢复。')) {
+                alert(`删除发布 ${id}...`);
+            }
+        }
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', loadReleases);
+    </script>
+</body>
+</html>

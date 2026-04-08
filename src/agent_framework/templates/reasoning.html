@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高级推理实验室 - Agent Framework</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/base-theme.css">
+    <style>
+        :root {
+            --theme-accent: #1363df;
+            --theme-accent-deep: #0f4eb3;
+            --theme-accent-soft: rgba(19, 99, 223, 0.10);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            background: linear-gradient(135deg, var(--theme-accent-deep), var(--theme-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+        }
+
+        .reasoning-panel {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            padding: 24px;
+        }
+
+        .input-section {
+            margin-bottom: 24px;
+        }
+
+        .input-section label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #0f172a;
+        }
+
+        .input-section textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+        }
+
+        .reasoning-modes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .mode-card {
+            padding: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .mode-card:hover {
+            border-color: var(--theme-accent);
+            background: var(--theme-accent-soft);
+        }
+
+        .mode-card.active {
+            border-color: var(--theme-accent);
+            background: var(--theme-accent-soft);
+        }
+
+        .mode-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .mode-name {
+            font-weight: 600;
+            color: #0f172a;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--theme-accent), var(--theme-accent-deep));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .reasoning-output {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            padding: 24px;
+        }
+
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .output-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .step-chain {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .reasoning-step {
+            padding: 16px;
+            background: #f8fafc;
+            border-left: 4px solid var(--theme-accent);
+            border-radius: 8px;
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .step-number {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--theme-accent);
+            color: white;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .step-title {
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .step-content {
+            color: #475569;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .confidence-bar {
+            margin-top: 12px;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--theme-accent), #10b981);
+            transition: width 0.3s;
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            padding: 20px;
+            height: fit-content;
+        }
+
+        .sidebar-section {
+            margin-bottom: 24px;
+        }
+
+        .sidebar-title {
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 12px;
+        }
+
+        .config-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .config-item:last-child {
+            border-bottom: none;
+        }
+
+        .config-label {
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .config-value {
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            margin: 8px 0;
+        }
+
+        .example-prompts {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .example-prompt {
+            padding: 10px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .example-prompt:hover {
+            border-color: var(--theme-accent);
+            background: var(--theme-accent-soft);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>🧠 高级推理实验室</h1>
+                <p>探索复杂推理能力，支持思维链、多步骤推理和逻辑分析</p>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div>
+                <div class="reasoning-panel">
+                    <div class="input-section">
+                        <label>输入问题或任务</label>
+                        <textarea id="reasoningInput" placeholder="例如：分析为什么电动汽车在寒冷地区续航会下降，并提出解决方案..."></textarea>
+                    </div>
+
+                    <div class="input-section">
+                        <label>推理模式</label>
+                        <div class="reasoning-modes">
+                            <div class="mode-card active" data-mode="chain-of-thought">
+                                <div class="mode-icon">🔗</div>
+                                <div class="mode-name">思维链</div>
+                            </div>
+                            <div class="mode-card" data-mode="tree-of-thought">
+                                <div class="mode-icon">🌳</div>
+                                <div class="mode-name">思维树</div>
+                            </div>
+                            <div class="mode-card" data-mode="step-by-step">
+                                <div class="mode-icon">📝</div>
+                                <div class="mode-name">分步推理</div>
+                            </div>
+                            <div class="mode-card" data-mode="causal">
+                                <div class="mode-icon">⚡</div>
+                                <div class="mode-name">因果分析</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-primary" onclick="startReasoning()">
+                        <i class="fas fa-brain"></i> 开始推理
+                    </button>
+                </div>
+
+                <div class="reasoning-output" style="margin-top: 20px;">
+                    <div class="output-header">
+                        <div class="output-title">推理过程</div>
+                        <button class="btn-secondary" onclick="exportReasoning()">
+                            <i class="fas fa-download"></i> 导出
+                        </button>
+                    </div>
+                    <div class="step-chain" id="reasoningSteps">
+                        <div style="text-align: center; color: #94a3b8; padding: 40px;">
+                            <i class="fas fa-lightbulb" style="font-size: 48px; margin-bottom: 16px;"></i>
+                            <p>输入问题并选择推理模式，开始探索AI的推理能力</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="sidebar-section">
+                    <div class="sidebar-title">推理配置</div>
+                    <div class="config-item">
+                        <div class="config-label">推理深度</div>
+                        <div class="config-value" id="depthValue">5</div>
+                    </div>
+                    <input type="range" id="depthSlider" min="1" max="10" value="5" oninput="updateDepth(this.value)">
+
+                    <div class="config-item">
+                        <div class="config-label">创造性</div>
+                        <div class="config-value" id="tempValue">0.7</div>
+                    </div>
+                    <input type="range" id="tempSlider" min="0" max="1" step="0.1" value="0.7" oninput="updateTemp(this.value)">
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-title">示例问题</div>
+                    <div class="example-prompts">
+                        <div class="example-prompt" onclick="loadExample(this)">
+                            为什么深度学习模型需要大量数据？
+                        </div>
+                        <div class="example-prompt" onclick="loadExample(this)">
+                            分析可再生能源的经济可行性
+                        </div>
+                        <div class="example-prompt" onclick="loadExample(this)">
+                            如何优化供应链管理？
+                        </div>
+                        <div class="example-prompt" onclick="loadExample(this)">
+                            解释量子计算的优势和局限
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-title">推理统计</div>
+                    <div class="config-item">
+                        <div class="config-label">总推理次数</div>
+                        <div class="config-value">0</div>
+                    </div>
+                    <div class="config-item">
+                        <div class="config-label">平均步骤数</div>
+                        <div class="config-value">0</div>
+                    </div>
+                    <div class="config-item">
+                        <div class="config-label">平均置信度</div>
+                        <div class="config-value">0%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentMode = 'chain-of-thought';
+
+        // 推理模式选择
+        document.querySelectorAll('.mode-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                currentMode = this.dataset.mode;
+            });
+        });
+
+        // 开始推理
+        async function startReasoning() {
+            const input = document.getElementById('reasoningInput').value;
+            if (!input.trim()) {
+                alert('请输入问题或任务');
+                return;
+            }
+
+            const stepsContainer = document.getElementById('reasoningSteps');
+            stepsContainer.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin" style="font-size: 32px; color: var(--theme-accent);"></i><p style="margin-top: 16px; color: #64748b;">正在推理中...</p></div>';
+
+            try {
+                const response = await fetch('/api/reasoning', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        input: input,
+                        mode: currentMode,
+                        depth: document.getElementById('depthSlider').value,
+                        temperature: document.getElementById('tempSlider').value
+                    })
+                });
+
+                const result = await response.json();
+                renderReasoningSteps(result.steps || []);
+            } catch (error) {
+                console.error('推理失败:', error);
+                renderPlaceholderSteps();
+            }
+        }
+
+        function renderReasoningSteps(steps) {
+            const container = document.getElementById('reasoningSteps');
+
+            if (!steps || steps.length === 0) {
+                renderPlaceholderSteps();
+                return;
+            }
+
+            container.innerHTML = steps.map((step, index) => `
+                <div class="reasoning-step">
+                    <div class="step-header">
+                        <div class="step-number">${index + 1}</div>
+                        <div class="step-title">${step.title || '推理步骤 ' + (index + 1)}</div>
+                    </div>
+                    <div class="step-content">${step.content}</div>
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" style="width: ${step.confidence || 85}%"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderPlaceholderSteps() {
+            const container = document.getElementById('reasoningSteps');
+            const placeholderSteps = [
+                { title: '问题分析', content: '首先，我们需要理解问题的核心要素和约束条件...', confidence: 90 },
+                { title: '信息收集', content: '收集相关的背景知识和数据，建立分析基础...', confidence: 85 },
+                { title: '逻辑推导', content: '基于已知信息，进行逻辑推理和因果分析...', confidence: 88 },
+                { title: '方案生成', content: '综合考虑各种因素，提出可行的解决方案...', confidence: 82 },
+                { title: '结论总结', content: '总结推理过程，给出最终结论和建议...', confidence: 87 }
+            ];
+            renderReasoningSteps(placeholderSteps);
+        }
+
+        function updateDepth(value) {
+            document.getElementById('depthValue').textContent = value;
+        }
+
+        function updateTemp(value) {
+            document.getElementById('tempValue').textContent = value;
+        }
+
+        function loadExample(element) {
+            document.getElementById('reasoningInput').value = element.textContent.trim();
+        }
+
+        function exportReasoning() {
+            alert('推理结果导出功能开发中...');
+        }
+
+        // 页面加载时显示示例
+        window.addEventListener('load', () => {
+            renderPlaceholderSteps();
+        });
+    </script>
+</body>
+</html>

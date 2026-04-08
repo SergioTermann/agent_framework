@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>扩展管理 - Agent Framework</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/base-theme.css">
+    <style>
+        :root {
+            --theme-accent: #1363df;
+            --theme-accent-deep: #0f4eb3;
+            --theme-accent-soft: rgba(19, 99, 223, 0.10);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            background: linear-gradient(135deg, var(--theme-accent-deep), var(--theme-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-primary {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--theme-accent), var(--theme-accent-deep));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-secondary {
+            padding: 10px 20px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #64748b;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .tab.active {
+            color: var(--theme-accent);
+            border-bottom-color: var(--theme-accent);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .extensions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .extension-card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s;
+        }
+
+        .extension-card:hover {
+            box-shadow: 0 4px 16px rgba(19, 99, 223, 0.15);
+            border-color: var(--theme-accent);
+        }
+
+        .extension-header {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .extension-icon {
+            width: 56px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--theme-accent-soft);
+            border-radius: 12px;
+            color: var(--theme-accent);
+            font-size: 28px;
+        }
+
+        .extension-info {
+            flex: 1;
+        }
+
+        .extension-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+
+        .extension-version {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .extension-description {
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .extension-meta {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .extension-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .status-enabled {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .status-disabled {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .extension-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-small {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .btn-small:hover {
+            background: #f8fafc;
+            border-color: var(--theme-accent);
+        }
+
+        .btn-small.primary {
+            background: var(--theme-accent);
+            color: white;
+            border-color: var(--theme-accent);
+        }
+
+        .btn-small.primary:hover {
+            background: var(--theme-accent-deep);
+        }
+
+        .btn-small.danger {
+            color: #dc2626;
+            border-color: #fee2e2;
+        }
+
+        .btn-small.danger:hover {
+            background: #fef2f2;
+            border-color: #dc2626;
+        }
+
+        .marketplace-search {
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .marketplace-search input {
+            width: 100%;
+            padding: 12px 40px 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .marketplace-search i {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+
+        .category-filters {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .category-btn {
+            padding: 8px 16px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .category-btn.active {
+            background: var(--theme-accent);
+            color: white;
+            border-color: var(--theme-accent);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #94a3b8;
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>🧩 扩展管理</h1>
+                <p>安装、管理和开发平台扩展，增强系统功能</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn-secondary" onclick="refreshExtensions()">
+                    <i class="fas fa-sync-alt"></i> 刷新
+                </button>
+                <button class="btn-primary" onclick="uploadExtension()">
+                    <i class="fas fa-upload"></i> 上传扩展
+                </button>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('installed')">已安装</button>
+            <button class="tab" onclick="switchTab('marketplace')">扩展市场</button>
+            <button class="tab" onclick="switchTab('develop')">开发中</button>
+        </div>
+
+        <!-- 已安装扩展 -->
+        <div class="tab-content active" id="installed-tab">
+            <div class="extensions-grid" id="installedExtensions">
+                <!-- 扩展卡片将通过 JavaScript 动态加载 -->
+            </div>
+        </div>
+
+        <!-- 扩展市场 -->
+        <div class="tab-content" id="marketplace-tab">
+            <div class="marketplace-search">
+                <input type="text" placeholder="搜索扩展..." id="marketplaceSearch">
+                <i class="fas fa-search"></i>
+            </div>
+
+            <div class="category-filters">
+                <button class="category-btn active" onclick="filterCategory('all')">全部</button>
+                <button class="category-btn" onclick="filterCategory('ai')">AI 模型</button>
+                <button class="category-btn" onclick="filterCategory('tools')">工具</button>
+                <button class="category-btn" onclick="filterCategory('integration')">集成</button>
+                <button class="category-btn" onclick="filterCategory('ui')">界面</button>
+                <button class="category-btn" onclick="filterCategory('data')">数据处理</button>
+            </div>
+
+            <div class="extensions-grid" id="marketplaceExtensions">
+                <!-- 市场扩展将通过 JavaScript 动态加载 -->
+            </div>
+        </div>
+
+        <!-- 开发中扩展 -->
+        <div class="tab-content" id="develop-tab">
+            <div class="extensions-grid" id="developExtensions">
+                <!-- 开发中扩展将通过 JavaScript 动态加载 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 切换标签页
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+
+            if (tabName === 'installed') {
+                loadInstalledExtensions();
+            } else if (tabName === 'marketplace') {
+                loadMarketplaceExtensions();
+            } else if (tabName === 'develop') {
+                loadDevelopExtensions();
+            }
+        }
+
+        // 加载已安装扩展
+        async function loadInstalledExtensions() {
+            try {
+                const response = await fetch('/api/extensions');
+                const extensions = await response.json();
+                renderInstalledExtensions(extensions);
+            } catch (error) {
+                console.error('加载扩展失败:', error);
+                renderEmptyState('installed');
+            }
+        }
+
+        function renderInstalledExtensions(extensions) {
+            const container = document.getElementById('installedExtensions');
+
+            if (!extensions || extensions.length === 0) {
+                renderEmptyState('installed');
+                return;
+            }
+
+            container.innerHTML = extensions.map(ext => `
+                <div class="extension-card">
+                    <div class="extension-header">
+                        <div class="extension-icon">
+                            <i class="${ext.icon || 'fas fa-puzzle-piece'}"></i>
+                        </div>
+                        <div class="extension-info">
+                            <div class="extension-name">${ext.name}</div>
+                            <div class="extension-version">v${ext.version}</div>
+                        </div>
+                    </div>
+                    <div class="extension-description">${ext.description}</div>
+                    <div class="extension-meta">
+                        <div class="meta-item">
+                            <i class="fas fa-download"></i>
+                            <span>${ext.downloads || 0} 次安装</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-star"></i>
+                            <span>${ext.rating || '5.0'}</span>
+                        </div>
+                    </div>
+                    <div class="extension-status ${ext.enabled ? 'status-enabled' : 'status-disabled'}">
+                        <i class="fas fa-circle" style="font-size: 8px"></i>
+                        <span>${ext.enabled ? '已启用' : '已禁用'}</span>
+                    </div>
+                    <div class="extension-actions">
+                        ${ext.enabled ?
+                            `<button class="btn-small" onclick="disableExtension('${ext.id}')">
+                                <i class="fas fa-pause"></i> 禁用
+                            </button>` :
+                            `<button class="btn-small primary" onclick="enableExtension('${ext.id}')">
+                                <i class="fas fa-play"></i> 启用
+                            </button>`
+                        }
+                        <button class="btn-small" onclick="configureExtension('${ext.id}')">
+                            <i class="fas fa-cog"></i> 配置
+                        </button>
+                        <button class="btn-small danger" onclick="uninstallExtension('${ext.id}')">
+                            <i class="fas fa-trash"></i> 卸载
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 加载扩展市场
+        async function loadMarketplaceExtensions() {
+            try {
+                const response = await fetch('/api/extensions/marketplace');
+                const extensions = await response.json();
+                renderMarketplaceExtensions(extensions);
+            } catch (error) {
+                console.error('加载市场扩展失败:', error);
+                renderPlaceholderMarketplace();
+            }
+        }
+
+        function renderMarketplaceExtensions(extensions) {
+            const container = document.getElementById('marketplaceExtensions');
+
+            if (!extensions || extensions.length === 0) {
+                renderPlaceholderMarketplace();
+                return;
+            }
+
+            container.innerHTML = extensions.map(ext => `
+                <div class="extension-card">
+                    <div class="extension-header">
+                        <div class="extension-icon">
+                            <i class="${ext.icon || 'fas fa-puzzle-piece'}"></i>
+                        </div>
+                        <div class="extension-info">
+                            <div class="extension-name">${ext.name}</div>
+                            <div class="extension-version">v${ext.version}</div>
+                        </div>
+                    </div>
+                    <div class="extension-description">${ext.description}</div>
+                    <div class="extension-meta">
+                        <div class="meta-item">
+                            <i class="fas fa-download"></i>
+                            <span>${ext.downloads || 0}</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-star"></i>
+                            <span>${ext.rating || '5.0'}</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-user"></i>
+                            <span>${ext.author}</span>
+                        </div>
+                    </div>
+                    <div class="extension-actions">
+                        <button class="btn-small primary" onclick="installExtension('${ext.id}')">
+                            <i class="fas fa-download"></i> 安装
+                        </button>
+                        <button class="btn-small" onclick="viewExtensionDetails('${ext.id}')">
+                            <i class="fas fa-info-circle"></i> 详情
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderPlaceholderMarketplace() {
+            const container = document.getElementById('marketplaceExtensions');
+            container.innerHTML = `
+                <div class="extension-card">
+                    <div class="extension-header">
+                        <div class="extension-icon"><i class="fas fa-robot"></i></div>
+                        <div class="extension-info">
+                            <div class="extension-name">GPT-4 集成</div>
+                            <div class="extension-version">v1.0.0</div>
+                        </div>
+                    </div>
+                    <div class="extension-description">集成 OpenAI GPT-4 模型，提供强大的自然语言处理能力。</div>
+                    <div class="extension-meta">
+                        <div class="meta-item"><i class="fas fa-download"></i><span>1.2k</span></div>
+                        <div class="meta-item"><i class="fas fa-star"></i><span>4.8</span></div>
+                        <div class="meta-item"><i class="fas fa-user"></i><span>OpenAI</span></div>
+                    </div>
+                    <div class="extension-actions">
+                        <button class="btn-small primary" onclick="installExtension('gpt4')">
+                            <i class="fas fa-download"></i> 安装
+                        </button>
+                        <button class="btn-small" onclick="viewExtensionDetails('gpt4')">
+                            <i class="fas fa-info-circle"></i> 详情
+                        </button>
+                    </div>
+                </div>
+                <div class="extension-card">
+                    <div class="extension-header">
+                        <div class="extension-icon"><i class="fas fa-database"></i></div>
+                        <div class="extension-info">
+                            <div class="extension-name">向量数据库</div>
+                            <div class="extension-version">v2.1.0</div>
+                        </div>
+                    </div>
+                    <div class="extension-description">高性能向量数据库扩展，支持语义搜索和相似度匹配。</div>
+                    <div class="extension-meta">
+                        <div class="meta-item"><i class="fas fa-download"></i><span>856</span></div>
+                        <div class="meta-item"><i class="fas fa-star"></i><span>4.9</span></div>
+                        <div class="meta-item"><i class="fas fa-user"></i><span>Pinecone</span></div>
+                    </div>
+                    <div class="extension-actions">
+                        <button class="btn-small primary" onclick="installExtension('vectordb')">
+                            <i class="fas fa-download"></i> 安装
+                        </button>
+                        <button class="btn-small" onclick="viewExtensionDetails('vectordb')">
+                            <i class="fas fa-info-circle"></i> 详情
+                        </button>
+                    </div>
+                </div>
+                <div class="extension-card">
+                    <div class="extension-header">
+                        <div class="extension-icon"><i class="fas fa-chart-line"></i></div>
+                        <div class="extension-info">
+                            <div class="extension-name">数据可视化</div>
+                            <div class="extension-version">v1.5.2</div>
+                        </div>
+                    </div>
+                    <div class="extension-description">强大的数据可视化工具，支持多种图表类型和交互式展示。</div>
+                    <div class="extension-meta">
+                        <div class="meta-item"><i class="fas fa-download"></i><span>2.3k</span></div>
+                        <div class="meta-item"><i class="fas fa-star"></i><span>4.7</span></div>
+                        <div class="meta-item"><i class="fas fa-user"></i><span>Plotly</span></div>
+                    </div>
+                    <div class="extension-actions">
+                        <button class="btn-small primary" onclick="installExtension('dataviz')">
+                            <i class="fas fa-download"></i> 安装
+                        </button>
+                        <button class="btn-small" onclick="viewExtensionDetails('dataviz')">
+                            <i class="fas fa-info-circle"></i> 详情
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 加载开发中扩展
+        async function loadDevelopExtensions() {
+            try {
+                const response = await fetch('/api/extensions/develop');
+                const extensions = await response.json();
+                renderDevelopExtensions(extensions);
+            } catch (error) {
+                console.error('加载开发扩展失败:', error);
+                renderEmptyState('develop');
+            }
+        }
+
+        function renderDevelopExtensions(extensions) {
+            const container = document.getElementById('developExtensions');
+
+            if (!extensions || extensions.length === 0) {
+                renderEmptyState('develop');
+                return;
+            }
+
+            container.innerHTML = extensions.map(ext => `
+                <div class="extension-card">
+                    <div class="extension-header">
+                        <div class="extension-icon">
+                            <i class="${ext.icon || 'fas fa-code'}"></i>
+                        </div>
+                        <div class="extension-info">
+                            <div class="extension-name">${ext.name}</div>
+                            <div class="extension-version">v${ext.version} (开发中)</div>
+                        </div>
+                    </div>
+                    <div class="extension-description">${ext.description}</div>
+                    <div class="extension-actions">
+                        <button class="btn-small primary" onclick="testExtension('${ext.id}')">
+                            <i class="fas fa-play"></i> 测试
+                        </button>
+                        <button class="btn-small" onclick="editExtension('${ext.id}')">
+                            <i class="fas fa-edit"></i> 编辑
+                        </button>
+                        <button class="btn-small" onclick="publishExtension('${ext.id}')">
+                            <i class="fas fa-upload"></i> 发布
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderEmptyState(type) {
+            const messages = {
+                installed: { icon: 'fas fa-puzzle-piece', title: '暂无已安装扩展', text: '前往扩展市场安装扩展' },
+                develop: { icon: 'fas fa-code', title: '暂无开发中扩展', text: '开始创建你的第一个扩展' }
+            };
+
+            const msg = messages[type];
+            const containerId = type === 'installed' ? 'installedExtensions' : 'developExtensions';
+
+            document.getElementById(containerId).innerHTML = `
+                <div class="empty-state" style="grid-column: 1 / -1;">
+                    <i class="${msg.icon}"></i>
+                    <h3>${msg.title}</h3>
+                    <p>${msg.text}</p>
+                </div>
+            `;
+        }
+
+        // 扩展操作函数
+        async function enableExtension(id) {
+            try {
+                await fetch(`/api/extensions/${id}/enable`, { method: 'POST' });
+                loadInstalledExtensions();
+            } catch (error) {
+                console.error('启用扩展失败:', error);
+                alert('启用扩展失败');
+            }
+        }
+
+        async function disableExtension(id) {
+            try {
+                await fetch(`/api/extensions/${id}/disable`, { method: 'POST' });
+                loadInstalledExtensions();
+            } catch (error) {
+                console.error('禁用扩展失败:', error);
+                alert('禁用扩展失败');
+            }
+        }
+
+        async function uninstallExtension(id) {
+            if (!confirm('确定要卸载此扩展吗？')) return;
+
+            try {
+                await fetch(`/api/extensions/${id}`, { method: 'DELETE' });
+                loadInstalledExtensions();
+            } catch (error) {
+                console.error('卸载扩展失败:', error);
+                alert('卸载扩展失败');
+            }
+        }
+
+        async function installExtension(id) {
+            try {
+                await fetch(`/api/extensions/${id}/install`, { method: 'POST' });
+                alert('扩展安装成功！');
+                switchTab('installed');
+            } catch (error) {
+                console.error('安装扩展失败:', error);
+                alert('安装扩展失败');
+            }
+        }
+
+        function configureExtension(id) {
+            alert(`配置扩展: ${id}`);
+        }
+
+        function viewExtensionDetails(id) {
+            alert(`查看扩展详情: ${id}`);
+        }
+
+        function testExtension(id) {
+            alert(`测试扩展: ${id}`);
+        }
+
+        function editExtension(id) {
+            alert(`编辑扩展: ${id}`);
+        }
+
+        function publishExtension(id) {
+            alert(`发布扩展: ${id}`);
+        }
+
+        function uploadExtension() {
+            alert('上传扩展功能开发中...');
+        }
+
+        function refreshExtensions() {
+            const activeTab = document.querySelector('.tab.active').textContent;
+            if (activeTab === '已安装') {
+                loadInstalledExtensions();
+            } else if (activeTab === '扩展市场') {
+                loadMarketplaceExtensions();
+            } else {
+                loadDevelopExtensions();
+            }
+        }
+
+        function filterCategory(category) {
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            // 实现分类过滤逻辑
+        }
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            loadInstalledExtensions();
+        });
+    </script>
+</body>
+</html>

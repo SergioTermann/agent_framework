@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多模态处理 - Agent Framework</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/base-theme.css">
+    <style>
+        :root {
+            --theme-accent: #1363df;
+            --theme-accent-deep: #0f4eb3;
+            --theme-accent-soft: rgba(19, 99, 223, 0.10);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            background: linear-gradient(135deg, var(--theme-accent-deep), var(--theme-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+        }
+
+        .input-panel {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            padding: 24px;
+        }
+
+        .mode-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .mode-card {
+            padding: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .mode-card:hover {
+            border-color: var(--theme-accent);
+            background: var(--theme-accent-soft);
+        }
+
+        .mode-card.active {
+            border-color: var(--theme-accent);
+            background: var(--theme-accent-soft);
+        }
+
+        .mode-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .mode-name {
+            font-weight: 600;
+            color: #0f172a;
+            font-size: 14px;
+        }
+
+        .upload-zone {
+            border: 2px dashed #e2e8f0;
+            border-radius: 12px;
+            padding: 60px 20px;
+            text-align: center;
+            margin-bottom: 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--theme-accent);
+            background: var(--theme-accent-soft);
+        }
+
+        .upload-zone.dragover {
+            border-color: var(--theme-accent);
+            background: var(--theme-accent-soft);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: var(--theme-accent);
+            margin-bottom: 16px;
+        }
+
+        .upload-text {
+            font-size: 16px;
+            color: #0f172a;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .upload-hint {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .preview-area {
+            margin-bottom: 24px;
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        .preview-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        .preview-item img,
+        .preview-item video {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .preview-item audio {
+            width: 100%;
+        }
+
+        .preview-remove {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 28px;
+            height: 28px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .text-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+            margin-bottom: 16px;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--theme-accent), var(--theme-accent-deep));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .result-panel {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            padding: 24px;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .result-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .result-content {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .result-text {
+            color: #475569;
+            line-height: 1.6;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+
+        .result-image {
+            width: 100%;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .result-meta {
+            display: grid;
+            gap: 12px;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+        }
+
+        .meta-label {
+            color: #64748b;
+        }
+
+        .meta-value {
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .history-list {
+            display: grid;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .history-item {
+            padding: 12px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .history-item:hover {
+            border-color: var(--theme-accent);
+            background: var(--theme-accent-soft);
+        }
+
+        .history-type {
+            font-size: 12px;
+            color: var(--theme-accent);
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .history-preview {
+            font-size: 13px;
+            color: #64748b;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .history-time {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top-color: var(--theme-accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>🎨 多模态处理</h1>
+                <p>处理图像、音频、视频等多种模态数据，实现跨模态理解和生成</p>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="input-panel">
+                <h3 style="margin-bottom: 16px;">选择处理模式</h3>
+                <div class="mode-selector">
+                    <div class="mode-card active" data-mode="image-to-text" onclick="selectMode('image-to-text')">
+                        <div class="mode-icon">🖼️</div>
+                        <div class="mode-name">图像理解</div>
+                    </div>
+                    <div class="mode-card" data-mode="text-to-image" onclick="selectMode('text-to-image')">
+                        <div class="mode-icon">🎨</div>
+                        <div class="mode-name">文生图</div>
+                    </div>
+                    <div class="mode-card" data-mode="audio-to-text" onclick="selectMode('audio-to-text')">
+                        <div class="mode-icon">🎵</div>
+                        <div class="mode-name">语音识别</div>
+                    </div>
+                    <div class="mode-card" data-mode="text-to-audio" onclick="selectMode('text-to-audio')">
+                        <div class="mode-icon">🔊</div>
+                        <div class="mode-name">语音合成</div>
+                    </div>
+                    <div class="mode-card" data-mode="video-analysis" onclick="selectMode('video-analysis')">
+                        <div class="mode-icon">🎬</div>
+                        <div class="mode-name">视频分析</div>
+                    </div>
+                </div>
+
+                <div id="uploadSection">
+                    <h3 style="margin-bottom: 16px;">上传文件</h3>
+                    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+                        <div class="upload-icon">📁</div>
+                        <div class="upload-text">点击或拖拽文件到此处</div>
+                        <div class="upload-hint">支持图片、音频、视频等多种格式</div>
+                    </div>
+                    <input type="file" id="fileInput" style="display: none" multiple accept="image/*,audio/*,video/*" onchange="handleFileSelect(event)">
+
+                    <div class="preview-area" id="previewArea" style="display: none;">
+                        <h4 style="margin-bottom: 12px;">预览</h4>
+                        <div class="preview-grid" id="previewGrid"></div>
+                    </div>
+                </div>
+
+                <div id="textSection">
+                    <h3 style="margin-bottom: 16px;">输入描述</h3>
+                    <textarea class="text-input" id="textInput" placeholder="请输入文本描述..."></textarea>
+                </div>
+
+                <button class="btn-primary" onclick="processMultimodal()">
+                    <i class="fas fa-play"></i> 开始处理
+                </button>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <div style="color: #64748b;">处理中...</div>
+                </div>
+            </div>
+
+            <div class="result-panel">
+                <div class="result-header">
+                    <div class="result-title">处理结果</div>
+                    <button class="btn-secondary" onclick="clearResult()" style="padding: 6px 12px; font-size: 13px;">
+                        <i class="fas fa-trash"></i> 清空
+                    </button>
+                </div>
+
+                <div id="resultContent" style="display: none;">
+                    <div class="result-content" id="resultDisplay"></div>
+
+                    <div class="result-meta">
+                        <div class="meta-row">
+                            <span class="meta-label">处理模式</span>
+                            <span class="meta-value" id="resultMode">-</span>
+                        </div>
+                        <div class="meta-row">
+                            <span class="meta-label">处理时间</span>
+                            <span class="meta-value" id="resultTime">-</span>
+                        </div>
+                        <div class="meta-row">
+                            <span class="meta-label">模型</span>
+                            <span class="meta-value" id="resultModel">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="emptyState" style="text-align: center; padding: 60px 20px; color: #94a3b8;">
+                    <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 16px; display: block;"></i>
+                    <div>暂无处理结果</div>
+                </div>
+
+                <h4 style="margin-top: 24px; margin-bottom: 12px;">历史记录</h4>
+                <div class="history-list" id="historyList">
+                    <!-- 历史记录将通过 JavaScript 动态加载 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentMode = 'image-to-text';
+        let uploadedFiles = [];
+
+        function selectMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            document.querySelector(`[data-mode="${mode}"]`).classList.add('active');
+
+            // 根据模式显示/隐藏相应区域
+            const uploadSection = document.getElementById('uploadSection');
+            const textSection = document.getElementById('textSection');
+
+            if (mode === 'text-to-image' || mode === 'text-to-audio') {
+                uploadSection.style.display = 'none';
+                textSection.style.display = 'block';
+            } else {
+                uploadSection.style.display = 'block';
+                textSection.style.display = mode === 'image-to-text' ? 'block' : 'none';
+            }
+        }
+
+        // 拖拽上传
+        const uploadZone = document.getElementById('uploadZone');
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        function handleFileSelect(event) {
+            handleFiles(event.target.files);
+        }
+
+        function handleFiles(files) {
+            uploadedFiles = Array.from(files);
+            displayPreviews();
+        }
+
+        function displayPreviews() {
+            const previewArea = document.getElementById('previewArea');
+            const previewGrid = document.getElementById('previewGrid');
+
+            if (uploadedFiles.length === 0) {
+                previewArea.style.display = 'none';
+                return;
+            }
+
+            previewArea.style.display = 'block';
+            previewGrid.innerHTML = '';
+
+            uploadedFiles.forEach((file, index) => {
+                const item = document.createElement('div');
+                item.className = 'preview-item';
+
+                if (file.type.startsWith('image/')) {
+                    const img = document.createElement('img');
+                    img.src = URL.createObjectURL(file);
+                    item.appendChild(img);
+                } else if (file.type.startsWith('video/')) {
+                    const video = document.createElement('video');
+                    video.src = URL.createObjectURL(file);
+                    video.controls = true;
+                    item.appendChild(video);
+                } else if (file.type.startsWith('audio/')) {
+                    const audio = document.createElement('audio');
+                    audio.src = URL.createObjectURL(file);
+                    audio.controls = true;
+                    item.appendChild(audio);
+                }
+
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'preview-remove';
+                removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                removeBtn.onclick = () => removeFile(index);
+                item.appendChild(removeBtn);
+
+                previewGrid.appendChild(item);
+            });
+        }
+
+        function removeFile(index) {
+            uploadedFiles.splice(index, 1);
+            displayPreviews();
+        }
+
+        async function processMultimodal() {
+            const loading = document.getElementById('loading');
+            const textInput = document.getElementById('textInput').value;
+
+            if (currentMode !== 'text-to-image' && currentMode !== 'text-to-audio' && uploadedFiles.length === 0) {
+                alert('请先上传文件');
+                return;
+            }
+
+            if ((currentMode === 'text-to-image' || currentMode === 'text-to-audio') && !textInput) {
+                alert('请输入文本描述');
+                return;
+            }
+
+            loading.classList.add('active');
+
+            try {
+                const formData = new FormData();
+                formData.append('mode', currentMode);
+                formData.append('text', textInput);
+                uploadedFiles.forEach(file => {
+                    formData.append('files', file);
+                });
+
+                const response = await fetch('/api/multimodal/process', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                displayResult(result);
+                addToHistory(result);
+            } catch (error) {
+                console.error('处理失败:', error);
+                alert('处理失败，请重试');
+            } finally {
+                loading.classList.remove('active');
+            }
+        }
+
+        function displayResult(result) {
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('resultContent').style.display = 'block';
+
+            const resultDisplay = document.getElementById('resultDisplay');
+            resultDisplay.innerHTML = '';
+
+            if (result.type === 'text') {
+                resultDisplay.innerHTML = `<div class="result-text">${result.content}</div>`;
+            } else if (result.type === 'image') {
+                const img = document.createElement('img');
+                img.src = result.url;
+                img.className = 'result-image';
+                resultDisplay.appendChild(img);
+            } else if (result.type === 'audio') {
+                const audio = document.createElement('audio');
+                audio.src = result.url;
+                audio.controls = true;
+                audio.style.width = '100%';
+                resultDisplay.appendChild(audio);
+            }
+
+            document.getElementById('resultMode').textContent = getModeLabel(currentMode);
+            document.getElementById('resultTime').textContent = result.processingTime || '1.2s';
+            document.getElementById('resultModel').textContent = result.model || 'GPT-4V';
+        }
+
+        function getModeLabel(mode) {
+            const labels = {
+                'image-to-text': '图像理解',
+                'text-to-image': '文生图',
+                'audio-to-text': '语音识别',
+                'text-to-audio': '语音合成',
+                'video-analysis': '视频分析'
+            };
+            return labels[mode] || mode;
+        }
+
+        function addToHistory(result) {
+            const historyList = document.getElementById('historyList');
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            item.innerHTML = `
+                <div class="history-type">${getModeLabel(currentMode)}</div>
+                <div class="history-preview">${result.preview || '处理完成'}</div>
+                <div class="history-time">${new Date().toLocaleString()}</div>
+            `;
+            item.onclick = () => displayResult(result);
+            historyList.insertBefore(item, historyList.firstChild);
+        }
+
+        function clearResult() {
+            document.getElementById('emptyState').style.display = 'block';
+            document.getElementById('resultContent').style.display = 'none';
+        }
+
+        // 加载历史记录
+        async function loadHistory() {
+            try {
+                const response = await fetch('/api/multimodal/history');
+                const history = await response.json();
+                history.forEach(item => addToHistory(item));
+            } catch (error) {
+                console.error('加载历史记录失败:', error);
+            }
+        }
+
+        // 页面加载时初始化
+        loadHistory();
+    </script>
+</body>
+</html>

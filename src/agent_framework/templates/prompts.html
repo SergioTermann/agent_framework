@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>提示词库 - Agent Framework</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/base-theme.css">
+    <style>
+        :root {
+            --theme-accent: #1363df;
+            --theme-accent-deep: #0f4eb3;
+            --theme-accent-soft: rgba(19, 99, 223, 0.10);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            background: linear-gradient(135deg, var(--theme-accent-deep), var(--theme-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-primary {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--theme-accent), var(--theme-accent-deep));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .prompt-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .prompt-card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s;
+        }
+
+        .prompt-card:hover {
+            box-shadow: 0 4px 16px rgba(19, 99, 223, 0.15);
+            border-color: var(--theme-accent);
+        }
+
+        .prompt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .prompt-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .prompt-tag {
+            padding: 4px 12px;
+            background: var(--theme-accent-soft);
+            color: var(--theme-accent);
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .prompt-content {
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 16px;
+            max-height: 100px;
+            overflow: hidden;
+        }
+
+        .prompt-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .prompt-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .btn-small:hover {
+            background: #f8fafc;
+            border-color: var(--theme-accent);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>📝 提示词库</h1>
+                <p>管理和复用提示词模板，支持版本控制和多场景应用</p>
+            </div>
+            <button class="btn-primary" onclick="createPrompt()">
+                <i class="fas fa-plus"></i> 创建提示词
+            </button>
+        </div>
+
+        <div class="prompt-grid" id="promptGrid">
+            <!-- 提示词卡片将通过 JavaScript 动态加载 -->
+        </div>
+    </div>
+
+    <script>
+        // 加载提示词列表
+        async function loadPrompts() {
+            try {
+                const response = await fetch('/api/prompts');
+                const prompts = await response.json();
+                renderPrompts(prompts);
+            } catch (error) {
+                console.error('加载提示词失败:', error);
+                renderPlaceholder();
+            }
+        }
+
+        function renderPrompts(prompts) {
+            const grid = document.getElementById('promptGrid');
+            if (!prompts || prompts.length === 0) {
+                renderPlaceholder();
+                return;
+            }
+
+            grid.innerHTML = prompts.map(prompt => `
+                <div class="prompt-card">
+                    <div class="prompt-header">
+                        <div class="prompt-title">${prompt.name}</div>
+                        <div class="prompt-tag">${prompt.category || '通用'}</div>
+                    </div>
+                    <div class="prompt-content">${prompt.content}</div>
+                    <div class="prompt-meta">
+                        <span><i class="fas fa-clock"></i> ${prompt.updated_at || '最近更新'}</span>
+                        <span><i class="fas fa-code-branch"></i> v${prompt.version || '1.0'}</span>
+                    </div>
+                    <div class="prompt-actions">
+                        <button class="btn-small" onclick="editPrompt('${prompt.id}')">
+                            <i class="fas fa-edit"></i> 编辑
+                        </button>
+                        <button class="btn-small" onclick="copyPrompt('${prompt.id}')">
+                            <i class="fas fa-copy"></i> 复制
+                        </button>
+                        <button class="btn-small" onclick="usePrompt('${prompt.id}')">
+                            <i class="fas fa-play"></i> 使用
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderPlaceholder() {
+            const grid = document.getElementById('promptGrid');
+            grid.innerHTML = `
+                <div class="prompt-card">
+                    <div class="prompt-header">
+                        <div class="prompt-title">示例：代码审查助手</div>
+                        <div class="prompt-tag">开发</div>
+                    </div>
+                    <div class="prompt-content">你是一个专业的代码审查助手。请仔细检查代码的质量、安全性和最佳实践...</div>
+                    <div class="prompt-meta">
+                        <span><i class="fas fa-clock"></i> 2小时前</span>
+                        <span><i class="fas fa-code-branch"></i> v1.2</span>
+                    </div>
+                    <div class="prompt-actions">
+                        <button class="btn-small"><i class="fas fa-edit"></i> 编辑</button>
+                        <button class="btn-small"><i class="fas fa-copy"></i> 复制</button>
+                        <button class="btn-small"><i class="fas fa-play"></i> 使用</button>
+                    </div>
+                </div>
+                <div class="prompt-card">
+                    <div class="prompt-header">
+                        <div class="prompt-title">示例：文档生成器</div>
+                        <div class="prompt-tag">文档</div>
+                    </div>
+                    <div class="prompt-content">根据代码自动生成清晰的技术文档，包括API说明、使用示例和注意事项...</div>
+                    <div class="prompt-meta">
+                        <span><i class="fas fa-clock"></i> 1天前</span>
+                        <span><i class="fas fa-code-branch"></i> v2.0</span>
+                    </div>
+                    <div class="prompt-actions">
+                        <button class="btn-small"><i class="fas fa-edit"></i> 编辑</button>
+                        <button class="btn-small"><i class="fas fa-copy"></i> 复制</button>
+                        <button class="btn-small"><i class="fas fa-play"></i> 使用</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createPrompt() {
+            alert('创建提示词功能开发中...');
+        }
+
+        function editPrompt(id) {
+            alert('编辑提示词: ' + id);
+        }
+
+        function copyPrompt(id) {
+            alert('复制提示词: ' + id);
+        }
+
+        function usePrompt(id) {
+            alert('使用提示词: ' + id);
+        }
+
+        // 页面加载时获取数据
+        loadPrompts();
+    </script>
+</body>
+</html>

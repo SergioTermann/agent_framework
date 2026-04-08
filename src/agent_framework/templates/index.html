@@ -646,15 +646,20 @@
     </a>
 
     <nav class="platform-nav" aria-label="平台导航">
-      <a class="platform-nav-link" href="/modules/weather-siting/app"><span class="material-symbols-outlined">wind_power</span><span>气象选址</span></a>
+      <a class="platform-nav-link" href="/maintenance-assistant"><span class="material-symbols-outlined">neurology</span><span>智导助手</span></a>
+      <a class="platform-nav-link" href="/modules/weather-siting/app"><span class="material-symbols-outlined">air</span><span>气象选址</span></a>
       <a class="platform-nav-link" href="/modules/power-trading/app"><span class="material-symbols-outlined">query_stats</span><span>电力交易</span></a>
       <a class="platform-nav-link" href="/modules/smart-workorder/app"><span class="material-symbols-outlined">assignment</span><span>智能工单</span></a>
-      <a class="platform-nav-link active" href="/dev"><span class="material-symbols-outlined">dashboard</span><span>开发控制台</span></a>
-      <a class="platform-nav-link" href="/dev/assistant"><span class="material-symbols-outlined">code</span><span>开发版助手</span></a>
+      <a class="platform-nav-link" href="/data-platform"><span class="material-symbols-outlined">shield</span><span>智能值守</span></a>
+      <a class="platform-nav-link" href="/modules/smart-office/app"><span class="material-symbols-outlined">workspaces</span><span>智慧办公</span></a>
     </nav>
 
     <div class="platform-sidebar-footer">
       <a class="platform-nav-utility" href="/knowledge"><span class="material-symbols-outlined">library_books</span><span>知识库</span></a>
+      <a class="platform-nav-utility" href="/prompts"><span class="material-symbols-outlined">description</span><span>提示词库</span></a>
+      <a class="platform-nav-utility" href="/documents"><span class="material-symbols-outlined">folder</span><span>文档中心</span></a>
+      <a class="platform-nav-utility" href="/ab-testing"><span class="material-symbols-outlined">science</span><span>A/B测试</span></a>
+      <a class="platform-nav-utility" href="/config-presets"><span class="material-symbols-outlined">tune</span><span>配置预设</span></a>
       <a class="platform-nav-utility" href="/plugins"><span class="material-symbols-outlined">extension</span><span>插件市场</span></a>
       <a class="platform-nav-utility" href="/settings"><span class="material-symbols-outlined">settings</span><span>平台设置</span></a>
       <a class="platform-nav-utility" href="/logs"><span class="material-symbols-outlined">receipt_long</span><span>日志中心</span></a>
@@ -813,6 +818,78 @@
               <span class="entry-link"><span class="material-symbols-outlined" style="font-size:16px">add_circle</span>创建技能</span>
             </div>
           </a>
+
+          <a class="entry-card" href="/prompts">
+            <span class="entry-icon material-symbols-outlined">description</span>
+            <strong>提示词库</strong>
+            <p>管理提示词模板，支持版本控制和多场景复用。</p>
+            <div class="entry-links">
+              <span class="entry-link"><span class="material-symbols-outlined" style="font-size:16px">edit_note</span>管理模板</span>
+            </div>
+          </a>
+
+          <a class="entry-card" href="/documents">
+            <span class="entry-icon material-symbols-outlined">folder</span>
+            <strong>文档中心</strong>
+            <p>上传、管理和检索文档，为知识库提供内容支撑。</p>
+            <div class="entry-links">
+              <span class="entry-link"><span class="material-symbols-outlined" style="font-size:16px">upload_file</span>上传文档</span>
+            </div>
+          </a>
+
+          <a class="entry-card" href="/ab-testing">
+            <span class="entry-icon material-symbols-outlined">science</span>
+            <strong>A/B 测试</strong>
+            <p>对比不同模型、提示词的效果，优化AI性能。</p>
+            <div class="entry-links">
+              <span class="entry-link"><span class="material-symbols-outlined" style="font-size:16px">experiment</span>创建实验</span>
+            </div>
+          </a>
+
+          <a class="entry-card" href="/reasoning">
+            <span class="entry-icon material-symbols-outlined">psychology_alt</span>
+            <strong>高级推理</strong>
+            <p>探索复杂推理能力，支持思维链和多步骤推理。</p>
+            <div class="entry-links">
+              <span class="entry-link"><span class="material-symbols-outlined" style="font-size:16px">account_tree</span>推理实验</span>
+            </div>
+          </a>
+
+          <a class="entry-card" href="/publish">
+            <span class="entry-icon material-symbols-outlined">publish</span>
+            <strong>发布管理</strong>
+            <p>管理应用和模型的发布流程，版本控制和部署。</p>
+            <div class="entry-links">
+              <span class="entry-link"><span class="material-symbols-outlined" style="font-size:16px">rocket_launch</span>发布应用</span>
+            </div>
+          </a>
+
+          <a class="entry-card" href="/config-presets">
+            <span class="entry-icon material-symbols-outlined">tune</span>
+            <strong>配置预设</strong>
+            <p>管理和复用配置模板，快速应用到不同场景。</p>
+            <div class="entry-links">
+              <span class="entry-link"><span class="material-symbols-outlined" style="font-size:16px">settings_suggest</span>管理预设</span>
+            </div>
+          </a>
+
+          <a class="entry-card" href="/http-tools">
+            <span class="entry-icon material-symbols-outlined">http</span>
+            <strong>HTTP 工具</strong>
+            <p>测试和调试HTTP请求，支持多种请求方法和参数配置。</p>
+            <div class="entry-links">
+              <span class="entry-link"><span class="material-symbols-outlined" style="font-size:16px">send</span>发送请求</span>
+            </div>
+          </a>
+
+          <a class="entry-card" href="/workflow-advanced">
+            <span class="entry-icon material-symbols-outlined">account_tree</span>
+            <strong>高级工作流</strong>
+            <p>可视化编排复杂工作流，支持条件分支和循环控制。</p>
+            <div class="entry-links">
+              <span class="entry-link"><span class="material-symbols-outlined" style="font-size:16px">schema</span>编排工作流</span>
+            </div>
+          </a>
         </div>
       </section>
 
@@ -833,6 +910,7 @@
               <a href="/modules/weather-siting/app"><span class="material-symbols-outlined" style="font-size:16px">air</span><span>气象选址</span></a>
               <a href="/modules/power-trading/app"><span class="material-symbols-outlined" style="font-size:16px">query_stats</span><span>电力交易</span></a>
               <a href="/modules/smart-workorder/app"><span class="material-symbols-outlined" style="font-size:16px">assignment</span><span>智能工单</span></a>
+              <a href="/chat-interface"><span class="material-symbols-outlined" style="font-size:16px">chat</span><span>AI 对话助手</span></a>
             </div>
           </div>
 
@@ -866,6 +944,29 @@
               <a href="/async-tasks"><span class="material-symbols-outlined" style="font-size:16px">pending_actions</span><span>异步任务</span></a>
               <a href="/webhooks"><span class="material-symbols-outlined" style="font-size:16px">webhook</span><span>Webhook</span></a>
               <a href="/multi-agent"><span class="material-symbols-outlined" style="font-size:16px">groups</span><span>多 Agent</span></a>
+            </div>
+          </div>
+
+          <div class="list-item">
+            <strong>新增功能入口</strong>
+            <p>提示词、文档、A/B测试、推理和发布管理等新功能。</p>
+            <div class="quick-links">
+              <a href="/prompts"><span class="material-symbols-outlined" style="font-size:16px">description</span><span>提示词库</span></a>
+              <a href="/documents"><span class="material-symbols-outlined" style="font-size:16px">folder</span><span>文档中心</span></a>
+              <a href="/ab-testing"><span class="material-symbols-outlined" style="font-size:16px">science</span><span>A/B测试</span></a>
+              <a href="/reasoning"><span class="material-symbols-outlined" style="font-size:16px">psychology_alt</span><span>高级推理</span></a>
+              <a href="/publish"><span class="material-symbols-outlined" style="font-size:16px">publish</span><span>发布管理</span></a>
+            </div>
+          </div>
+
+          <div class="list-item">
+            <strong>工具与配置</strong>
+            <p>配置预设、HTTP工具、高级工作流等开发辅助功能。</p>
+            <div class="quick-links">
+              <a href="/config-presets"><span class="material-symbols-outlined" style="font-size:16px">tune</span><span>配置预设</span></a>
+              <a href="/http-tools"><span class="material-symbols-outlined" style="font-size:16px">http</span><span>HTTP工具</span></a>
+              <a href="/workflow-advanced"><span class="material-symbols-outlined" style="font-size:16px">account_tree</span><span>高级工作流</span></a>
+              <a href="/code-snippets"><span class="material-symbols-outlined" style="font-size:16px">code</span><span>代码片段</span></a>
             </div>
           </div>
         </div>
