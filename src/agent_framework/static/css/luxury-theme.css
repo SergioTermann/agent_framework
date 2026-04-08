@@ -1,0 +1,229 @@
+/* 风起时域 - 蓝色浅色配色系统 */
+
+:root {
+    /* 主色调 - 蓝色系 */
+    --gold-dark: #0f4eb3;
+    --gold-standard: #1363df;
+    --gold-light: #e3ecff;
+    --gold-border: rgba(19, 99, 223, 0.2);
+    --gold-border-hover: rgba(19, 99, 223, 0.4);
+
+    /* 背景色 - 浅蓝色系 */
+    --bg-primary: #f5f8fc;
+    --bg-secondary: #eff4fb;
+    --bg-tertiary: #e3ecff;
+
+    /* 卡片背景 */
+    --card-bg: rgba(255, 255, 255, 0.86);
+    --card-bg-hover: rgba(255, 255, 255, 0.98);
+    --card-border: rgba(101, 120, 144, 0.14);
+
+    /* 文字颜色 */
+    --text-primary: #253038;
+    --text-secondary: #617181;
+    --text-tertiary: #4c5a68;
+
+    /* 阴影 */
+    --shadow-sm: 0 2px 10px rgba(19, 99, 223, 0.1);
+    --shadow-md: 0 18px 44px rgba(23, 45, 78, 0.18);
+    --shadow-lg: 0 30px 72px rgba(19, 64, 128, 0.22);
+
+    /* 渐变 */
+    --gradient-gold: linear-gradient(135deg, #0f4eb3 0%, #1363df 100%);
+    --gradient-bg: linear-gradient(135deg, #f5f8fc 0%, #eff4fb 50%, #e3ecff 100%);
+}
+
+/* 全局样式 */
+body {
+    font-family: 'PingFang SC', 'Microsoft YaHei UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', sans-serif;
+    background: var(--gradient-bg);
+    color: var(--text-primary);
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* 通用卡片样式 */
+.luxury-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--card-border);
+    border-radius: 15px;
+    padding: 30px;
+    transition: all 0.3s ease;
+}
+
+.luxury-card:hover {
+    background: var(--card-bg-hover);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--gold-border-hover);
+}
+
+/* 通用按钮样式 */
+.luxury-btn {
+    background: rgba(212, 175, 55, 0.1);
+    border: 1px solid var(--gold-border);
+    color: var(--text-primary);
+    padding: 12px 30px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'PingFang SC', 'Microsoft YaHei UI', sans-serif;
+    font-size: 1em;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.luxury-btn:hover {
+    background: rgba(212, 175, 55, 0.2);
+    box-shadow: var(--shadow-md);
+}
+
+.luxury-btn-primary {
+    background: var(--gradient-gold);
+    border: none;
+    color: #ffffff;
+}
+
+.luxury-btn-primary:hover {
+    box-shadow: var(--shadow-lg);
+}
+
+/* 通用输入框样式 */
+.luxury-input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid var(--gold-border);
+    border-radius: 8px;
+    padding: 12px;
+    color: var(--text-primary);
+    font-family: 'PingFang SC', 'Microsoft YaHei UI', sans-serif;
+    font-size: 1em;
+    transition: all 0.3s ease;
+}
+
+.luxury-input:focus {
+    outline: none;
+    border-color: var(--gold-border-hover);
+    box-shadow: 0 0 15px rgba(184, 134, 11, 0.1);
+    background: rgba(255, 255, 255, 0.8);
+}
+
+/* 通用标题样式 */
+.luxury-title {
+    font-size: 2em;
+    font-weight: 700;
+    background: var(--gradient-gold);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.luxury-subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1em;
+    line-height: 1.6;
+}
+
+/* 通用导航栏样式 */
+.luxury-header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--gold-border);
+    padding: 20px 0;
+    box-shadow: var(--shadow-sm);
+}
+
+/* 通用面板样式 */
+.luxury-panel {
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--card-border);
+    border-radius: 15px;
+    padding: 30px;
+}
+
+/* 通用统计卡片 */
+.luxury-stat-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.luxury-stat-card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.luxury-stat-value {
+    font-size: 2.5em;
+    font-weight: 700;
+    color: var(--gold-dark);
+    margin-bottom: 5px;
+}
+
+.luxury-stat-label {
+    color: var(--text-tertiary);
+    font-size: 0.9em;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(212, 175, 55, 0.05);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(184, 134, 11, 0.3);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(184, 134, 11, 0.5);
+}
+
+/* 加载动画 */
+.luxury-loading {
+    text-align: center;
+    color: var(--text-tertiary);
+    padding: 40px;
+}
+
+.luxury-loading::after {
+    content: '...';
+    animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+    0%, 20% { content: '.'; }
+    40% { content: '..'; }
+    60%, 100% { content: '...'; }
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+    .luxury-card {
+        padding: 20px;
+    }
+
+    .luxury-panel {
+        padding: 20px;
+    }
+
+    .luxury-title {
+        font-size: 1.5em;
+    }
+}

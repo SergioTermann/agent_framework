@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gateway WebSocket Demo</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root{--bg:#f5f7fb;--card:#fff;--line:#dde6f2;--text:#10233f;--muted:#63748c;--primary:#1363df;--ok:#0f9d58;--warn:#d97706;--error:#dc2626;--shadow:0 12px 30px rgba(16,35,63,.08);--radius:16px}
+    *{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+    .page{max-width:1280px;margin:0 auto;padding:28px;display:grid;gap:18px}
+    .hero,.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+    .hero{padding:24px}.hero h1{margin:0 0 8px;font-size:30px}.hero p{margin:0;color:var(--muted);line-height:1.7}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+    .card{padding:20px;display:grid;gap:14px}
+    .card h2{margin:0;font-size:18px}.muted{color:var(--muted);font-size:13px;line-height:1.7}
+    .field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .field{display:grid;gap:6px}.field.full{grid-column:1/-1}
+    label{font-size:13px;font-weight:700;color:var(--muted)}
+    input,textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font:inherit;background:#fbfdff;color:var(--text)}
+    textarea{min-height:110px;resize:vertical}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    button{border:none;border-radius:12px;padding:11px 16px;background:var(--primary);color:#fff;font-weight:700;cursor:pointer}
+    button.secondary{background:#edf3ff;color:var(--primary)}
+    .status{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;background:#eef3fb;color:var(--muted);font-size:13px;font-weight:800}
+    .status[data-tone="ok"]{background:#eaf8f0;color:var(--ok)}
+    .status[data-tone="warn"]{background:#fff4e5;color:var(--warn)}
+    .status[data-tone="error"]{background:#feeceb;color:var(--error)}
+    .tips{display:grid;gap:10px;padding:14px;border:1px dashed var(--line);border-radius:14px;background:#fbfdff}
+    .tips strong{font-size:14px}.tips ul{margin:0;padding-left:18px;color:var(--muted);line-height:1.8;font-size:13px}
+    .log{min-height:420px;max-height:620px;overflow:auto;display:grid;gap:10px;padding-right:4px}
+    .log-item{padding:12px 14px;border-radius:12px;background:#fbfdff;border:1px solid #edf2f8;white-space:pre-wrap;word-break:break-word;font:12px/1.7 ui-monospace,SFMono-Regular,Consolas,monospace}
+    .log-item.success{border-color:#cce9d8;background:#f5fcf7}.log-item.warn{border-color:#f5d6a6;background:#fff9ef}.log-item.error{border-color:#f4c7c3;background:#fff5f5}
+    .api-example{padding:14px;border-radius:14px;background:#0f172a;color:#e2e8f0;font:12px/1.8 ui-monospace,SFMono-Regular,Consolas,monospace;overflow:auto}
+    @media (max-width: 960px){.grid,.field-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <h1>Gateway + WebSocket 联调页</h1>
+      <p>这个页面用于验证新接入的 Gateway 长连接层：连接鉴权、在线状态、心跳、chat.send、主动推送、ACK 回写、离线补发。</p>
+    </section>
+
+    <div class="grid">
+      <section class="card">
+        <h2>1. 连接 Gateway</h2>
+        <div class="muted">优先填 JWT Token；开发联调阶段也可仅填 user_id（当前后端保留 fallback）。</div>
+        <div class="field-grid">
+          <div class="field">
+            <label for="gatewayNamespace">Namespace</label>
+            <input id="gatewayNamespace" value="/gateway">
+          </div>
+          <div class="field">
+            <label for="gatewayDeviceId">device_id</label>
+            <input id="gatewayDeviceId" value="web-demo">
+          </div>
+          <div class="field full">
+            <label for="gatewayToken">JWT Token</label>
+            <input id="gatewayToken" placeholder="可选：登录后返回的 token">
+          </div>
+          <div class="field full">
+            <label for="gatewayUserId">user_id</label>
+            <input id="gatewayUserId" placeholder="开发联调可直接填写 user_id">
+          </div>
+        </div>
+        <div class="actions">
+          <button id="connectGatewayBtn"><i class="fas fa-plug"></i> 连接</button>
+          <button class="secondary" id="disconnectGatewayBtn"><i class="fas fa-ban"></i> 断开</button>
+          <button class="secondary" id="heartbeatBtn"><i class="fas fa-heart-pulse"></i> 心跳</button>
+        </div>
+        <div class="status" id="gatewayStatus" data-tone="idle">尚未连接</div>
+      </section>
+
+      <section class="card">
+        <h2>2. 通过 WebSocket 发起 chat.send</h2>
+        <div class="field">
+          <label for="gatewayMessage">消息内容</label>
+          <textarea id="gatewayMessage">请结合风电运维场景，分析机组偏航频繁动作并伴随偏航超差告警的可能根因与排查建议。</textarea>
+        </div>
+        <div class="actions">
+          <button id="sendChatBtn"><i class="fas fa-paper-plane"></i> 发送 chat.send</button>
+        </div>
+        <div class="tips">
+          <strong>行为说明</strong>
+          <ul>
+            <li>页面会向 <code>/gateway</code> namespace 发送 <code>chat.send</code></li>
+            <li>服务端内部调用现有 unified orchestrator</li>
+            <li>回答将通过 <code>chat.message</code> 回推到当前连接</li>
+            <li>客户端收到后会自动回 ACK</li>
+          </ul>
+        </div>
+      </section>
+    </div>
+
+    <div class="grid">
+      <section class="card">
+        <h2>3. 通过 HTTP 主动推送</h2>
+        <div class="field-grid">
+          <div class="field">
+            <label for="pushUserId">推送目标 user_id</label>
+            <input id="pushUserId" placeholder="为空时默认取上方 user_id">
+          </div>
+          <div class="field">
+            <label for="pushEvent">事件名</label>
+            <input id="pushEvent" value="notify.system">
+          </div>
+          <div class="field full">
+            <label for="pushPayload">payload JSON</label>
+            <textarea id="pushPayload">{"title":"任务完成","content":"AI 诊断已完成，可点击查看结果。"} </textarea>
+          </div>
+        </div>
+        <div class="actions">
+          <button id="pushEventBtn"><i class="fas fa-bell"></i> 发送主动推送</button>
+        </div>
+        <div class="api-example">POST /api/gateway/push
+{
+  "user_id": "u1001",
+  "event": "notify.system",
+  "target": "ALL",
+  "payload": {
+    "title": "任务完成",
+    "content": "AI 诊断已完成"
+  }
+}</div>
+      </section>
+
+      <section class="card">
+        <h2>4. 联调提示</h2>
+        <div class="tips">
+          <strong>推荐流程</strong>
+          <ul>
+            <li>先连接 Gateway，确认在线</li>
+            <li>调用 <code>/api/gateway/online-users</code> 检查在线用户</li>
+            <li>再调用主动推送接口验证单播/多端同步</li>
+            <li>最后断开连接，再推送一次，验证离线补发</li>
+          </ul>
+        </div>
+        <div class="tips">
+          <strong>常用接口</strong>
+          <ul>
+            <li><code>GET /api/gateway/nodes</code></li>
+            <li><code>GET /api/gateway/online-users</code></li>
+            <li><code>GET /api/gateway/users/&lt;user_id&gt;/connections</code></li>
+            <li><code>GET /api/gateway/users/&lt;user_id&gt;/offline-events</code></li>
+            <li><code>GET /api/gateway/events/&lt;event_id&gt;</code></li>
+          </ul>
+        </div>
+      </section>
+    </div>
+
+    <section class="card">
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;">
+        <div>
+          <h2>5. 实时日志</h2>
+          <div class="muted">这里会显示连接事件、推送事件、chat.send 执行结果和 ACK 回写。</div>
+        </div>
+        <div class="actions">
+          <button class="secondary" id="clearLogBtn"><i class="fas fa-trash"></i> 清空日志</button>
+        </div>
+      </div>
+      <div class="log" id="gatewayLog"></div>
+    </section>
+  </div>
+
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+  <script src="/static/js/gateway-demo.js"></script>
+</body>
+</html>

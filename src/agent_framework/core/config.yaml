@@ -1,0 +1,70 @@
+# Agent Framework 平台配置
+# 环境变量优先级高于此文件中的值
+
+llm:
+  provider: "openai-compatible"
+  # api_key: ""                  # 建议通过 SILICONFLOW_API_KEY 环境变量设置
+  model: "Qwen/Qwen3-VL-32B-Instruct"
+  base_url: "https://api.siliconflow.cn/v1"
+  timeout: 120
+
+  # vLLM 示例：
+  # provider: "vllm"
+  # model: "Qwen/Qwen2.5-7B-Instruct"
+  # base_url: "http://127.0.0.1:8000/v1"
+  # api_key: ""
+
+server:
+  host: "0.0.0.0"
+  port: 5000
+  debug: false
+  # secret_key: ""               # 建议通过 SECRET_KEY 环境变量设置
+  max_upload_mb: 100
+
+agent:
+  temperature: 0.7
+  max_tokens: 2048
+  top_p: 0.95
+  frequency_penalty: 0.0
+  presence_penalty: 0.0
+  max_rounds: 15
+  stream: true
+
+data:
+  data_dir: "./data"
+  workflow_dir: "./data/workflows"
+
+web_search:
+  provider: "searxng"
+  base_url: "http://localhost:8888"
+  timeout: 10
+  max_results: 5
+  language: ""
+  safesearch: 0
+  enabled: true
+
+weather:
+  provider: "openweathermap"
+  # api_key: ""                  # 建议通过 WEATHER_API_KEY 环境变量设置
+  base_url: "https://api.openweathermap.org/data/2.5"
+  timeout: 10
+  units: "metric"               # metric / imperial / standard
+  language: "zh_cn"
+  enabled: true
+
+travel:
+  provider: "amap"
+  # api_key: ""                  # 建议通过 AMAP_API_KEY 环境变量设置
+  base_url: "https://restapi.amap.com/v3"
+  timeout: 10
+  enabled: true
+
+# 工具统一开关（按工具名控制，默认全部启用）
+tools_enabled:
+  calculate: true
+  get_datetime: true
+  sum_numbers: true
+  score_grade: true
+  to_uppercase: true            # 同时控制 text_utils 所有子工具
+  create_todo_list: true
+  analyze_causal_chain: true    # 同时控制因果推理所有子工具

@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>知识库 - Agent Framework</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/base-theme.css">
+    <style>
+        :root {
+            --theme-accent: #1363df;
+            --theme-accent-deep: #0f4eb3;
+            --theme-accent-soft: rgba(19, 99, 223, 0.10);
+            --theme-accent-line: rgba(19, 99, 223, 0.22);
+            --theme-accent-shadow: rgba(19, 99, 223, 0.22);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-copy {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            background: linear-gradient(135deg, var(--theme-accent-deep), var(--theme-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            max-width: 640px;
+            font-size: 14px;
+            line-height: 1.7;
+            color: #64748b;
+        }
+
+        .stats {
+            display: flex;
+            gap: 30px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+        }
+
+        .sidebar {
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            height: fit-content;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            background: #f8fafc;
+            border: 1px solid rgba(15, 23, 42, 0.2);
+            border-radius: 8px;
+            color: #0f172a;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn:hover {
+            background: #f9fafc;
+            border-color: var(--theme-accent);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--theme-accent-deep), var(--theme-accent));
+            border: none;
+            color: #ffffff;
+            box-shadow: 0 2px 8px var(--theme-accent-shadow);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 4px 12px rgba(19, 99, 223, 0.28);
+        }
+
+        .btn-danger {
+            background: #fef2f2;
+            border-color: #dc2626;
+            color: #b91c1c;
+        }
+
+        .btn-danger:hover {
+            background: #fee2e2;
+            border-color: #b91c1c;
+        }
+
+        .kb-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .kb-item {
+            padding: 15px;
+            background: #f8fafc;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .kb-item:hover {
+            background: #f9fafc;
+            border-color: var(--theme-accent);
+        }
+
+        .kb-item.active {
+            background: var(--theme-accent-soft);
+            border-color: var(--theme-accent);
+        }
+
+        .kb-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #0f172a;
+        }
+
+        .kb-info {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .content-area {
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(15, 23, 42, 0.1);
+        }
+
+        .content-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--theme-accent-line);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            cursor: pointer;
+            background: #f8fafc;
+        }
+
+        .upload-area:hover {
+            border-color: var(--theme-accent);
+            background: rgba(19, 99, 223, 0.04);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--theme-accent-deep);
+            background: var(--theme-accent-soft);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: var(--theme-accent);
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #0f172a;
+        }
+
+        .upload-hint {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .doc-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .doc-item {
+            background: #f8fafc;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            border-radius: 8px;
+            padding: 15px;
+            transition: all 0.3s;
+        }
+
+        .doc-item:hover {
+            background: #f9fafc;
+            border-color: var(--theme-accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .doc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+
+        .doc-icon {
+            font-size: 32px;
+            color: var(--theme-accent);
+        }
+
+        .doc-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            padding: 5px;
+            transition: all 0.3s;
+        }
+
+        .icon-btn:hover {
+            color: var(--theme-accent);
+        }
+
+        .doc-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            word-break: break-word;
+            color: #0f172a;
+        }
+
+        .doc-info {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .settings-panel {
+            margin-bottom: 20px;
+            padding: 16px;
+            background: #f8fafc;
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            border-radius: 12px;
+        }
+
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .settings-subtitle {
+            margin: 18px 0 10px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #334155;
+        }
+
+        .checkbox-inline {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 42px;
+            padding: 10px 12px;
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            border-radius: 10px;
+            background: #fff;
+            color: #334155;
+        }
+
+        .settings-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .settings-hint {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 10px;
+        }
+
+        .status-text {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .search-section {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(15, 23, 42, 0.1);
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px;
+            background: #ffffff;
+            border: 1px solid rgba(15, 23, 42, 0.2);
+            border-radius: 8px;
+            color: #0f172a;
+            font-size: 14px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--theme-accent);
+            box-shadow: 0 0 0 3px rgba(19, 99, 223, 0.12);
+        }
+
+        .search-input::placeholder {
+            color: #64748b;
+        }
+
+        .search-results {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .result-item {
+            background: #f8fafc;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .result-content {
+            margin-bottom: 10px;
+            line-height: 1.6;
+            color: #0f172a;
+        }
+
+        .result-meta {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #ffffff;
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #0f172a;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #475569;
+            font-weight: 600;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            background: #ffffff;
+            border: 1px solid rgba(15, 23, 42, 0.18);
+            border-radius: 8px;
+            color: #0f172a;
+            font-size: 14px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--theme-accent);
+            box-shadow: 0 0 0 3px rgba(19, 99, 223, 0.12);
+        }
+
+        .form-input::placeholder {
+            color: #94a3b8;
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+
+        @media (max-width: 900px) {
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .back-link {
+            color: var(--theme-accent) !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wide">
+        <nav class="topbar">
+            <div class="brand">
+                <a class="back-link" href="{{ url_for('developer_home') }}">← 返回主页</a>
+                <h1><i class="fas fa-database"></i> 知识库</h1>
+            </div>
+            <div class="topbar-actions">
+            </div>
+        </nav>
+
+    <div class="container">
+        <div class="header">
+            <div class="header-copy">
+                <h1>把知识页从“存文档”升级成“可调可控的检索底座”</h1>
+                <p>这里不只是上传资料，而是把文档、分块、召回、重排和搜索结果放进同一个工作台，方便你判断这套知识到底能不能支撑当前 Agent 任务。</p>
+            </div>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="kbCount">0</div>
+                    <div class="stat-label">知识目录</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="docCount">0</div>
+                    <div class="stat-label">已入库文档</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="chunkCount">0</div>
+                    <div class="stat-label">可检索片段</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- 左侧边栏 -->
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <div class="sidebar-title">我的知识目录</div>
+                    <button class="btn btn-primary" onclick="showCreateKBModal()">
+                        <i class="fas fa-plus"></i> 新建知识库
+                    </button>
+                </div>
+                <div class="kb-list" id="kbList">
+                    <div class="loading">加载中...</div>
+                </div>
+            </div>
+
+            <!-- 右侧内容区 -->
+            <div class="content-area">
+                <div id="emptyState" class="empty-state">
+                    <div class="empty-icon"><i class="fas fa-folder-open"></i></div>
+                    <p>先选一个知识库，把文档、参数和检索结果收进同一个工作台。</p>
+                </div>
+
+                <div id="kbContent" style="display: none;">
+                    <div class="content-header">
+                        <div class="content-title" id="kbTitle">知识库名称</div>
+                        <div>
+                            <button class="btn btn-danger" onclick="deleteCurrentKB()">
+                                <i class="fas fa-trash"></i> 删除当前知识库
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="settings-panel">
+                        <div class="settings-header">
+                            <strong>让这套知识真正可用的检索设置</strong>
+                            <button class="btn" onclick="loadServingEndpoints()">
+                                <i class="fas fa-rotate"></i> 刷新端点
+                            </button>
+                        </div>
+                        <div class="settings-grid">
+                            <div>
+                                <label class="form-label">向量模型端点</label>
+                                <select id="embeddingEndpointSelect" class="form-input"></select>
+                            </div>
+                            <div>
+                                <label class="form-label">重排模型端点</label>
+                                <select id="rerankEndpointSelect" class="form-input"></select>
+                            </div>
+                        </div>
+                        <div class="settings-subtitle">高级检索参数</div>
+                        <div class="settings-grid">
+                            <div>
+                                <label class="form-label">分块大小</label>
+                                <input id="ragChunkSizeInput" class="form-input" type="number" min="100" max="4000" step="50">
+                            </div>
+                            <div>
+                                <label class="form-label">分块重叠</label>
+                                <input id="ragChunkOverlapInput" class="form-input" type="number" min="0" max="1000" step="10">
+                            </div>
+                            <div>
+                                <label class="form-label">默认返回条数 Top-K</label>
+                                <input id="ragSearchTopKInput" class="form-input" type="number" min="1" max="20" step="1">
+                            </div>
+                            <div>
+                                <label class="form-label">候选召回数</label>
+                                <input id="ragCandidateTopKInput" class="form-input" type="number" min="8" max="100" step="1">
+                            </div>
+                            <div>
+                                <label class="form-label">结果阈值</label>
+                                <input id="ragScoreThresholdInput" class="form-input" type="number" min="0" max="1" step="0.01">
+                            </div>
+                            <div>
+                                <label class="form-label">MMR 多样性系数</label>
+                                <input id="ragMmrLambdaInput" class="form-input" type="number" min="0" max="1" step="0.01">
+                            </div>
+                            <div>
+                                <label class="form-label">相邻扩展块数</label>
+                                <input id="ragWindowSizeInput" class="form-input" type="number" min="0" max="4" step="1">
+                            </div>
+                            <div>
+                                <label class="form-label">上下文最大字符数</label>
+                                <input id="ragWindowCharsInput" class="form-input" type="number" min="200" max="6000" step="100">
+                            </div>
+                            <div>
+                                <label class="form-label">章节上下文最大字符数</label>
+                                <input id="ragSectionCharsInput" class="form-input" type="number" min="400" max="8000" step="100">
+                            </div>
+                            <div>
+                                <label class="form-label">查询扩展</label>
+                                <label class="checkbox-inline">
+                                    <input id="ragQueryExpansionInput" type="checkbox">
+                                    <span>启用同义词 / 领域词扩展</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="settings-actions">
+                            <button class="btn btn-primary" onclick="saveKBSettings()">
+                                <i class="fas fa-floppy-disk"></i> 保存检索设置
+                            </button>
+                            <button class="btn" onclick="rebuildKBEmbeddings()">
+                                <i class="fas fa-arrows-rotate"></i> 重新生成向量
+                            </button>
+                        </div>
+                        <div class="settings-hint">
+                            重点不是把文档放进来，而是把分块、召回、阈值、MMR、多段上下文和查询扩展调到适合当前业务问题。
+                        </div>
+                        <div class="status-text" id="kbSettingsStatus"></div>
+                    </div>
+
+                    <!-- 上传区域 -->
+                    <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                        <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                        <div class="upload-text">把资料拖进来，先把知识底座搭起来</div>
+                        <div class="upload-hint">支持 PDF、Word、Markdown、TXT，上传后会进入分块与检索流程</div>
+                        <input type="file" id="fileInput" class="file-input" accept=".pdf,.docx,.doc,.md,.txt" onchange="uploadFile(event)">
+                    </div>
+
+                    <!-- 文档列表 -->
+                    <div class="doc-list" id="docList"></div>
+
+                    <!-- 搜索区域 -->
+                    <div class="search-section">
+                        <h3 style="margin-bottom: 15px;">检索验证</h3>
+                        <div class="search-box">
+                            <input type="text" class="search-input" id="searchInput" placeholder="输入一个真实业务问题，看看这套知识能不能答上来">
+                            <button class="btn btn-primary" onclick="searchKnowledge()">
+                                <i class="fas fa-search"></i> 开始检索
+                            </button>
+                        </div>
+                        <div class="search-results" id="searchResults"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 创建知识库模态框 -->
+    <div class="modal" id="createKBModal">
+        <div class="modal-content">
+            <div class="modal-header">新建知识库</div>
+            <div class="form-group">
+                <label class="form-label">知识库名称</label>
+                <input type="text" class="form-input" id="kbName" placeholder="给这套知识起一个业务上看得懂的名字">
+            </div>
+            <div class="form-group">
+                <label class="form-label">描述</label>
+                <textarea class="form-input form-textarea" id="kbDescription" placeholder="写清这套知识要服务什么场景、什么问题，后面筛选和维护会更清楚"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeCreateKBModal()">取消</button>
+                <button class="btn btn-primary" onclick="createKB()">创建知识库</button>
+            </div>
+        </div>
+    </div>
+
+    </div> <!-- page-wide -->
+
+    <script src="/static/js/knowledge.js"></script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+/**
+ * 风起时域 - 统一设计系统
+ * Design System for Agent Framework
+ */
+
+/* CSS变量定义 */
+:root {
+    --primary-color: #1363df;
+    --primary-dark: #0f4eb3;
+    --secondary-color: #60a5fa;
+    --success-color: #22a06b;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+
+    --bg-primary: #f5f8fc;
+    --bg-secondary: rgba(239, 244, 251, 0.85);
+    --bg-card: rgba(255, 255, 255, 0.86);
+    --bg-hover: rgba(19, 99, 223, 0.08);
+
+    --text-primary: #253038;
+    --text-secondary: #617181;
+
+    --border-color: rgba(101, 120, 144, 0.14);
+    --shadow-md: 0 18px 44px rgba(23, 45, 78, 0.18);
+    --shadow-glow: 0 0 20px rgba(19, 99, 223, 0.3);
+    
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    
+    --font-primary: 'PingFang SC', 'Microsoft YaHei UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --transition-base: 250ms ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-primary);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    font-size: 16px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    font-weight: 600;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+}
+
+.btn-primary:hover {
+    box-shadow: var(--shadow-glow);
+}
+
+.card {
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-base);
+}
+
+.card:hover {
+    border-color: rgba(88, 166, 255, 0.4);
+}
+
+.input {
+    width: 100%;
+    padding: 12px 16px;
+    color: var(--text-primary);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-base);
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+}
+
+.grid {
+    display: grid;
+    gap: var(--spacing-lg);
+}
+
+.grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 1024px) {
+    .grid-cols-3 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .grid-cols-3 {
+        grid-template-columns: 1fr;
+    }
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(88, 166, 255, 0.3);
+    border-radius: 999px;
+}
+
+::selection {
+    background: rgba(88, 166, 255, 0.3);
+}

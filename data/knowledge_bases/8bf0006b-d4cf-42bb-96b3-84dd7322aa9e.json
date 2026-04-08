@@ -1,0 +1,16 @@
+{
+  "kb_id": "8bf0006b-d4cf-42bb-96b3-84dd7322aa9e",
+  "name": "1",
+  "embedding_type": "simple",
+  "store_type": "chroma",
+  "created_at": "2026-03-10T15:27:49.327396",
+  "document_count": 0,
+  "config": {
+    "name": "1",
+    "description": "1",
+    "embedding_type": "simple",
+    "store_type": "chroma",
+    "chunk_size": 500,
+    "overlap": 50
+  }
+}

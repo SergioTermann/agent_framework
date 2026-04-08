@@ -1,0 +1,330 @@
+<svg width="1920" height="1080" xmlns="http://www.w3.org/2000/svg" style="background: #f9fafb;">
+ <!-- 浅色背景 -->
+ <rect width="1920" height="1080" fill="#f9fafb"/>
+ <defs>
+  <linearGradient id="svg_6" x1="0%" y1="0%" x2="100%" y2="0%">
+   <stop offset="0%" stop-color="#8b5cf6"/>
+   <stop offset="100%" stop-color="#ec4899"/>
+  </linearGradient>
+  <linearGradient id="svg_10" x1="0%" y1="0%" x2="0%" y2="100%">
+   <stop offset="0%" stop-color="#10b981" stop-opacity="0.8"/>
+   <stop offset="100%" stop-color="#047857" stop-opacity="0.8"/>
+  </linearGradient>
+  <linearGradient id="svg_9" x1="0%" y1="0%" x2="0%" y2="100%">
+   <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.8"/>
+   <stop offset="100%" stop-color="#d97706" stop-opacity="0.8"/>
+  </linearGradient>
+ </defs>
+ <g>
+  <title>Layer 1</title>
+  <defs transform="translate(1 0) translate(558 271) translate(-300 0) translate(0 -151.5)">
+   <!-- 渐变定义 -->
+   <!-- 箭头标记 -->
+   <marker id="svg_3" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+    <path id="svg_12" d="m0,0l0,6l9,-3l-9,-3z" fill="#3b82f6"/>
+   </marker>
+   <marker id="svg_2" markerWidth="12" markerHeight="12" refX="10" refY="3" orient="auto">
+    <path id="svg_13" d="m0,0l0,6l10,-3l-10,-3z" fill="#8b5cf6"/>
+   </marker>
+   <marker id="svg_1" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+    <path id="svg_14" d="m0,0l0,6l9,-3l-9,-3z" fill="#374151"/>
+   </marker>
+   <!-- 阴影滤镜 -->
+   <filter id="svg_5" x="-50%" y="-50%" width="200%" height="200%">
+    <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+   </filter>
+  </defs>
+  <!-- 标题 -->
+  <text id="svg_15" x="959" y="159.5" font-family="Times New Roman, serif" font-size="28" font-weight="bold" fill="#1f2937" text-anchor="middle">System Architecture of LLM-Driven O&amp;M Platform</text>
+  <!-- ========================================== -->
+  <!-- 左侧：物理世界 (Physical World) -->
+  <!-- ========================================== -->
+  <rect id="svg_16" x="275" y="211.5" width="280" height="700" rx="8" fill="#f9fafb" stroke="#d1d5db" stroke-width="2"/>
+  <text id="svg_17" x="417" y="253.5" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#374151" text-anchor="middle">Physical World</text>
+  <!-- 风机 - 更精美的设计 -->
+  <!-- 风机塔 -->
+  <!-- 传感器 - 更精美的图标 -->
+  <g id="svg_36">
+   <rect id="svg_37" width="220" height="100" rx="6" fill="#ffffff" stroke="#10b981" stroke-width="2" filter="url(#svg_5)" y="478.5" x="302"/>
+   <text id="svg_38" x="412" y="503.5" font-family="Arial" font-size="14" font-weight="bold" fill="#047857" text-anchor="middle">Sensors</text>
+   <!-- 传感器图标组 -->
+   <g id="svg_39">
+    <!-- 振动传感器 -->
+    <g id="svg_40">
+     <rect id="svg_41" x="327" y="518.5" width="30" height="30" rx="3" fill="url(#svg_10)" stroke="#047857"/>
+     <path id="svg_42" d="m335,533.5l4,-5l4,10l4,-8l2,3" stroke="#ffffff" stroke-width="2" fill="none"/>
+    </g>
+    <text id="svg_43" x="342" y="563.5" font-family="Arial" font-size="9" fill="#6b7280" text-anchor="middle">Vibration</text>
+    <!-- 温度传感器 -->
+    <g id="svg_44">
+     <rect id="svg_45" x="377" y="518.5" width="30" height="30" rx="3" fill="url(#svg_10)" stroke="#047857"/>
+     <circle id="svg_46" cx="392" cy="538.5" r="4" fill="#ffffff"/>
+     <rect id="svg_47" x="390" y="526.5" width="4" height="12" fill="#ffffff"/>
+     <line id="svg_48" x1="392" y1="532.5" x2="392" y2="528.5" stroke="#10b981" stroke-width="2"/>
+    </g>
+    <text id="svg_49" x="392" y="563.5" font-family="Arial" font-size="9" fill="#6b7280" text-anchor="middle">Temp</text>
+    <!-- 压力传感器 -->
+    <g id="svg_50">
+     <rect id="svg_51" x="427" y="518.5" width="30" height="30" rx="3" fill="url(#svg_10)" stroke="#047857"/>
+     <circle id="svg_52" cx="442" cy="533.5" r="8" fill="none" stroke="#ffffff" stroke-width="2"/>
+     <path id="svg_53" d="m442,528.5l0,5l4,4" stroke="#ffffff" stroke-width="2" fill="none"/>
+    </g>
+    <text id="svg_54" x="442" y="563.5" font-family="Arial" font-size="9" fill="#6b7280" text-anchor="middle">Pressure</text>
+    <!-- 速度传感器 -->
+    <g id="svg_55">
+     <rect id="svg_56" x="477" y="518.5" width="30" height="30" rx="3" fill="url(#svg_10)" stroke="#047857"/>
+     <path id="svg_57" d="m485,533.5l14,0m-4,-4l4,4l-4,4" stroke="#ffffff" stroke-width="2" fill="none"/>
+    </g>
+    <text id="svg_58" x="492" y="563.5" font-family="Arial" font-size="9" fill="#6b7280" text-anchor="middle">Speed</text>
+   </g>
+  </g>
+  <!-- 摄像头 - 更精美的设计 -->
+  <!-- 摄像头图标 -->
+  <!-- 网络 -->
+  <g id="svg_74">
+   <rect id="svg_75" width="220" height="80" rx="6" fill="#ffffff" stroke="#6366f1" stroke-width="2" filter="url(#svg_5)" y="766.5" x="306"/>
+   <text id="svg_76" x="416" y="791.5" font-family="Arial" font-size="14" font-weight="bold" fill="#4338ca" text-anchor="middle">Network Layer</text>
+   <!-- 网络图标 -->
+   <g id="svg_77">
+    <circle id="svg_78" cx="356" cy="816.5" r="6" fill="#6366f1" stroke="#4338ca" stroke-width="1.5"/>
+    <circle id="svg_79" cx="396" cy="816.5" r="6" fill="#6366f1" stroke="#4338ca" stroke-width="1.5"/>
+    <circle id="svg_80" cx="436" cy="816.5" r="6" fill="#6366f1" stroke="#4338ca" stroke-width="1.5"/>
+    <circle id="svg_81" cx="476" cy="816.5" r="6" fill="#6366f1" stroke="#4338ca" stroke-width="1.5"/>
+    <line id="svg_82" x1="362" y1="816.5" x2="390" y2="816.5" stroke="#6366f1" stroke-width="2"/>
+    <line id="svg_83" x1="402" y1="816.5" x2="430" y2="816.5" stroke="#6366f1" stroke-width="2"/>
+    <line id="svg_84" x1="442" y1="816.5" x2="470" y2="816.5" stroke="#6366f1" stroke-width="2"/>
+   </g>
+  </g>
+  <!-- ========================================== -->
+  <!-- 中间：核心引擎 (LLM-Driven Strategy Chain) -->
+  <!-- ========================================== -->
+  <!-- 大框 -->
+  <path stroke="#8b5cf6" id="svg_85" d="m635,223.5c0,-6.52055 5.23116,-12 11.45625,-12l588.08747,0c6.22509,0 11.45625,5.47945 11.45625,12l0,676c0,6.52055 -5.23116,12 -11.45625,12l-588.08747,0c-6.22509,0 -11.45625,-5.47945 -11.45625,-12l0,-676z" opacity="undefined" stroke-width="3" fill="#f9fafb"/>
+  <text id="svg_86" x="955" y="250.5" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#7c3aed" text-anchor="middle">LLM-Driven Strategy Chain (Core Innovation)</text>
+  <!-- 数据采集层 -->
+  <g id="svg_87">
+   <rect id="svg_88" width="580" height="80" rx="6" fill="#ffffff" stroke="#93c5fd" stroke-width="2" filter="url(#svg_5)" y="285.5" x="655"/>
+   <text id="svg_89" x="945" y="310.5" font-family="Arial" font-size="14" font-weight="bold" fill="#1e40af" text-anchor="middle">Data Acquisition &amp; Preprocessing</text>
+   <g id="svg_90">
+    <rect id="svg_91" width="160" height="30" rx="4" fill="#dbeafe" stroke="#3b82f6" y="325.5" x="685"/>
+    <text id="svg_92" x="765" y="345.5" font-size="11" fill="#1e40af" text-anchor="middle">Frame Sampling</text>
+    <rect id="svg_93" width="160" height="30" x="875" rx="4" fill="#dbeafe" stroke="#3b82f6" y="325.5"/>
+    <text id="svg_94" x="955" y="345.5" font-size="11" fill="#1e40af" text-anchor="middle">Data Fusion</text>
+    <rect id="svg_95" width="160" height="30" x="1065" rx="4" fill="#dbeafe" stroke="#3b82f6" y="325.5"/>
+    <text id="svg_96" x="1145" y="345.5" font-size="11" fill="#1e40af" text-anchor="middle">Normalization</text>
+   </g>
+  </g>
+  <!-- 策略链主体 -->
+  <text id="svg_98" x="957" y="416.5" font-family="Arial" font-size="16" font-weight="bold" fill="#7c3aed" text-anchor="middle">Multimodal LLM: Qwen3-VL-8B-Thinking</text>
+  <!-- Step 1: Perception -->
+  <rect id="svg_100" width="130" height="180" rx="8" fill="#f3e8ff" stroke="#7c3aed" stroke-width="2" filter="url(#svg_5)" y="443.5" x="668"/>
+  <text id="svg_101" x="733" y="473.5" font-family="Arial" font-size="13" font-weight="bold" fill="#7c3aed" text-anchor="middle">① Perception</text>
+  <line id="svg_102" x1="688" y1="483.5" x2="778" y2="483.5" stroke="#7c3aed"/>
+  <!-- 眼睛图标 -->
+  <g id="svg_103">
+   <ellipse id="svg_104" cx="732" cy="514.5" rx="22" ry="14" fill="#7c3aed" fill-opacity="0.2" stroke="#7c3aed" stroke-width="2"/>
+   <circle id="svg_105" cx="732" cy="514.5" r="8" fill="#7c3aed" fill-opacity="0.3"/>
+   <circle id="svg_106" cx="732" cy="514.5" r="4" fill="#7c3aed"/>
+   <circle id="svg_107" cx="734" cy="512.5" r="2" fill="#ffffff"/>
+  </g>
+  <text id="svg_108" x="733" y="553.5" font-family="Arial" font-size="10" fill="#6b21a8" text-anchor="middle">• Object Detection</text>
+  <text id="svg_109" x="733" y="573.5" font-family="Arial" font-size="10" fill="#6b21a8" text-anchor="middle">• Scene Understanding</text>
+  <text id="svg_110" x="733" y="593.5" font-family="Arial" font-size="10" fill="#6b21a8" text-anchor="middle">• Attribute Recognition</text>
+  <!-- Arrow -->
+  <path stroke="#7c3aed" id="svg_111" d="m804,535.5l60,0" stroke-width="3" marker-end="url(#svg_2)"/>
+  <!-- Step 2: Reasoning -->
+  <rect id="svg_113" width="130" height="180" rx="8" fill="#f3e8ff" stroke="#7c3aed" stroke-width="2" filter="url(#svg_5)" y="444.5" x="866"/>
+  <text id="svg_114" x="931" y="474.5" font-family="Arial" font-size="13" font-weight="bold" fill="#7c3aed" text-anchor="middle">② Reasoning</text>
+  <line id="svg_115" x1="886" y1="484.5" x2="976" y2="484.5" stroke="#7c3aed"/>
+  <!-- 大脑图标 -->
+  <g id="svg_116">
+   <path id="svg_117" d="m923,505.5q5,-5 10,-2q5,-3 10,2q2,5 0,10q-2,5 -5,8q-5,4 -10,0q-3,-3 -5,-8q-2,-5 0,-10" fill="#7c3aed" fill-opacity="0.2" stroke="#7c3aed" stroke-width="2"/>
+   <!-- 神经网络线条 -->
+   <path id="svg_118" d="m928,510.5q3,3 0,6m5,-7q2,4 0,8m5,-7q-2,3 0,6" stroke="#7c3aed" stroke-width="1.5" fill="none"/>
+  </g>
+  <text id="svg_119" x="931" y="554.5" font-family="Arial" font-size="10" fill="#6b21a8" text-anchor="middle">• Anomaly Detection</text>
+  <text id="svg_120" x="931" y="574.5" font-family="Arial" font-size="10" fill="#6b21a8" text-anchor="middle">• Root Cause Analysis</text>
+  <text id="svg_121" x="931" y="594.5" font-family="Arial" font-size="10" fill="#6b21a8" text-anchor="middle">• Logic Inference</text>
+  <!-- Arrow -->
+  <path stroke="#7c3aed" id="svg_122" d="m1000,534.5l59,0" stroke-width="3" marker-end="url(#svg_2)"/>
+  <!-- Step 3: Decision -->
+  <rect id="svg_124" width="130" height="180" rx="8" fill="#f3e8ff" stroke="#7c3aed" stroke-width="2" filter="url(#svg_5)" y="438.5" x="1071"/>
+  <text id="svg_125" x="1133" y="475.5" font-family="Arial" font-size="13" font-weight="bold" fill="#7c3aed" text-anchor="middle">③ Decision</text>
+  <line id="svg_126" x1="1088" y1="485.5" x2="1178" y2="485.5" stroke="#7c3aed"/>
+  <!-- 决策图标（检查列表） -->
+  <g id="svg_127">
+   <rect id="svg_128" x="1115" y="493.5" width="35" height="40" rx="3" fill="#7c3aed" fill-opacity="0.2" stroke="#7c3aed" stroke-width="2"/>
+   <line id="svg_129" x1="1120" y1="503.5" x2="1145" y2="503.5" stroke="#7c3aed" stroke-width="2"/>
+   <line id="svg_130" x1="1120" y1="513.5" x2="1145" y2="513.5" stroke="#7c3aed" stroke-width="2"/>
+   <line id="svg_131" x1="1120" y1="523.5" x2="1145" y2="523.5" stroke="#7c3aed" stroke-width="2"/>
+   <path id="svg_132" d="m1123,500.5l2,2l4,-4" stroke="#10b981" stroke-width="2" fill="none"/>
+   <path id="svg_133" d="m1123,510.5l2,2l4,-4" stroke="#10b981" stroke-width="2" fill="none"/>
+  </g>
+  <text id="svg_134" x="1133" y="555.5" font-family="Arial" font-size="10" fill="#6b21a8" text-anchor="middle">• Maintenance Plan</text>
+  <text id="svg_135" x="1133" y="575.5" font-family="Arial" font-size="10" fill="#6b21a8" text-anchor="middle">• Priority Ranking</text>
+  <text id="svg_136" x="1133" y="595.5" font-family="Arial" font-size="10" fill="#6b21a8" text-anchor="middle">• Resource Allocation</text>
+  <!-- Knowledge Base (底部) -->
+  <g id="svg_137">
+   <rect id="svg_138" width="470" height="80" rx="6" fill="#f9fafb" stroke="#a855f7" stroke-width="2" stroke-dasharray="5,5" filter="url(#svg_5)" y="656.5" x="705"/>
+   <!-- 书本图标 -->
+   <g id="svg_139">
+    <rect id="svg_140" x="725" y="676.5" width="30" height="40" rx="2" fill="#8b5cf6" stroke="#7c3aed" stroke-width="1.5"/>
+    <line id="svg_141" x1="740" y1="676.5" x2="740" y2="716.5" stroke="#a855f7"/>
+    <rect id="svg_142" x="730" y="686.5" width="5" height="2" fill="#faf5ff"/>
+    <rect id="svg_143" x="730" y="692.5" width="5" height="2" fill="#faf5ff"/>
+    <rect id="svg_144" x="730" y="698.5" width="5" height="2" fill="#faf5ff"/>
+   </g>
+   <text id="svg_145" x="940" y="686.5" font-family="Arial" font-size="13" font-weight="bold" fill="#7c3aed" text-anchor="middle">Domain Expert Knowledge Base (RAG)</text>
+   <text id="svg_146" x="940" y="711.5" font-family="Arial" font-size="11" fill="#6b21a8" text-anchor="middle">Historical Fault Cases • Maintenance Manuals • Expert Rules</text>
+  </g>
+  <!-- 连接线到知识库 -->
+  <path id="svg_147" d="m963,625.5l0,30" stroke="#a855f7" stroke-width="2" stroke-dasharray="3,3"/>
+  <!-- 数字孪生可视化层 -->
+  <g id="svg_148">
+   <rect id="svg_149" width="580" height="80" rx="6" fill="#ffffff" stroke="#93c5fd" stroke-width="2" filter="url(#svg_5)" y="779.5" x="652"/>
+   <text id="svg_150" x="942" y="804.5" font-family="Arial" font-size="14" font-weight="bold" fill="#1e40af" text-anchor="middle">Digital Twin Visualization</text>
+   <g id="svg_151">
+    <rect id="svg_152" width="160" height="30" rx="4" fill="#dbeafe" stroke="#3b82f6" y="819.5" x="682"/>
+    <text id="svg_153" x="762" y="839.5" font-size="11" fill="#1e40af" text-anchor="middle">3D Model (Three.js)</text>
+    <rect id="svg_154" width="160" height="30" x="872" rx="4" fill="#dbeafe" stroke="#3b82f6" y="819.5"/>
+    <text id="svg_155" x="952" y="839.5" font-size="11" fill="#1e40af" text-anchor="middle">Real-time Status</text>
+    <rect id="svg_156" width="160" height="30" x="1062" rx="4" fill="#dbeafe" stroke="#3b82f6" y="819.5"/>
+    <text id="svg_157" x="1142" y="839.5" font-size="11" fill="#1e40af" text-anchor="middle">Alert Display</text>
+   </g>
+  </g>
+  <!-- ========================================== -->
+  <!-- 右侧：用户界面 (User Interface) -->
+  <!-- ========================================== -->
+  <rect id="svg_158" x="1329" y="219.5" width="280" height="700" rx="8" fill="#f9fafb" stroke="#d1d5db" stroke-width="2"/>
+  <text id="svg_159" x="1469" y="254.5" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#374151" text-anchor="middle">User Interface</text>
+  <!-- 运维人员 - 更精美的头像 -->
+  <rect id="svg_161" width="220" height="120" rx="6" fill="#ffffff" stroke="#8b5cf6" stroke-width="2" filter="url(#svg_5)" y="289.5" x="1359"/>
+  <text id="svg_162" x="1469" y="314.5" font-family="Arial" font-size="14" font-weight="bold" fill="#7c3aed" text-anchor="middle">O&amp;M Personnel</text>
+  <!-- 人物头像 -->
+  <g id="svg_163">
+   <circle id="svg_164" cx="1406" cy="354.5" r="20" fill="url(#svg_6)" stroke="#7c3aed" stroke-width="2"/>
+   <!-- 头部 -->
+   <circle id="svg_165" cx="1406" cy="349.5" r="8" fill="#f3e8ff"/>
+   <!-- 身体 -->
+   <path id="svg_166" d="m1394,361.5q12,-6 24,0" fill="#f3e8ff"/>
+   <!-- 安全帽 -->
+   <ellipse id="svg_167" cx="1406" cy="345.5" rx="9" ry="5" fill="#fbbf24"/>
+   <rect id="svg_168" x="1401" y="343.5" width="10" height="2" fill="#f59e0b"/>
+  </g>
+  <g id="svg_169">
+   <text id="svg_170" x="1445" y="340.5" font-family="Arial" font-size="10" fill="#6b7280">• Field Inspection</text>
+   <text id="svg_171" x="1445" y="358.5" font-family="Arial" font-size="10" fill="#6b7280">• Maintenance</text>
+   <text id="svg_172" x="1445" y="376.5" font-family="Arial" font-size="10" fill="#6b7280">• Decision Making</text>
+  </g>
+  <!-- AI 助手 -->
+  <rect id="svg_174" width="220" height="140" rx="6" fill="#ffffff" stroke="#ec4899" stroke-width="2" filter="url(#svg_5)" y="429.5" x="1359"/>
+  <text id="svg_175" x="1469" y="454.5" font-family="Arial" font-size="14" font-weight="bold" fill="#db2777" text-anchor="middle">AI Assistant</text>
+  <!-- 聊天气泡图标 -->
+  <g id="svg_176">
+   <rect id="svg_177" x="1375" y="455.5" width="40" height="30" rx="8" fill="#fce7f3" stroke="#ec4899" stroke-width="2"/>
+   <path id="svg_178" d="m1385,487.5l5,6l0,-6l-5,0z" fill="#fce7f3" stroke="#ec4899" stroke-width="2"/>
+   <circle id="svg_179" cx="1385" cy="467.5" r="2" fill="#db2777"/>
+   <circle id="svg_180" cx="1395" cy="467.5" r="2" fill="#db2777"/>
+   <circle id="svg_181" cx="1405" cy="467.5" r="2" fill="#db2777"/>
+   <path id="svg_182" d="m1383,475.5q12,4 24,0" stroke="#db2777" stroke-width="2" fill="none"/>
+  </g>
+  <text id="svg_183" x="1483" y="481.5" font-family="Arial" font-size="11" fill="#6b7280" text-anchor="middle">Natural Language Q&amp;A</text>
+  <rect id="svg_184" x="1379" y="504.5" width="180" height="50" rx="4" fill="#fce7f3" stroke="#ec4899"/>
+  <text id="svg_185" x="1469" y="524.5" font-family="Arial" font-size="10" fill="#9f1239" text-anchor="middle">"What's the issue with</text>
+  <text id="svg_186" x="1469" y="539.5" font-family="Arial" font-size="10" fill="#9f1239" text-anchor="middle">gearbox vibration?"</text>
+  <!-- 分析报告 -->
+  <rect id="svg_188" width="220" height="140" rx="6" fill="#ffffff" stroke="#10b981" stroke-width="2" filter="url(#svg_5)" y="589.5" x="1359"/>
+  <text id="svg_189" x="1469" y="614.5" font-family="Arial" font-size="14" font-weight="bold" fill="#059669" text-anchor="middle">Analysis Reports</text>
+  <!-- 文档图标 -->
+  <g id="svg_190">
+   <rect id="svg_191" x="1373" y="638.5" width="30" height="38" rx="2" fill="#d1fae5" stroke="#10b981" stroke-width="2"/>
+   <line id="svg_192" x1="1379" y1="648.5" x2="1397" y2="648.5" stroke="#10b981" stroke-width="1.5"/>
+   <line id="svg_193" x1="1379" y1="654.5" x2="1397" y2="654.5" stroke="#10b981" stroke-width="1.5"/>
+   <line id="svg_194" x1="1379" y1="660.5" x2="1391" y2="660.5" stroke="#10b981" stroke-width="1.5"/>
+   <path id="svg_195" d="m1381,668.5l2,2l5,-5" stroke="#10b981" stroke-width="2" fill="none"/>
+  </g>
+  <g id="svg_196">
+   <text id="svg_197" x="1419" y="629.5" font-family="Arial" font-size="10" fill="#6b7280">✓ Fault Diagnosis</text>
+   <text id="svg_198" x="1419" y="649.5" font-family="Arial" font-size="10" fill="#6b7280">✓ Maintenance Plan</text>
+   <text id="svg_199" x="1419" y="669.5" font-family="Arial" font-size="10" fill="#6b7280">✓ Risk Assessment</text>
+   <text id="svg_200" x="1419" y="689.5" font-family="Arial" font-size="10" fill="#6b7280">✓ Cost Estimation</text>
+  </g>
+  <!-- 决策支持 -->
+  <rect id="svg_202" width="220" height="100" rx="6" fill="#ffffff" stroke="#f59e0b" stroke-width="2" filter="url(#svg_5)" y="749.5" x="1359"/>
+  <text id="svg_203" x="1469" y="774.5" font-family="Arial" font-size="14" font-weight="bold" fill="#d97706" text-anchor="middle">Decision Support</text>
+  <!-- 仪表盘图标 -->
+  <g id="svg_204">
+   <path id="svg_205" d="m1385,809.5q0,-20 20,-20q20,0 20,20" stroke="#f59e0b" stroke-width="3" fill="none"/>
+   <circle id="svg_206" cx="1405" cy="809.5" r="3" fill="#f59e0b"/>
+   <line id="svg_207" x1="1405" y1="809.5" x2="1415" y2="799.5" stroke="#f59e0b" stroke-width="2"/>
+  </g>
+  <g id="svg_208">
+   <text id="svg_209" x="1439" y="794.5" font-family="Arial" font-size="11" fill="#6b7280">Actionable Strategies</text>
+   <text id="svg_210" x="1439" y="814.5" font-family="Arial" font-size="11" fill="#6b7280">Resource Optimization</text>
+  </g>
+  <!-- ========================================== -->
+  <!-- 数据流箭头 -->
+  <!-- ========================================== -->
+  <!-- Physical -> Core (输入) -->
+  <path stroke="#3b82f6" id="svg_211" d="m556,473.5l75,0" stroke-width="4" marker-end="url(#svg_3)"/>
+  <text id="svg_212" x="599" y="452.5" font-family="Arial" font-size="11" fill="#3b82f6" text-anchor="middle" font-weight="bold">Multimodal</text>
+  <text id="svg_213" x="594" y="497.5" font-family="Arial" font-size="11" fill="#3b82f6" text-anchor="middle" font-weight="bold">Data</text>
+  <!-- Core -> User (输出) -->
+  <path stroke="#8b5cf6" id="svg_214" d="m1253.00001,569.5l76.99999,0" stroke-width="4" marker-end="url(#svg_2)"/>
+  <text id="svg_215" x="1288" y="547.5" font-family="Arial" font-size="11" fill="#8b5cf6" text-anchor="middle" font-weight="bold">Intelligent</text>
+  <text transform="matrix(1.01989 0 0 1 -48.1395 0)" stroke="null" id="svg_216" x="1309.57035" y="595.5" font-family="Arial" font-size="11" fill="#8b5cf6" text-anchor="middle" font-weight="bold">Strategy</text>
+  <!-- User -> Core (反馈) -->
+  <path stroke="#6b7280" id="svg_217" d="m1329,669.5l-72,0" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#svg_1)"/>
+  <text id="svg_218" x="1304" y="659.5" font-family="Arial" font-size="10" fill="#6b7280" text-anchor="middle">Feedback</text>
+  <!-- ========================================== -->
+  <!-- 底部创新点标注 -->
+  <!-- ========================================== -->
+  <g id="svg_224">
+   <rect id="svg_60" width="220" height="100" rx="6" fill="#ffffff" stroke="#f59e0b" stroke-width="2" filter="url(#svg_5)" y="617.5" x="304"/>
+   <text id="svg_61" x="416" y="636.5" font-family="Arial" font-size="14" font-weight="bold" fill="#d97706" text-anchor="middle">Video Cameras</text>
+   <g id="svg_62">
+    <!-- 镜头主体 -->
+    <rect id="svg_63" x="336" y="649.5" width="45" height="30" rx="4" fill="url(#svg_9)" stroke="#d97706" stroke-width="1.5"/>
+    <circle id="svg_64" cx="366" cy="664.5" r="10" fill="#451a03" stroke="#d97706"/>
+    <circle id="svg_65" cx="366" cy="664.5" r="6" fill="#78350f"/>
+    <circle id="svg_66" cx="368" cy="662.5" r="2" fill="#fef3c7"/>
+    <!-- 支架 -->
+    <rect id="svg_67" x="354" y="679.5" width="24" height="3" fill="#78350f"/>
+    <rect id="svg_68" x="362" y="682.5" width="8" height="7" fill="#78350f"/>
+    <!-- 指示灯 -->
+    <circle id="svg_69" cx="346" cy="656.5" r="2" fill="#ef4444"/>
+   </g>
+   <g id="svg_70">
+    <text id="svg_71" x="396" y="656.5" font-family="Arial" font-size="11" fill="#6b7280">• 1080p HD</text>
+    <text id="svg_72" x="396" y="674.5" font-family="Arial" font-size="11" fill="#6b7280">• RTSP Stream</text>
+    <text id="svg_73" x="396" y="692.5" font-family="Arial" font-size="11" fill="#6b7280">• 24/7 Monitoring</text>
+   </g>
+  </g>
+  <g id="svg_225">
+   <rect id="svg_19" width="220" height="120" rx="6" fill="#ffffff" stroke="#60a5fa" stroke-width="2" filter="url(#svg_5)" y="324.5" x="304"/>
+   <text id="svg_20" x="412" y="348.5" font-family="Arial" font-size="14" font-weight="bold" fill="#1e40af" text-anchor="middle">Wind Turbines</text>
+   <g id="svg_21">
+    <polygon id="svg_22" points="360,413.5 362,388.5 358,388.5 " fill="#64748b"/>
+    <circle id="svg_23" cx="360" cy="388.5" r="12" fill="#3b82f6" stroke="#1e40af" stroke-width="2"/>
+    <!-- 三个叶片 -->
+    <g id="svg_24">
+     <ellipse id="svg_25" cx="360" cy="373.5" rx="3" ry="15" fill="#60a5fa"/>
+    </g>
+    <g transform="rotate(120 360 388.5)" id="svg_26">
+     <ellipse id="svg_27" cx="360" cy="373.5" rx="3" ry="15" fill="#60a5fa"/>
+    </g>
+    <g transform="rotate(240 360 388.5)" id="svg_28">
+     <ellipse id="svg_29" cx="360" cy="373.5" rx="3" ry="15" fill="#60a5fa"/>
+    </g>
+    <circle id="svg_30" cx="360" cy="388.5" r="3" fill="#1e40af"/>
+    <!-- 地面 -->
+    <line id="svg_31" x1="350" y1="413.5" x2="370" y2="413.5" stroke="#64748b" stroke-width="2"/>
+   </g>
+   <g id="svg_32">
+    <text id="svg_33" x="412" y="368.5" font-family="Arial" font-size="11" fill="#6b7280">• Gearbox</text>
+    <text id="svg_34" x="412" y="388.5" font-family="Arial" font-size="11" fill="#6b7280">• Generator</text>
+    <text id="svg_35" x="412" y="408.5" font-family="Arial" font-size="11" fill="#6b7280">• Rotor System</text>
+   </g>
+  </g>
+ </g>
+</svg>

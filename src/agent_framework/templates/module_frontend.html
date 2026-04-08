@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ module.name }} - 业务前台</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@300..700,0..1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/module_frontend.css') }}">
+</head>
+<body>
+    <div class="module-app-shell">
+        <aside class="module-sidebar">
+            <div class="module-brand">
+                <a class="module-brand-home" href="/">
+                    <span class="module-brand-mark material-symbols-outlined">bolt</span>
+                    <span class="module-brand-copy">
+                        <strong>风起时域</strong>
+                        <small>新能源 AI 平台入口</small>
+                    </span>
+                </a>
+            </div>
+
+            <a class="module-primary-entry" href="{{ module.primary_href }}">
+                <span class="material-symbols-outlined">add_circle</span>
+                <span>{{ module.primary_label }}</span>
+            </a>
+
+            <nav class="module-sidebar-nav" aria-label="业务模块导航">
+                <a class="module-sidebar-link{% if module.slug == 'guide-assistant' %} is-active{% endif %}" href="/maintenance-assistant">
+                    <span class="material-symbols-outlined">neurology</span>
+                    <span>智导助手</span>
+                </a>
+                <a class="module-sidebar-link{% if module.slug == 'weather-siting' %} is-active{% endif %}" href="/modules/weather-siting/app">
+                    <span class="material-symbols-outlined">air</span>
+                    <span>气象选址</span>
+                </a>
+                <a class="module-sidebar-link{% if module.slug == 'power-trading' %} is-active{% endif %}" href="/modules/power-trading/app">
+                    <span class="material-symbols-outlined">query_stats</span>
+                    <span>电力交易</span>
+                </a>
+                <a class="module-sidebar-link{% if module.slug == 'smart-workorder' %} is-active{% endif %}" href="/modules/smart-workorder/app">
+                    <span class="material-symbols-outlined">assignment</span>
+                    <span>智能工单</span>
+                </a>
+                <a class="module-sidebar-link{% if module.slug == 'smart-guard' %} is-active{% endif %}" href="/modules/smart-guard/app">
+                    <span class="material-symbols-outlined">shield</span>
+                    <span>智能值守</span>
+                </a>
+                <a class="module-sidebar-link{% if module.slug == 'smart-office' %} is-active{% endif %}" href="/modules/smart-office/app">
+                    <span class="material-symbols-outlined">workspaces</span>
+                    <span>智慧办公</span>
+                </a>
+            </nav>
+
+            <div class="module-sidebar-footer">
+                <a class="module-sidebar-utility" href="{{ module.secondary_href }}">
+                    <span class="material-symbols-outlined">open_in_new</span>
+                    <span>{{ module.secondary_label }}</span>
+                </a>
+                <a class="module-sidebar-utility" href="{{ url_for('settings') }}">
+                    <span class="material-symbols-outlined">settings</span>
+                    <span>平台设置</span>
+                </a>
+            </div>
+        </aside>
+
+        <div class="module-main-shell">
+            <header class="module-topbar">
+                <div class="module-topbar-title">
+                    <small>模块 {{ module.index }}</small>
+                    <strong>{{ module.name }}</strong>
+                </div>
+                <div class="module-topbar-tools">
+                    <label class="module-search">
+                        <span class="material-symbols-outlined">search</span>
+                        <input type="text" value="{{ module.tagline }}" readonly aria-label="当前模块摘要">
+                    </label>
+                    <a class="module-topbar-action" href="{{ module.primary_href }}">打开主流程</a>
+                    <a class="module-topbar-icon" href="{{ module.secondary_href }}" aria-label="{{ module.secondary_label }}">
+                        <span class="material-symbols-outlined">insights</span>
+                    </a>
+                </div>
+            </header>
+
+            <main class="module-canvas">
+                <section class="module-hero">
+                    <div class="module-hero-badge">
+                        <span class="material-symbols-outlined">auto_awesome</span>
+                        <span>{{ module.status }}</span>
+                    </div>
+                    <div class="module-hero-mark">
+                        <span class="material-symbols-outlined">{{ "air" if module.slug == "weather-siting" else "analytics" if module.slug == "power-trading" else "assignment" if module.slug == "smart-workorder" else "shield" if module.slug == "smart-guard" else "workspaces" if module.slug == "smart-office" else "neurology" }}</span>
+                    </div>
+                    <h1>{{ page.headline }}</h1>
+                    <p class="module-hero-summary">{{ page.summary }}</p>
+
+                    <div class="module-metric-grid">
+                        {% for metric in page.metrics %}
+                        <article class="module-metric-card">
+                            <span>{{ metric.label }}</span>
+                            <strong>{{ metric.value }}</strong>
+                            <small>{{ metric.note }}</small>
+                        </article>
+                        {% endfor %}
+                    </div>
+
+                    <div class="module-action-grid">
+                        {% for action in page.quick_actions %}
+                        <button class="module-suggestion-card" type="button" data-action="{{ action }}">
+                            <span class="material-symbols-outlined">flash_on</span>
+                            <strong>{{ action }}</strong>
+                            <small>将这项动作作为当前模块流程的快捷起点。</small>
+                        </button>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <section class="module-workspace-grid">
+                    <div class="module-composer-panel">
+                        <div class="module-panel-head">
+                            <small>任务编排区</small>
+                            <strong>{{ module.description }}</strong>
+                        </div>
+
+                        <form id="module-form" data-module-name="{{ module.name }}" data-result-title="{{ page.result_title }}">
+                            <div class="module-form-grid">
+                                {% for field in page.fields %}
+                                <label class="module-field{% if field.type == 'textarea' %} is-wide{% endif %}">
+                                    <span>{{ field.label }}</span>
+                                    {% if field.type == 'textarea' %}
+                                    <textarea
+                                        name="{{ field.name }}"
+                                        id="module-primary-input"
+                                        rows="7"
+                                        placeholder="{{ field.placeholder }}"
+                                        {% if not loop.last %}data-secondary-field="true"{% endif %}
+                                    ></textarea>
+                                    {% else %}
+                                    <input
+                                        type="text"
+                                        name="{{ field.name }}"
+                                        placeholder="{{ field.placeholder }}"
+                                    >
+                                    {% endif %}
+                                </label>
+                                {% endfor %}
+                            </div>
+
+                            <div class="module-pill-row">
+                                {% for scene in module.scenes %}
+                                <button class="module-scene-pill" type="button" data-scene="{{ scene }}">{{ scene }}</button>
+                                {% endfor %}
+                            </div>
+
+                            <div class="module-composer-bar">
+                                <div class="module-composer-hint">
+                                    <span class="material-symbols-outlined">tips_and_updates</span>
+                                    <p>先补全结构化字段，再结合快捷动作和场景标签，最后流转到下一步业务处理。</p>
+                                </div>
+                                <div class="module-composer-actions">
+                                    <a class="module-secondary-btn" href="{{ module.secondary_href }}">{{ module.secondary_label }}</a>
+                                    <button class="module-primary-btn" type="submit">
+                                        <span class="material-symbols-outlined">send</span>
+                                        <span>生成摘要</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <aside class="module-insight-panel">
+                        <section class="module-insight-card">
+                            <div class="module-panel-head">
+                                <small>能力栈</small>
+                                <strong>当前可用能力</strong>
+                            </div>
+                            <div class="module-capability-list">
+                                {% for capability in module.capabilities %}
+                                <article class="module-capability-item">
+                                    <strong>{{ capability.title }}</strong>
+                                    <p>{{ capability.desc }}</p>
+                                </article>
+                                {% endfor %}
+                            </div>
+                        </section>
+
+                        <section class="module-insight-card module-result-card" id="module-result-box">
+                            <div class="module-panel-head">
+                                <small>输出摘要</small>
+                                <strong>{{ page.result_title }}</strong>
+                            </div>
+                            <ul class="module-result-list">
+                                {% for line in page.result_lines %}
+                                <li>{{ line }}</li>
+                                {% endfor %}
+                            </ul>
+                        </section>
+                    </aside>
+                </section>
+
+                <section class="module-board-section">
+                    <div class="module-panel-head">
+                        <small>运行概览</small>
+                        <strong>{{ page.board_title }}</strong>
+                    </div>
+                    <div class="module-board-table-wrap">
+                        <table class="module-board-table">
+                            <thead>
+                                <tr>
+                                    {% for column in page.board_columns %}
+                                    <th>{{ column }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in page.board_rows %}
+                                <tr>
+                                    {% for cell in row %}
+                                    <td>{{ cell }}</td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <div class="module-floating-card" aria-hidden="true">
+        <div class="module-floating-head">
+            <span>实时运行脉搏</span>
+            <span class="module-floating-dot"></span>
+        </div>
+        <div class="module-floating-bars">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <strong>{{ page.metrics[0].value if page.metrics else "98.4%" }}</strong>
+        <p>{{ page.quick_actions[0] if page.quick_actions else module.name }}</p>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/module_frontend.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+# Agent 工具选择机制
+
+现在 Agent 支持通过白名单 / 黑名单 / 工具集动态指定工具。
+
+## 支持的参数
+
+可通过 `metadata` 或会话 `config` 传入：
+
+```json
+{
+  "toolsets": ["wind_maintenance", "research"],
+  "allowed_tools": ["get_datetime"],
+  "blocked_tools": ["fetch_url"],
+  "include_plugin_tools": true
+}
+```
+
+## 规则
+
+- 未传时：默认注册全部工具
+- `toolsets`：先按预设工具集选择
+- `allowed_tools`：再追加指定工具
+- `blocked_tools`：最后排除
+
+## 内置工具集
+
+- `none`
+- `all`
+- `basic`
+- `text`
+- `research`
+- `causal`
+- `travel`
+- `wind_maintenance`
+
+## unified_orchestrator 调用示例
+
+```python
+result = orchestrator.chat(
+    user_input="分析机组偏航告警",
+    metadata={
+        "toolsets": ["wind_maintenance"],
+        "allowed_tools": ["get_datetime"],
+        "blocked_tools": ["fetch_url"],
+    },
+)
+```
+
+## AgentSession / WebSocket 会话示例
+
+```json
+{
+  "config": {
+    "toolsets": ["causal", "research"],
+    "blocked_tools": ["fetch_url"]
+  }
+}
+```
+
+
+## ??????
+
+`/maintenance-assistant` ? `/dev/assistant` ??? ?Agent ????? ???
+
+- `toolsetSelection`????????
+- `allowedToolsInput`???? / ????????
+- `blockedToolsInput`???? / ??????
+- `includePluginTools`?????????????? Agent
+
+???
+
+- ????????????????????
+- ??? `none`??????????????? `allowed_tools` ????
+- ?????????? `/api/unified/chat` ? `metadata`?Gateway WebSocket ???????? payload

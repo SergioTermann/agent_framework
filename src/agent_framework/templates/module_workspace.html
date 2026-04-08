@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ module.name }} - 业务工作台</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@300..700,0..1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/module_workspace.css') }}">
+</head>
+<body>
+    <div class="workspace-app-shell">
+        <aside class="workspace-sidebar">
+            <div class="workspace-brand">
+                <a class="workspace-brand-home" href="/">
+                    <span class="workspace-brand-mark material-symbols-outlined">bolt</span>
+                    <span class="workspace-brand-copy">
+                        <strong>风起时域</strong>
+                        <small>新能源 AI 平台入口</small>
+                    </span>
+                </a>
+            </div>
+
+            <a class="workspace-entry-btn" href="{{ module.primary_href }}">
+                <span class="material-symbols-outlined">play_circle</span>
+                <span>{{ module.primary_label }}</span>
+            </a>
+
+            <div class="workspace-module-card">
+                <span class="workspace-kicker">模块 {{ module.index }}</span>
+                <strong>{{ module.name }}</strong>
+                <p>{{ module.tagline }}</p>
+            </div>
+
+            <div class="workspace-sidebar-block">
+                <span class="workspace-kicker">典型场景</span>
+                <div class="workspace-scene-list">
+                    {% for scene in module.scenes %}
+                    <span>{{ scene }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="workspace-sidebar-footer">
+                <a class="workspace-utility-link" href="{{ module.secondary_href }}">
+                    <span class="material-symbols-outlined">insights</span>
+                    <span>{{ module.secondary_label }}</span>
+                </a>
+                <a class="workspace-utility-link" href="/modules/{{ module.slug }}/app">
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                    <span>打开前端页面</span>
+                </a>
+            </div>
+        </aside>
+
+        <div class="workspace-main-shell">
+            <header class="workspace-topbar">
+                <div class="workspace-topbar-copy">
+                    <small>{{ module.status }}</small>
+                    <strong>{{ module.name }}</strong>
+                </div>
+                <div class="workspace-topbar-actions">
+                    <a class="workspace-topbar-btn is-ghost" href="/">返回平台首页</a>
+                    <a class="workspace-topbar-btn" href="/modules/{{ module.slug }}/app">进入模块前端</a>
+                </div>
+            </header>
+
+            <main class="workspace-canvas">
+                <section class="workspace-hero">
+                    <div class="workspace-hero-head">
+                        <span class="workspace-pill">
+                            <span class="material-symbols-outlined">auto_awesome</span>
+                            <span>{{ module.status }}</span>
+                        </span>
+                        <span class="workspace-hero-index">0{{ module.index }}</span>
+                    </div>
+                    <h1>{{ module.name }}</h1>
+                    <p>{{ module.description }}</p>
+                    <div class="workspace-hero-actions">
+                        <a class="workspace-primary-btn" href="{{ module.primary_href }}">{{ module.primary_label }}</a>
+                        <a class="workspace-secondary-btn" href="{{ module.secondary_href }}">{{ module.secondary_label }}</a>
+                    </div>
+                </section>
+
+                <section class="workspace-overview-grid">
+                    <article class="workspace-overview-card">
+                        <span class="workspace-kicker">当前重点</span>
+                        <strong>围绕当前业务快速进入主要流程</strong>
+                        <p>从这里可以直接进入当前模块最常用的功能入口，减少来回切换页面的成本。</p>
+                    </article>
+                    <article class="workspace-overview-card">
+                        <span class="workspace-kicker">推荐操作</span>
+                        <strong>优先使用主操作入口</strong>
+                        <p>建议先处理当前模块的高频任务，再根据需要进入分析、日志或监控等辅助页面。</p>
+                    </article>
+                    <article class="workspace-overview-card">
+                        <span class="workspace-kicker">辅助入口</span>
+                        <strong>按需查看分析与状态页面</strong>
+                        <p>如果需要补充判断，可以继续进入当前模块关联的分析页、状态页或日志页。</p>
+                    </article>
+                </section>
+
+                <section class="workspace-capability-section">
+                    <div class="workspace-section-head">
+                        <small>能力栈</small>
+                        <strong>这个工作台应承载的能力</strong>
+                    </div>
+                    <div class="workspace-capability-grid">
+                        {% for capability in module.capabilities %}
+                        <article class="workspace-capability-card">
+                            <span class="material-symbols-outlined">stacked_line_chart</span>
+                            <h2>{{ capability.title }}</h2>
+                            <p>{{ capability.desc }}</p>
+                        </article>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <section class="workspace-board-section">
+                    <div class="workspace-section-head">
+                        <small>工作看板</small>
+                        <strong>{{ module.name }} 业务通道</strong>
+                    </div>
+                    <div class="workspace-board-grid">
+                        <article class="workspace-board-card">
+                            <span class="workspace-kicker">主流程</span>
+                            <strong>{{ module.primary_label }}</strong>
+                            <p>优先承接最高频的业务动作，让用户从第一次点击开始就能看懂主线入口。</p>
+                        </article>
+                        <article class="workspace-board-card">
+                            <span class="workspace-kicker">辅助流程</span>
+                            <strong>{{ module.secondary_label }}</strong>
+                            <p>保留分析、复核或监控的辅助入口，但不要稀释主操作按钮的优先级。</p>
+                        </article>
+                        <article class="workspace-board-card">
+                            <span class="workspace-kicker">模块状态</span>
+                            <strong>{{ module.status }}</strong>
+                            <p>清楚展示模块成熟度，让用户知道自己进入的是稳定流程还是仍在演进中的工作台。</p>
+                        </article>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Status</title>
+    <style>
+        :root {
+            --bg: #f3efe7;
+            --panel: rgba(255, 251, 245, 0.88);
+            --ink: #1f2937;
+            --muted: #6b7280;
+            --line: #d5c7b5;
+            --accent: #0f766e;
+            --accent-soft: rgba(15, 118, 110, 0.12);
+            --warn: #b45309;
+            --error: #b91c1c;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            color: var(--ink);
+            font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(15, 118, 110, 0.1), transparent 28%),
+                linear-gradient(180deg, #fbf7f0 0%, var(--bg) 100%);
+        }
+
+        main {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 40px 18px 56px;
+        }
+
+        .hero {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(2rem, 4vw, 3rem);
+        }
+
+        .subhead {
+            margin: 8px 0 0;
+            color: var(--muted);
+            max-width: 760px;
+            line-height: 1.6;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button,
+        a.button {
+            border: 1px solid var(--line);
+            background: var(--panel);
+            color: var(--ink);
+            padding: 10px 14px;
+            border-radius: 999px;
+            text-decoration: none;
+            cursor: pointer;
+            font: inherit;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 14px;
+            margin-bottom: 26px;
+        }
+
+        .card,
+        .section {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            box-shadow: 0 10px 26px rgba(31, 41, 55, 0.06);
+        }
+
+        .card { padding: 18px; }
+
+        .label {
+            font-size: 0.82rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .value {
+            margin-top: 8px;
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+
+        .hint {
+            margin-top: 8px;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .section {
+            padding: 18px;
+            margin-bottom: 14px;
+        }
+
+        .section h2 {
+            margin: 0 0 14px;
+            font-size: 1.05rem;
+        }
+
+        .kv {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 10px 14px;
+        }
+
+        .kv div {
+            padding: 12px 14px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.55);
+        }
+
+        .kv strong {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.86rem;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .pill {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .pill.warn {
+            background: rgba(180, 83, 9, 0.12);
+            color: var(--warn);
+        }
+
+        .pill.error {
+            background: rgba(185, 28, 28, 0.12);
+            color: var(--error);
+        }
+
+        pre {
+            margin: 0;
+            padding: 14px;
+            background: rgba(31, 41, 55, 0.05);
+            border-radius: 14px;
+            overflow: auto;
+            font-size: 0.84rem;
+        }
+
+        .empty { color: var(--muted); }
+
+        @media (max-width: 640px) {
+            main { padding: 28px 14px 42px; }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <section class="hero">
+            <div>
+                <h1>Harness Status</h1>
+                <p class="subhead">
+                    Live runtime snapshot of the current Flask app, gateway mode, memory backend, tool surface, and
+                    migration posture. This page reads from <code>/api/system/status</code>.
+                </p>
+            </div>
+            <div class="actions">
+                <button id="refreshButton" type="button">Refresh</button>
+                <a class="button" href="/api/system/status">Raw JSON</a>
+                <a class="button" href="/api/openapi.json">OpenAPI</a>
+            </div>
+        </section>
+
+        <section id="summary" class="grid"></section>
+        <section id="details"></section>
+    </main>
+
+    <script>
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;");
+        }
+
+        function pillClass(value) {
+            if (value === "unreachable" || value === false) return "pill error";
+            if (value === "hybrid" || value === "bootstrap" || value === "sidecar-ready") return "pill warn";
+            return "pill";
+        }
+
+        function renderSummary(data) {
+            const cards = [
+                { label: "Harness", value: data.status, hint: data.timestamp },
+                { label: "Readiness", value: data.readiness.status, hint: "ready=" + data.readiness.ready },
+                { label: "Gateway Mode", value: data.gateway.mode, hint: data.gateway.namespace },
+                { label: "Routes", value: data.routes.total, hint: data.routes.api + " API / " + data.routes.ui + " UI" },
+                { label: "Tools", value: data.tools.builtin_count, hint: data.tools.plugin_tool_count + " plugin tools" },
+            ];
+            return cards.map((card) => `
+                <article class="card">
+                    <div class="label">${escapeHtml(card.label)}</div>
+                    <div class="value">${escapeHtml(card.value)}</div>
+                    <div class="hint">${escapeHtml(card.hint)}</div>
+                </article>
+            `).join("");
+        }
+
+        function renderDetailSection(title, entries) {
+            const body = entries.map((entry) => `
+                <div>
+                    <strong>${escapeHtml(entry.label)}</strong>
+                    <span class="${entry.kind === "pill" ? pillClass(entry.value) : ""}">${escapeHtml(entry.value)}</span>
+                </div>
+            `).join("");
+            return `<section class="section"><h2>${escapeHtml(title)}</h2><div class="kv">${body}</div></section>`;
+        }
+
+        function renderServices(services) {
+            const entries = Object.entries(services).map(([name, info]) => `
+                <div>
+                    <strong>${escapeHtml(name)}</strong>
+                    <span class="${pillClass(info.status)}">${escapeHtml(info.status)}</span>
+                    <div class="hint">${escapeHtml((info.notes || []).join(" | ") || "")}</div>
+                </div>
+            `).join("");
+            return `<section class="section"><h2>Services</h2><div class="kv">${entries}</div></section>`;
+        }
+
+        function renderJsonBlock(title, data) {
+            return `<section class="section"><h2>${escapeHtml(title)}</h2><pre>${escapeHtml(JSON.stringify(data, null, 2))}</pre></section>`;
+        }
+
+        async function loadStatus() {
+            const summary = document.getElementById("summary");
+            const details = document.getElementById("details");
+            summary.innerHTML = `<article class="card"><div class="label">Status</div><div class="value">Loading</div></article>`;
+            details.innerHTML = `<section class="section empty">Collecting runtime snapshot...</section>`;
+
+            try {
+                const response = await fetch("/api/system/status");
+                if (!response.ok) throw new Error("HTTP " + response.status);
+                const data = await response.json();
+                summary.innerHTML = renderSummary(data);
+                details.innerHTML = [
+                    renderDetailSection("Runtime", [
+                        { label: "Python", value: data.runtime.python_version },
+                        { label: "Platform", value: data.runtime.platform },
+                        { label: "Host", value: data.runtime.host + ":" + data.runtime.port },
+                        { label: "Debug", value: String(data.runtime.debug) },
+                    ]),
+                    renderDetailSection("Gateway", [
+                        { label: "Mode", value: data.gateway.mode, kind: "pill" },
+                        { label: "Storage", value: data.gateway.storage },
+                        { label: "Control Plane URL", value: data.gateway.control_plane.configured_url },
+                        { label: "Control Plane Status", value: data.gateway.control_plane.status, kind: "pill" },
+                    ]),
+                    renderDetailSection("LLM + Memory", [
+                        { label: "Provider", value: data.llm.provider },
+                        { label: "Model", value: data.llm.model },
+                        { label: "Memory Active", value: data.memory.active, kind: "pill" },
+                        { label: "Memory Fallback", value: String(Boolean(data.memory.fallback)) },
+                    ]),
+                    renderDetailSection("Plugins + Migration", [
+                        { label: "Loaded Plugins", value: data.plugins.loaded_count },
+                        { label: "Preset Count", value: data.tools.preset_count },
+                        { label: "Migration Status", value: data.migration.status, kind: "pill" },
+                        { label: "Source Of Truth", value: data.migration.source_of_truth },
+                    ]),
+                    renderDetailSection("Readiness Summary", [
+                        { label: "Ready", value: String(data.readiness.ready), kind: "pill" },
+                        { label: "Status", value: data.readiness.status, kind: "pill" },
+                        { label: "Passing Checks", value: data.readiness.summary.pass },
+                        { label: "Warnings", value: data.readiness.summary.warn + " / Failures " + data.readiness.summary.fail },
+                    ]),
+                    renderServices(data.services),
+                    renderJsonBlock("Loaded Plugin Names", data.plugins.loaded_names),
+                ].join("");
+            } catch (error) {
+                summary.innerHTML = `<article class="card"><div class="label">Status</div><div class="value">Error</div><div class="hint">${escapeHtml(error.message)}</div></article>`;
+                details.innerHTML = `<section class="section empty">Failed to load status: ${escapeHtml(error.message)}</section>`;
+            }
+        }
+
+        document.getElementById("refreshButton").addEventListener("click", loadStatus);
+        loadStatus();
+    </script>
+</body>
+</html>

@@ -1,0 +1,527 @@
+/* 统一蓝色主题 - 高对比度可访问配色系统 */
+/* Unified Blue Theme - High Contrast Accessible Color System */
+
+:root {
+    /* ========== 主品牌色 - 深色背景用 ========== */
+    --primary-bg-dark: #0f4eb3;           /* 深蓝背景 */
+    --primary-bg-medium: #1363df;         /* 中蓝背景 */
+    --primary-bg-light: #60a5fa;          /* 浅蓝背景 */
+
+    /* ========== 主品牌色 - 浅色背景用 ========== */
+    --primary-bg-white: #ffffff;          /* 纯白背景 */
+    --primary-bg-gray: #f5f8fc;           /* 浅灰背景 */
+    --primary-bg-blue: #eff4fb;           /* 浅蓝背景 */
+
+    /* ========== 强调色 - 确保对比度 ========== */
+    --accent-cyan: #1363df;               /* 主蓝色 */
+    --accent-cyan-dark: #0f4eb3;          /* 深蓝色 */
+    --accent-cyan-light: #60a5fa;         /* 浅蓝色 */
+
+    --accent-teal: #1363df;               /* 蓝色 */
+    --accent-teal-dark: #0f4eb3;          /* 深蓝 */
+    --accent-teal-light: #60a5fa;         /* 浅蓝 */
+
+    --accent-orange: #f97316;             /* 能源橙 */
+    --accent-orange-dark: #ea580c;        /* 深橙 */
+    --accent-orange-light: #fb923c;       /* 浅橙 */
+
+    --accent-amber: #f59e0b;              /* 琥珀色 */
+    --accent-amber-dark: #d97706;         /* 深琥珀 */
+    --accent-amber-light: #fbbf24;        /* 浅琥珀 */
+
+    /* ========== 功能色 - 高对比度 ========== */
+    --success-dark: #15803d;              /* 深绿 - 成功 */
+    --success-medium: #16a34a;            /* 中绿 */
+    --success-light: #22c55e;             /* 浅绿 */
+    --success-bg: #f0fdf4;                /* 成功背景 */
+
+    --warning-dark: #c2410c;              /* 深橙 - 警告 */
+    --warning-medium: #ea580c;            /* 中橙 */
+    --warning-light: #f97316;             /* 浅橙 */
+    --warning-bg: #fff7ed;                /* 警告背景 */
+
+    --danger-dark: #b91c1c;               /* 深红 - 危险 */
+    --danger-medium: #dc2626;             /* 中红 */
+    --danger-light: #ef4444;              /* 浅红 */
+    --danger-bg: #fef2f2;                 /* 危险背景 */
+
+    --info-dark: #1e40af;                 /* 深蓝 - 信息 */
+    --info-medium: #2563eb;               /* 中蓝 */
+    --info-light: #3b82f6;                /* 浅蓝 */
+    --info-bg: #eff6ff;                   /* 信息背景 */
+
+    /* ========== 文本颜色 - 深色背景用 ========== */
+    --text-on-dark-primary: #f8fafc;      /* 主文本 - 白色 */
+    --text-on-dark-secondary: #cbd5e1;    /* 次要文本 - 浅灰 */
+    --text-on-dark-muted: #94a3b8;        /* 弱化文本 - 中灰 */
+    --text-on-dark-disabled: #64748b;     /* 禁用文本 - 深灰 */
+
+    /* ========== 文本颜色 - 浅色背景用 ========== */
+    --text-on-light-primary: #253038;     /* 主文本 - 深色 */
+    --text-on-light-secondary: #617181;   /* 次要文本 - 中色 */
+    --text-on-light-muted: #64748b;       /* 弱化文本 - 浅色 */
+    --text-on-light-disabled: #94a3b8;    /* 禁用文本 - 更浅灰 */
+
+    /* ========== 边框颜色 ========== */
+    --border-on-dark: rgba(148, 163, 184, 0.3);    /* 深色背景边框 */
+    --border-on-light: rgba(101, 120, 144, 0.14);  /* 浅色背景边框 */
+    --border-accent: rgba(19, 99, 223, 0.5);       /* 强调边框 */
+
+    /* ========== 阴影 ========== */
+    --shadow-sm: 0 1px 3px rgba(19, 99, 223, 0.12);
+    --shadow-md: 0 18px 44px rgba(23, 45, 78, 0.18);
+    --shadow-lg: 0 30px 72px rgba(19, 64, 128, 0.22);
+    --shadow-xl: 0 12px 36px rgba(19, 99, 223, 0.22);
+
+    /* ========== 渐变背景 ========== */
+    --gradient-dark: linear-gradient(135deg, #0f4eb3 0%, #1363df 100%);
+    --gradient-cyan: linear-gradient(135deg, #1363df 0%, #60a5fa 100%);
+    --gradient-teal: linear-gradient(135deg, #1363df 0%, #60a5fa 100%);
+    --gradient-orange: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    --gradient-light: linear-gradient(135deg, #f8fafc 0%, #f0f9ff 100%);
+}
+
+/* ========== 模块配色方案 ========== */
+
+/* 侧边栏 - 深色主题 */
+.sidebar,
+.sidebar-dark {
+    background: var(--gradient-dark);
+    color: var(--text-on-dark-primary);
+    border-right: 1px solid var(--border-on-dark);
+}
+
+.sidebar .nav-item {
+    color: var(--text-on-dark-secondary);
+}
+
+.sidebar .nav-item:hover {
+    background: rgba(19, 99, 223, 0.15);
+    color: var(--text-on-dark-primary);
+}
+
+.sidebar .nav-item.active {
+    background: rgba(19, 99, 223, 0.25);
+    color: var(--text-on-dark-primary);
+    border-left: 3px solid var(--accent-cyan);
+}
+
+.sidebar .nav-section-title {
+    color: var(--text-on-dark-muted);
+}
+
+/* 顶部栏 - 浅色主题 */
+.top-bar,
+.header-light {
+    background: var(--primary-bg-white);
+    color: var(--text-on-light-primary);
+    border-bottom: 1px solid var(--border-on-light);
+}
+
+.page-title {
+    color: var(--text-on-light-primary);
+}
+
+/* 卡片 - 浅色主题 */
+.card,
+.card-light {
+    background: var(--primary-bg-white);
+    color: var(--text-on-light-primary);
+    border: 1px solid var(--border-on-light);
+}
+
+.card-header {
+    background: var(--primary-bg-gray);
+    color: var(--text-on-light-primary);
+    border-bottom: 1px solid var(--border-on-light);
+}
+
+.card-title {
+    color: var(--text-on-light-primary);
+}
+
+.card-body {
+    color: var(--text-on-light-secondary);
+}
+
+/* 卡片 - 深色主题 */
+.card-dark {
+    background: var(--primary-bg-medium);
+    color: var(--text-on-dark-primary);
+    border: 1px solid var(--border-on-dark);
+}
+
+.card-dark .card-header {
+    background: var(--primary-bg-dark);
+    color: var(--text-on-dark-primary);
+    border-bottom: 1px solid var(--border-on-dark);
+}
+
+.card-dark .card-title {
+    color: var(--text-on-dark-primary);
+}
+
+.card-dark .card-body {
+    color: var(--text-on-dark-secondary);
+}
+
+/* 按钮 - 主要按钮 */
+.btn-primary {
+    background: var(--gradient-cyan);
+    color: var(--text-on-dark-primary);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: var(--accent-cyan-dark);
+    color: var(--text-on-dark-primary);
+}
+
+/* 按钮 - 次要按钮 */
+.btn-secondary {
+    background: var(--primary-bg-white);
+    color: var(--text-on-light-primary);
+    border: 1px solid var(--border-on-light);
+}
+
+.btn-secondary:hover {
+    background: var(--primary-bg-gray);
+    color: var(--text-on-light-primary);
+}
+
+/* 按钮 - 成功按钮 */
+.btn-success {
+    background: var(--success-medium);
+    color: var(--text-on-dark-primary);
+    border: none;
+}
+
+.btn-success:hover {
+    background: var(--success-dark);
+    color: var(--text-on-dark-primary);
+}
+
+/* 按钮 - 警告按钮 */
+.btn-warning {
+    background: var(--warning-medium);
+    color: var(--text-on-dark-primary);
+    border: none;
+}
+
+.btn-warning:hover {
+    background: var(--warning-dark);
+    color: var(--text-on-dark-primary);
+}
+
+/* 按钮 - 危险按钮 */
+.btn-danger {
+    background: var(--danger-medium);
+    color: var(--text-on-dark-primary);
+    border: none;
+}
+
+.btn-danger:hover {
+    background: var(--danger-dark);
+    color: var(--text-on-dark-primary);
+}
+
+/* 表单控件 - 浅色背景 */
+.form-control {
+    background: var(--primary-bg-white);
+    color: var(--text-on-light-primary);
+    border: 1px solid var(--border-on-light);
+}
+
+.form-control:focus {
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 0 3px rgba(19, 99, 223, 0.1);
+}
+
+.form-control::placeholder {
+    color: var(--text-on-light-muted);
+}
+
+.form-label {
+    color: var(--text-on-light-primary);
+}
+
+/* 表单控件 - 深色背景 */
+.form-control-dark {
+    background: var(--primary-bg-medium);
+    color: var(--text-on-dark-primary);
+    border: 1px solid var(--border-on-dark);
+}
+
+.form-control-dark:focus {
+    border-color: var(--accent-cyan-light);
+    box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.2);
+}
+
+.form-control-dark::placeholder {
+    color: var(--text-on-dark-muted);
+}
+
+.form-label-dark {
+    color: var(--text-on-dark-primary);
+}
+
+/* 表格 - 浅色主题 */
+.table {
+    background: var(--primary-bg-white);
+    color: var(--text-on-light-primary);
+}
+
+.table th {
+    background: var(--primary-bg-gray);
+    color: var(--text-on-light-primary);
+    border-bottom: 2px solid var(--border-on-light);
+}
+
+.table td {
+    color: var(--text-on-light-secondary);
+    border-bottom: 1px solid var(--border-on-light);
+}
+
+.table tbody tr:hover {
+    background: var(--primary-bg-blue);
+}
+
+/* 表格 - 深色主题 */
+.table-dark {
+    background: var(--primary-bg-medium);
+    color: var(--text-on-dark-primary);
+}
+
+.table-dark th {
+    background: var(--primary-bg-dark);
+    color: var(--text-on-dark-primary);
+    border-bottom: 2px solid var(--border-on-dark);
+}
+
+.table-dark td {
+    color: var(--text-on-dark-secondary);
+    border-bottom: 1px solid var(--border-on-dark);
+}
+
+.table-dark tbody tr:hover {
+    background: var(--primary-bg-light);
+}
+
+/* 状态指示器 */
+.status-success {
+    background: var(--success-bg);
+    color: var(--success-dark);
+    border: 1px solid var(--success-medium);
+}
+
+.status-warning {
+    background: var(--warning-bg);
+    color: var(--warning-dark);
+    border: 1px solid var(--warning-medium);
+}
+
+.status-danger {
+    background: var(--danger-bg);
+    color: var(--danger-dark);
+    border: 1px solid var(--danger-medium);
+}
+
+.status-info {
+    background: var(--info-bg);
+    color: var(--info-dark);
+    border: 1px solid var(--info-medium);
+}
+
+/* 通知 */
+.notification-success {
+    background: var(--success-bg);
+    color: var(--success-dark);
+    border: 1px solid var(--success-medium);
+}
+
+.notification-warning {
+    background: var(--warning-bg);
+    color: var(--warning-dark);
+    border: 1px solid var(--warning-medium);
+}
+
+.notification-danger {
+    background: var(--danger-bg);
+    color: var(--danger-dark);
+    border: 1px solid var(--danger-medium);
+}
+
+.notification-info {
+    background: var(--info-bg);
+    color: var(--info-dark);
+    border: 1px solid var(--info-medium);
+}
+
+/* 徽章 */
+.badge-primary {
+    background: var(--accent-cyan);
+    color: var(--text-on-dark-primary);
+}
+
+.badge-success {
+    background: var(--success-medium);
+    color: var(--text-on-dark-primary);
+}
+
+.badge-warning {
+    background: var(--warning-medium);
+    color: var(--text-on-dark-primary);
+}
+
+.badge-danger {
+    background: var(--danger-medium);
+    color: var(--text-on-dark-primary);
+}
+
+.badge-info {
+    background: var(--info-medium);
+    color: var(--text-on-dark-primary);
+}
+
+/* 链接 */
+a {
+    color: var(--accent-cyan-dark);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--accent-cyan);
+    text-decoration: underline;
+}
+
+/* 深色背景上的链接 */
+.link-on-dark {
+    color: var(--accent-cyan-light);
+}
+
+.link-on-dark:hover {
+    color: var(--accent-cyan);
+}
+
+/* 工具提示 */
+.tooltip::after {
+    background: var(--primary-bg-dark);
+    color: var(--text-on-dark-primary);
+    border: 1px solid var(--border-on-dark);
+}
+
+/* 模态框 */
+.modal-content {
+    background: var(--primary-bg-white);
+    color: var(--text-on-light-primary);
+    border: 1px solid var(--border-on-light);
+}
+
+.modal-header {
+    background: var(--primary-bg-gray);
+    color: var(--text-on-light-primary);
+    border-bottom: 1px solid var(--border-on-light);
+}
+
+.modal-footer {
+    background: var(--primary-bg-gray);
+    border-top: 1px solid var(--border-on-light);
+}
+
+/* 下拉菜单 */
+.dropdown-menu {
+    background: var(--primary-bg-white);
+    border: 1px solid var(--border-on-light);
+    box-shadow: var(--shadow-lg);
+}
+
+.dropdown-item {
+    color: var(--text-on-light-primary);
+}
+
+.dropdown-item:hover {
+    background: var(--primary-bg-blue);
+    color: var(--text-on-light-primary);
+}
+
+/* 进度条 */
+.progress {
+    background: var(--primary-bg-gray);
+    border: 1px solid var(--border-on-light);
+}
+
+.progress-bar {
+    background: var(--gradient-cyan);
+    color: var(--text-on-dark-primary);
+}
+
+/* 标签页 */
+.tabs {
+    border-bottom: 2px solid var(--border-on-light);
+}
+
+.tab {
+    color: var(--text-on-light-secondary);
+    border-bottom: 2px solid transparent;
+}
+
+.tab:hover {
+    color: var(--text-on-light-primary);
+    border-bottom-color: var(--text-on-light-muted);
+}
+
+.tab.active {
+    color: var(--accent-cyan-dark);
+    border-bottom-color: var(--accent-cyan);
+}
+
+/* 面包屑 */
+.breadcrumb {
+    color: var(--text-on-light-secondary);
+}
+
+.breadcrumb-item {
+    color: var(--text-on-light-secondary);
+}
+
+.breadcrumb-item.active {
+    color: var(--text-on-light-primary);
+}
+
+.breadcrumb-separator {
+    color: var(--text-on-light-muted);
+}
+
+/* 分页 */
+.pagination {
+    display: flex;
+    gap: 8px;
+}
+
+.page-item {
+    background: var(--primary-bg-white);
+    color: var(--text-on-light-primary);
+    border: 1px solid var(--border-on-light);
+}
+
+.page-item:hover {
+    background: var(--primary-bg-blue);
+    border-color: var(--accent-cyan);
+}
+
+.page-item.active {
+    background: var(--accent-cyan);
+    color: var(--text-on-dark-primary);
+    border-color: var(--accent-cyan);
+}
+
+/* 加载动画 */
+.spinner {
+    border: 3px solid var(--border-on-light);
+    border-top-color: var(--accent-cyan);
+}
+
+.spinner-dark {
+    border: 3px solid var(--border-on-dark);
+    border-top-color: var(--accent-cyan-light);
+}

@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webhook 管理</title>
+    <link rel="stylesheet" href="/static/css/base-theme.css">
+    <style>
+        /* page-specific overrides only — base-theme.css handles resets, body, topbar, btn */
+
+        .actions {
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: var(--primary-deep);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .webhooks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .webhook-card {
+            background: white;
+            padding: 25px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            transition: transform 0.3s;
+        }
+
+        .webhook-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .webhook-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .webhook-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .webhook-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .webhook-status.active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .webhook-status.inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .webhook-path {
+            font-family: 'Courier New', monospace;
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-bottom: 10px;
+            color: #495057;
+        }
+
+        .webhook-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .webhook-meta {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 15px;
+        }
+
+        .webhook-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .webhook-actions button {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: var(--radius);
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: var(--primary);
+            font-size: 24px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .secret-display {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            word-break: break-all;
+            margin-top: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .no-webhooks {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .no-webhooks h3 {
+            color: var(--primary);
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .no-webhooks p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+    </style>
+    <link rel="stylesheet" href="/static/css/submodule-theme.css?v=1.0">
+</head>
+<body>
+    <div class="page-wide">
+        <nav class="topbar">
+            <div class="brand">
+                <a class="back-link" href="/developer">← 返回</a>
+                <h1>Webhook 管理</h1>
+            </div>
+            <div class="topbar-actions">
+                <button class="btn btn-primary" onclick="showCreateModal()">创建 Webhook</button>
+                <button class="btn btn-secondary" onclick="loadWebhooks()">刷新</button>
+            </div>
+        </nav>
+
+        <div class="webhooks-grid" id="webhooks-grid">
+            <div class="loading">加载中...</div>
+        </div>
+    </div>
+
+    <!-- 创建/编辑 Webhook 模态框 -->
+    <div class="modal" id="webhook-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">创建 Webhook</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="webhook-form" onsubmit="saveWebhook(event)">
+                <input type="hidden" id="webhook-id">
+
+                <div class="form-group">
+                    <label>名称 *</label>
+                    <input type="text" id="webhook-name" required placeholder="GitHub Webhook">
+                </div>
+
+                <div class="form-group">
+                    <label>URL 路径 *</label>
+                    <input type="text" id="webhook-path" required placeholder="github" pattern="[a-z0-9_-]+">
+                    <small style="color: #666;">完整路径: /webhooks/<span id="path-preview">github</span></small>
+                </div>
+
+                <div class="form-group">
+                    <label>描述</label>
+                    <textarea id="webhook-description" placeholder="接收 GitHub 事件通知"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>状态</label>
+                    <select id="webhook-status">
+                        <option value="active">激活</option>
+                        <option value="inactive">未激活</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="webhook-verify" checked>
+                        验证签名
+                    </label>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" class="btn">保存</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">取消</button>
+                </div>
+            </form>
+
+            <div id="secret-section" style="display: none; margin-top: 20px;">
+                <h3 style="color: var(--primary); margin-bottom: 10px;">密钥</h3>
+                <p style="color: #666; font-size: 14px; margin-bottom: 10px;">
+                    请妥善保管此密钥，用于验证 Webhook 请求的签名。
+                </p>
+                <div class="secret-display" id="webhook-secret"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 事件列表模态框 -->
+    <div class="modal" id="events-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Webhook 事件</h2>
+                <button class="close-btn" onclick="closeEventsModal()">&times;</button>
+            </div>
+            <div id="events-list"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentWebhookId = null;
+
+        // 加载 Webhook 列表
+        async function loadWebhooks() {
+            try {
+                const response = await fetch('/api/webhooks/');
+                const data = await response.json();
+
+                const grid = document.getElementById('webhooks-grid');
+
+                if (data.webhooks.length === 0) {
+                    grid.innerHTML = `
+                        <div class="no-webhooks" style="grid-column: 1 / -1;">
+                            <h3>还没有 Webhook</h3>
+                            <p>创建第一个 Webhook 来接收外部事件</p>
+                            <button class="btn" onclick="showCreateModal()">创建 Webhook</button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                grid.innerHTML = '';
+
+                data.webhooks.forEach(webhook => {
+                    const card = document.createElement('div');
+                    card.className = 'webhook-card';
+                    card.innerHTML = `
+                        <div class="webhook-header">
+                            <div class="webhook-name">${webhook.name}</div>
+                            <span class="webhook-status ${webhook.status}">${webhook.status}</span>
+                        </div>
+                        <div class="webhook-path">${webhook.url_path}</div>
+                        ${webhook.description ? `<div class="webhook-description">${webhook.description}</div>` : ''}
+                        <div class="webhook-meta">
+                            创建时间: ${webhook.created_at}
+                        </div>
+                        <div class="webhook-actions">
+                            <button class="btn" onclick="viewEvents('${webhook.webhook_id}')">查看事件</button>
+                            <button class="btn btn-secondary" onclick="testWebhook('${webhook.webhook_id}')">测试</button>
+                            <button class="btn btn-danger" onclick="deleteWebhook('${webhook.webhook_id}')">删除</button>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            } catch (error) {
+                console.error('加载失败:', error);
+            }
+        }
+
+        // 显示创建模态框
+        function showCreateModal() {
+            document.getElementById('modal-title').textContent = '创建 Webhook';
+            document.getElementById('webhook-form').reset();
+            document.getElementById('webhook-id').value = '';
+            document.getElementById('secret-section').style.display = 'none';
+            document.getElementById('webhook-modal').classList.add('active');
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('webhook-modal').classList.remove('active');
+        }
+
+        // 保存 Webhook
+        async function saveWebhook(event) {
+            event.preventDefault();
+
+            const webhookId = document.getElementById('webhook-id').value;
+            const name = document.getElementById('webhook-name').value;
+            const path = document.getElementById('webhook-path').value;
+            const description = document.getElementById('webhook-description').value;
+            const status = document.getElementById('webhook-status').value;
+            const verifySignature = document.getElementById('webhook-verify').checked;
+
+            const data = {
+                name,
+                url_path: path,
+                description,
+                status,
+                verify_signature: verifySignature
+            };
+
+            try {
+                const response = await fetch('/api/webhooks/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // 显示密钥
+                    document.getElementById('webhook-secret').textContent = result.secret;
+                    document.getElementById('secret-section').style.display = 'block';
+
+                    // 刷新列表
+                    loadWebhooks();
+
+                    alert('Webhook 创建成功！');
+                } else {
+                    alert('创建失败: ' + result.error);
+                }
+            } catch (error) {
+                alert('创建失败: ' + error.message);
+            }
+        }
+
+        // 删除 Webhook
+        async function deleteWebhook(webhookId) {
+            if (!confirm('确定要删除这个 Webhook 吗？')) return;
+
+            try {
+                const response = await fetch(`/api/webhooks/${webhookId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('删除成功');
+                    loadWebhooks();
+                } else {
+                    const data = await response.json();
+                    alert('删除失败: ' + data.error);
+                }
+            } catch (error) {
+                alert('删除失败: ' + error.message);
+            }
+        }
+
+        // 测试 Webhook
+        async function testWebhook(webhookId) {
+            try {
+                const response = await fetch('/api/webhooks/test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        webhook_id: webhookId,
+                        payload: { test: 'data', timestamp: new Date().toISOString() },
+                        event_type: 'test'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('测试事件已发送！');
+                } else {
+                    alert('测试失败: ' + data.error);
+                }
+            } catch (error) {
+                alert('测试失败: ' + error.message);
+            }
+        }
+
+        // 查看事件
+        async function viewEvents(webhookId) {
+            try {
+                const response = await fetch(`/api/webhooks/${webhookId}/events`);
+                const data = await response.json();
+
+                const eventsList = document.getElementById('events-list');
+
+                if (data.events.length === 0) {
+                    eventsList.innerHTML = '<p style="text-align: center; color: #666;">暂无事件</p>';
+                } else {
+                    eventsList.innerHTML = data.events.map(event => `
+                        <div style="padding: 15px; border-bottom: 1px solid #e0e0e0;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <strong>${event.event_type}</strong>
+                                <span style="color: ${event.status === 'success' ? '#28a745' : '#dc3545'};">
+                                    ${event.status}
+                                </span>
+                            </div>
+                            <div style="font-size: 12px; color: #666;">
+                                ${event.received_at}
+                            </div>
+                        </div>
+                    `).join('');
+                }
+
+                document.getElementById('events-modal').classList.add('active');
+            } catch (error) {
+                alert('加载事件失败: ' + error.message);
+            }
+        }
+
+        // 关闭事件模态框
+        function closeEventsModal() {
+            document.getElementById('events-modal').classList.remove('active');
+        }
+
+        // 路径预览
+        document.getElementById('webhook-path').addEventListener('input', (e) => {
+            document.getElementById('path-preview').textContent = e.target.value || 'github';
+        });
+
+        // 初始加载
+        loadWebhooks();
+    </script>
+</body>
+</html>

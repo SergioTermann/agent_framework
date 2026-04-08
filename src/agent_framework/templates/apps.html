@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>应用管理 - Agent Framework</title>
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet"> -->
+    <link rel="stylesheet" href="/static/css/base-theme.css">
+    <style>
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 30px;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 35px;
+            gap: 20px;
+        }
+
+        .search-box-input {
+            flex: 1;
+            max-width: 450px;
+            padding: 14px 20px;
+            background: var(--surface-strong);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-size: 16px;
+            transition: all var(--ease);
+        }
+
+        .search-box-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-soft);
+        }
+
+        .search-box-input::placeholder {
+            color: var(--muted);
+        }
+
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+        }
+
+        .app-card {
+            background: var(--surface);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 28px;
+            box-shadow: var(--shadow-sm);
+            transition: all var(--ease);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .app-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            transform: scaleX(0);
+            transition: transform var(--ease);
+        }
+
+        .app-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .app-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-gold);
+            border-color: var(--line-strong);
+        }
+
+        .app-icon {
+            font-size: 48px;
+            margin-bottom: 18px;
+            transition: transform var(--ease);
+        }
+
+        .app-card:hover .app-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .app-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+
+        .app-desc {
+            color: var(--muted);
+            line-height: 1.7;
+            margin-bottom: 18px;
+            min-height: 50px;
+        }
+
+        .app-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 18px;
+            border-top: 1px solid var(--line);
+        }
+
+        .app-type {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            background: var(--primary-soft);
+            color: var(--primary-deep);
+            border: 1px solid var(--line-strong);
+        }
+
+        .app-status {
+            font-size: 13px;
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--muted);
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 25px;
+            opacity: 0.5;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(16, 35, 63, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--surface-strong);
+            border-radius: var(--radius);
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            border: 1px solid var(--line);
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.16);
+        }
+
+        .modal-title {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: var(--text);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text);
+            font-size: 14px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--line);
+            border-radius: var(--radius-sm);
+            font-size: 1em;
+            color: var(--text);
+            background: var(--surface-strong);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-soft);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+    </style>
+    <link rel="stylesheet" href="/static/css/submodule-theme.css?v=1.0">
+</head>
+<body>
+    <div class="page-wide">
+        <nav class="topbar">
+            <div class="brand">
+                <a class="back-link" href="/developer">← 返回</a>
+                <h1>应用管理</h1>
+            </div>
+            <div class="topbar-actions">
+                <button class="btn btn-primary" onclick="showCreateModal()">+ 创建应用</button>
+            </div>
+        </nav>
+    </div>
+
+    <div class="container">
+        <div class="toolbar">
+            <input type="text" class="search-box-input" placeholder="搜索应用..." id="searchBox">
+        </div>
+
+        <div class="apps-grid" id="appsGrid">
+            <div class="empty-state">
+                <div class="empty-state-icon">📦</div>
+                <p>暂无应用，点击"创建应用"开始</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="createModal">
+        <div class="modal-content">
+            <h2 class="modal-title">创建新应用</h2>
+            <form id="createForm">
+                <div class="form-group">
+                    <label class="form-label">应用名称</label>
+                    <input type="text" class="form-input" id="appName" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">应用类型</label>
+                    <select class="form-input" id="appType">
+                        <option value="chatbot">聊天机器人</option>
+                        <option value="workflow">工作流应用</option>
+                        <option value="agent">Agent 应用</option>
+                        <option value="api">API 服务</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">描述</label>
+                    <textarea class="form-input" id="appDesc" rows="3"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="hideCreateModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">创建</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function showCreateModal() {
+            document.getElementById('createModal').classList.add('active');
+        }
+
+        function hideCreateModal() {
+            document.getElementById('createModal').classList.remove('active');
+        }
+
+        document.getElementById('createForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const data = {
+                name: document.getElementById('appName').value,
+                type: document.getElementById('appType').value,
+                description: document.getElementById('appDesc').value,
+                owner_id: 'demo-user'
+            };
+
+            try {
+                const response = await fetch('/api/apps/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    hideCreateModal();
+                    loadApps();
+                    document.getElementById('createForm').reset();
+                } else {
+                    alert('创建失败');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('创建失败');
+            }
+        });
+
+        async function loadApps() {
+            try {
+                const response = await fetch('/api/apps/');
+                const apps = await response.json();
+
+                const grid = document.getElementById('appsGrid');
+
+                if (apps.length === 0) {
+                    grid.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📦</div>
+                            <p>暂无应用，点击"创建应用"开始</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                grid.innerHTML = apps.map(app => `
+                    <div class="app-card">
+                        <div class="app-icon">${getAppIcon(app.type)}</div>
+                        <div class="app-title">${app.name}</div>
+                        <div class="app-desc">${app.description || '暂无描述'}</div>
+                        <div class="app-meta">
+                            <span class="app-type">${getAppTypeName(app.type)}</span>
+                            <span class="app-status">${getStatusName(app.status)}</span>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading apps:', error);
+            }
+        }
+
+        function getAppIcon(type) {
+            const icons = {
+                chatbot: '💬',
+                workflow: '🔄',
+                agent: '🤖',
+                api: '🔌',
+                custom: '⚙️'
+            };
+            return icons[type] || '📱';
+        }
+
+        function getAppTypeName(type) {
+            const names = {
+                chatbot: '聊天机器人',
+                workflow: '工作流',
+                agent: 'Agent',
+                api: 'API',
+                custom: '自定义'
+            };
+            return names[type] || type;
+        }
+
+        function getStatusName(status) {
+            const names = {
+                draft: '草稿',
+                published: '已发布',
+                archived: '已归档'
+            };
+            return names[status] || status;
+        }
+
+        // 加载应用列表
+        loadApps();
+
+        // 搜索功能
+        document.getElementById('searchBox').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const cards = document.querySelectorAll('.app-card');
+
+            cards.forEach(card => {
+                const title = card.querySelector('.app-title').textContent.toLowerCase();
+                const desc = card.querySelector('.app-desc').textContent.toLowerCase();
+
+                if (title.includes(query) || desc.includes(query)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

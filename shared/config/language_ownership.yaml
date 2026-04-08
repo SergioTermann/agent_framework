@@ -1,0 +1,86 @@
+version: 1
+
+principles:
+  go:
+    owns:
+      - gateway
+      - auth
+      - stable_http_apis
+      - persistence_facing_service_logic
+      - scheduling
+      - operational_control
+  python:
+    owns:
+      - unified_chat_orchestration
+      - context_building
+      - rag_composition
+      - multi_agent_coordination
+      - model_routing
+      - model_serving
+      - training
+  rust:
+    owns:
+      - vector_kernels
+      - retrieval_kernels
+      - causal_kernels
+      - ws_primitives_when_profiled
+
+module_targets:
+  src/agent_framework/gateway:
+    target: go
+    service: gateway-go
+  src/agent_framework/core/auth.py:
+    target: go
+    service: app-go
+  src/agent_framework/api/auth_api.py:
+    target: go
+    service: app-go
+  src/agent_framework/api/application_api.py:
+    target: go
+    service: app-go
+  src/agent_framework/api/conversation_api.py:
+    target: go
+    service: app-go
+  src/agent_framework/api/api_key_api.py:
+    target: go
+    service: app-go
+  src/agent_framework/api/webhook_api.py:
+    target: go
+    service: app-go
+  src/agent_framework/web/unified_orchestrator.py:
+    target: python
+    service: ai-python
+  src/agent_framework/web/context_builder.py:
+    target: python
+    service: ai-python
+  src/agent_framework/api/unified_chat_api.py:
+    target: python
+    service: ai-python
+  src/agent_framework/platform/multi_agent.py:
+    target: python
+    service: ai-python
+  src/agent_framework/platform/multi_agent_impl.py:
+    target: python
+    service: ai-python
+  src/agent_framework/reasoning/model_serving.py:
+    target: python
+    service: model-python
+  src/agent_framework/reasoning/llm_rlhf_engine.py:
+    target: python
+    service: model-python
+  src/agent_framework/vector_db/vector_ops.py:
+    target: rust
+    crate: vector-core
+  src/agent_framework/vector_db/retrieval_core_ops.py:
+    target: rust
+    crate: retrieval-core
+  src/agent_framework/causal/causal_graph_ops.py:
+    target: rust
+    crate: causal-core
+
+do_not_migrate_to_go:
+  - src/agent_framework/web/unified_orchestrator.py
+  - src/agent_framework/web/context_builder.py
+  - src/agent_framework/api/unified_chat_api.py
+  - src/agent_framework/platform/multi_agent.py
+  - src/agent_framework/platform/multi_agent_impl.py

@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模型微调 - 风起时域</title>
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet"> -->
+    <link rel="stylesheet" href="/static/common-theme.css?v=3.0">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --theme-accent: #1363df;
+            --theme-accent-deep: #0f4eb3;
+            --theme-accent-soft: rgba(19, 99, 223, 0.12);
+            --theme-accent-line: rgba(19, 99, 223, 0.22);
+            --theme-accent-shadow: rgba(19, 99, 223, 0.22);
+            --theme-accent-text: rgba(19, 99, 223, 0.82);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f5f8fc 0%, #eff4fb 100%);
+            margin: 0;
+        }
+
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #0f4eb3 0%, #1363df 52%, #2b7fff 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-header {
+            padding: 28px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .sidebar-logo {
+            font-size: 26px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 20px 0;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            padding: 12px 24px;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border-left: 3px solid white;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: #ffffff;
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(101, 120, 144, 0.14);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            color: #253038;
+            font-weight: 600;
+        }
+
+        /* 主容器 */
+        .container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px 20px;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .content-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--theme-accent-line);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            border-color: rgba(19, 99, 223, 0.36);
+            box-shadow: 0 8px 32px rgba(19, 99, 223, 0.16);
+        }
+
+        /* 卡片标题 */
+        .card-title {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: var(--theme-accent-deep);
+            font-weight: 600;
+        }
+
+        /* 表单 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #e0e0e0;
+            font-size: 0.95em;
+            font-weight: 500;
+        }
+
+        .form-help {
+            display: block;
+            margin-top: 6px;
+            font-size: 0.85em;
+            color: #a0a0a0;
+            line-height: 1.4;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--theme-accent-line);
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: rgba(19, 99, 223, 0.6);
+            box-shadow: 0 0 15px rgba(19, 99, 223, 0.22);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* 按钮 */
+        .btn {
+            background: linear-gradient(135deg, rgba(19, 99, 223, 0.16) 0%, rgba(96, 165, 250, 0.18) 100%);
+            border: 1px solid rgba(19, 99, 223, 0.32);
+            color: var(--theme-accent-deep);
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, rgba(19, 99, 223, 0.22) 0%, rgba(96, 165, 250, 0.24) 100%);
+            box-shadow: 0 4px 15px rgba(19, 99, 223, 0.24);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--theme-accent-deep) 0%, var(--theme-accent) 100%);
+            border-color: transparent;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 4px 20px rgba(19, 99, 223, 0.28);
+        }
+
+        /* 任务列表 */
+        .task-list {
+            grid-column: 1 / -1;
+        }
+
+        .task-item {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid var(--theme-accent-line);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .task-info {
+            flex: 1;
+        }
+
+        .task-name {
+            font-size: 1.2em;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+
+        .task-meta {
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+
+        .task-status {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .status-running {
+            background: rgba(255, 193, 7, 0.2);
+            border: 1px solid rgba(255, 193, 7, 0.5);
+            color: #f39c12;
+        }
+
+        .status-completed {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid rgba(76, 175, 80, 0.5);
+            color: #27ae60;
+        }
+
+        .status-failed {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid rgba(244, 67, 54, 0.5);
+            color: #e74c3c;
+        }
+
+        /* 文件上传 */
+        .file-upload {
+            border: 2px dashed var(--theme-accent-line);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .file-upload:hover {
+            border-color: rgba(19, 99, 223, 0.6);
+            background: rgba(19, 99, 223, 0.05);
+        }
+
+        .file-upload input {
+            display: none;
+        }
+
+        /* 进度条 */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(200, 200, 200, 0.3);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--theme-accent-deep), var(--theme-accent));
+            transition: width 0.3s;
+            box-shadow: 0 0 10px rgba(19, 99, 223, 0.28);
+        }
+
+        /* 训练曲线图 */
+        .chart-wrapper {
+            position: relative;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(19, 99, 223, 0.15);
+        }
+
+        .chart-wrapper:hover {
+            border-color: rgba(19, 99, 223, 0.6);
+            box-shadow: 0 0 20px rgba(19, 99, 223, 0.2);
+            transform: translateX(-5px);
+        }
+    </style>
+</head>
+<body>
+    <!-- 水墨画线条 -->
+    <div class="app-container">
+        <!-- 侧边栏 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    🤖 Agent Framework
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="/" class="nav-item">
+                    <span>🏠</span>
+                    <span>首页</span>
+                </a>
+                <a href="/chat" class="nav-item">
+                    <span>💬</span>
+                    <span>对话助手</span>
+                </a>
+                <a href="/visual_workflow" class="nav-item">
+                    <span>🔄</span>
+                    <span>工作流编排</span>
+                </a>
+                <a href="/knowledge" class="nav-item">
+                    <span>📚</span>
+                    <span>知识库</span>
+                </a>
+                <a href="/finetune" class="nav-item active">
+                    <span>🔧</span>
+                    <span>模型微调</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <div class="header">
+                <h1>🔧 模型微调</h1>
+            </div>
+
+            <div class="container">
+            <div class="content-wrapper">
+        <!-- 第一行：微调配置 和 数据集管理 -->
+        <div class="row">
+            <!-- 微调配置 -->
+            <div class="card">
+                <h2 class="card-title">微调配置</h2>
+            <form id="finetuneForm">
+                <div class="form-group">
+                    <label class="form-label">基础模型</label>
+                    <select class="form-select" id="baseModel">
+                        <option value="">加载模型中...</option>
+                    </select>
+                    <span class="form-help">💡 选择要微调的基础模型。建议：7B 模型适合入门，14B 模型效果更好但需要更多显存。</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">任务名称</label>
+                    <input type="text" class="form-input" id="taskName" placeholder="例如: 客服对话微调" required>
+                    <span class="form-help">💡 给这次微调任务起个名字，方便后续管理和识别。</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">训练方法</label>
+                    <select class="form-select" id="trainMethod">
+                        <option value="lora">LoRA</option>
+                        <option value="qlora">QLoRA</option>
+                        <option value="full">全参数微调</option>
+                    </select>
+                    <span class="form-help">💡 <strong>LoRA</strong>: 低秩适配，显存占用少，速度快（推荐）| <strong>QLoRA</strong>: 量化 LoRA，显存更少 | <strong>全参数微调</strong>: 效果最好但需要大量显存。</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">学习率</label>
+                    <input type="number" class="form-input" id="learningRate" value="0.0001" step="0.00001">
+                    <span class="form-help">💡 控制模型学习的步长。推荐值：LoRA 用 1e-4 (0.0001)，全参数微调用 1e-5 (0.00001)。太大会不稳定，太小会学不动。</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">训练轮数</label>
+                    <input type="number" class="form-input" id="epochs" value="3" min="1">
+                    <span class="form-help">💡 数据集完整训练的次数。推荐 3-5 轮。太少学不好，太多会过拟合（死记硬背）。</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">批次大小</label>
+                    <input type="number" class="form-input" id="batchSize" value="4" min="1">
+                    <span class="form-help">💡 每次训练处理的样本数量。推荐 4-8。越大训练越快但显存占用越多，根据你的 GPU 显存调整。</span>
+                </div>
+
+                <button type="submit" class="btn btn-primary">开始微调</button>
+            </form>
+        </div>
+
+        <!-- 数据集上传 -->
+        <div class="card">
+            <h2 class="card-title">数据集管理</h2>
+
+            <div class="form-group">
+                <label class="form-label">上传训练数据</label>
+                <div class="file-upload" onclick="document.getElementById('datasetFile').click()">
+                    <input type="file" id="datasetFile" accept=".json,.jsonl,.csv">
+                    <p>📁 点击上传数据集文件</p>
+                    <p style="font-size: 0.9em; color: rgba(19, 99, 223, 0.65); margin-top: 10px;">
+                        支持 JSON, JSONL, CSV 格式
+                    </p>
+                </div>
+                <span class="form-help">💡 上传你的训练数据。每条数据应包含输入和期望的输出，用于教会模型如何回答。</span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">数据格式示例</label>
+                <textarea class="form-textarea" readonly>{
+  "instruction": "你是一个客服助手",
+  "input": "如何退货？",
+  "output": "您可以在订单页面申请退货..."
+}</textarea>
+                <span class="form-help">💡 <strong>instruction</strong>: 系统提示词，定义模型角色 | <strong>input</strong>: 用户问题 | <strong>output</strong>: 期望的回答。</span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">已上传数据集</label>
+                <select class="form-select" id="datasetSelect">
+                    <option value="">选择数据集...</option>
+                </select>
+                <span class="form-help">💡 从已上传的数据集中选择一个用于训练。建议数据量：至少 100 条，越多效果越好。</span>
+            </div>
+        </div>
+        </div>
+
+        <!-- 第二行：模型下载（全宽）-->
+        <div class="card full-width">
+            <h2 class="card-title">模型下载</h2>
+
+            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 20px; align-items: end;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label">HuggingFace 模型 ID</label>
+                    <input type="text" class="form-input" id="modelId" placeholder="例如: Qwen/Qwen2.5-7B-Instruct">
+                    <span class="form-help">💡 输入 HuggingFace 上的模型 ID。格式：<strong>作者/模型名</strong>。可以在 huggingface.co 搜索模型。</span>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label">下载路径</label>
+                    <input type="text" class="form-input" id="downloadPath" value="./models" placeholder="本地保存路径">
+                    <span class="form-help">💡 模型保存的本地目录。</span>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" style="opacity: 0;">占位</label>
+                    <button class="btn btn-primary" onclick="downloadModel()" style="width: 100%;">
+                        <span id="downloadBtnText">📥 下载模型</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="downloadProgress" style="display: none; margin-top: 20px;">
+                <div class="form-label">下载进度</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="downloadProgressBar" style="width: 0%"></div>
+                </div>
+                <p id="downloadStatus" style="margin-top: 10px; color: rgba(19, 99, 223, 0.82); font-size: 0.9em;"></p>
+            </div>
+
+            <div class="form-group" style="margin-top: 30px; margin-bottom: 0;">
+                <label class="form-label">已安装模型</label>
+                <div id="localModels" style="max-height: 200px; overflow-y: auto;">
+                    <p style="text-align: center; color: rgba(19, 99, 223, 0.55); padding: 20px;">
+                        加载中...
+                    </p>
+                </div>
+                <span class="form-help">💡 这里可以直接选择已安装模型用于微调，也可以删除不用的模型。</span>
+            </div>
+        </div>
+
+        <!-- 训练曲线图 -->
+        <div class="card full-width">
+            <h2 class="card-title">训练曲线</h2>
+            <div class="chart-wrapper">
+                <canvas id="trainingChart"></canvas>
+            </div>
+            <p style="text-align: center; color: rgba(19, 99, 223, 0.65); margin-top: 15px; font-size: 0.9em;">
+                💡 实时显示训练过程中的损失值和准确率变化。损失越低越好，准确率越高越好。
+            </p>
+        </div>
+
+        <!-- 微调任务列表 -->
+        <div class="card full-width">
+            <h2 class="card-title">微调任务</h2>
+            <div id="taskList">
+                <p style="text-align: center; color: rgba(19, 99, 223, 0.55); padding: 40px;">
+                    暂无微调任务
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function createTrainingChartFallback(message) {
+            const wrapper = document.querySelector('.chart-wrapper');
+            if (wrapper) {
+                wrapper.innerHTML = `
+                    <div style="min-height:320px;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;color:rgba(19, 99, 223, 0.82);line-height:1.8;">
+                        <div>
+                            <div style="font-size:28px;margin-bottom:10px;">⚠️</div>
+                            <div>${message}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            return {
+                data: { labels: [], datasets: [{ data: [] }, { data: [] }] },
+                update() {}
+            };
+        }
+
+        function renderTrainMethodLabel(method) {
+            return {
+                lora: 'LoRA',
+                qlora: 'QLoRA',
+                full: '全参数微调',
+                dpo: 'DPO'
+            }[method] || method;
+        }
+
+        function renderTaskStatusLabel(status) {
+            return {
+                running: '运行中',
+                completed: '已完成',
+                failed: '失败',
+                stopped: '已停止'
+            }[status] || status;
+        }
+
+        // 初始化训练曲线图
+        const trainingCanvas = document.getElementById('trainingChart');
+        const trainingChart = typeof window.Chart === 'undefined'
+            ? createTrainingChartFallback('Chart.js 加载失败，训练曲线暂时不可用。')
+            : new Chart(trainingCanvas.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    {
+                        label: '损失',
+                        data: [],
+                        borderColor: '#1363df',
+                        backgroundColor: 'rgba(19, 99, 223, 0.12)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: '准确率',
+                        data: [],
+                        borderColor: '#60a5fa',
+                        backgroundColor: 'rgba(96, 165, 250, 0.12)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            color: '#0f4eb3',
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(10, 14, 39, 0.9)',
+                        borderColor: 'rgba(19, 99, 223, 0.5)',
+                        borderWidth: 1,
+                        titleColor: '#1363df',
+                        bodyColor: '#1363df'
+                    }
+                },
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: '训练步数',
+                            color: '#0f4eb3'
+                        },
+                        grid: {
+                            color: 'rgba(19, 99, 223, 0.08)'
+                        },
+                        ticks: {
+                            color: 'rgba(19, 99, 223, 0.72)'
+                        }
+                    },
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: '损失',
+                            color: '#0f4eb3'
+                        },
+                        grid: {
+                            color: 'rgba(19, 99, 223, 0.08)'
+                        },
+                        ticks: {
+                            color: 'rgba(19, 99, 223, 0.72)'
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: '准确率',
+                            color: '#60a5fa'
+                        },
+                        grid: {
+                            drawOnChartArea: false,
+                        },
+                        ticks: {
+                            color: 'rgba(96, 165, 250, 0.78)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // 更新训练曲线
+        function updateTrainingChart(step, loss, accuracy) {
+            trainingChart.data.labels.push(step);
+            trainingChart.data.datasets[0].data.push(loss);
+            trainingChart.data.datasets[1].data.push(accuracy);
+
+            // 只保留最近 50 个数据点
+            if (trainingChart.data.labels.length > 50) {
+                trainingChart.data.labels.shift();
+                trainingChart.data.datasets[0].data.shift();
+                trainingChart.data.datasets[1].data.shift();
+            }
+
+            trainingChart.update('none');
+        }
+
+        // 模拟训练数据（实际使用时从后端获取）
+        function simulateTraining() {
+            let step = 0;
+            const interval = setInterval(() => {
+                step += 10;
+                const loss = Math.max(0.1, 2.5 - step * 0.02 + Math.random() * 0.3);
+                const accuracy = Math.min(0.95, step * 0.008 + Math.random() * 0.05);
+
+                updateTrainingChart(step, loss, accuracy);
+
+                if (step >= 500) {
+                    clearInterval(interval);
+                }
+            }, 1000);
+        }
+
+        // 表单提交
+        document.getElementById('finetuneForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const data = {
+                base_model: document.getElementById('baseModel').value,
+                task_name: document.getElementById('taskName').value,
+                train_method: document.getElementById('trainMethod').value,
+                learning_rate: parseFloat(document.getElementById('learningRate').value),
+                epochs: parseInt(document.getElementById('epochs').value),
+                batch_size: parseInt(document.getElementById('batchSize').value),
+                dataset: document.getElementById('datasetSelect').value
+            };
+
+            try {
+                const response = await fetch('/api/finetune/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    alert('微调任务已启动！');
+                    loadTasks();
+                    // 启动训练曲线模拟（实际使用时从后端获取真实数据）
+                    simulateTraining();
+                } else {
+                    alert('启动失败，请检查配置');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('启动失败: ' + error.message);
+            }
+        });
+
+        // 文件上传
+        document.getElementById('datasetFile').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/api/finetune/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    alert('数据集上传成功！');
+                    loadDatasets();
+                } else {
+                    alert('上传失败');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('上传失败: ' + error.message);
+            }
+        });
+
+        // 下载模型
+        async function downloadModel() {
+            const modelId = document.getElementById('modelId').value.trim();
+            const downloadPath = document.getElementById('downloadPath').value.trim();
+
+            if (!modelId) {
+                alert('请输入模型 ID');
+                return;
+            }
+
+            const downloadBtn = document.getElementById('downloadBtnText');
+            const progressDiv = document.getElementById('downloadProgress');
+            const progressBar = document.getElementById('downloadProgressBar');
+            const statusText = document.getElementById('downloadStatus');
+
+            downloadBtn.textContent = '⏳ 下载中...';
+            progressDiv.style.display = 'block';
+            progressBar.style.width = '0%';
+            statusText.textContent = '正在连接 HuggingFace...';
+
+            try {
+                const response = await fetch('/api/finetune/download-model', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model_id: modelId,
+                        download_path: downloadPath
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // 开始轮询下载进度
+                    const taskId = result.task_id;
+                    pollDownloadProgress(taskId);
+                } else {
+                    alert('下载失败: ' + (result.error || '未知错误'));
+                    downloadBtn.textContent = '📥 下载模型';
+                    progressDiv.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('下载失败: ' + error.message);
+                downloadBtn.textContent = '📥 下载模型';
+                progressDiv.style.display = 'none';
+            }
+        }
+
+        // 轮询下载进度
+        async function pollDownloadProgress(taskId) {
+            const progressBar = document.getElementById('downloadProgressBar');
+            const statusText = document.getElementById('downloadStatus');
+            const downloadBtn = document.getElementById('downloadBtnText');
+
+            const interval = setInterval(async () => {
+                try {
+                    const response = await fetch(`/api/finetune/download-progress/${taskId}`);
+                    const data = await response.json();
+
+                    progressBar.style.width = data.progress + '%';
+                    statusText.textContent = data.status;
+
+                    if (data.completed) {
+                        clearInterval(interval);
+                        downloadBtn.textContent = '✅ 下载完成';
+                        setTimeout(() => {
+                            downloadBtn.textContent = '📥 下载模型';
+                            document.getElementById('downloadProgress').style.display = 'none';
+                        }, 3000);
+                        loadLocalModels();
+                    } else if (data.error) {
+                        clearInterval(interval);
+                        alert('下载失败: ' + data.error);
+                        downloadBtn.textContent = '📥 下载模型';
+                        document.getElementById('downloadProgress').style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error('Error polling progress:', error);
+                }
+            }, 2000);
+        }
+
+        function escapeHtml(value) {
+            return String(value || '').replace(/[&<>"']/g, (char) => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[char]));
+        }
+
+        function encodeInlineValue(value) {
+            return encodeURIComponent(String(value || ''));
+        }
+
+        function getModelSourceLabel(source) {
+            return {
+                downloaded: '已下载',
+                cache: '缓存',
+                finetuned: '微调产物'
+            }[source] || source || '未知';
+        }
+
+        function getModelCapabilityLabel(capability) {
+            return {
+                chat: '聊天',
+                embedding: 'Embedding',
+                rerank: 'Rerank'
+            }[capability] || capability || '未知';
+        }
+
+        // 加载已安装模型
+        async function loadLocalModels() {
+            try {
+                const response = await fetch('/api/finetune/installed-models');
+                const payload = await response.json();
+                const models = Array.isArray(payload.models) ? payload.models : [];
+
+                await loadBaseModelOptions(models);
+
+                const container = document.getElementById('localModels');
+                if (models.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: rgba(19, 99, 223, 0.55); padding: 20px;">暂无已安装模型</p>';
+                    return;
+                }
+
+                container.innerHTML = models.map(model => {
+                    const useButton = (model.capability || 'chat') === 'chat'
+                        ? `<button class="btn" style="padding: 6px 12px; font-size: 0.85em;" onclick="useModel(decodeURIComponent('${encodeInlineValue(model.path)}'), decodeURIComponent('${encodeInlineValue(model.name)}'))">用于微调</button>`
+                        : '';
+                    return `
+                        <div style="background: rgba(10, 14, 39, 0.6); border: 1px solid rgba(19, 99, 223, 0.2); border-radius: 8px; padding: 12px; margin-bottom: 10px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+                                <div style="min-width: 0;">
+                                    <div style="color: #1363df; font-weight: 600;">${escapeHtml(model.name)}</div>
+                                    <div style="font-size: 0.85em; color: rgba(19, 99, 223, 0.78); margin-top: 4px;">
+                                        ${escapeHtml(model.size)} · ${escapeHtml(getModelSourceLabel(model.source))} · ${escapeHtml(getModelCapabilityLabel(model.capability))}
+                                    </div>
+                                    <div style="font-size: 0.8em; color: rgba(19, 99, 223, 0.58); margin-top: 4px; word-break: break-all;">
+                                        ${escapeHtml(model.path)}
+                                    </div>
+                                </div>
+                                <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
+                                    ${useButton}
+                                    <button class="btn" style="padding: 6px 12px; font-size: 0.85em; background: rgba(239,68,68,.12); border-color: rgba(239,68,68,.35); color: #ef4444;" onclick="deleteInstalledModel(decodeURIComponent('${encodeInlineValue(model.path)}'), decodeURIComponent('${encodeInlineValue(model.name)}'))">删除</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error loading installed models:', error);
+            }
+        }
+
+        async function loadBaseModelOptions(installedModels = null) {
+            try {
+                const [recommendedResponse, installedResponse] = await Promise.all([
+                    fetch('/api/finetune/models'),
+                    installedModels
+                        ? Promise.resolve({ ok: true, json: async () => ({ success: true, models: installedModels }) })
+                        : fetch('/api/finetune/installed-models')
+                ]);
+
+                const recommended = recommendedResponse.ok ? await recommendedResponse.json() : [];
+                const installedPayload = installedResponse.ok ? await installedResponse.json() : { success: false, models: [] };
+                const installed = Array.isArray(installedPayload.models)
+                    ? installedPayload.models.filter(model => (model.capability || 'chat') === 'chat')
+                    : [];
+                const select = document.getElementById('baseModel');
+                const currentValue = select.value || '';
+
+                const installedOptions = installed
+                    .map(model => `<option value="${escapeHtml(model.path)}">${escapeHtml(model.name)} · ${escapeHtml(getModelSourceLabel(model.source))} · ${escapeHtml(model.size)}</option>`)
+                    .join('');
+                const recommendedOptions = (recommended || [])
+                    .map(model => `<option value="${escapeHtml(model.name)}">${escapeHtml(model.name)} (${escapeHtml(model.size)})</option>`)
+                    .join('');
+
+                select.innerHTML =
+                    '<option value="">请选择基础模型...</option>' +
+                    (installedOptions ? `<optgroup label="已安装模型">${installedOptions}</optgroup>` : '') +
+                    (recommendedOptions ? `<optgroup label="推荐模型">${recommendedOptions}</optgroup>` : '');
+
+                if (Array.from(select.options).some(option => option.value === currentValue)) {
+                    select.value = currentValue;
+                } else if (installed[0]) {
+                    select.value = installed[0].path;
+                }
+            } catch (error) {
+                console.error('Error loading base model options:', error);
+            }
+        }
+
+        function useModel(modelValue) {
+            const select = document.getElementById('baseModel');
+            select.value = modelValue;
+            select.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        async function deleteInstalledModel(modelPath, displayName) {
+            if (!confirm(`确认删除这个模型吗？\n\n${displayName}\n${modelPath}`)) return;
+            try {
+                const response = await fetch('/api/finetune/installed-models', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path: modelPath })
+                });
+                const result = await response.json();
+                if (!response.ok || !result.success) {
+                    throw new Error(result.error || '删除失败');
+                }
+                await loadLocalModels();
+            } catch (error) {
+                console.error('Error deleting model:', error);
+                alert('删除失败: ' + error.message);
+            }
+        }
+
+        // 加载任务列表
+        async function loadTasks() {
+            try {
+                const response = await fetch('/api/finetune/tasks');
+                const tasks = await response.json();
+
+                const taskList = document.getElementById('taskList');
+                if (tasks.length === 0) {
+                    taskList.innerHTML = '<p style="text-align: center; color: rgba(19, 99, 223, 0.55); padding: 40px;">暂无微调任务</p>';
+                    return;
+                }
+
+                taskList.innerHTML = tasks.map(task => `
+                    <div class="task-item">
+                        <div class="task-info">
+                            <div class="task-name">${task.task_name}</div>
+                            <div class="task-meta">
+                                模型: ${task.base_model} | 方法: ${renderTrainMethodLabel(task.train_method)} | 创建时间: ${task.created_at}
+                            </div>
+                            ${task.status === 'running' ? `
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${task.progress || 0}%"></div>
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="task-status status-${task.status}">
+                            ${renderTaskStatusLabel(task.status)}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading tasks:', error);
+            }
+        }
+
+        // 加载数据集列表
+        async function loadDatasets() {
+            try {
+                const response = await fetch('/api/finetune/datasets');
+                const datasets = await response.json();
+
+                const select = document.getElementById('datasetSelect');
+                select.innerHTML = '<option value="">选择数据集...</option>' +
+                    datasets.map(ds => `<option value="${ds.name}">${ds.name} (${ds.size})</option>`).join('');
+            } catch (error) {
+                console.error('Error loading datasets:', error);
+            }
+        }
+
+        // 初始化
+        loadTasks();
+        loadDatasets();
+        loadLocalModels();
+
+        // 定时刷新任务状态
+        setInterval(loadTasks, 5000);
+    </script>
+        </div>
+    </div>
+</body>
+</html>

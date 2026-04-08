@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>风起时域 · 开发控制台</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/base-theme.css">
+  <link rel="stylesheet" href="/static/css/submodule-theme.css?v=1.0">
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: rgba(255, 255, 255, 0.94);
+      --line: #dbe4f0;
+      --text: #10233f;
+      --muted: #5f728c;
+      --primary: #1363df;
+      --primary-deep: #0f4eb3;
+      --primary-soft: rgba(19, 99, 223, 0.1);
+      --accent: #1363df;
+      --accent-soft: rgba(19, 99, 223, 0.1);
+      --ok: #1d4ed8;
+      --warn: #2563eb;
+      --shadow: 0 16px 34px rgba(16, 35, 63, 0.09);
+      --radius: 20px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: "Inter", "Segoe UI", "Microsoft YaHei", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(19, 99, 223, 0.10), transparent 28%),
+        radial-gradient(circle at top right, rgba(96, 165, 250, 0.08), transparent 24%),
+        linear-gradient(180deg, #f9fbff 0%, #f4f8ff 100%);
+    }
+
+    .material-symbols-outlined {
+      font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+      user-select: none;
+    }
+
+    .platform-sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 16rem;
+      height: 100vh;
+      padding: 24px 16px;
+      background: #f0f4f7;
+      border-right: 1px solid rgba(219, 228, 240, 0.78);
+    }
+
+    .platform-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 8px 10px;
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .platform-brand-mark {
+      display: grid;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--primary), #5794fd);
+      color: #fff;
+      font-size: 22px;
+    }
+
+    .platform-brand-copy strong {
+      display: block;
+      font-family: "Manrope", sans-serif;
+      font-size: 17px;
+      line-height: 1.1;
+    }
+
+    .platform-brand-copy small {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: .04em;
+    }
+
+    .platform-primary-entry {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin: 2px 0 8px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-deep));
+      color: #fff;
+      text-decoration: none;
+      font-weight: 800;
+      box-shadow: 0 18px 32px rgba(19, 99, 223, 0.2);
+    }
+
+    .platform-nav,
+    .platform-sidebar-footer {
+      display: grid;
+      gap: 4px;
+    }
+
+    .platform-nav-link,
+    .platform-nav-utility {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      color: rgba(44, 52, 55, 0.8);
+      text-decoration: none;
+      font-weight: 700;
+      transition: .2s ease;
+    }
+
+    .platform-nav-link:hover,
+    .platform-nav-utility:hover {
+      background: rgba(213, 227, 253, 0.56);
+      color: #005cc0;
+    }
+
+    .platform-nav-link.active {
+      background: #d5e3fd;
+      color: #005cc0;
+      box-shadow: inset 0 0 0 1px rgba(0, 92, 192, 0.08);
+    }
+
+    .platform-sidebar-footer {
+      margin-top: auto;
+      padding-top: 14px;
+      border-top: 1px solid rgba(172, 179, 183, 0.18);
+    }
+
+    .platform-user-pill {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px 0;
+    }
+
+    .platform-user-mark {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--primary), #5794fd);
+    }
+
+    .platform-user-pill strong {
+      display: block;
+      font-size: 12px;
+    }
+
+    .platform-user-pill small {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 10px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .platform-header {
+      position: fixed;
+      left: 16rem;
+      right: 0;
+      top: 0;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      height: 72px;
+      padding: 0 32px;
+      background: rgba(247, 249, 251, 0.86);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(219, 228, 240, 0.55);
+    }
+
+    .platform-header-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .platform-header-title strong {
+      font-family: "Manrope", sans-serif;
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    .platform-header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .platform-header-tools {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .platform-header-search {
+      position: relative;
+    }
+
+    .platform-header-search .material-symbols-outlined {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 18px;
+      color: var(--muted);
+    }
+
+    .platform-header-search input {
+      width: 320px;
+      padding: 10px 16px 10px 40px;
+      border: 1px solid rgba(219, 228, 240, 0.95);
+      border-radius: 999px;
+      background: #f0f4f7;
+      color: var(--text);
+      font: inherit;
+      outline: none;
+    }
+
+    .platform-header-icon {
+      display: grid;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: .2s ease;
+    }
+
+    .platform-header-icon:hover {
+      background: #e9f1ff;
+      color: var(--primary);
+    }
+
+    .console-shell {
+      min-height: 100vh;
+      width: calc(100% - 16rem);
+      margin-left: 16rem;
+      padding: 96px 32px 32px;
+      display: grid;
+      gap: 20px;
+    }
+
+    .hero-card,
+    .panel-card,
+    .entry-card,
+    .status-card {
+      border: 1px solid rgba(219, 228, 240, 0.95);
+      border-radius: var(--radius);
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-card {
+      padding: 28px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .hero-kicker {
+      display: inline-flex;
+      width: max-content;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .hero-card h1 {
+      margin: 0;
+      font-family: "Manrope", sans-serif;
+      font-size: 40px;
+      line-height: 1.08;
+    }
+
+    .hero-card p {
+      margin: 0;
+      max-width: 1040px;
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: 15px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 16px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700;
+      transition: .2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-deep));
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .status-card {
+      padding: 16px 18px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .status-card span {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--muted);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .status-card strong {
+      font-size: 16px;
+      line-height: 1.4;
+    }
+
+    .status-card small {
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 12px;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(320px, .7fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel-card {
+      padding: 22px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+
+    .panel-head h2,
+    .panel-head h3 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .panel-head p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .panel-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .entry-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .entry-card {
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+      transition: .2s ease;
+    }
+
+    .entry-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(19, 99, 223, 0.24);
+      box-shadow: 0 18px 32px rgba(19, 99, 223, 0.1);
+    }
+
+    .entry-icon {
+      display: grid;
+      place-items: center;
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(19, 99, 223, 0.12), rgba(87, 148, 253, 0.16));
+      color: var(--primary);
+    }
+
+    .entry-card strong {
+      font-size: 16px;
+    }
+
+    .entry-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 13px;
+    }
+
+    .entry-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .entry-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: #eef4ff;
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .list-stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .list-item {
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: linear-gradient(180deg, #fbfdff, #fff);
+    }
+
+    .list-item strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    .list-item p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 13px;
+    }
+
+    .quick-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .quick-links a {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: #eef4ff;
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    @media (max-width: 1180px) {
+      .platform-sidebar {
+        position: static;
+        width: auto;
+        height: auto;
+        margin: 0 14px 12px;
+        border-right: none;
+        border-bottom: 1px solid rgba(219, 228, 240, 0.7);
+        border-radius: 0 0 24px 24px;
+      }
+
+      .platform-header {
+        position: static;
+        left: auto;
+        right: auto;
+        height: auto;
+        margin: 0 14px 8px;
+        padding: 14px 18px;
+        border: 1px solid rgba(219, 228, 240, 0.55);
+        border-radius: 20px;
+      }
+
+      .platform-header-tools {
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: wrap;
+      }
+
+      .platform-header-search {
+        flex: 1 1 320px;
+      }
+
+      .platform-header-search input {
+        width: 100%;
+      }
+
+      .console-shell {
+        width: 100%;
+        margin-left: 0;
+        padding: 16px 14px 24px;
+      }
+
+      .status-grid,
+      .content-grid,
+      .entry-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .hero-card {
+        padding: 20px;
+      }
+
+      .hero-card h1 {
+        font-size: 32px;
+      }
+
+      .platform-sidebar {
+        margin: 0 12px 10px;
+        padding: 18px 14px;
+      }
+
+      .platform-header {
+        margin: 0 12px 8px;
+        padding: 14px;
+      }
+
+      .panel-card,
+      .entry-card,
+      .status-card {
+        padding: 16px;
+      }
+    }
+  </style>
+  <style>
+    .platform-brand-copy small,
+    .platform-user-pill small,
+    .platform-header-badge,
+    .hero-kicker,
+    .status-card span,
+    .entry-link,
+    .panel-tag {
+      font-size: 13px;
+    }
+
+    .platform-user-pill strong,
+    .status-card small {
+      font-size: 13px;
+    }
+
+    .entry-card p,
+    .list-item p {
+      font-size: 14px;
+    }
+
+    .quick-links a {
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <aside class="platform-sidebar">
+    <a class="platform-brand" href="/">
+      <span class="platform-brand-mark material-symbols-outlined">bolt</span>
+      <span class="platform-brand-copy">
+        <strong>风起时域</strong>
+        <small>新能源 AI 平台入口</small>
+      </span>
+    </a>
+
+    <a class="platform-primary-entry" href="/dev/assistant">
+      <span class="material-symbols-outlined">terminal</span>
+      <span>进入开发版助手</span>
+    </a>
+
+    <nav class="platform-nav" aria-label="平台导航">
+      <a class="platform-nav-link" href="/modules/weather-siting/app"><span class="material-symbols-outlined">wind_power</span><span>气象选址</span></a>
+      <a class="platform-nav-link" href="/modules/power-trading/app"><span class="material-symbols-outlined">query_stats</span><span>电力交易</span></a>
+      <a class="platform-nav-link" href="/modules/smart-workorder/app"><span class="material-symbols-outlined">assignment</span><span>智能工单</span></a>
+      <a class="platform-nav-link active" href="/dev"><span class="material-symbols-outlined">dashboard</span><span>开发控制台</span></a>
+      <a class="platform-nav-link" href="/dev/assistant"><span class="material-symbols-outlined">code</span><span>开发版助手</span></a>
+    </nav>
+
+    <div class="platform-sidebar-footer">
+      <a class="platform-nav-utility" href="/knowledge"><span class="material-symbols-outlined">library_books</span><span>知识库</span></a>
+      <a class="platform-nav-utility" href="/plugins"><span class="material-symbols-outlined">extension</span><span>插件市场</span></a>
+      <a class="platform-nav-utility" href="/settings"><span class="material-symbols-outlined">settings</span><span>平台设置</span></a>
+      <a class="platform-nav-utility" href="/logs"><span class="material-symbols-outlined">receipt_long</span><span>日志中心</span></a>
+      <div class="platform-user-pill">
+        <span class="platform-user-mark"></span>
+        <div>
+          <strong>统一平台风格</strong>
+          <small>developer</small>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <header class="platform-header">
+    <div class="platform-header-title">
+      <strong>风起时域 · 开发控制台</strong>
+      <span class="platform-header-badge">
+        <span class="material-symbols-outlined" style="font-size:16px">construction</span>
+        <span>统一中文入口</span>
+      </span>
+    </div>
+    <div class="platform-header-tools">
+      <label class="platform-header-search">
+        <span class="material-symbols-outlined">search</span>
+        <input type="text" value="开发版助手 / 工作流 / 知识库 / 训练流水线 / 系统监控" readonly aria-label="页面说明">
+      </label>
+      <a class="platform-header-icon" href="/system-status" aria-label="系统状态"><span class="material-symbols-outlined">monitor_heart</span></a>
+      <a class="platform-header-icon" href="/dashboard" aria-label="平台看板"><span class="material-symbols-outlined">space_dashboard</span></a>
+      <a class="platform-header-icon" href="/dev/assistant" aria-label="开发版助手"><span class="material-symbols-outlined">account_circle</span></a>
+    </div>
+  </header>
+
+  <main class="console-shell">
+    <section class="hero-card">
+      <div class="hero-kicker"><span class="material-symbols-outlined">rocket_launch</span><span>开发控制台</span></div>
+      <h1>开发控制台</h1>
+      <p>这里集中提供开发版助手、工作流编排、知识库、训练流水线和系统状态等入口。页面结构、颜色和导航已经与平台其他页面保持一致，点击后都会直接进入真实功能页。</p>
+      <div class="hero-actions">
+        <a class="btn primary" href="/chat"><span class="material-symbols-outlined">chat</span><span>对话助手</span></a>
+        <a class="btn" href="/workflow"><span class="material-symbols-outlined">hub</span><span>进入工作流编排</span></a>
+        <a class="btn" href="/knowledge"><span class="material-symbols-outlined">library_books</span><span>知识库</span></a>
+      </div>
+    </section>
+
+    <section class="status-grid" aria-label="平台概览">
+      <article class="status-card">
+        <span>主入口</span>
+        <strong>统一入口与导航</strong>
+        <small>与智导助手、模块页面和平台首页保持一致的左侧导航与顶部结构。</small>
+      </article>
+      <article class="status-card">
+        <span>页面语言</span>
+        <strong>页面文案已改为正常中文</strong>
+        <small>避免出现英文菜单或过于像内部备注的说明文字。</small>
+      </article>
+      <article class="status-card">
+        <span>布局宽度</span>
+        <strong>主内容区域与助手页等宽</strong>
+        <small>桌面端不再挤在左侧窄栏，移动端也能保持完整排版。</small>
+      </article>
+      <article class="status-card">
+        <span>按钮映射</span>
+        <strong>所有按钮都连接真实页面</strong>
+        <small>包括开发版助手、工作流、知识库、训练、监控和日志入口。</small>
+      </article>
+    </section>
+
+    <section class="content-grid">
+      <section class="panel-card">
+        <div class="panel-head">
+          <div>
+            <h2>核心开发入口</h2>
+            <p>常用开发入口集中展示在这里，点击卡片即可进入对应功能页面。</p>
+          </div>
+          <span class="panel-tag"><span class="material-symbols-outlined">grid_view</span><span>真实功能模块</span></span>
+        </div>
+
+        <div class="entry-grid">
+          <a class="entry-card" href="/chat">
+            <span class="entry-icon material-symbols-outlined">chat</span>
+            <strong>对话助手</strong>
+            <p>简单的对话界面，直接与AI助手进行交流。</p>
+            <div class="entry-links">
+              <span class="entry-link"><span class="material-symbols-outlined" style="font-size:16px">chat_bubble</span>开始对话</span>
+            </div>
+          </a>
+
+          <a class="entry-card" href="/visual_workflow">
+            <span class="entry-icon material-symbols-outlined">hub</span>
+            <strong>工作流编排</strong>
+            <p>进入可视化工作流页面，查看节点编排、链路流转与执行组织方式。</p>
+            <div class="entry-links">
+              <span class="entry-link"><span class="material-symbols-outlined" style="font-size:16px">schema</span>可视编排</span>
+            </div>
+          </a>
+
+          <a class="entry-card" href="/knowledge">
+            <span class="entry-icon material-symbols-outlined">library_books</span>
+            <strong>知识库</strong>
+            <p>管理知识资产、检索策略和内容组织，为助手和工作流提供知识支撑。</p>
+            <div class="entry-links">
+              <span class="entry-link"><span class="material-symbols-outlined" style="font-size:16px">search</span>知识检索</span>
+            </div>
+          </a>
+
+          <a class="entry-card" href="/api_keys">
+            <span class="entry-icon material-symbols-outlined">key</span>
+            <strong>API 密钥管理</strong>
+            <p>创建和管理API密钥，设置访问限流和权限控制。</p>
+            <div class="entry-links">
+              <span class="entry-link"><span class="material-symbols-outlined" style="font-size:16px">vpn_key</span>密钥管理</span>
+            </div>
+          </a>
+
+          <a class="entry-card" href="/finetune">
+            <span class="entry-icon material-symbols-outlined">tune</span>
+            <strong>模型微调</strong>
+            <p>进行模型微调训练，支持LoRA、QLoRA等多种微调方法。</p>
+            <div class="entry-links">
+              <span class="entry-link"><span class="material-symbols-outlined" style="font-size:16px">model_training</span>开始微调</span>
+            </div>
+          </a>
+
+          <a class="entry-card" href="/industry_knowledge">
+            <span class="entry-icon material-symbols-outlined">business</span>
+            <strong>行业智库</strong>
+            <p>新能源、风电运维等行业知识库，提供专业领域的智能问答。</p>
+            <div class="entry-links">
+              <span class="entry-link"><span class="material-symbols-outlined" style="font-size:16px">psychology</span>行业咨询</span>
+            </div>
+          </a>
+
+          <a class="entry-card" href="/plugin_market">
+            <span class="entry-icon material-symbols-outlined">extension</span>
+            <strong>插件市场</strong>
+            <p>发现、安装和管理各类功能插件，扩展平台能力。</p>
+            <div class="entry-links">
+              <span class="entry-link"><span class="material-symbols-outlined" style="font-size:16px">storefront</span>浏览插件</span>
+            </div>
+          </a>
+
+          <a class="entry-card" href="/settings">
+            <span class="entry-icon material-symbols-outlined">settings</span>
+            <strong>系统设置</strong>
+            <p>配置API密钥、默认模型、界面主题等系统参数。</p>
+            <div class="entry-links">
+              <span class="entry-link"><span class="material-symbols-outlined" style="font-size:16px">tune</span>系统配置</span>
+            </div>
+          </a>
+
+          <a class="entry-card" href="/skill_creator">
+            <span class="entry-icon material-symbols-outlined">psychology</span>
+            <strong>技能创建器</strong>
+            <p>创建和管理AI技能，定义技能参数和执行逻辑。</p>
+            <div class="entry-links">
+              <span class="entry-link"><span class="material-symbols-outlined" style="font-size:16px">add_circle</span>创建技能</span>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <aside class="panel-card">
+        <div class="panel-head">
+          <div>
+            <h3>联调与运维入口</h3>
+            <p>右侧保留高频辅助入口，便于从控制台快速切换到相关页面。</p>
+          </div>
+          <span class="panel-tag"><span class="material-symbols-outlined">bolt</span><span>快捷导航</span></span>
+        </div>
+
+        <div class="list-stack">
+          <div class="list-item">
+            <strong>业务模块前台</strong>
+            <p>气象选址、电力交易和智能工单都已使用统一中文导航和同一套平台风格。</p>
+            <div class="quick-links">
+              <a href="/modules/weather-siting/app"><span class="material-symbols-outlined" style="font-size:16px">air</span><span>气象选址</span></a>
+              <a href="/modules/power-trading/app"><span class="material-symbols-outlined" style="font-size:16px">query_stats</span><span>电力交易</span></a>
+              <a href="/modules/smart-workorder/app"><span class="material-symbols-outlined" style="font-size:16px">assignment</span><span>智能工单</span></a>
+            </div>
+          </div>
+
+          <div class="list-item">
+            <strong>平台治理</strong>
+            <p>插件、设置、日志、应用中心这些管理页都保留独立入口。</p>
+            <div class="quick-links">
+              <a href="/plugins"><span class="material-symbols-outlined" style="font-size:16px">extension</span><span>插件市场</span></a>
+              <a href="/settings"><span class="material-symbols-outlined" style="font-size:16px">settings</span><span>平台设置</span></a>
+              <a href="/logs"><span class="material-symbols-outlined" style="font-size:16px">receipt_long</span><span>日志中心</span></a>
+              <a href="/apps"><span class="material-symbols-outlined" style="font-size:16px">apps</span><span>应用中心</span></a>
+            </div>
+          </div>
+
+          <div class="list-item">
+            <strong>模型与数据分析</strong>
+            <p>模型训练、长期记忆、分析和性能观测页面都可以从这里直接进入。</p>
+            <div class="quick-links">
+              <a href="/finetune"><span class="material-symbols-outlined" style="font-size:16px">tune</span><span>模型微调</span></a>
+              <a href="/llm-rl"><span class="material-symbols-outlined" style="font-size:16px">psychology</span><span>RLHF 平台</span></a>
+              <a href="/memory"><span class="material-symbols-outlined" style="font-size:16px">memory</span><span>长期记忆</span></a>
+              <a href="/analytics"><span class="material-symbols-outlined" style="font-size:16px">insights</span><span>分析看板</span></a>
+            </div>
+          </div>
+
+          <div class="list-item">
+            <strong>更多开发页</strong>
+            <p>适合做链路排查或能力展示的扩展入口。</p>
+            <div class="quick-links">
+              <a href="/dashboard"><span class="material-symbols-outlined" style="font-size:16px">dashboard</span><span>平台看板</span></a>
+              <a href="/async-tasks"><span class="material-symbols-outlined" style="font-size:16px">pending_actions</span><span>异步任务</span></a>
+              <a href="/webhooks"><span class="material-symbols-outlined" style="font-size:16px">webhook</span><span>Webhook</span></a>
+              <a href="/multi-agent"><span class="material-symbols-outlined" style="font-size:16px">groups</span><span>多 Agent</span></a>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </section>
+  </main>
+</body>
+</html>

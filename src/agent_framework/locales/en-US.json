@@ -1,0 +1,100 @@
+{
+  "app": {
+    "name": "Agent Framework",
+    "description": "Intelligent AI Application Development Platform"
+  },
+  "nav": {
+    "home": "Home",
+    "chat": "Wind Assistant",
+    "workflow": "Workflow",
+    "knowledge": "Knowledge",
+    "plugins": "Plugins",
+    "apps": "Apps",
+    "settings": "Settings"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "username": "Username",
+    "email": "Email",
+    "password": "Password",
+    "confirm_password": "Confirm Password",
+    "remember_me": "Remember me",
+    "forgot_password": "Forgot password?",
+    "no_account": "Don't have an account?",
+    "has_account": "Already have an account?",
+    "sign_up_now": "Sign up now",
+    "sign_in_now": "Sign in now"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "loading": "Loading...",
+    "success": "Success",
+    "error": "Error",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "close": "Close"
+  },
+  "workflow": {
+    "title": "Workflow Editor",
+    "new_workflow": "New Workflow",
+    "save_workflow": "Save Workflow",
+    "run_workflow": "Run Workflow",
+    "nodes": "Nodes",
+    "edges": "Edges",
+    "add_node": "Add Node",
+    "delete_node": "Delete Node",
+    "node_types": {
+      "start": "Start",
+      "end": "End",
+      "llm": "LLM",
+      "tool": "Tool",
+      "condition": "Condition",
+      "loop": "Loop"
+    }
+  },
+  "plugin": {
+    "market": "Plugin Market",
+    "installed": "Installed",
+    "install": "Install",
+    "uninstall": "Uninstall",
+    "details": "Details",
+    "rating": "Rating",
+    "downloads": "Downloads",
+    "version": "Version",
+    "author": "Author",
+    "category": "Category",
+    "all": "All",
+    "popular": "Popular",
+    "new": "New"
+  },
+  "knowledge": {
+    "title": "Knowledge Base",
+    "new_kb": "New Knowledge Base",
+    "upload_doc": "Upload Document",
+    "search": "Search",
+    "documents": "Documents",
+    "chunks": "Chunks"
+  },
+  "messages": {
+    "login_success": "Login successful",
+    "login_failed": "Login failed",
+    "register_success": "Registration successful",
+    "register_failed": "Registration failed",
+    "save_success": "Saved successfully",
+    "save_failed": "Save failed",
+    "delete_confirm": "Are you sure you want to delete?",
+    "network_error": "Network error, please try again later"
+  }
+}

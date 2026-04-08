@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SFT-RLHF 训练流水线 - Agent Framework</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --grad-start: #1363df;
+            --grad-end: #06b6d4;
+            --card-bg: rgba(255,255,255,.98);
+            --text: #1a1a2e;
+            --text2: #555;
+            --text3: #999;
+            --border: rgba(255,255,255,.6);
+            --primary: #1363df;
+            --primary-dark: #0f4eb3;
+            --success: #10b981;
+            --success-light: rgba(16,185,129,.1);
+            --danger: #ef4444;
+            --danger-light: rgba(239,68,68,.08);
+            --warning: #06b6d4;
+            --warning-light: rgba(6,182,212,.1);
+            --shadow: 0 10px 30px rgba(0,0,0,.2);
+            --shadow-sm: 0 4px 15px rgba(0,0,0,.08);
+            --glass: rgba(255,255,255,.95);
+            --radius: 18px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, var(--grad-start) 0%, var(--grad-end) 100%);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .container { max-width: 1200px; margin: 0 auto; animation: fadeIn .6s ease-out; }
+
+        .back-btn {
+            position: fixed; top: 20px; left: 20px; z-index: 200;
+            padding: 12px 22px; background: var(--glass);
+            border: 1px solid var(--border); border-radius: 14px;
+            color: var(--text); text-decoration: none;
+            font-weight: 600; font-size: 14px;
+            box-shadow: var(--shadow-sm); backdrop-filter: blur(12px);
+            transition: all .25s;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .back-btn:hover { box-shadow: var(--shadow); background: #fff; }
+
+        .header {
+            background: var(--card-bg); padding: 40px;
+            border-radius: 22px; box-shadow: var(--shadow);
+            margin-bottom: 28px; text-align: center;
+            position: relative; overflow: hidden;
+        }
+        .header::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+            background: linear-gradient(90deg, var(--grad-start), var(--grad-end), #e040fb, var(--grad-start));
+            background-size: 300% 100%; animation: shimmer 4s linear infinite;
+        }
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+        .header h1 {
+            font-size: 2.4em; font-weight: 800;
+            background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            margin-bottom: 10px;
+        }
+        .header p { color: var(--text2); font-size: 16px; }
+
+        .card {
+            background: var(--card-bg); border-radius: var(--radius);
+            padding: 28px; box-shadow: var(--shadow-sm);
+            margin-bottom: 20px;
+        }
+        .card-title {
+            font-size: 18px; font-weight: 700; margin-bottom: 18px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .card-title i { color: var(--primary); }
+
+        /* ── Pipeline Progress ── */
+        .pipeline-progress {
+            display: flex; align-items: center; justify-content: center;
+            gap: 0; margin: 30px 0; flex-wrap: wrap;
+        }
+        .stage-node {
+            display: flex; flex-direction: column; align-items: center;
+            cursor: pointer; position: relative; padding: 8px 16px;
+        }
+        .stage-circle {
+            width: 52px; height: 52px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; font-weight: 700;
+            background: #e5e7eb; color: #9ca3af;
+            transition: all .3s; border: 3px solid transparent;
+        }
+        .stage-node.active .stage-circle {
+            background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
+            color: #fff; border-color: rgba(102,126,234,.3);
+            box-shadow: 0 0 20px rgba(102,126,234,.3);
+        }
+        .stage-node.completed .stage-circle {
+            background: var(--success); color: #fff;
+        }
+        .stage-label {
+            margin-top: 8px; font-size: 13px; font-weight: 600;
+            color: var(--text3); white-space: nowrap;
+        }
+        .stage-node.active .stage-label { color: var(--primary); }
+        .stage-node.completed .stage-label { color: var(--success); }
+
+        .stage-connector {
+            width: 50px; height: 3px; background: #e5e7eb;
+            margin-bottom: 28px;
+        }
+        .stage-connector.done { background: var(--success); }
+
+        /* ── Stage Detail Card ── */
+        .stage-detail {
+            border: 2px solid rgba(102,126,234,.15);
+            border-radius: var(--radius);
+        }
+        .stage-detail .status-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600;
+        }
+        .status-pending { background: #f3f4f6; color: #6b7280; }
+        .status-active { background: rgba(102,126,234,.1); color: var(--primary); }
+        .status-completed { background: var(--success-light); color: var(--success); }
+
+        /* ── Buttons ── */
+        .btn {
+            padding: 12px 24px; border: none; border-radius: 12px;
+            font-size: 14px; font-weight: 600; cursor: pointer;
+            transition: all .2s; display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-primary { background: linear-gradient(135deg, var(--grad-start), var(--grad-end)); color: #fff; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(102,126,234,.3); }
+        .btn-success { background: var(--success); color: #fff; }
+        .btn-danger { background: var(--danger); color: #fff; }
+        .btn-outline {
+            background: transparent; border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+        .btn-outline:hover { background: rgba(102,126,234,.05); }
+        .btn-sm { padding: 8px 16px; font-size: 13px; }
+        .btn:disabled { opacity: .5; cursor: not-allowed; }
+        .btn-block { width: 100%; justify-content: center; }
+
+        /* ── Form ── */
+        .form-row { margin-bottom: 16px; }
+        .form-row label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px; }
+        .form-row input, .form-row select {
+            width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb;
+            border-radius: 12px; font-size: 14px; transition: border .2s;
+        }
+        .form-row input:focus, .form-row select:focus { border-color: var(--primary); outline: none; }
+        .form-row-inline { display: flex; gap: 16px; }
+        .form-row-inline .form-row { flex: 1; }
+
+        /* ── Endpoint Table ── */
+        .endpoint-table { width: 100%; border-collapse: collapse; }
+        .endpoint-table th, .endpoint-table td {
+            padding: 12px 16px; text-align: left; border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+        .endpoint-table th { font-weight: 600; color: var(--text2); background: #fafafa; }
+        .endpoint-badge {
+            padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 600;
+        }
+        .badge-running { background: var(--success-light); color: var(--success); }
+        .badge-stopped { background: #f3f4f6; color: #6b7280; }
+        .badge-starting { background: var(--warning-light); color: var(--warning); }
+        .badge-error { background: var(--danger-light); color: var(--danger); }
+
+        .empty-state {
+            text-align: center; padding: 40px; color: var(--text3);
+        }
+        .empty-state i { font-size: 40px; margin-bottom: 12px; display: block; }
+
+        /* ── Toast ── */
+        .toast {
+            position: fixed; bottom: 30px; right: 30px;
+            padding: 16px 24px; border-radius: 14px;
+            background: var(--card-bg); box-shadow: var(--shadow);
+            font-weight: 600; z-index: 9999;
+            transform: translateY(100px); opacity: 0;
+            transition: all .3s;
+        }
+        .toast.show { transform: translateY(0); opacity: 1; }
+
+        /* ── Modal ── */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,.5); z-index: 1000;
+            display: none; align-items: center; justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--card-bg); border-radius: var(--radius);
+            padding: 32px; width: 500px; max-width: 90vw;
+            box-shadow: var(--shadow);
+        }
+        .modal h3 { margin-bottom: 20px; font-size: 20px; }
+        .modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
+
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
+
+        .subtle-text { color: var(--text3); font-size: 12px; line-height: 1.6; }
+        .hidden { display: none !important; }
+        .endpoint-meta { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+        .meta-pill {
+            display:inline-flex; align-items:center; gap:6px;
+            padding:4px 8px; border-radius:999px; font-size:12px;
+            background:#f4f6fb; color:var(--text2);
+        }
+        .model-grid { display:grid; gap:12px; max-height:420px; overflow:auto; }
+        .model-card {
+            border:1px solid #e5e7eb; border-radius:14px; padding:14px;
+            background:linear-gradient(180deg,#fff,#fafbff);
+        }
+        .model-card-head { display:flex; align-items:center; gap:10px; justify-content:space-between; }
+        .model-card-name { font-weight:700; }
+        .model-card pre {
+            white-space:pre-wrap; word-break:break-word; margin-top:8px;
+            font-size:12px; color:var(--text2); background:#f9fafb; padding:10px; border-radius:10px;
+        }
+        .section-hint {
+            margin-top:10px; padding:10px 12px; border-radius:12px;
+            background:rgba(102,126,234,.08); color:var(--text2); font-size:13px;
+        }
+    </style>
+</head>
+<body>
+    <a href="{{ url_for('developer_home') }}" class="back-btn"><i class="fas fa-arrow-left"></i> 返回首页</a>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-route"></i> SFT-RLHF 训练流水线</h1>
+            <p>SFT 微调 &rarr; 启动模型 &rarr; 偏好收集 &rarr; 奖励模型训练 &rarr; DPO 微调 &mdash; 形成完整闭环</p>
+        </div>
+
+        <!-- Pipeline List / Create -->
+        <div class="card" id="pipelineListCard">
+            <div class="card-title">
+                <i class="fas fa-list"></i> 流水线列表
+                <button class="btn btn-primary btn-sm" style="margin-left:auto;" onclick="showCreateModal()">
+                    <i class="fas fa-plus"></i> 新建流水线
+                </button>
+            </div>
+            <div id="pipelineList">
+                <div class="empty-state"><i class="fas fa-inbox"></i><p>暂无流水线，点击右上角创建</p></div>
+            </div>
+        </div>
+
+        <!-- Pipeline Detail (hidden by default) -->
+        <div id="pipelineDetail" style="display:none;">
+            <!-- Progress Bar -->
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-route"></i> <span id="pipelineName"></span>
+                    <button class="btn btn-outline btn-sm" style="margin-left:auto;" onclick="backToList()">
+                        <i class="fas fa-list"></i> 返回列表
+                    </button>
+                </div>
+                <div class="pipeline-progress" id="progressBar"></div>
+            </div>
+
+            <!-- Stage Detail -->
+            <div class="card stage-detail" id="stageDetail"></div>
+
+            <!-- Endpoints Management -->
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-server"></i> Model Endpoints
+                    <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;">
+                        <button class="btn btn-outline btn-sm" onclick="showStartVllmModal()">
+                            <i class="fas fa-play"></i> Start Local Service
+                        </button>
+                        <button class="btn btn-outline btn-sm" onclick="showRegisterModal()">
+                            <i class="fas fa-plus"></i> Register External Endpoint
+                        </button>
+                    </div>
+                </div>
+                <table class="endpoint-table" id="endpointTable">
+                    <thead>
+                        <tr>
+                            <th>Model / UID</th>
+                            <th>Type</th>
+                            <th>Backend</th>
+                            <th>URL</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="endpointBody">
+                        <tr><td colspan="6" class="empty-state" style="padding:20px;">No endpoints yet</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Pipeline Modal -->
+    <div class="modal-overlay" id="createModal">
+        <div class="modal">
+            <h3><i class="fas fa-plus-circle" style="color:var(--primary);"></i> Create Pipeline</h3>
+            <div class="form-row">
+                <label>Pipeline Name</label>
+                <input type="text" id="newPipelineName" placeholder="Example: Qwen2.5-7B Support Tuning">
+            </div>
+            <div class="form-row">
+                <label>Base Model</label>
+                <input type="text" id="newBaseModel" placeholder="Example: Qwen/Qwen2.5-7B">
+            </div>
+            <div class="form-row">
+                <label>Existing SFT Task ID (optional)</label>
+                <input type="text" id="newSftTaskId" placeholder="Leave empty to start from SFT">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="hideCreateModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="createPipeline()"><i class="fas fa-check"></i> Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Endpoint Modal -->
+    <div class="modal-overlay" id="registerModal">
+        <div class="modal" style="width:720px;max-width:95vw;">
+            <h3><i class="fas fa-server" style="color:var(--primary);"></i> Register External Endpoint</h3>
+            <div class="form-row-inline">
+                <div class="form-row">
+                    <label>Backend</label>
+                    <select id="regBackend" onchange="toggleRegisterBackendFields()">
+                        <option value="xinference">Xinference</option>
+                        <option value="manual">OpenAI Compatible</option>
+                        <option value="vllm">vLLM</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label>Endpoint Type</label>
+                    <select id="regEndpointType">
+                        <option value="chat">Chat / LLM</option>
+                        <option value="embedding">Embedding</option>
+                        <option value="rerank">Rerank</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row-inline">
+                <div class="form-row">
+                    <label>API Base URL</label>
+                    <input type="text" id="regBaseUrl" placeholder="http://127.0.0.1:9997/v1">
+                </div>
+                <div class="form-row">
+                    <label>API Key (optional)</label>
+                    <input type="text" id="regApiKey" placeholder="Leave empty if auth is disabled">
+                </div>
+            </div>
+            <div class="form-row-inline">
+                <div class="form-row">
+                    <label>Model Name</label>
+                    <input type="text" id="regModelName" placeholder="Example: qwen2.5-instruct / bge-m3 / bge-reranker-v2-m3">
+                </div>
+                <div class="form-row" id="regModelUidRow">
+                    <label>Model UID (Xinference optional)</label>
+                    <input type="text" id="regModelUid" placeholder="Example: model-uid">
+                </div>
+            </div>
+            <div class="form-row-inline">
+                <div class="form-row" style="flex:2;">
+                    <label>Auto-discover models from /v1/models</label>
+                    <select id="regDiscoveredModels" onchange="handleRegisterModelSelect()">
+                        <option value="">Fill Base URL first, then click Discover Models</option>
+                    </select>
+                </div>
+                <div class="form-row" style="display:flex;align-items:flex-end;">
+                    <button class="btn btn-outline btn-block" onclick="discoverRegisterModels()">
+                        <i class="fas fa-wand-magic-sparkles"></i> Discover Models
+                    </button>
+                </div>
+            </div>
+            <div class="section-hint">
+                Works with vLLM, Xinference, and generic OpenAI-compatible endpoints. You can directly register chat, embedding, and rerank models.
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="hideRegisterModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="registerEndpoint()"><i class="fas fa-check"></i> Register</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Start Local Serving Modal -->
+    <div class="modal-overlay" id="startVllmModal">
+        <div class="modal" style="width:760px;max-width:96vw;">
+            <h3><i class="fas fa-rocket" style="color:var(--primary);"></i> Start Local vLLM / Xinference</h3>
+            <div class="form-row-inline">
+                <div class="form-row">
+                    <label>Backend</label>
+                    <select id="startBackend" onchange="toggleStartBackendFields()">
+                        <option value="vllm">vLLM</option>
+                        <option value="xinference">Xinference</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label>Endpoint Type</label>
+                    <select id="startEndpointType">
+                        <option value="chat">Chat / LLM</option>
+                        <option value="embedding">Embedding</option>
+                        <option value="rerank">Rerank</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="startVllmFields">
+                <div class="form-row">
+                    <label>Model Path</label>
+                    <input type="text" id="vllmModelPath" placeholder="Example: C:\models\Qwen2.5-7B-Instruct">
+                </div>
+                <div class="form-row-inline">
+                    <div class="form-row">
+                        <label>Served Model Name</label>
+                        <input type="text" id="vllmModelName" placeholder="Example: qwen2.5-7b-instruct">
+                    </div>
+                    <div class="form-row">
+                        <label>Port</label>
+                        <input type="number" id="vllmPort" placeholder="8001">
+                    </div>
+                </div>
+                <div class="form-row-inline">
+                    <div class="form-row">
+                        <label>Host</label>
+                        <input type="text" id="vllmHost" value="127.0.0.1">
+                    </div>
+                    <div class="form-row">
+                        <label>Tensor Parallel</label>
+                        <input type="number" id="vllmTp" value="1" min="1">
+                    </div>
+                </div>
+                <div class="form-row-inline">
+                    <div class="form-row">
+                        <label>GPU Memory Utilization</label>
+                        <input type="number" id="vllmGpuMem" value="0.9" min="0.1" max="1" step="0.05">
+                    </div>
+                    <div class="form-row">
+                        <label>Max Model Length</label>
+                        <input type="number" id="vllmMaxLen" placeholder="Optional, 0 = default">
+                    </div>
+                </div>
+                <div class="form-row-inline">
+                    <div class="form-row">
+                        <label>dtype</label>
+                        <select id="vllmDtype">
+                            <option value="auto">auto</option>
+                            <option value="float16">float16</option>
+                            <option value="bfloat16">bfloat16</option>
+                            <option value="float32">float32</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label>API Key (optional)</label>
+                        <input type="text" id="vllmApiKey" placeholder="Leave empty if auth is disabled">
+                    </div>
+                </div>
+            </div>
+
+            <div id="startXinferenceFields" class="hidden">
+                <div class="form-row-inline">
+                    <div class="form-row">
+                        <label>Host</label>
+                        <input type="text" id="xinferenceHost" value="127.0.0.1">
+                    </div>
+                    <div class="form-row">
+                        <label>Port</label>
+                        <input type="number" id="xinferencePort" placeholder="9997">
+                    </div>
+                </div>
+                <div class="form-row-inline">
+                    <div class="form-row">
+                        <label>Default Model Name (optional)</label>
+                        <input type="text" id="xinferenceModelName" placeholder="Leave empty to start service only">
+                    </div>
+                    <div class="form-row">
+                        <label>Model UID (optional)</label>
+                        <input type="text" id="xinferenceModelUid" placeholder="Fill only if known">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label>API Key (optional)</label>
+                    <input type="text" id="xinferenceApiKey" placeholder="Use only if the endpoint requires auth">
+                </div>
+                <div class="section-hint">
+                    After Xinference starts, use the endpoint table to read /v1/models and register chat, embedding, or rerank models into the system.
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="hideStartVllmModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="startVllmEndpoint()"><i class="fas fa-play"></i> Start</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Models Modal -->
+    <div class="modal-overlay" id="modelsModal">
+        <div class="modal" style="width:760px;max-width:96vw;">
+            <h3><i class="fas fa-layer-group" style="color:var(--primary);"></i> Available Models</h3>
+            <div id="modelsModalTitle" class="subtle-text" style="margin-bottom:14px;"></div>
+            <div id="modelsBody" class="model-grid">
+                <div class="empty-state" style="padding:20px;">No models loaded</div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="hideModelsModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+<script>
+const STAGES = [
+    {key:'sft', name:'SFT', icon:'fa-graduation-cap', desc:'Supervised fine-tuning'},
+    {key:'serving', name:'Serving', icon:'fa-server', desc:'Start vLLM / Xinference or register external endpoints'},
+    {key:'preference', name:'Preference', icon:'fa-hand-pointer', desc:'Collect A/B preference data'},
+    {key:'reward', name:'Reward', icon:'fa-brain', desc:'Train a Bradley-Terry reward model'},
+    {key:'dpo', name:'DPO', icon:'fa-rocket', desc:'Export DPO data and run the second fine-tune'},
+];
+
+let currentPipeline = null;
+let pipelines = [];
+let lastRegisterModels = [];
+let lastEndpointModels = [];
+let lastViewedEndpoint = null;
+
+async function api(url, opts={}) {
+    const r = await fetch(url, {
+        headers: {'Content-Type':'application/json'},
+        ...opts,
+        body: opts.body ? JSON.stringify(opts.body) : undefined,
+    });
+    return r.json();
+}
+
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function endpointTypeLabel(type) {
+    return ({chat:'Chat', embedding:'Embedding', rerank:'Rerank'})[type] || (type || '-');
+}
+
+function backendLabel(backend) {
+    return ({xinference:'Xinference', vllm:'vLLM', manual:'OpenAI Compatible'})[backend] || (backend || '-');
+}
+
+function setSelectOptions(selectId, models, emptyText='No models found') {
+    const el = document.getElementById(selectId);
+    if (!el) return;
+    if (!models.length) {
+        el.innerHTML = `<option value="">${emptyText}</option>`;
+        return;
+    }
+    el.innerHTML = '<option value="">Select a model</option>' + models.map((model, idx) => {
+        const uid = model.model_uid ? ` / ${model.model_uid}` : '';
+        return `<option value="${idx}">${model.model_name || model.id}${uid} [${endpointTypeLabel(model.endpoint_type)}]</option>`;
+    }).join('');
+}
+
+function showCreateModal() { document.getElementById('createModal').classList.add('active'); }
+function hideCreateModal() { document.getElementById('createModal').classList.remove('active'); }
+function showRegisterModal() { document.getElementById('registerModal').classList.add('active'); toggleRegisterBackendFields(); }
+function hideRegisterModal() { document.getElementById('registerModal').classList.remove('active'); }
+function showStartVllmModal() { document.getElementById('startVllmModal').classList.add('active'); toggleStartBackendFields(); }
+function hideStartVllmModal() { document.getElementById('startVllmModal').classList.remove('active'); }
+function showModelsModal() { document.getElementById('modelsModal').classList.add('active'); }
+function hideModelsModal() { document.getElementById('modelsModal').classList.remove('active'); }
+
+function toggleRegisterBackendFields() {
+    const backend = document.getElementById('regBackend').value;
+    document.getElementById('regModelUidRow').style.display = backend === 'xinference' ? 'block' : 'none';
+    document.getElementById('regBaseUrl').placeholder = backend === 'xinference'
+        ? 'http://127.0.0.1:9997/v1'
+        : 'http://127.0.0.1:8001/v1';
+}
+
+function toggleStartBackendFields() {
+    const backend = document.getElementById('startBackend').value;
+    document.getElementById('startVllmFields').classList.toggle('hidden', backend !== 'vllm');
+    document.getElementById('startXinferenceFields').classList.toggle('hidden', backend !== 'xinference');
+}
+
+async function loadPipelines() {
+    const r = await api('/api/pipeline/list');
+    pipelines = r.data || [];
+    renderPipelineList();
+}
+
+function renderPipelineList() {
+    const el = document.getElementById('pipelineList');
+    if (!pipelines.length) {
+        el.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>No pipelines yet. Create one from the top right.</p></div>';
+        return;
+    }
+    el.innerHTML = pipelines.map(p => {
+        const stage = STAGES[p.current_stage] || STAGES[0];
+        const pct = Math.round((p.current_stage / STAGES.length) * 100);
+        return `
+            <div style="display:flex;align-items:center;padding:16px;border-bottom:1px solid #f0f0f0;cursor:pointer;"
+                 onclick="openPipeline('${p.id}')">
+                <div style="flex:1;">
+                    <div style="font-weight:700;font-size:16px;">${p.name}</div>
+                    <div style="color:var(--text3);font-size:13px;margin-top:4px;">
+                        Current stage: ${stage.name} &middot; Progress ${pct}%
+                    </div>
+                </div>
+                <div style="width:200px;height:6px;background:#e5e7eb;border-radius:3px;margin:0 20px;">
+                    <div style="width:${pct}%;height:100%;background:linear-gradient(90deg,var(--grad-start),var(--grad-end));border-radius:3px;transition:width .3s;"></div>
+                </div>
+                <i class="fas fa-chevron-right" style="color:var(--text3);"></i>
+            </div>`;
+    }).join('');
+}
+
+async function createPipeline() {
+    const name = document.getElementById('newPipelineName').value.trim();
+    const base_model = document.getElementById('newBaseModel').value.trim();
+    const sft_task_id = document.getElementById('newSftTaskId').value.trim();
+    const r = await api('/api/pipeline/create', {
+        method: 'POST',
+        body: { name, base_model, sft_task_id }
+    });
+    if (r.success) {
+        showToast('Pipeline created');
+        hideCreateModal();
+        loadPipelines();
+    } else {
+        showToast('Create failed: ' + (r.error || 'unknown error'));
+    }
+}
+
+async function openPipeline(id) {
+    const r = await api(`/api/pipeline/${id}`);
+    if (!r.success) {
+        showToast('Failed to load pipeline');
+        return;
+    }
+    currentPipeline = r.data;
+    document.getElementById('pipelineListCard').style.display = 'none';
+    document.getElementById('pipelineDetail').style.display = 'block';
+    document.getElementById('pipelineName').textContent = currentPipeline.name;
+    renderProgress();
+    renderStageDetail(currentPipeline.current_stage);
+    loadEndpoints();
+}
+
+function backToList() {
+    document.getElementById('pipelineListCard').style.display = 'block';
+    document.getElementById('pipelineDetail').style.display = 'none';
+    currentPipeline = null;
+    loadPipelines();
+}
+
+function renderProgress() {
+    const bar = document.getElementById('progressBar');
+    let html = '';
+    STAGES.forEach((s, i) => {
+        const stageData = currentPipeline.stages[s.key] || {};
+        let cls = '';
+        if (stageData.status === 'completed') cls = 'completed';
+        else if (i === currentPipeline.current_stage) cls = 'active';
+        if (i > 0) html += `<div class="stage-connector ${i <= currentPipeline.current_stage ? 'done' : ''}"></div>`;
+        html += `
+            <div class="stage-node ${cls}" onclick="renderStageDetail(${i})">
+                <div class="stage-circle"><i class="fas ${s.icon}"></i></div>
+                <div class="stage-label">${s.name}</div>
+            </div>`;
+    });
+    bar.innerHTML = html;
+}
+
+function renderStageDetail(idx) {
+    const s = STAGES[idx];
+    const stageData = currentPipeline.stages[s.key] || {};
+    const isCurrent = idx === currentPipeline.current_stage;
+    const statusCls = stageData.status === 'completed' ? 'status-completed' : (isCurrent ? 'status-active' : 'status-pending');
+    const statusText = stageData.status === 'completed' ? 'Completed' : (isCurrent ? 'In Progress' : 'Pending');
+    let actionHtml = '';
+    if (isCurrent && stageData.status !== 'completed') actionHtml = getStageActions(s.key);
+
+    document.getElementById('stageDetail').innerHTML = `
+        <div style="padding:28px;">
+            <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+                <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--grad-start),var(--grad-end));display:flex;align-items:center;justify-content:center;">
+                    <i class="fas ${s.icon}" style="color:#fff;font-size:20px;"></i>
+                </div>
+                <div>
+                    <h2 style="font-size:22px;">${s.name}</h2>
+                    <p style="color:var(--text2);font-size:14px;">${s.desc}</p>
+                </div>
+                <span class="status-badge ${statusCls}" style="margin-left:auto;">${statusText}</span>
+            </div>
+            ${actionHtml}
+        </div>`;
+}
+
+function getStageActions(key) {
+    switch (key) {
+        case 'sft':
+            return `
+                <p style="color:var(--text2);margin-bottom:16px;">Start an SFT task or pick an already-finished fine-tuned model.</p>
+                <div class="form-row-inline">
+                    <button class="btn btn-primary" onclick="window.open('/finetune','_blank')">
+                        <i class="fas fa-graduation-cap"></i> Open Fine-tuning Page
+                    </button>
+                    <button class="btn btn-outline" onclick="loadCompletedModels()">
+                        <i class="fas fa-search"></i> Choose Finished Model
+                    </button>
+                    <button class="btn btn-success" onclick="advanceStage()">
+                        <i class="fas fa-arrow-right"></i> Mark Stage Complete
+                    </button>
+                </div>
+                <div id="completedModels" style="margin-top:16px;"></div>`;
+
+        case 'serving':
+            return `
+                <p style="color:var(--text2);margin-bottom:16px;">Start local vLLM / Xinference or register external chat, embedding, and rerank endpoints.</p>
+                <div class="form-row-inline">
+                    <button class="btn btn-primary" onclick="showStartVllmModal()">
+                        <i class="fas fa-play"></i> Start Local Service
+                    </button>
+                    <button class="btn btn-outline" onclick="showRegisterModal()">
+                        <i class="fas fa-plus"></i> Register External Endpoint
+                    </button>
+                    <button class="btn btn-success" onclick="advanceWithEndpoint()">
+                        <i class="fas fa-arrow-right"></i> Endpoint Ready, Continue
+                    </button>
+                </div>`;
+
+        case 'preference':
+            return `
+                <p style="color:var(--text2);margin-bottom:16px;">Go to the RLHF panel for A/B comparison and preference labeling.</p>
+                <div class="form-row-inline">
+                    <button class="btn btn-primary" onclick="window.open('/llm-rl','_blank')">
+                        <i class="fas fa-hand-pointer"></i> Open RLHF Panel
+                    </button>
+                    <button class="btn btn-success" onclick="advanceStage()">
+                        <i class="fas fa-arrow-right"></i> Preference Collection Done
+                    </button>
+                </div>`;
+
+        case 'reward':
+            return `
+                <p style="color:var(--text2);margin-bottom:16px;">Train a Bradley-Terry reward model from preference data.</p>
+                <div class="form-row-inline">
+                    <button class="btn btn-primary" onclick="trainRewardModel()">
+                        <i class="fas fa-brain"></i> Train Reward Model
+                    </button>
+                    <button class="btn btn-success" onclick="advanceStage()">
+                        <i class="fas fa-arrow-right"></i> Training Done, Continue
+                    </button>
+                </div>
+                <div id="rewardResult" style="margin-top:16px;"></div>`;
+
+        case 'dpo':
+            return `
+                <p style="color:var(--text2);margin-bottom:16px;">Export the DPO dataset and then launch DPO fine-tuning.</p>
+                <div class="form-row-inline">
+                    <button class="btn btn-outline" onclick="exportDpoDataset()">
+                        <i class="fas fa-file-export"></i> Export DPO Dataset
+                    </button>
+                    <button class="btn btn-primary" onclick="window.open('/finetune','_blank')">
+                        <i class="fas fa-rocket"></i> Open Fine-tuning Page (DPO)
+                    </button>
+                    <button class="btn btn-success" onclick="advanceStage()">
+                        <i class="fas fa-check"></i> Finish Pipeline
+                    </button>
+                </div>
+                <div id="dpoResult" style="margin-top:16px;"></div>`;
+
+        default:
+            return '';
+    }
+}
+
+async function advanceStage() {
+    const r = await api(`/api/pipeline/${currentPipeline.id}/advance`, { method: 'POST', body: {} });
+    if (r.success) {
+        currentPipeline = r.data;
+        renderProgress();
+        renderStageDetail(currentPipeline.current_stage);
+        showToast('Moved to the next stage');
+    }
+}
+
+async function advanceWithEndpoint() {
+    const epR = await api('/api/pipeline/endpoints/list?endpoint_type=chat&status=running');
+    const eps = epR.data || [];
+    if (eps.length) {
+        await api('/api/llm-rl/endpoint/set', {
+            method: 'POST',
+            body: {
+                base_url: eps[0].base_url,
+                model: eps[0].model_name,
+                api_key: eps[0].api_key || 'not-needed'
+            }
+        });
+    }
+    advanceStage();
+}
+
+async function loadCompletedModels() {
+    const r = await fetch('/api/finetune/completed-models');
+    const data = await r.json();
+    const models = data.models || [];
+    const el = document.getElementById('completedModels');
+    if (!models.length) {
+        el.innerHTML = '<p style="color:var(--text3);">No finished fine-tuned model found</p>';
+        return;
+    }
+    el.innerHTML = models.map(m => `
+        <div style="display:flex;align-items:center;padding:12px;border:1px solid #e5e7eb;border-radius:12px;margin-bottom:8px;">
+            <div style="flex:1;">
+                <div style="font-weight:600;">${m.task_name || m.task_id}</div>
+                <div style="font-size:13px;color:var(--text3);">${m.base_model} &middot; ${m.train_method} &middot; ${m.model_path}</div>
+            </div>
+            <button class="btn btn-sm btn-outline" onclick='selectModel(${JSON.stringify(m.task_id || '')}, ${JSON.stringify(m.model_path || '')})'>Select</button>
+        </div>
+    `).join('');
+}
+
+async function selectModel(taskId, modelPath) {
+    await api(`/api/pipeline/${currentPipeline.id}/stage/sft/update`, {
+        method: 'POST',
+        body: { data: { sft_task_id: taskId, model_path: modelPath } }
+    });
+    currentPipeline.config.sft_task_id = taskId;
+    currentPipeline.config.model_path = modelPath;
+    showToast('Selected model: ' + modelPath);
+}
+
+async function trainRewardModel() {
+    const el = document.getElementById('rewardResult');
+    el.innerHTML = '<p style="color:var(--primary);"><i class="fas fa-spinner fa-spin"></i> Training...</p>';
+    const r = await api('/api/llm-rl/reward-model/train', { method: 'POST', body: {} });
+    if (r.success) {
+        const d = r.data;
+        el.innerHTML = `<p style="color:var(--success);"><i class="fas fa-check-circle"></i> Training complete. Accuracy: ${(d.accuracy * 100).toFixed(1)}%, Samples: ${d.samples}</p>`;
+    } else {
+        el.innerHTML = `<p style="color:var(--danger);"><i class="fas fa-times-circle"></i> ${r.error}</p>`;
+    }
+}
+
+async function exportDpoDataset() {
+    const el = document.getElementById('dpoResult');
+    el.innerHTML = '<p style="color:var(--primary);"><i class="fas fa-spinner fa-spin"></i> Exporting...</p>';
+    const r = await api('/api/finetune/import-dpo-dataset', { method: 'POST', body: {} });
+    if (r.success) {
+        el.innerHTML = `<p style="color:var(--success);"><i class="fas fa-check-circle"></i> Exported ${r.count} DPO samples to ${r.filename}</p>`;
+    } else {
+        el.innerHTML = `<p style="color:var(--danger);"><i class="fas fa-times-circle"></i> ${r.error}</p>`;
+    }
+}
+
+async function loadEndpoints() {
+    const r = await api('/api/pipeline/endpoints/list');
+    const eps = r.data || [];
+    const tbody = document.getElementById('endpointBody');
+    if (!eps.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state" style="padding:20px;">No endpoints yet</td></tr>';
+        return;
+    }
+    tbody.innerHTML = eps.map(ep => `
+        <tr>
+            <td>
+                <div style="font-weight:700;">${ep.model_name || '-'}</div>
+                <div style="font-size:12px;color:var(--text3);margin-top:4px;">${ep.model_uid || 'No UID'}</div>
+            </td>
+            <td><span class="endpoint-badge">${endpointTypeLabel(ep.endpoint_type)}</span></td>
+            <td><span class="endpoint-badge">${backendLabel(ep.backend)}</span></td>
+            <td style="font-size:13px;color:var(--text2);word-break:break-all;">${ep.base_url}</td>
+            <td><span class="endpoint-badge badge-${ep.status}">${ep.status}</span></td>
+            <td>
+                ${ep.status === 'running' && ep.endpoint_type === 'chat' ? `<button class="btn btn-sm btn-outline" onclick="useEndpoint('${ep.endpoint_id}')" title="Use as current RLHF chat model"><i class="fas fa-plug"></i></button>` : ''}
+                ${ep.status === 'running' ? `<button class="btn btn-sm btn-outline" onclick="viewEndpointModels('${ep.endpoint_id}')" title="Read /v1/models"><i class="fas fa-layer-group"></i></button>` : ''}
+                <button class="btn btn-sm btn-outline" onclick="healthCheck('${ep.endpoint_id}')" title="Health check"><i class="fas fa-heartbeat"></i></button>
+                ${ep.process_id ? `<button class="btn btn-sm btn-danger" onclick="stopEndpoint('${ep.endpoint_id}')" title="Stop local process"><i class="fas fa-stop"></i></button>` : ''}
+                <button class="btn btn-sm btn-danger" onclick="removeEndpoint('${ep.endpoint_id}')" style="margin-left:4px;" title="Remove"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+async function discoverRegisterModels() {
+    const base_url = document.getElementById('regBaseUrl').value.trim();
+    const api_key = document.getElementById('regApiKey').value.trim();
+    if (!base_url) {
+        showToast('Please fill Base URL first');
+        return;
+    }
+    const r = await api('/api/pipeline/endpoints/models/discover', {
+        method: 'POST',
+        body: { base_url, api_key }
+    });
+    if (!r.success) {
+        showToast('Discover failed: ' + (r.error || ''));
+        return;
+    }
+    lastRegisterModels = r.data || [];
+    setSelectOptions('regDiscoveredModels', lastRegisterModels, 'No models returned');
+    showToast(`Discovered ${lastRegisterModels.length} models`);
+}
+
+function handleRegisterModelSelect() {
+    const idx = document.getElementById('regDiscoveredModels').value;
+    if (idx === '') return;
+    const model = lastRegisterModels[Number(idx)];
+    if (!model) return;
+    document.getElementById('regModelName').value = model.model_name || model.id || '';
+    document.getElementById('regModelUid').value = model.model_uid || '';
+    document.getElementById('regEndpointType').value = model.endpoint_type || 'chat';
+}
+
+async function registerEndpoint() {
+    const backend = document.getElementById('regBackend').value;
+    const endpoint_type = document.getElementById('regEndpointType').value;
+    const base_url = document.getElementById('regBaseUrl').value.trim();
+    const api_key = document.getElementById('regApiKey').value.trim();
+    const model_name = document.getElementById('regModelName').value.trim();
+    const model_uid = document.getElementById('regModelUid').value.trim();
+    if (!base_url || !model_name) {
+        showToast('Please fill all required fields');
+        return;
+    }
+    const r = await api('/api/pipeline/endpoints/register', {
+        method: 'POST',
+        body: {
+            backend,
+            endpoint_type,
+            base_url,
+            api_key,
+            model_name,
+            model_uid,
+            finetune_task_id: currentPipeline?.config?.sft_task_id || ''
+        }
+    });
+    if (r.success) {
+        showToast('Endpoint registered');
+        hideRegisterModal();
+        loadEndpoints();
+    } else {
+        showToast('Register failed: ' + (r.error || ''));
+    }
+}
+
+async function startVllmEndpoint() {
+    const backend = document.getElementById('startBackend').value;
+    const endpoint_type = document.getElementById('startEndpointType').value;
+    let body = {
+        backend,
+        endpoint_type,
+        finetune_task_id: currentPipeline?.config?.sft_task_id || ''
+    };
+
+    if (backend === 'vllm') {
+        const model_path = document.getElementById('vllmModelPath').value.trim();
+        if (!model_path) {
+            showToast('Please fill model path');
+            return;
+        }
+        body = {
+            ...body,
+            model_path,
+            model_name: document.getElementById('vllmModelName').value.trim(),
+            port: Number(document.getElementById('vllmPort').value || 0),
+            host: document.getElementById('vllmHost').value.trim() || '127.0.0.1',
+            tensor_parallel_size: Number(document.getElementById('vllmTp').value || 1),
+            gpu_memory_utilization: Number(document.getElementById('vllmGpuMem').value || 0.9),
+            max_model_len: Number(document.getElementById('vllmMaxLen').value || 0),
+            dtype: document.getElementById('vllmDtype').value,
+            api_key: document.getElementById('vllmApiKey').value.trim(),
+        };
+    } else {
+        body = {
+            ...body,
+            host: document.getElementById('xinferenceHost').value.trim() || '127.0.0.1',
+            port: Number(document.getElementById('xinferencePort').value || 0),
+            model_name: document.getElementById('xinferenceModelName').value.trim(),
+            model_uid: document.getElementById('xinferenceModelUid').value.trim(),
+            api_key: document.getElementById('xinferenceApiKey').value.trim(),
+        };
+    }
+
+    const r = await api('/api/pipeline/endpoints/start', { method: 'POST', body });
+    if (r.success) {
+        showToast(backend === 'vllm' ? 'vLLM startup submitted' : 'Xinference startup submitted');
+        hideStartVllmModal();
+        loadEndpoints();
+    } else {
+        showToast('Start failed: ' + (r.error || ''));
+    }
+}
+
+async function useEndpoint(endpointId) {
+    const endpointsResp = await api('/api/pipeline/endpoints/list');
+    const endpoint = (endpointsResp.data || []).find(ep => ep.endpoint_id === endpointId);
+    if (!endpoint) {
+        showToast('Endpoint not found');
+        return;
+    }
+    if (endpoint.endpoint_type !== 'chat') {
+        showToast('Only chat endpoints can be used as the RLHF current model');
+        return;
+    }
+    const r = await api('/api/llm-rl/endpoint/set', {
+        method: 'POST',
+        body: {
+            base_url: endpoint.base_url,
+            model: endpoint.model_name,
+            api_key: endpoint.api_key || 'not-needed'
+        }
+    });
+    if (r.success) {
+        showToast('RLHF model updated');
+    } else {
+        showToast('Set endpoint failed: ' + (r.error || ''));
+    }
+}
+
+async function viewEndpointModels(endpointId) {
+    const endpointsResp = await api('/api/pipeline/endpoints/list');
+    const endpoint = (endpointsResp.data || []).find(ep => ep.endpoint_id === endpointId);
+    if (!endpoint) {
+        showToast('Endpoint not found');
+        return;
+    }
+    const r = await api(`/api/pipeline/endpoints/${endpointId}/models`);
+    if (!r.success) {
+        showToast('Read model list failed: ' + (r.error || ''));
+        return;
+    }
+    lastViewedEndpoint = endpoint;
+    lastEndpointModels = r.data || [];
+    document.getElementById('modelsModalTitle').textContent = `${endpoint.model_name || endpoint.endpoint_id} · ${endpoint.base_url}`;
+    const body = document.getElementById('modelsBody');
+    if (!lastEndpointModels.length) {
+        body.innerHTML = '<div class="empty-state" style="padding:20px;">This endpoint returned no models</div>';
+    } else {
+        body.innerHTML = lastEndpointModels.map((model, idx) => `
+            <div class="model-card">
+                <div class="model-card-head">
+                    <div>
+                        <div class="model-card-name">${model.model_name || model.id || '-'}</div>
+                        <div class="endpoint-meta">
+                            <span class="meta-pill">${endpointTypeLabel(model.endpoint_type)}</span>
+                            <span class="meta-pill">${model.model_uid || 'No UID'}</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-sm btn-outline" onclick="prefillRegisterFromModel(${idx})">
+                        <i class="fas fa-arrow-up-right-from-square"></i> Fill Register Form
+                    </button>
+                </div>
+                <pre>${JSON.stringify(model.details || {}, null, 2)}</pre>
+            </div>
+        `).join('');
+    }
+    showModelsModal();
+}
+
+function prefillRegisterFromModel(index) {
+    const model = lastEndpointModels[index];
+    if (!model || !lastViewedEndpoint) return;
+    document.getElementById('regBackend').value = lastViewedEndpoint.backend || 'manual';
+    document.getElementById('regBaseUrl').value = lastViewedEndpoint.base_url || '';
+    document.getElementById('regApiKey').value = lastViewedEndpoint.api_key || '';
+    document.getElementById('regModelName').value = model.model_name || model.id || '';
+    document.getElementById('regModelUid').value = model.model_uid || '';
+    document.getElementById('regEndpointType').value = model.endpoint_type || 'chat';
+    toggleRegisterBackendFields();
+    hideModelsModal();
+    showRegisterModal();
+}
+
+async function healthCheck(id) {
+    const r = await api(`/api/pipeline/endpoints/${id}/health`);
+    showToast(r.data?.healthy ? 'Health check passed' : 'Health check failed');
+}
+
+async function stopEndpoint(id) {
+    await api('/api/pipeline/endpoints/stop', { method: 'POST', body: { endpoint_id: id } });
+    showToast('Endpoint stopped');
+    loadEndpoints();
+}
+
+async function removeEndpoint(id) {
+    await api(`/api/pipeline/endpoints/${id}`, { method: 'DELETE' });
+    showToast('Endpoint removed');
+    loadEndpoints();
+}
+
+toggleRegisterBackendFields();
+toggleStartBackendFields();
+loadPipelines();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,16 @@
+.git
+.gitignore
+.idea
+.vscode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+.env
+.env.local
+.claude/
+.agent_threads/
+data/
+static/images/
+风起时域商业计划书-2026-new.pdf-969b5b8f-9b2b-4b84-b81e-74e53fbacbf0/

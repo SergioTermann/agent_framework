@@ -1,0 +1,32 @@
+plugins:
+  data_processor:
+    enabled: true
+    config:
+      max_records: 10000
+      cache_enabled: true
+      api_timeout: 30
+    description: "数据处理插件，提供数据清洗、转换、分析功能"
+
+  # 示例：其他插件配置
+  # notification_plugin:
+  #   enabled: false
+  #   config:
+  #     email_provider: "smtp"
+  #     smtp_host: "smtp.gmail.com"
+  #     smtp_port: 587
+  #   description: "通知插件，支持邮件、短信、Webhook通知"
+
+  # ai_enhancement:
+  #   enabled: false
+  #   config:
+  #     model_provider: "openai"
+  #     api_key: "${OPENAI_API_KEY}"
+  #     max_tokens: 4000
+  #   description: "AI增强插件，提供高级AI功能"
+
+# 全局插件设置
+settings:
+  auto_load: true
+  plugin_timeout: 60
+  max_concurrent_plugins: 10
+  log_level: "INFO"

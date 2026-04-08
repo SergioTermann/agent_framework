@@ -1,0 +1,2068 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>因果推理引擎 - 风起时域</title>
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet"> -->
+    <link rel="stylesheet" href="/static/common-theme.css?v=3.0">
+    <style>
+        body { overflow-y: auto; }
+
+        .container {
+            max-width: 2200px;
+            margin: 0 auto;
+            padding: 30px 80px 80px;
+            position: relative;
+            z-index: 5;
+            font-size: 17px;
+        }
+
+        /* ── Header ── */
+        .page-header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding-top: 65px;
+        }
+        .page-header h1 {
+            font-size: 3.8em;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 50%, #9b59b6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 300;
+        }
+        .page-header p { color: #7f8c8d; font-size: 1.35em; }
+
+        /* ── 返回按钮 ── */
+        .nav-bar {
+            position: fixed; top: 15px; left: 20px; z-index: 100;
+        }
+
+        /* ── Tabs ── */
+        .tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 35px;
+            background: rgba(255,255,255,0.95);
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(184, 134, 11, 0.1);
+            border: 1px solid rgba(184, 134, 11, 0.15);
+        }
+        .tab {
+            flex: 1;
+            padding: 22px 14px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #7f8c8d;
+            transition: all 0.3s;
+            text-align: center;
+            border-bottom: 3px solid transparent;
+            font-family: inherit;
+        }
+        .tab:hover { background: rgba(52,152,219,0.05); color: #2c3e50; }
+        .tab.active {
+            color: #3498db;
+            background: rgba(52,152,219,0.08);
+            border-bottom-color: #3498db;
+            font-weight: 600;
+        }
+        .tab .tab-icon { display: block; font-size: 26px; margin-bottom: 6px; }
+
+        /* ── Tab content ── */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ── Card ── */
+        .panel {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 14px;
+            padding: 38px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 20px rgba(184, 134, 11, 0.1);
+            border: 1px solid rgba(184, 134, 11, 0.15);
+        }
+        .panel h3 {
+            font-size: 1.4em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid rgba(52,152,219,0.15);
+        }
+
+        /* ── Form ── */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-bottom: 22px; }
+        .form-grid.single { grid-template-columns: 1fr; }
+        .form-group { margin-bottom: 18px; }
+        .form-group label {
+            display: block; margin-bottom: 10px;
+            color: #2c3e50; font-weight: 600; font-size: 16px;
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%; padding: 14px 18px;
+            border: 1.5px solid #dce6f0;
+            border-radius: 10px; font-size: 16px;
+            background: #fff; transition: all 0.3s;
+            font-family: inherit;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none; border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.1);
+        }
+        .form-group textarea { resize: vertical; min-height: 100px; }
+
+        /* ── Buttons ── */
+        .btn {
+            padding: 14px 36px;
+            border: none; border-radius: 10px;
+            font-size: 16px; font-weight: 600;
+            cursor: pointer; transition: all 0.3s;
+            font-family: inherit;
+            display: inline-flex; align-items: center; gap: 7px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: #fff;
+        }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(52,152,219,0.4); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .btn-secondary {
+            background: rgba(52,152,219,0.08);
+            color: #3498db; border: 1.5px solid rgba(52,152,219,0.2);
+        }
+        .btn-secondary:hover { background: rgba(52,152,219,0.15); }
+        .btn-danger {
+            background: rgba(231,76,60,0.08);
+            color: #e74c3c; border: 1.5px solid rgba(231,76,60,0.2);
+        }
+        .btn-danger:hover { background: rgba(231,76,60,0.15); }
+        .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
+
+        /* ── Example chips ── */
+        .example-section {
+            margin-top: 18px;
+            padding-top: 18px;
+            border-top: 1px dashed rgba(52,152,219,0.2);
+        }
+        .example-label {
+            font-size: 13px; color: #95a5a6; margin-bottom: 10px; font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .example-chips {
+            display: flex; gap: 10px; flex-wrap: wrap;
+        }
+        .example-chip {
+            padding: 9px 20px;
+            border-radius: 22px;
+            border: 1.5px solid rgba(52,152,219,0.2);
+            background: rgba(52,152,219,0.04);
+            color: #3498db;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.25s;
+            font-family: inherit;
+        }
+        .example-chip:hover {
+            background: rgba(52,152,219,0.12);
+            border-color: rgba(52,152,219,0.4);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(52,152,219,0.15);
+        }
+        .example-chip:active { transform: translateY(0); }
+
+        /* ── Results ── */
+        .result-area {
+            min-height: 260px;
+            position: relative;
+        }
+        .result-placeholder {
+            text-align: center; padding: 70px 20px;
+            color: #bdc3c7;
+        }
+        .result-placeholder .placeholder-icon { font-size: 56px; margin-bottom: 14px; }
+
+        /* ── Loading ── */
+        .loading-overlay {
+            display: none;
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(4px);
+            border-radius: 12px;
+            z-index: 10;
+            align-items: center; justify-content: center;
+            flex-direction: column; gap: 12px;
+        }
+        .loading-overlay.active { display: flex; }
+        .loading-spinner {
+            width: 40px; height: 40px;
+            border: 3px solid #ecf0f1;
+            border-top-color: #3498db;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { color: #7f8c8d; font-size: 14px; }
+
+        /* ── Tree visualization ── */
+        .tree-container {
+            padding: 24px; overflow-x: auto;
+        }
+        .tree-node {
+            position: relative;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border-radius: 12px;
+            border-left: 4px solid #3498db;
+            background: rgba(52,152,219,0.04);
+            transition: all 0.3s;
+        }
+        .tree-node:hover { background: rgba(52,152,219,0.08); transform: translateX(3px); }
+        .tree-node.cause { border-left-color: #e74c3c; background: rgba(231,76,60,0.04); }
+        .tree-node.effect { border-left-color: #27ae60; background: rgba(39,174,96,0.04); }
+        .tree-node.intermediate { border-left-color: #f39c12; background: rgba(243,156,18,0.04); }
+        .tree-node .node-content { font-size: 15px; color: #2c3e50; margin-bottom: 8px; }
+        .tree-node .node-meta {
+            display: flex; gap: 12px; font-size: 13px; color: #7f8c8d; flex-wrap: wrap;
+        }
+        .tree-node .node-meta span { display: inline-flex; align-items: center; gap: 4px; }
+        .tree-children { margin-left: 32px; border-left: 2px solid rgba(52,152,219,0.15); padding-left: 18px; }
+
+        /* ── Causal Graph Visualization ── */
+        .causal-graph {
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(52,152,219,0.02), rgba(155,89,182,0.02));
+            border-radius: 16px;
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+        .graph-chain {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: nowrap;
+            min-width: max-content;
+            padding: 20px 0;
+        }
+        .graph-node {
+            position: relative;
+            min-width: 200px;
+            max-width: 280px;
+            padding: 20px 24px;
+            border-radius: 16px;
+            background: white;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 2px solid;
+            transition: all 0.3s;
+        }
+        .graph-node:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        }
+        .graph-node.cause {
+            border-color: #e74c3c;
+            background: linear-gradient(135deg, #fff 0%, rgba(231,76,60,0.05) 100%);
+        }
+        .graph-node.intermediate {
+            border-color: #f39c12;
+            background: linear-gradient(135deg, #fff 0%, rgba(243,156,18,0.05) 100%);
+        }
+        .graph-node.effect {
+            border-color: #27ae60;
+            background: linear-gradient(135deg, #fff 0%, rgba(39,174,96,0.05) 100%);
+        }
+        .graph-node-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+        .graph-node-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 13px;
+        }
+        .graph-node-mechanism {
+            color: #7f8c8d;
+            font-size: 12px;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed rgba(127,140,141,0.2);
+            line-height: 1.5;
+        }
+
+        /* 可编辑样式 */
+        .graph-node-title[contenteditable="true"],
+        .graph-node-mechanism[contenteditable="true"] {
+            outline: 2px dashed #3498db;
+            outline-offset: 2px;
+            padding: 4px;
+            border-radius: 4px;
+            cursor: text;
+            background: rgba(52,152,219,0.05);
+        }
+        .node-actions {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            display: flex;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .graph-node:hover .node-actions {
+            opacity: 1;
+        }
+        .node-action-btn {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .node-action-btn:hover {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        .confidence-slider-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 8px 0;
+        }
+        .confidence-slider {
+            flex: 1;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #ddd;
+            border-radius: 2px;
+            outline: none;
+        }
+        .confidence-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            background: #3498db;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .confidence-slider::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            background: #3498db;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+        .confidence-value {
+            min-width: 45px;
+            text-align: right;
+            font-weight: 600;
+            color: #3498db;
+            font-size: 12px;
+        }
+        .relation-select {
+            padding: 4px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+            background: white;
+            cursor: pointer;
+        }
+        .evidence-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin: 4px 0;
+        }
+        .evidence-item input {
+            flex: 1;
+            padding: 4px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .evidence-item button {
+            padding: 2px 6px;
+            border: 1px solid #e74c3c;
+            background: white;
+            color: #e74c3c;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+        .evidence-item button:hover {
+            background: #e74c3c;
+            color: white;
+        }
+        .add-evidence-btn {
+            padding: 4px 12px;
+            border: 1px dashed #3498db;
+            background: white;
+            color: #3498db;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 6px;
+            width: 100%;
+        }
+        .add-evidence-btn:hover {
+            background: #3498db;
+            color: white;
+        }
+        .save-changes-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 14px 28px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(39,174,96,0.3);
+            z-index: 1000;
+            display: none;
+            transition: all 0.3s;
+        }
+        .save-changes-btn:hover {
+            background: #229954;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(39,174,96,0.4);
+        }
+        .save-changes-btn.visible {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .edit-hint-banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(102,126,234,0.3);
+        }
+        .edit-hint-banner .icon {
+            font-size: 24px;
+        }
+        .edit-hint-banner .content {
+            flex: 1;
+        }
+        .edit-hint-banner .title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .edit-hint-banner .tips {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        .edit-hint-banner .close-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .edit-hint-banner .close-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        .graph-arrow {
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            color: #3498db;
+            font-size: 28px;
+            font-weight: 300;
+        }
+        .graph-arrow-label {
+            font-size: 11px;
+            color: #95a5a6;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+        .graph-legend {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px dashed rgba(52,152,219,0.2);
+        }
+        .graph-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #7f8c8d;
+        }
+        .graph-legend-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 2px solid;
+        }
+
+        /* ── Confidence bar ── */
+        .confidence-bar {
+            display: inline-flex; align-items: center; gap: 7px;
+        }
+        .confidence-bar .bar {
+            width: 70px; height: 7px;
+            background: #ecf0f1; border-radius: 4px; overflow: hidden;
+        }
+        .confidence-bar .bar-fill {
+            height: 100%; border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+        .bar-fill.high { background: #27ae60; }
+        .bar-fill.medium { background: #f39c12; }
+        .bar-fill.low { background: #e74c3c; }
+
+        /* ── Tags ── */
+        .tag {
+            display: inline-block; padding: 4px 12px;
+            border-radius: 14px; font-size: 13px; font-weight: 500;
+        }
+        .tag-cause { background: rgba(231,76,60,0.1); color: #e74c3c; }
+        .tag-effect { background: rgba(39,174,96,0.1); color: #27ae60; }
+        .tag-intermediate { background: rgba(243,156,18,0.1); color: #f39c12; }
+        .tag-high { background: rgba(39,174,96,0.1); color: #27ae60; }
+        .tag-medium { background: rgba(243,156,18,0.1); color: #f39c12; }
+        .tag-low { background: rgba(231,76,60,0.1); color: #e74c3c; }
+
+        /* ── Summary box ── */
+        .summary-box {
+            background: linear-gradient(135deg, rgba(52,152,219,0.05), rgba(155,89,182,0.05));
+            border: 1px solid rgba(52,152,219,0.15);
+            border-radius: 12px; padding: 22px; margin-bottom: 20px;
+        }
+        .summary-box .summary-title { font-weight: 600; color: #2c3e50; margin-bottom: 10px; font-size: 15px; }
+        .summary-box .summary-text { color: #555; font-size: 15px; line-height: 1.7; }
+
+        /* ── Stats cards ── */
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 14px; margin-bottom: 22px;
+        }
+        .stat-card {
+            text-align: center; padding: 20px;
+            background: rgba(52,152,219,0.04);
+            border-radius: 12px; border: 1px solid rgba(52,152,219,0.1);
+        }
+        .stat-card .stat-value { font-size: 2em; font-weight: 700; color: #3498db; }
+        .stat-card .stat-label { font-size: 13px; color: #7f8c8d; margin-top: 6px; }
+
+        /* ── List items ── */
+        .item-card {
+            padding: 20px; margin-bottom: 12px;
+            border-radius: 12px; border: 1px solid rgba(52,152,219,0.12);
+            background: rgba(255,255,255,0.8); transition: all 0.3s;
+        }
+        .item-card:hover { border-color: rgba(52,152,219,0.3); box-shadow: 0 2px 10px rgba(52,152,219,0.1); }
+        .item-card .item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .item-card .item-title { font-weight: 600; color: #2c3e50; font-size: 15px; }
+        .item-card .item-body { color: #555; font-size: 14px; line-height: 1.6; }
+
+        /* ── Gauge ── */
+        .gauge-container {
+            display: flex; align-items: center; gap: 18px; margin: 12px 0;
+        }
+        .gauge {
+            width: 90px; height: 90px; position: relative;
+        }
+        .gauge svg { transform: rotate(-90deg); }
+        .gauge-bg { fill: none; stroke: #ecf0f1; stroke-width: 8; }
+        .gauge-fill { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 1s ease; }
+        .gauge-text {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 18px; font-weight: 700; color: #2c3e50;
+        }
+
+        /* ── Two-column layout ── */
+        .split-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        @media (max-width: 900px) {
+            .split-layout, .form-grid { grid-template-columns: 1fr; }
+            .tabs { flex-wrap: wrap; }
+            .tab { flex: none; width: calc(33.33% - 0px); }
+        }
+
+        /* ── History ── */
+        .history-item {
+            display: flex; align-items: center; gap: 14px;
+            padding: 12px 16px; border-radius: 10px;
+            border: 1px solid rgba(52,152,219,0.1);
+            margin-bottom: 8px; font-size: 14px; color: #555;
+            cursor: default; transition: all 0.2s;
+        }
+        .history-item:hover { background: rgba(52,152,219,0.04); }
+        .history-type {
+            padding: 3px 10px; border-radius: 5px; font-size: 12px; font-weight: 600;
+            white-space: nowrap;
+        }
+
+        /* ── Evidence list ── */
+        .evidence-list { list-style: none; padding: 0; }
+        .evidence-list li {
+            padding: 5px 0 5px 18px; position: relative;
+            font-size: 14px; color: #555;
+        }
+        .evidence-list li::before {
+            content: ''; position: absolute; left: 0; top: 12px;
+            width: 7px; height: 7px; border-radius: 50%;
+            background: #3498db;
+        }
+    </style>
+    <link rel="stylesheet" href="/static/css/submodule-theme.css?v=1.0">
+</head>
+<body>
+    <!-- 水墨背景 -->
+    <svg class="ink-lines" viewBox="0 0 1440 900" preserveAspectRatio="none">
+        <path class="ink-line thin" d="M0,200 Q360,180 720,220 T1440,200" stroke-dasharray="1200" />
+        <path class="ink-line" d="M0,450 Q400,420 800,460 T1440,440" stroke-dasharray="1400" />
+        <path class="ink-line thick" d="M0,700 Q500,680 900,720 T1440,700" stroke-dasharray="1600" />
+    </svg>
+
+    <a href="{{ url_for('developer_home') }}" class="back-btn">
+        <span class="back-btn-icon">←</span>
+        <span>返回主页</span>
+    </a>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="page-header">
+            <h1>因果推理引擎</h1>
+            <p>LLM 驱动的多维度因果分析 &middot; 支持因果链、反事实、预测、根因、干预五大推理模式</p>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" data-tab="chain">
+                <span class="tab-icon">&#x1f517;</span>因果链
+            </button>
+            <button class="tab" data-tab="counterfactual">
+                <span class="tab-icon">&#x1f500;</span>反事实
+            </button>
+            <button class="tab" data-tab="prediction">
+                <span class="tab-icon">&#x1f52e;</span>效果预测
+            </button>
+            <button class="tab" data-tab="rootcause">
+                <span class="tab-icon">&#x1f50d;</span>根因分析
+            </button>
+            <button class="tab" data-tab="intervention">
+                <span class="tab-icon">&#x1f6e0;</span>干预分析
+            </button>
+            <button class="tab" data-tab="graph">
+                <span class="tab-icon">&#x1f4ca;</span>图谱总览
+            </button>
+        </div>
+
+        <!-- ═══════════ Tab 1: 因果链分析 ═══════════ -->
+        <div class="tab-content active" id="tab-chain">
+            <div class="panel">
+                <h3>因果链分析</h3>
+                <p style="color:#7f8c8d;font-size:13px;margin-bottom:18px;">分析从原因到结果的完整因果链路，识别中间环节和传导机制</p>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>起始原因</label>
+                        <input type="text" id="chain-cause" placeholder="例：全球央行加息">
+                    </div>
+                    <div class="form-group">
+                        <label>最终结果</label>
+                        <input type="text" id="chain-effect" placeholder="例：房地产市场降温">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>背景信息（可选）</label>
+                    <textarea id="chain-context" placeholder="提供相关背景信息以提高分析准确度..."></textarea>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="analyzeChain()">开始分析</button>
+                </div>
+                <div class="example-section">
+                    <div class="example-label">快速填入案例</div>
+                    <div class="example-chips" id="chain-examples"></div>
+                </div>
+            </div>
+            <div class="panel result-area" id="chain-result">
+                <div class="loading-overlay" id="chain-loading">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">正在进行因果推理分析...</div>
+                </div>
+                <div class="result-placeholder">
+                    <div class="placeholder-icon">&#x1f517;</div>
+                    <div>输入原因和结果，开始因果链分析</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════ Tab 2: 反事实推理 ═══════════ -->
+        <div class="tab-content" id="tab-counterfactual">
+            <div class="panel">
+                <h3>反事实推理</h3>
+                <p style="color:#7f8c8d;font-size:13px;margin-bottom:18px;">探索"如果原因不同，结果会怎样"的假设场景</p>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>实际原因</label>
+                        <input type="text" id="cf-original" placeholder="例：公司选择了保守战略">
+                    </div>
+                    <div class="form-group">
+                        <label>假设原因</label>
+                        <input type="text" id="cf-alternative" placeholder="例：公司选择了激进扩张">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>观察到的结果</label>
+                    <input type="text" id="cf-effect" placeholder="例：市场份额稳步增长5%">
+                </div>
+                <div class="form-group">
+                    <label>背景（可选）</label>
+                    <textarea id="cf-context" placeholder="描述当时的市场环境..."></textarea>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="analyzeCounterfactual()">开始推理</button>
+                </div>
+                <div class="example-section">
+                    <div class="example-label">快速填入案例</div>
+                    <div class="example-chips" id="cf-examples"></div>
+                </div>
+            </div>
+            <div class="panel result-area" id="cf-result">
+                <div class="loading-overlay" id="cf-loading">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">正在进行反事实推理...</div>
+                </div>
+                <div class="result-placeholder">
+                    <div class="placeholder-icon">&#x1f500;</div>
+                    <div>输入实际原因和假设原因，探索不同可能</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════ Tab 3: 效果预测 ═══════════ -->
+        <div class="tab-content" id="tab-prediction">
+            <div class="panel">
+                <h3>效果预测</h3>
+                <p style="color:#7f8c8d;font-size:13px;margin-bottom:18px;">给定原因或事件，预测可能产生的多种结果</p>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>原因 / 事件</label>
+                        <input type="text" id="pred-cause" placeholder="例：某国宣布大规模减税政策">
+                    </div>
+                    <div class="form-group">
+                        <label>预测数量</label>
+                        <select id="pred-count">
+                            <option value="3">3 个结果</option>
+                            <option value="5" selected>5 个结果</option>
+                            <option value="8">8 个结果</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>背景（可选）</label>
+                    <textarea id="pred-context" placeholder="提供上下文信息..."></textarea>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="analyzePrediction()">开始预测</button>
+                </div>
+                <div class="example-section">
+                    <div class="example-label">快速填入案例</div>
+                    <div class="example-chips" id="pred-examples"></div>
+                </div>
+            </div>
+            <div class="panel result-area" id="pred-result">
+                <div class="loading-overlay" id="pred-loading">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">正在预测可能的结果...</div>
+                </div>
+                <div class="result-placeholder">
+                    <div class="placeholder-icon">&#x1f52e;</div>
+                    <div>输入原因或事件，预测多种可能的结果</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════ Tab 4: 根因分析 ═══════════ -->
+        <div class="tab-content" id="tab-rootcause">
+            <div class="panel">
+                <h3>根因分析</h3>
+                <p style="color:#7f8c8d;font-size:13px;margin-bottom:18px;">从观察到的现象追溯根本原因，支持 5-Why 和鱼骨图方法</p>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>观察到的现象 / 问题</label>
+                        <input type="text" id="rc-effect" placeholder="例：系统响应速度显著下降">
+                    </div>
+                    <div class="form-group">
+                        <label>分析深度</label>
+                        <select id="rc-depth">
+                            <option value="2">2 层（快速分析）</option>
+                            <option value="3" selected>3 层（标准分析）</option>
+                            <option value="5">5 层（深度分析）</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>背景（可选）</label>
+                    <textarea id="rc-context" placeholder="描述问题发生的环境..."></textarea>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="analyzeRootCause()">开始分析</button>
+                </div>
+                <div class="example-section">
+                    <div class="example-label">快速填入案例</div>
+                    <div class="example-chips" id="rc-examples"></div>
+                </div>
+            </div>
+            <div class="panel result-area" id="rc-result">
+                <div class="loading-overlay" id="rc-loading">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">正在进行根因追溯...</div>
+                </div>
+                <div class="result-placeholder">
+                    <div class="placeholder-icon">&#x1f50d;</div>
+                    <div>输入观察到的现象，追溯根本原因</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════ Tab 5: 干预分析 ═══════════ -->
+        <div class="tab-content" id="tab-intervention">
+            <div class="panel">
+                <h3>干预分析</h3>
+                <p style="color:#7f8c8d;font-size:13px;margin-bottom:18px;">评估干预措施的因果影响，包括直接效果、间接效果和潜在副作用</p>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>当前状况</label>
+                        <input type="text" id="iv-situation" placeholder="例：团队生产力持续下降">
+                    </div>
+                    <div class="form-group">
+                        <label>期望结果</label>
+                        <input type="text" id="iv-outcome" placeholder="例：团队生产力提升30%">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>提议的干预措施</label>
+                    <input type="text" id="iv-intervention" placeholder="例：引入弹性工作制和OKR绩效体系">
+                </div>
+                <div class="form-group">
+                    <label>背景（可选）</label>
+                    <textarea id="iv-context" placeholder="描述组织环境和约束条件..."></textarea>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="analyzeIntervention()">开始评估</button>
+                </div>
+                <div class="example-section">
+                    <div class="example-label">快速填入案例</div>
+                    <div class="example-chips" id="iv-examples"></div>
+                </div>
+            </div>
+            <div class="panel result-area" id="iv-result">
+                <div class="loading-overlay" id="iv-loading">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">正在评估干预效果...</div>
+                </div>
+                <div class="result-placeholder">
+                    <div class="placeholder-icon">&#x1f6e0;</div>
+                    <div>输入状况、干预措施和期望结果，评估干预效果</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════ Tab 6: 图谱总览 ═══════════ -->
+        <div class="tab-content" id="tab-graph">
+            <div class="stats-grid" id="graph-stats">
+                <div class="stat-card"><div class="stat-value" id="stat-nodes">0</div><div class="stat-label">节点总数</div></div>
+                <div class="stat-card"><div class="stat-value" id="stat-links">0</div><div class="stat-label">链接总数</div></div>
+                <div class="stat-card"><div class="stat-value" id="stat-causes">0</div><div class="stat-label">原因节点</div></div>
+                <div class="stat-card"><div class="stat-value" id="stat-effects">0</div><div class="stat-label">结果节点</div></div>
+                <div class="stat-card"><div class="stat-value" id="stat-confidence">0</div><div class="stat-label">平均置信度</div></div>
+                <div class="stat-card"><div class="stat-value" id="stat-history">0</div><div class="stat-label">推理次数</div></div>
+            </div>
+            <div class="split-layout">
+                <div class="panel">
+                    <h3>推理历史</h3>
+                    <div id="history-list" style="max-height:400px;overflow-y:auto;">
+                        <div class="result-placeholder" style="padding:30px 10px;">
+                            <div>暂无推理历史</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <h3>图谱管理</h3>
+                    <div class="btn-group" style="margin-bottom:18px;">
+                        <button class="btn btn-secondary" onclick="refreshStats()">刷新统计</button>
+                        <button class="btn btn-secondary" onclick="exportGraph()">导出图谱</button>
+                        <button class="btn btn-danger" onclick="clearGraph()">清空图谱</button>
+                    </div>
+                    <div id="graph-export" style="display:none;">
+                        <h3 style="margin-top:10px;">图谱数据</h3>
+                        <textarea id="graph-json" readonly style="width:100%;height:250px;font-family:monospace;font-size:12px;padding:10px;border:1.5px solid #dce6f0;border-radius:8px;background:#f8f9fa;resize:vertical;"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+<script>
+// ── Tab switching ──
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+        if (tab.dataset.tab === 'graph') refreshStats();
+    });
+});
+
+// ── API helper ──
+async function apiCall(url, data = null, method = 'POST') {
+    const opts = { method, headers: { 'Content-Type': 'application/json' } };
+    if (data) opts.body = JSON.stringify(data);
+    const resp = await fetch(url, opts);
+    if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        throw new Error(err.error || `HTTP ${resp.status}`);
+    }
+    return resp.json();
+}
+
+function showLoading(id) { document.getElementById(id).classList.add('active'); }
+function hideLoading(id) { document.getElementById(id).classList.remove('active'); }
+
+// ── Confidence bar helper ──
+function confidenceBar(value) {
+    const pct = Math.round(value * 100);
+    const cls = value >= 0.7 ? 'high' : value >= 0.4 ? 'medium' : 'low';
+    return `<span class="confidence-bar">
+        <span class="bar"><span class="bar-fill ${cls}" style="width:${pct}%"></span></span>
+        <span>${pct}%</span>
+    </span>`;
+}
+
+function typeTag(type) {
+    const map = { cause: '原因', effect: '结果', intermediate: '中间环节', intervention: '干预' };
+    return `<span class="tag tag-${type}">${map[type] || type}</span>`;
+}
+
+function severityTag(level) {
+    const cls = level === '高' ? 'high' : level === '低' ? 'low' : 'medium';
+    return `<span class="tag tag-${cls}">${level}</span>`;
+}
+
+// ── Gauge SVG ──
+function gaugeHTML(value, label, color) {
+    const pct = Math.round(value * 100);
+    const r = 32, circ = 2 * Math.PI * r;
+    const offset = circ * (1 - value);
+    return `<div class="gauge-container">
+        <div class="gauge">
+            <svg width="80" height="80" viewBox="0 0 80 80">
+                <circle class="gauge-bg" cx="40" cy="40" r="${r}" />
+                <circle class="gauge-fill" cx="40" cy="40" r="${r}"
+                    stroke="${color}" stroke-dasharray="${circ}" stroke-dashoffset="${offset}" />
+            </svg>
+            <div class="gauge-text">${pct}%</div>
+        </div>
+        <div style="font-size:13px;color:#555;">${label}</div>
+    </div>`;
+}
+
+// ═══════════ 1. 因果链分析 ═══════════
+async function analyzeChain() {
+    const cause = document.getElementById('chain-cause').value.trim();
+    const effect = document.getElementById('chain-effect').value.trim();
+    const context = document.getElementById('chain-context').value.trim();
+    if (!cause || !effect) return alert('请输入起始原因和最终结果');
+
+    showLoading('chain-loading');
+    try {
+        const data = await apiCall('/api/causal-reasoning/analyze', { cause, effect, context });
+        renderChainResult(data);
+    } catch (e) {
+        document.getElementById('chain-result').innerHTML = `<div class="summary-box"><div class="summary-title" style="color:#e74c3c;">分析失败</div><div class="summary-text">${e.message}</div></div>`;
+    } finally {
+        hideLoading('chain-loading');
+    }
+}
+
+function renderChainResult(data) {
+    const el = document.getElementById('chain-result');
+    let html = '';
+
+    // 编辑提示横幅
+    html += `<div class="edit-hint-banner" id="edit-hint-banner">
+        <div class="icon">✨</div>
+        <div class="content">
+            <div class="title">交互式编辑模式已启用</div>
+            <div class="tips">
+                点击 ✏️ 编辑节点内容 | 拖动滑块调整置信度 | 修改关系类型 | 添加/删除证据 | Ctrl+S 保存
+            </div>
+        </div>
+        <button class="close-btn" onclick="document.getElementById('edit-hint-banner').style.display='none'">知道了</button>
+    </div>`;
+
+    // Summary
+    if (data.summary) {
+        html += `<div class="summary-box">
+            <div class="summary-title">分析总结</div>
+            <div class="summary-text">${data.summary}</div>
+        </div>`;
+    }
+
+    // Stats
+    html += `<div class="stats-grid" style="margin-bottom:16px;">
+        <div class="stat-card"><div class="stat-value">${data.node_count || 0}</div><div class="stat-label">推理节点</div></div>
+        <div class="stat-card"><div class="stat-value">${Math.round((data.chain_confidence || 0) * 100)}%</div><div class="stat-label">链路置信度</div></div>
+        <div class="stat-card"><div class="stat-value">${(data.alternative_paths || []).length}</div><div class="stat-label">替代路径</div></div>
+    </div>`;
+
+    // Causal Graph
+    if (data.tree) {
+        html += '<h3 style="margin-bottom:16px;color:#2c3e50;">因果推理图</h3>';
+        html += renderCausalGraph(data.tree);
+    }
+
+    // Alternative paths
+    if (data.alternative_paths && data.alternative_paths.length) {
+        html += '<h3 style="margin:18px 0 12px;color:#2c3e50;">替代路径</h3>';
+        data.alternative_paths.forEach(p => {
+            html += `<div class="item-card">
+                <div class="item-header">
+                    <span class="item-title">${p.description}</span>
+                    ${confidenceBar(p.likelihood)}
+                </div>
+            </div>`;
+        });
+    }
+
+    // Assumptions & Limitations
+    if (data.assumptions && data.assumptions.length) {
+        html += '<h3 style="margin:18px 0 8px;color:#2c3e50;">关键假设</h3><ul class="evidence-list">';
+        data.assumptions.forEach(a => { html += `<li>${a}</li>`; });
+        html += '</ul>';
+    }
+    if (data.limitations && data.limitations.length) {
+        html += '<h3 style="margin:18px 0 8px;color:#2c3e50;">局限性</h3><ul class="evidence-list">';
+        data.limitations.forEach(l => { html += `<li>${l}</li>`; });
+        html += '</ul>';
+    }
+
+    el.innerHTML = html;
+}
+
+// Render causal graph as a flow diagram
+let currentGraphData = null; // 存储当前图谱数据
+let hasUnsavedChanges = false;
+
+function renderCausalGraph(tree) {
+    currentGraphData = tree;
+    const nodes = flattenTree(tree);
+
+    let html = '<div class="causal-graph">';
+    html += '<div class="graph-chain">';
+
+    nodes.forEach((node, index) => {
+        const typeClass = node.type || 'intermediate';
+        const nodeId = `node-${index}`;
+
+        html += `<div class="graph-node ${typeClass}" data-node-id="${nodeId}" data-index="${index}">
+            <div class="node-actions">
+                <button class="node-action-btn" onclick="toggleEditMode('${nodeId}')" title="编辑">✏️</button>
+                <button class="node-action-btn" onclick="deleteNode(${index})" title="删除">🗑️</button>
+            </div>
+            <div class="graph-node-title" id="${nodeId}-title" contenteditable="false">${node.content}</div>
+            <div class="graph-node-meta">
+                ${typeTag(node.type)}
+                <div class="confidence-slider-container">
+                    <span style="font-size:12px;color:#7f8c8d;">置信度:</span>
+                    <input type="range" class="confidence-slider" id="${nodeId}-confidence"
+                           min="0" max="100" value="${Math.round((node.confidence || 0.5) * 100)}"
+                           onchange="updateConfidence('${nodeId}', this.value)">
+                    <span class="confidence-value" id="${nodeId}-confidence-value">${Math.round((node.confidence || 0.5) * 100)}%</span>
+                </div>
+            </div>`;
+
+        if (node.mechanism || index < nodes.length - 1) {
+            html += `<div class="graph-node-mechanism" id="${nodeId}-mechanism" contenteditable="false">
+                <strong>⚙️ 因果机制：</strong>${node.mechanism || '点击编辑添加机制说明'}
+            </div>`;
+        }
+
+        if (node.evidence || true) {
+            html += `<div class="graph-node-mechanism">
+                <strong>📋 证据：</strong>
+                <div id="${nodeId}-evidence-list">`;
+
+            if (node.evidence && node.evidence.length) {
+                node.evidence.forEach((e, ei) => {
+                    html += `<div class="evidence-item">
+                        <input type="text" value="${e}" onchange="updateEvidence('${nodeId}', ${ei}, this.value)">
+                        <button onclick="removeEvidence('${nodeId}', ${ei})">删除</button>
+                    </div>`;
+                });
+            }
+
+            html += `</div>
+                <button class="add-evidence-btn" onclick="addEvidence('${nodeId}')">+ 添加证据</button>
+            </div>`;
+        }
+
+        html += '</div>';
+
+        // Add arrow between nodes
+        if (index < nodes.length - 1) {
+            const relation = node.relation || '导致';
+            html += `<div class="graph-arrow">
+                <div>→</div>
+                <div class="graph-arrow-label">
+                    <select class="relation-select" onchange="updateRelation(${index}, this.value)">
+                        <option value="直接导致" ${relation === '直接导致' ? 'selected' : ''}>直接导致</option>
+                        <option value="间接影响" ${relation === '间接影响' ? 'selected' : ''}>间接影响</option>
+                        <option value="必要条件" ${relation === '必要条件' ? 'selected' : ''}>必要条件</option>
+                        <option value="充分条件" ${relation === '充分条件' ? 'selected' : ''}>充分条件</option>
+                        <option value="促进因素" ${relation === '促进因素' ? 'selected' : ''}>促进因素</option>
+                        <option value="抑制因素" ${relation === '抑制因素' ? 'selected' : ''}>抑制因素</option>
+                        <option value="相关关系" ${relation === '相关关系' ? 'selected' : ''}>相关关系</option>
+                    </select>
+                </div>
+            </div>`;
+        }
+    });
+
+    html += '</div>';
+
+    // Legend
+    html += `<div class="graph-legend">
+        <div class="graph-legend-item">
+            <div class="graph-legend-box" style="border-color:#e74c3c;background:rgba(231,76,60,0.1);"></div>
+            <span>原因</span>
+        </div>
+        <div class="graph-legend-item">
+            <div class="graph-legend-box" style="border-color:#f39c12;background:rgba(243,156,18,0.1);"></div>
+            <span>中间环节</span>
+        </div>
+        <div class="graph-legend-item">
+            <div class="graph-legend-box" style="border-color:#27ae60;background:rgba(39,174,96,0.1);"></div>
+            <span>结果</span>
+        </div>
+    </div>`;
+
+    html += '</div>';
+
+    // Add save button
+    html += '<button class="save-changes-btn" id="save-changes-btn" onclick="saveChanges()">💾 保存修改</button>';
+
+    return html;
+}
+
+// 编辑模式切换
+function toggleEditMode(nodeId) {
+    const titleEl = document.getElementById(`${nodeId}-title`);
+    const mechanismEl = document.getElementById(`${nodeId}-mechanism`);
+
+    const isEditable = titleEl.getAttribute('contenteditable') === 'true';
+
+    titleEl.setAttribute('contenteditable', !isEditable);
+    if (mechanismEl) {
+        mechanismEl.setAttribute('contenteditable', !isEditable);
+    }
+
+    if (!isEditable) {
+        titleEl.focus();
+    }
+
+    markAsChanged();
+}
+
+// 更新置信度
+function updateConfidence(nodeId, value) {
+    const valueEl = document.getElementById(`${nodeId}-confidence-value`);
+    valueEl.textContent = value + '%';
+    markAsChanged();
+}
+
+// 更新关系类型
+function updateRelation(index, value) {
+    markAsChanged();
+}
+
+// 添加证据
+function addEvidence(nodeId) {
+    const listEl = document.getElementById(`${nodeId}-evidence-list`);
+    const evidenceCount = listEl.querySelectorAll('.evidence-item').length;
+
+    const newItem = document.createElement('div');
+    newItem.className = 'evidence-item';
+    newItem.innerHTML = `
+        <input type="text" placeholder="输入新证据" onchange="markAsChanged()">
+        <button onclick="removeEvidence('${nodeId}', ${evidenceCount})">删除</button>
+    `;
+
+    listEl.appendChild(newItem);
+    newItem.querySelector('input').focus();
+    markAsChanged();
+}
+
+// 删除证据
+function removeEvidence(nodeId, index) {
+    const listEl = document.getElementById(`${nodeId}-evidence-list`);
+    const items = listEl.querySelectorAll('.evidence-item');
+    if (items[index]) {
+        items[index].remove();
+        markAsChanged();
+    }
+}
+
+// 更新证据
+function updateEvidence(nodeId, index, value) {
+    markAsChanged();
+}
+
+// 删除节点
+function deleteNode(index) {
+    if (!confirm('确定要删除这个节点吗？')) return;
+
+    const nodes = flattenTree(currentGraphData);
+    if (nodes.length <= 2) {
+        alert('至少需要保留2个节点（起始原因和最终结果）');
+        return;
+    }
+
+    // 这里简化处理，实际应该重新构建树结构
+    alert('节点删除功能需要重新分析因果链，请修改输入后重新分析');
+}
+
+// 标记为已修改
+function markAsChanged() {
+    hasUnsavedChanges = true;
+    const saveBtn = document.getElementById('save-changes-btn');
+    if (saveBtn) {
+        saveBtn.classList.add('visible');
+    }
+}
+
+// 保存修改
+function saveChanges() {
+    const nodes = document.querySelectorAll('.graph-node');
+    const updatedData = [];
+
+    nodes.forEach((nodeEl, index) => {
+        const nodeId = `node-${index}`;
+        const titleEl = document.getElementById(`${nodeId}-title`);
+        const confidenceEl = document.getElementById(`${nodeId}-confidence`);
+        const mechanismEl = document.getElementById(`${nodeId}-mechanism`);
+        const evidenceList = document.getElementById(`${nodeId}-evidence-list`);
+
+        const nodeData = {
+            content: titleEl.textContent.trim(),
+            confidence: parseInt(confidenceEl.value) / 100,
+            mechanism: mechanismEl ? mechanismEl.textContent.replace('⚙️ 因果机制：', '').trim() : '',
+            evidence: []
+        };
+
+        if (evidenceList) {
+            const evidenceInputs = evidenceList.querySelectorAll('input');
+            evidenceInputs.forEach(input => {
+                if (input.value.trim()) {
+                    nodeData.evidence.push(input.value.trim());
+                }
+            });
+        }
+
+        updatedData.push(nodeData);
+    });
+
+    console.log('保存的数据:', updatedData);
+
+    // 显示保存成功提示
+    const saveBtn = document.getElementById('save-changes-btn');
+    const originalText = saveBtn.textContent;
+    saveBtn.textContent = '✅ 已保存';
+    saveBtn.style.background = '#27ae60';
+
+    setTimeout(() => {
+        saveBtn.textContent = originalText;
+        saveBtn.classList.remove('visible');
+        hasUnsavedChanges = false;
+    }, 2000);
+
+    // 这里可以添加API调用，将修改保存到后端
+    // await apiCall('/api/causal-reasoning/update', { data: updatedData });
+}
+
+// Flatten tree structure into linear chain
+function flattenTree(node, result = []) {
+    if (!node) return result;
+    result.push(node);
+    if (node.children && node.children.length > 0) {
+        // Take the first child for main chain
+        flattenTree(node.children[0], result);
+    }
+    return result;
+}
+
+function renderTree(node, depth = 0) {
+    if (!node) return '';
+    const typeClass = node.type || 'intermediate';
+    let html = `<div class="tree-node ${typeClass}">
+        <div class="node-content">${node.content}</div>
+        <div class="node-meta">
+            ${typeTag(node.type)}
+            ${confidenceBar(node.confidence)}
+            ${node.relation ? `<span>&#x2192; ${node.relation}</span>` : ''}
+            ${node.mechanism ? `<span title="${node.mechanism}">&#x2699; 机制</span>` : ''}
+        </div>`;
+    if (node.evidence && node.evidence.length) {
+        html += '<ul class="evidence-list" style="margin-top:6px;">';
+        node.evidence.forEach(e => { html += `<li>${e}</li>`; });
+        html += '</ul>';
+    }
+    html += '</div>';
+
+    if (node.children && node.children.length) {
+        html += '<div class="tree-children">';
+        node.children.forEach(c => { html += renderTree(c, depth + 1); });
+        html += '</div>';
+    }
+    return html;
+}
+
+// ═══════════ 2. 反事实推理 ═══════════
+async function analyzeCounterfactual() {
+    const original = document.getElementById('cf-original').value.trim();
+    const alternative = document.getElementById('cf-alternative').value.trim();
+    const effect = document.getElementById('cf-effect').value.trim();
+    const context = document.getElementById('cf-context').value.trim();
+    if (!original || !alternative || !effect) return alert('请填写所有必填字段');
+
+    showLoading('cf-loading');
+    try {
+        const data = await apiCall('/api/causal-reasoning/counterfactual', {
+            original_cause: original, alternative_cause: alternative,
+            observed_effect: effect, context
+        });
+        renderCounterfactualResult(data);
+    } catch (e) {
+        document.getElementById('cf-result').innerHTML = `<div class="summary-box"><div class="summary-title" style="color:#e74c3c;">推理失败</div><div class="summary-text">${e.message}</div></div>`;
+    } finally {
+        hideLoading('cf-loading');
+    }
+}
+
+function renderCounterfactualResult(data) {
+    const el = document.getElementById('cf-result');
+    let html = '';
+
+    // Overall confidence
+    if (data.confidence_score !== undefined) {
+        html += gaugeHTML(data.confidence_score, '分析置信度', '#3498db');
+    }
+
+    // Split view
+    html += '<div class="split-layout">';
+
+    // Original
+    const orig = data.original_analysis || {};
+    html += `<div class="item-card" style="border-left:4px solid #3498db;">
+        <div class="item-header"><span class="item-title">实际场景</span></div>
+        <div class="item-body">
+            <p><strong>原因：</strong>${orig.cause || ''}</p>
+            <p><strong>结果：</strong>${orig.effect || ''}</p>
+            <p><strong>机制：</strong>${orig.causal_mechanism || ''}</p>
+            <p>${confidenceBar(orig.confidence || 0)}</p>
+        </div>
+    </div>`;
+
+    // Counterfactual
+    const cf = data.counterfactual_analysis || {};
+    html += `<div class="item-card" style="border-left:4px solid #9b59b6;">
+        <div class="item-header"><span class="item-title">反事实场景</span></div>
+        <div class="item-body">
+            <p><strong>假设原因：</strong>${cf.alternative_cause || ''}</p>
+            <p><strong>预测结果：</strong>${cf.predicted_effect || ''}</p>
+            <p><strong>推理：</strong>${cf.reasoning || ''}</p>
+            <p>${confidenceBar(cf.effect_probability || 0)}</p>
+        </div>
+    </div>`;
+    html += '</div>';
+
+    // Comparison
+    const cmp = data.comparison || {};
+    if (cmp.key_differences || cmp.unchanged_aspects || cmp.butterfly_effects) {
+        html += '<div class="summary-box" style="margin-top:16px;">';
+        html += `<div class="summary-title">差异对比</div>`;
+        if (cmp.sensitivity) html += `<p><strong>结果敏感度：</strong>${severityTag(cmp.sensitivity === '高' ? '高' : cmp.sensitivity === '低' ? '低' : '中')}</p>`;
+        if (cmp.key_differences && cmp.key_differences.length) {
+            html += '<p style="margin-top:8px;"><strong>关键差异：</strong></p><ul class="evidence-list">';
+            cmp.key_differences.forEach(d => { html += `<li>${d}</li>`; });
+            html += '</ul>';
+        }
+        if (cmp.butterfly_effects && cmp.butterfly_effects.length) {
+            html += '<p style="margin-top:8px;"><strong>蝴蝶效应：</strong></p><ul class="evidence-list">';
+            cmp.butterfly_effects.forEach(b => { html += `<li>${b}</li>`; });
+            html += '</ul>';
+        }
+        html += '</div>';
+    }
+
+    // Conclusion
+    if (data.conclusion) {
+        html += `<div class="summary-box" style="margin-top:12px;">
+            <div class="summary-title">结论</div>
+            <div class="summary-text">${data.conclusion}</div>
+        </div>`;
+    }
+
+    el.innerHTML = html;
+}
+
+// ═══════════ 3. 效果预测 ═══════════
+async function analyzePrediction() {
+    const cause = document.getElementById('pred-cause').value.trim();
+    const context = document.getElementById('pred-context').value.trim();
+    const num = parseInt(document.getElementById('pred-count').value);
+    if (!cause) return alert('请输入原因或事件');
+
+    showLoading('pred-loading');
+    try {
+        const data = await apiCall('/api/causal-reasoning/predict-effects', {
+            cause, context, num_predictions: num
+        });
+        renderPredictionResult(data);
+    } catch (e) {
+        document.getElementById('pred-result').innerHTML = `<div class="summary-box"><div class="summary-title" style="color:#e74c3c;">预测失败</div><div class="summary-text">${e.message}</div></div>`;
+    } finally {
+        hideLoading('pred-loading');
+    }
+}
+
+function renderPredictionResult(data) {
+    const el = document.getElementById('pred-result');
+    let html = '';
+
+    if (data.overall_assessment) {
+        html += `<div class="summary-box">
+            <div class="summary-title">整体评估</div>
+            <div class="summary-text">${data.overall_assessment}</div>
+        </div>`;
+    }
+
+    const preds = data.predictions || [];
+    preds.forEach((p, i) => {
+        html += `<div class="item-card">
+            <div class="item-header">
+                <span class="item-title">#${i + 1} ${p.effect}</span>
+                ${confidenceBar(p.probability)}
+            </div>
+            <div class="item-body">
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
+                    ${p.timeframe ? `<span class="tag tag-medium">${p.timeframe}</span>` : ''}
+                    ${p.impact_level ? severityTag(p.impact_level) : ''}
+                    ${p.category ? `<span class="tag" style="background:rgba(52,152,219,0.1);color:#3498db;">${p.category}</span>` : ''}
+                </div>
+                ${p.reasoning ? `<p style="margin-top:4px;">${p.reasoning}</p>` : ''}
+                ${p.preconditions && p.preconditions.length ? '<p style="margin-top:4px;"><strong>前提条件：</strong>' + p.preconditions.join('、') + '</p>' : ''}
+            </div>
+        </div>`;
+    });
+
+    if (data.risk_factors && data.risk_factors.length) {
+        html += '<h3 style="margin:16px 0 8px;color:#2c3e50;">风险因素</h3><ul class="evidence-list">';
+        data.risk_factors.forEach(r => { html += `<li>${r}</li>`; });
+        html += '</ul>';
+    }
+
+    el.innerHTML = html;
+}
+
+// ═══════════ 4. 根因分析 ═══════════
+async function analyzeRootCause() {
+    const effect = document.getElementById('rc-effect').value.trim();
+    const context = document.getElementById('rc-context').value.trim();
+    const depth = parseInt(document.getElementById('rc-depth').value);
+    if (!effect) return alert('请输入观察到的现象');
+
+    showLoading('rc-loading');
+    try {
+        const data = await apiCall('/api/causal-reasoning/root-cause', {
+            observed_effect: effect, context, depth
+        });
+        renderRootCauseResult(data);
+    } catch (e) {
+        document.getElementById('rc-result').innerHTML = `<div class="summary-box"><div class="summary-title" style="color:#e74c3c;">分析失败</div><div class="summary-text">${e.message}</div></div>`;
+    } finally {
+        hideLoading('rc-loading');
+    }
+}
+
+function renderRootCauseResult(data) {
+    const el = document.getElementById('rc-result');
+    let html = '';
+
+    // Overall
+    if (data.confidence_score !== undefined) {
+        html += gaugeHTML(data.confidence_score, '分析置信度', '#e67e22');
+    }
+    if (data.analysis_method) {
+        html += `<div class="summary-box"><div class="summary-title">分析方法</div><div class="summary-text">${data.analysis_method}</div></div>`;
+    }
+
+    // Root causes
+    const causes = data.root_causes || [];
+    html += '<h3 style="margin:12px 0 10px;color:#2c3e50;">根本原因</h3>';
+    causes.forEach((c, i) => {
+        html += `<div class="item-card" style="border-left:4px solid ${['#e74c3c','#e67e22','#f1c40f'][i % 3]};">
+            <div class="item-header">
+                <span class="item-title">${c.cause}</span>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    ${c.severity ? severityTag(c.severity) : ''}
+                    ${confidenceBar(c.confidence)}
+                </div>
+            </div>
+            <div class="item-body">
+                ${c.category ? `<p><span class="tag" style="background:rgba(52,152,219,0.1);color:#3498db;">${c.category}</span></p>` : ''}
+                ${c.causal_chain && c.causal_chain.length ? `<p style="margin-top:6px;"><strong>因果链条：</strong>${c.causal_chain.join(' &#x2192; ')}</p>` : ''}
+                ${c.evidence && c.evidence.length ? '<ul class="evidence-list" style="margin-top:4px;">' + c.evidence.map(e => `<li>${e}</li>`).join('') + '</ul>' : ''}
+            </div>
+        </div>`;
+    });
+
+    // Contributing factors
+    const factors = data.contributing_factors || [];
+    if (factors.length) {
+        html += '<h3 style="margin:16px 0 10px;color:#2c3e50;">促进因素</h3>';
+        factors.forEach(f => {
+            html += `<div class="item-card"><div class="item-header">
+                <span class="item-title">${f.factor}</span>${confidenceBar(f.influence)}
+            </div></div>`;
+        });
+    }
+
+    // Recommended actions
+    const actions = data.recommended_actions || [];
+    if (actions.length) {
+        html += '<h3 style="margin:16px 0 10px;color:#2c3e50;">建议措施</h3>';
+        actions.forEach(a => {
+            html += `<div class="item-card">
+                <div class="item-header">
+                    <span class="item-title">${a.action}</span>
+                    ${a.priority ? severityTag(a.priority) : ''}
+                </div>
+                ${a.expected_impact ? `<div class="item-body">${a.expected_impact}</div>` : ''}
+            </div>`;
+        });
+    }
+
+    el.innerHTML = html;
+}
+
+// ═══════════ 5. 干预分析 ═══════════
+async function analyzeIntervention() {
+    const situation = document.getElementById('iv-situation').value.trim();
+    const intervention = document.getElementById('iv-intervention').value.trim();
+    const outcome = document.getElementById('iv-outcome').value.trim();
+    const context = document.getElementById('iv-context').value.trim();
+    if (!situation || !intervention || !outcome) return alert('请填写所有必填字段');
+
+    showLoading('iv-loading');
+    try {
+        const data = await apiCall('/api/causal-reasoning/intervention', {
+            current_situation: situation, proposed_intervention: intervention,
+            desired_outcome: outcome, context
+        });
+        renderInterventionResult(data);
+    } catch (e) {
+        document.getElementById('iv-result').innerHTML = `<div class="summary-box"><div class="summary-title" style="color:#e74c3c;">评估失败</div><div class="summary-text">${e.message}</div></div>`;
+    } finally {
+        hideLoading('iv-loading');
+    }
+}
+
+function renderInterventionResult(data) {
+    const el = document.getElementById('iv-result');
+    let html = '';
+
+    // Assessment gauges
+    const assess = data.intervention_assessment || {};
+    html += '<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;">';
+    if (assess.feasibility !== undefined) html += gaugeHTML(assess.feasibility, '可行性', '#27ae60');
+    if (assess.effectiveness !== undefined) html += gaugeHTML(assess.effectiveness, '有效性', '#3498db');
+    if (data.success_probability !== undefined) html += gaugeHTML(data.success_probability, '成功概率', '#9b59b6');
+    html += '</div>';
+
+    if (assess.risk_level || assess.time_to_effect) {
+        html += `<div class="summary-box">
+            ${assess.risk_level ? `<p><strong>风险等级：</strong>${severityTag(assess.risk_level)}</p>` : ''}
+            ${assess.time_to_effect ? `<p><strong>预计生效：</strong>${assess.time_to_effect}</p>` : ''}
+        </div>`;
+    }
+
+    // Causal pathway
+    const pathway = data.causal_pathway || {};
+
+    if (pathway.direct_effects && pathway.direct_effects.length) {
+        html += '<h3 style="margin:12px 0 8px;color:#2c3e50;">直接效果</h3>';
+        pathway.direct_effects.forEach(e => {
+            html += `<div class="item-card" style="border-left:4px solid #27ae60;">
+                <div class="item-header"><span class="item-title">${e.effect}</span>${confidenceBar(e.probability)}</div>
+                ${e.mechanism ? `<div class="item-body">${e.mechanism}</div>` : ''}
+            </div>`;
+        });
+    }
+
+    if (pathway.indirect_effects && pathway.indirect_effects.length) {
+        html += '<h3 style="margin:12px 0 8px;color:#2c3e50;">间接效果</h3>';
+        pathway.indirect_effects.forEach(e => {
+            html += `<div class="item-card" style="border-left:4px solid #f39c12;">
+                <div class="item-header"><span class="item-title">${e.effect}</span>${confidenceBar(e.probability)}</div>
+                ${e.delay ? `<div class="item-body">延迟：${e.delay}</div>` : ''}
+            </div>`;
+        });
+    }
+
+    if (pathway.side_effects && pathway.side_effects.length) {
+        html += '<h3 style="margin:12px 0 8px;color:#e74c3c;">潜在副作用</h3>';
+        pathway.side_effects.forEach(e => {
+            html += `<div class="item-card" style="border-left:4px solid #e74c3c;">
+                <div class="item-header">
+                    <span class="item-title">${e.effect}</span>
+                    <div style="display:flex;gap:8px;align-items:center;">${severityTag(e.severity)}${confidenceBar(e.probability)}</div>
+                </div>
+            </div>`;
+        });
+    }
+
+    // Alternatives
+    const alts = data.alternative_interventions || [];
+    if (alts.length) {
+        html += '<h3 style="margin:16px 0 8px;color:#2c3e50;">替代方案</h3>';
+        alts.forEach(a => {
+            html += `<div class="item-card">
+                <div class="item-title" style="margin-bottom:6px;">${a.intervention}</div>
+                <div class="item-body">
+                    <p><span style="color:#27ae60;">&#x2714;</span> ${a.advantage}</p>
+                    <p><span style="color:#e74c3c;">&#x2718;</span> ${a.disadvantage}</p>
+                </div>
+            </div>`;
+        });
+    }
+
+    // Recommendation
+    if (data.recommendation) {
+        html += `<div class="summary-box" style="margin-top:12px;">
+            <div class="summary-title">最终建议</div>
+            <div class="summary-text">${data.recommendation}</div>
+        </div>`;
+    }
+
+    el.innerHTML = html;
+}
+
+// ═══════════ 6. 图谱管理 ═══════════
+async function refreshStats() {
+    try {
+        const [stats, hist] = await Promise.all([
+            apiCall('/api/causal-reasoning/graph/statistics', null, 'GET'),
+            apiCall('/api/causal-reasoning/history', null, 'GET'),
+        ]);
+        document.getElementById('stat-nodes').textContent = stats.total_nodes || 0;
+        document.getElementById('stat-links').textContent = stats.total_links || 0;
+        document.getElementById('stat-causes').textContent = stats.cause_nodes || 0;
+        document.getElementById('stat-effects').textContent = stats.effect_nodes || 0;
+        document.getElementById('stat-confidence').textContent = stats.avg_confidence ? (stats.avg_confidence * 100).toFixed(0) + '%' : '0';
+        document.getElementById('stat-history').textContent = stats.history_count || 0;
+
+        const history = hist.history || [];
+        const hEl = document.getElementById('history-list');
+        if (!history.length) {
+            hEl.innerHTML = '<div class="result-placeholder" style="padding:30px 10px;"><div>暂无推理历史</div></div>';
+        } else {
+            const typeMap = { causal_chain: '因果链', counterfactual: '反事实', prediction: '预测', root_cause: '根因', intervention: '干预' };
+            const colorMap = { causal_chain: '#3498db', counterfactual: '#9b59b6', prediction: '#e67e22', root_cause: '#e74c3c', intervention: '#27ae60' };
+            hEl.innerHTML = history.map(h => {
+                const t = h.type || '';
+                const label = typeMap[t] || t;
+                const color = colorMap[t] || '#7f8c8d';
+                let detail = '';
+                if (h.cause) detail = h.cause + (h.effect ? ' → ' + h.effect : '');
+                else if (h.observed_effect) detail = h.observed_effect;
+                else if (h.intervention) detail = h.intervention;
+                else if (h.original_cause) detail = h.original_cause + ' vs ' + (h.alternative_cause || '');
+                return `<div class="history-item">
+                    <span class="history-type" style="background:${color}22;color:${color};">${label}</span>
+                    <span style="flex:1;">${detail}</span>
+                </div>`;
+            }).join('');
+        }
+    } catch (e) {
+        console.error('Stats error:', e);
+    }
+}
+
+async function exportGraph() {
+    try {
+        const data = await apiCall('/api/causal-reasoning/graph/export', null, 'GET');
+        document.getElementById('graph-json').value = JSON.stringify(data, null, 2);
+        document.getElementById('graph-export').style.display = 'block';
+    } catch (e) { alert('导出失败: ' + e.message); }
+}
+
+async function clearGraph() {
+    if (!confirm('确定要清空所有因果图谱数据吗？此操作不可撤销。')) return;
+    try {
+        await apiCall('/api/causal-reasoning/graph/clear');
+        refreshStats();
+        alert('图谱已清空');
+    } catch (e) { alert('清空失败: ' + e.message); }
+}
+
+// ═══════════ Demo data ═══════════
+const DEMOS = {
+    chain: [
+        {
+            label: '风机齿轮箱过热故障',
+            cause: '风力发电机齿轮箱润滑油温度持续超过85°C',
+            effect: '风机自动停机并触发主轴承损坏报警',
+            context: '某海上风电场3号机组运行3年，近期风速持续在额定功率区间，齿轮箱负载较高。润滑油循环系统冷却器散热片积累盐雾腐蚀，冷却效率下降30%。'
+        },
+        {
+            label: '叶片结冰导致功率骤降',
+            cause: '冬季低温高湿环境下风机叶片表面结冰',
+            effect: '风机发电功率下降60%并产生异常振动',
+            context: '北方山地风电场，环境温度-5°C，相对湿度90%。叶片表面结冰厚度达5mm，改变了叶片气动外形，三支叶片结冰不均匀导致转子不平衡。'
+        },
+        {
+            label: '央行加息与资本外流',
+            cause: '全球央行同步加息',
+            effect: '新兴市场经济体出现资本外流',
+            context: '在全球通胀压力上升、美联储带头激进加息的背景下，多个主要经济体央行跟随收紧货币政策。新兴市场国家面临本币贬值和外资撤离的双重压力。'
+        },
+        {
+            label: 'AI 技术与就业结构',
+            cause: '大规模部署通用人工智能（AGI）技术',
+            effect: '全球劳动力市场结构发生根本性变革',
+            context: 'AI 技术在 2024-2026 年间快速发展，从文本生成扩展到自主决策、代码开发、科研辅助等领域，各行业加速部署。'
+        },
+        {
+            label: '气候变暖与粮食安全',
+            cause: '全球平均气温较工业化前上升2°C',
+            effect: '全球粮食价格大幅波动并引发社会动荡',
+            context: '极端天气事件频发，包括干旱、洪涝、高温热浪等，主要粮食产区（北美、南亚、东南亚）均受到不同程度影响。'
+        },
+        {
+            label: '社交媒体与青少年心理',
+            cause: '青少年日均社交媒体使用时间超过4小时',
+            effect: '青少年抑郁和焦虑症发病率显著上升',
+            context: '短视频平台算法推荐机制导致使用成瘾，社交比较效应加剧，睡眠质量下降，面对面社交减少。'
+        },
+        {
+            label: '远程办公与城市格局',
+            cause: '大型科技公司全面推行永久远程办公制度',
+            effect: '一线城市房价下跌而二三线城市房价上涨',
+            context: '疫情后远程办公常态化，员工不再需要居住在公司所在城市，开始向生活成本更低、环境更好的地区迁移。'
+        }
+    ],
+    counterfactual: [
+        {
+            label: '风机偏航策略选择',
+            original: '风机采用被动偏航策略，仅在风向偏差超过15°时启动偏航',
+            alternative: '风机采用主动偏航策略，实时跟踪风向变化',
+            effect: '年发电量达到设计值的92%，偏航系统故障率为5%',
+            context: '某风电场位于复杂山地地形，风向变化频繁。偏航系统采用电机驱动，每次偏航动作会产生机械磨损和电能消耗。'
+        },
+        {
+            label: '风机基础设计方案',
+            original: '海上风机采用单桩基础方案，打桩深度40米',
+            alternative: '海上风机采用导管架基础方案，多点支撑',
+            effect: '风机在台风中安全运行，但建设成本增加40%',
+            context: '东南沿海海域水深25米，海床为软质粘土，每年经历2-3次台风，最大风速可达45m/s。'
+        },
+        {
+            label: '数字化转型策略选择',
+            original: '公司选择了渐进式的数字化转型策略',
+            alternative: '公司选择了一次性全面数字化改造',
+            effect: '三年内实现了50%的运营效率提升',
+            context: '一家拥有5000名员工的传统制造企业，面临行业数字化浪潮的竞争压力。'
+        },
+        {
+            label: '新能源汽车路线之争',
+            original: '某车企押注纯电动路线，投入500亿研发',
+            alternative: '某车企选择氢燃料电池与混动并行的技术路线',
+            effect: '五年后成为国内新能源汽车销量前三',
+            context: '2020年中国新能源汽车市场竞争激烈，补贴政策逐步退坡，充电基础设施快速建设中。'
+        },
+        {
+            label: '教育政策假设',
+            original: '某国实施了严格的高考制度作为唯一大学入学标准',
+            alternative: '某国采用综合素质评价加多元化录取制度',
+            effect: '顶尖大学培养出了大量高分但创新能力参差不齐的毕业生',
+            context: '该国拥有14亿人口，每年约1000万高考考生，高等教育资源分布不均。'
+        },
+        {
+            label: '疫情应对策略',
+            original: '某国在疫情初期采取了严格的封控清零策略',
+            alternative: '某国从一开始就选择了群体免疫加重点保护策略',
+            effect: '成功将死亡率控制在较低水平，但经济受到较大冲击',
+            context: '2020年初全球新冠疫情爆发，各国面临公共健康与经济活动的艰难平衡。'
+        }
+    ],
+    prediction: [
+        {
+            label: '风电场智能运维系统上线',
+            cause: '风电场部署基于AI的预测性维护系统，可提前7天预警设备故障',
+            context: '某大型风电场拥有100台风机，年发电量5亿度。当前采用定期维护策略，平均每台风机年停机维护时间15天，非计划停机5天。维护成本占运营成本的35%。'
+        },
+        {
+            label: '超大型海上风机投运',
+            cause: '全球首批20MW级海上风机正式投入商业运营',
+            context: '当前主流海上风机功率为8-12MW，单机容量提升可降低单位千瓦建设成本，但对安装船舶、电网接入、运维能力提出更高要求。叶片直径超过250米。'
+        },
+        {
+            label: '四天工作制',
+            cause: '某国政府宣布全面推行四天工作制',
+            context: '该国是一个发达经济体，服务业占GDP的70%，失业率维持在4%左右，工会力量较强。'
+        },
+        {
+            label: '量子计算机商用',
+            cause: '首台百万量子比特级通用量子计算机实现商用',
+            context: '当前最先进的量子计算机约为1000量子比特，该突破使量子计算在密码学、药物研发、材料科学等领域具备实用价值。'
+        },
+        {
+            label: '全球碳交易市场统一',
+            cause: '联合国宣布建立全球统一碳交易市场，设定碳价下限为每吨100美元',
+            context: '目前各国碳交易市场碎片化，欧盟碳价约80欧元/吨，中国碳价约60元/吨，很多国家尚未建立碳市场。'
+        },
+        {
+            label: '脑机接口普及',
+            cause: '非侵入式脑机接口技术突破，成本降至消费电子级别（约2000元）',
+            context: '当前脑机接口主要用于医疗领域辅助瘫痪患者，侵入式设备需要开颅手术，非侵入式精度有限。'
+        },
+        {
+            label: '人口负增长拐点',
+            cause: '中国人口连续5年负增长，年均减少800万人',
+            context: '生育率降至0.8以下，老龄化加速，劳动力市场紧缩，养老金体系承压，各地出台鼓励生育政策效果有限。'
+        }
+    ],
+    rootcause: [
+        {
+            label: '风机发电量持续低于预期',
+            effect: '某风电场实际年发电量仅为设计值的75%，持续两年',
+            context: '风电场位于内蒙古草原，装机容量200MW，共100台2MW风机。前期风资源评估显示年平均风速7.5m/s，但实际运行中发电量始终不达标。'
+        },
+        {
+            label: '风机叶片频繁开裂',
+            effect: '某风电场50%的风机叶片在运行3年内出现前缘开裂',
+            context: '风电场位于沿海地区，盐雾腐蚀严重。叶片采用玻璃纤维复合材料，设计寿命20年。开裂主要集中在叶片前缘距叶尖15-25米区域。'
+        },
+        {
+            label: '风机变流器故障率高',
+            effect: '某型号风机变流器年故障率达到15%，远超行业平均3%',
+            context: '该型号风机共部署500台，变流器为双馈型，功率2.5MW。故障主要表现为IGBT模块烧毁和控制板通讯中断，多发生在夏季高温时段。'
+        },
+        {
+            label: '平台用户流失',
+            effect: '大型互联网平台用户活跃度连续三个季度下降',
+            context: '该平台有超过5亿注册用户，日活曾高达1.5亿，但近期持续下滑至1亿以下。竞争对手推出了多款新产品。'
+        },
+        {
+            label: '芯片制造良率',
+            effect: '先进制程芯片（3nm）量产良率始终低于50%',
+            context: '工厂已投入超过200亿美元建设产线，拥有最新一代光刻机，但良率从试产以来一直无法达到经济可行的70%目标。'
+        },
+        {
+            label: '电商退货率飙升',
+            effect: '某大型电商平台服装品类退货率从20%飙升至45%',
+            context: '平台月活用户3亿，服装是最大品类。退货率在6个月内急剧上升，导致物流成本和商家抱怨同步增加。'
+        },
+        {
+            label: '创业公司倒闭潮',
+            effect: '某科技园区一年内超过40%的创业公司倒闭',
+            context: '该园区入驻约200家初创企业，以AI和生物科技为主。去年融资环境收紧，同时行业监管趋严。'
+        },
+        {
+            label: '员工离职率异常',
+            effect: '某知名科技公司核心研发团队年离职率达到35%',
+            context: '公司近两年市值增长了3倍，薪资处于行业中上水平，但关键技术骨干持续流失，项目交付延期严重。'
+        }
+    ],
+    intervention: [
+        {
+            label: '风机叶片防冰系统升级',
+            situation: '北方风电场冬季因叶片结冰导致发电量损失30%，年损失电费超过2000万元',
+            intervention: '为所有风机加装叶片电热防冰系统，并配合智能气象预测启停策略',
+            outcome: '将冬季发电量损失降低至5%以内，投资回收期3年',
+            context: '风电场位于东北地区，冬季长达5个月，气温常低于-10°C。现有除冰方式为人工除冰和停机自然融化，效率低且存在安全隐患。'
+        },
+        {
+            label: '海上风电运维船队优化',
+            situation: '海上风电场因恶劣海况导致年平均可达率仅60%，大量故障无法及时处理',
+            intervention: '采购2艘全天候运维母船配合4艘快速交通艇，建立海上临时驻守机制',
+            outcome: '将风机可达率提升至85%，年发电量增加8%',
+            context: '风电场距离陆地50公里，海域常年风浪较大，现有运维船只为普通交通艇，仅能在3级海况以下作业，年可作业天数不足200天。'
+        },
+        {
+            label: '风电场智能调度系统',
+            situation: '风电场频繁因电网调度指令限电，年弃风率达20%，经济损失严重',
+            intervention: '部署储能系统（50MW/100MWh）配合智能调度算法，参与电网调峰调频',
+            outcome: '将弃风率降至5%，同时获得辅助服务收益，综合收益率提升15%',
+            context: '风电场装机300MW，位于电网末端，输电通道容量有限。电网负荷低谷时段经常要求风电场降功率运行。'
+        },
+        {
+            label: '城市交通治理',
+            situation: '城市交通拥堵日益严重，早晚高峰平均通勤时间超过90分钟',
+            intervention: '实施分区限行政策并同步大力发展公共交通系统',
+            outcome: '将平均通勤时间降低至60分钟以内',
+            context: '人口超过1500万的特大城市，私家车保有量超过500万辆，地铁线路覆盖率仅40%。'
+        },
+        {
+            label: '在线教育改革',
+            situation: '农村地区中小学教育质量远低于城市，高考升学率差距达3倍',
+            intervention: '部署AI个性化教学系统，配合城乡教师双向轮岗制度',
+            outcome: '三年内将城乡高考升学率差距缩小到1.5倍以内',
+            context: '农村学校师资力量薄弱，优秀教师大量流向城市。学生家庭普遍缺乏辅导资源，但智能手机普及率已达到90%。'
+        },
+        {
+            label: '抗生素耐药性',
+            situation: '超级细菌感染病例年增长率达15%，部分常见感染已无有效抗生素可用',
+            intervention: '全面禁止畜牧业预防性使用抗生素，同时设立100亿专项基金支持新型抗菌药物研发',
+            outcome: '五年内将超级细菌感染增长率降至5%以下',
+            context: '全球每年约70万人死于抗生素耐药性感染。畜牧业使用了全球约70%的抗生素，新抗生素研发投入严重不足。'
+        },
+        {
+            label: '新能源电网改造',
+            situation: '可再生能源发电占比达到40%，但电网频繁出现弃风弃光和供电不稳定',
+            intervention: '投资2000亿建设分布式储能系统和智能电网调度平台',
+            outcome: '将弃风弃光率从15%降至3%，电网稳定性达到99.99%',
+            context: '风电和光伏装机快速增长，但储能设施严重滞后，跨区域输电能力不足，调峰手段单一依赖火电。'
+        },
+        {
+            label: '老年人数字鸿沟',
+            situation: '65岁以上老年人中仅有30%能独立使用智能手机完成基本数字服务',
+            intervention: '推出老年人数字素养培训计划并强制要求公共服务保留线下通道',
+            outcome: '两年内将老年人数字服务独立使用率提升至60%',
+            context: '社会服务快速数字化，医院挂号、政务办理、交通出行等日益依赖手机APP，老年人群体面临被排斥的风险。'
+        }
+    ]
+};
+
+function fillDemo(type, index) {
+    const demos = DEMOS[type];
+    if (!demos || !demos[index]) return;
+    const d = demos[index];
+    switch (type) {
+        case 'chain':
+            document.getElementById('chain-cause').value = d.cause;
+            document.getElementById('chain-effect').value = d.effect;
+            document.getElementById('chain-context').value = d.context;
+            break;
+        case 'counterfactual':
+            document.getElementById('cf-original').value = d.original;
+            document.getElementById('cf-alternative').value = d.alternative;
+            document.getElementById('cf-effect').value = d.effect;
+            document.getElementById('cf-context').value = d.context;
+            break;
+        case 'prediction':
+            document.getElementById('pred-cause').value = d.cause;
+            document.getElementById('pred-context').value = d.context;
+            break;
+        case 'rootcause':
+            document.getElementById('rc-effect').value = d.effect;
+            document.getElementById('rc-context').value = d.context;
+            break;
+        case 'intervention':
+            document.getElementById('iv-situation').value = d.situation;
+            document.getElementById('iv-intervention').value = d.intervention;
+            document.getElementById('iv-outcome').value = d.outcome;
+            document.getElementById('iv-context').value = d.context;
+            break;
+    }
+}
+
+// Render example chips for each tab
+function renderExampleChips() {
+    const chipContainers = {
+        chain: 'chain-examples',
+        counterfactual: 'cf-examples',
+        prediction: 'pred-examples',
+        rootcause: 'rc-examples',
+        intervention: 'iv-examples'
+    };
+    for (const [type, containerId] of Object.entries(chipContainers)) {
+        const el = document.getElementById(containerId);
+        if (!el || !DEMOS[type]) continue;
+        el.innerHTML = DEMOS[type].map((d, i) =>
+            `<button class="example-chip" onclick="fillDemo('${type}', ${i})">${d.label}</button>`
+        ).join('');
+    }
+}
+renderExampleChips();
+
+// ═══════════ 键盘快捷键支持 ═══════════
+document.addEventListener('keydown', function(e) {
+    // Ctrl/Cmd + S: 保存修改
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        if (hasUnsavedChanges) {
+            saveChanges();
+        }
+    }
+
+    // Esc: 取消编辑模式
+    if (e.key === 'Escape') {
+        document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+            el.setAttribute('contenteditable', 'false');
+        });
+    }
+});
+
+// 页面离开前提醒
+window.addEventListener('beforeunload', function(e) {
+    if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '您有未保存的修改，确定要离开吗？';
+        return e.returnValue;
+    }
+});
+
+console.log('🎨 因果推理引擎已加载');
+console.log('💡 提示：');
+console.log('  - 点击节点上的 ✏️ 按钮进入编辑模式');
+console.log('  - 拖动滑块调整置信度');
+console.log('  - 使用下拉菜单修改关系类型');
+console.log('  - 点击 + 添加证据 按钮添加新证据');
+console.log('  - 按 Ctrl+S 快速保存修改');
+
+</script>
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Framework API Docs</title>
+    <style>
+        :root {
+            --bg: #f4efe4;
+            --panel: #fffaf0;
+            --ink: #1f2933;
+            --muted: #6b7280;
+            --line: #d8cbb5;
+            --accent: #8c5a2b;
+            --accent-soft: #ead8c2;
+            --get: #1f7a4c;
+            --post: #9a3412;
+            --put: #1d4ed8;
+            --delete: #b91c1c;
+            --patch: #7c3aed;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Georgia, "Times New Roman", serif;
+            background:
+                radial-gradient(circle at top left, #fff7e8 0, transparent 30%),
+                linear-gradient(180deg, #f8f1e3 0%, var(--bg) 100%);
+            color: var(--ink);
+        }
+
+        main {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 48px 20px 64px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(2rem, 4vw, 3.25rem);
+            letter-spacing: 0.02em;
+        }
+
+        .subhead {
+            margin: 12px 0 28px;
+            color: var(--muted);
+            max-width: 720px;
+            line-height: 1.6;
+        }
+
+        .links {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+        }
+
+        .links a {
+            text-decoration: none;
+            color: var(--ink);
+            background: var(--panel);
+            border: 1px solid var(--line);
+            padding: 10px 14px;
+            border-radius: 999px;
+        }
+
+        .group {
+            margin-top: 28px;
+        }
+
+        .group h2 {
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--accent);
+            margin-bottom: 12px;
+        }
+
+        .endpoint {
+            background: rgba(255, 250, 240, 0.92);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 16px 18px;
+            margin-bottom: 12px;
+            box-shadow: 0 8px 24px rgba(76, 52, 24, 0.06);
+        }
+
+        .endpoint-header {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .method {
+            min-width: 72px;
+            text-align: center;
+            border-radius: 999px;
+            color: #fff;
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 6px 10px;
+            letter-spacing: 0.06em;
+        }
+
+        .method.get { background: var(--get); }
+        .method.post { background: var(--post); }
+        .method.put { background: var(--put); }
+        .method.delete { background: var(--delete); }
+        .method.patch { background: var(--patch); }
+
+        .path {
+            font-family: "Courier New", monospace;
+            font-size: 0.98rem;
+            word-break: break-word;
+        }
+
+        .summary {
+            margin: 0 0 6px;
+            font-weight: 700;
+        }
+
+        .description {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.55;
+            white-space: pre-wrap;
+        }
+
+        .meta {
+            margin-top: 12px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .meta span {
+            background: var(--accent-soft);
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-size: 0.85rem;
+        }
+
+        .empty,
+        .error {
+            padding: 24px;
+            border-radius: 18px;
+            background: var(--panel);
+            border: 1px solid var(--line);
+        }
+
+        @media (max-width: 640px) {
+            main {
+                padding: 32px 16px 48px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Agent Framework API Docs</h1>
+        <p class="subhead">
+            This page is generated from the live Flask route table. It gives you a current view of available endpoints
+            without relying on a separate handwritten spec.
+        </p>
+        <div class="links">
+            <a href="/api/openapi.json">OpenAPI JSON</a>
+            <a href="/health">Health Check</a>
+        </div>
+        <div id="content" class="empty">Loading endpoints...</div>
+    </main>
+    <script>
+        async function loadDocs() {
+            const content = document.getElementById("content");
+            try {
+                const response = await fetch("/api/openapi.json");
+                if (!response.ok) {
+                    throw new Error("HTTP " + response.status);
+                }
+                const spec = await response.json();
+                const paths = spec.paths || {};
+                const groups = new Map();
+
+                Object.entries(paths).forEach(([path, operations]) => {
+                    Object.entries(operations).forEach(([method, operation]) => {
+                        const tag = (operation.tags && operation.tags[0]) || "misc";
+                        if (!groups.has(tag)) {
+                            groups.set(tag, []);
+                        }
+                        groups.get(tag).push({ path, method, operation });
+                    });
+                });
+
+                if (!groups.size) {
+                    content.className = "empty";
+                    content.textContent = "No documented endpoints were discovered.";
+                    return;
+                }
+
+                const html = Array.from(groups.entries())
+                    .sort((a, b) => a[0].localeCompare(b[0]))
+                    .map(([tag, entries]) => {
+                        const items = entries
+                            .sort((a, b) => a.path.localeCompare(b.path) || a.method.localeCompare(b.method))
+                            .map(({ path, method, operation }) => {
+                                const parameters = operation.parameters || [];
+                                const hasBody = Boolean(operation.requestBody);
+                                const meta = [];
+                                if (parameters.length) {
+                                    meta.push("<span>Path params: " + parameters.length + "</span>");
+                                }
+                                if (hasBody) {
+                                    meta.push("<span>JSON body</span>");
+                                }
+                                return `
+                                    <article class="endpoint">
+                                        <div class="endpoint-header">
+                                            <span class="method ${method}">${method.toUpperCase()}</span>
+                                            <span class="path">${path}</span>
+                                        </div>
+                                        <p class="summary">${operation.summary || "Untitled endpoint"}</p>
+                                        <p class="description">${operation.description || "No additional description."}</p>
+                                        <div class="meta">${meta.join("")}</div>
+                                    </article>
+                                `;
+                            })
+                            .join("");
+                        return `<section class="group"><h2>${tag}</h2>${items}</section>`;
+                    })
+                    .join("");
+
+                content.className = "";
+                content.innerHTML = html;
+            } catch (error) {
+                content.className = "error";
+                content.textContent = "Failed to load API documentation: " + error.message;
+            }
+        }
+
+        loadDocs();
+    </script>
+</body>
+</html>

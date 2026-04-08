@@ -1,0 +1,55 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agent-framework"
+version = "0.1.0"
+description = "Agent harness framework and application platform"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "Flask>=3.0,<4.0",
+    "Flask-SocketIO>=5.3,<6.0",
+    "openai>=2.0,<3.0",
+    "openai-agents>=0.3,<1.0",
+    "python-dotenv>=1.0,<2.0",
+    "numpy>=1.26,<3.0",
+    "PyYAML>=6.0,<7.0",
+    "requests>=2.31,<3.0",
+    "PyJWT>=2.8,<3.0",
+    "Werkzeug>=3.0,<4.0",
+    "orjson>=3.10,<4.0",
+    "ujson>=5.10,<6.0",
+    "numba>=0.59,<1.0",
+    "beautifulsoup4>=4.12,<5.0",
+    "PyPDF2>=3.0,<4.0",
+    "python-docx>=1.1,<2.0",
+    "openpyxl>=3.1,<4.0",
+    "python-pptx>=0.6,<1.0",
+    "chromadb>=0.5,<1.0",
+    "matplotlib>=3.8,<4.0",
+    "networkx>=3.2,<4.0",
+    "plotly>=5.20,<6.0",
+    "croniter>=3.0,<4.0",
+    "watchdog>=4.0,<6.0",
+    "Pillow>=10.0,<12.0",
+    "lancedb>=0.6,<1.0",
+    "pyarrow>=15.0,<17.0",
+]
+
+[project.scripts]
+agent-framework-web = "agent_framework.web.web_ui:run_server"
+agent-framework-rerank = "agent_framework.reasoning.rerank_server:main"
+agent-framework-doctor = "agent_framework.core.harness_doctor:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agent_framework"]
+
+[tool.uv]
+package = true
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0,<9.0",
+]

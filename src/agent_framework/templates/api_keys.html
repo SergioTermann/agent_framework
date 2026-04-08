@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API 密钥管理 - Agent Framework</title>
+    <link rel="stylesheet" href="/static/common-theme.css?v=3.0">
+    <style>
+        :root {
+            --theme-accent: #1363df;
+            --theme-accent-deep: #0f4eb3;
+            --theme-accent-soft: rgba(19, 99, 223, 0.10);
+            --theme-accent-shadow: rgba(19, 99, 223, 0.18);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f8fc 0%, #eff4fb 100%);
+            margin: 0;
+        }
+
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #0f4eb3 0%, #1363df 52%, #2b7fff 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-header {
+            padding: 28px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .sidebar-logo {
+            font-size: 26px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 20px 0;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            padding: 12px 24px;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border-left: 3px solid white;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: #ffffff;
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(101, 120, 144, 0.14);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            color: #253038;
+            font-weight: 600;
+        }
+
+        .container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px 20px;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--theme-accent-deep) 0%, var(--theme-accent) 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            box-shadow: 0 10px 24px var(--theme-accent-shadow);
+        }
+
+        .keys-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .key-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .key-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .key-name {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .key-value {
+            font-family: 'Courier New', monospace;
+            background: #f5f7fa;
+            padding: 12px;
+            border-radius: 6px;
+            margin: 15px 0;
+            word-break: break-all;
+        }
+
+        .key-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .meta-label {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .meta-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .icon-btn {
+            background: #f0f2f5;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-left: 8px;
+        }
+
+        .icon-btn:hover {
+            background: #e0e2e5;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-title {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--theme-accent);
+            box-shadow: 0 0 0 3px rgba(19, 99, 223, 0.12);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .back-btn {
+            color: var(--theme-accent) !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 侧边栏 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    🤖 Agent Framework
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="/" class="nav-item">
+                    <span>🏠</span>
+                    <span>首页</span>
+                </a>
+                <a href="/chat" class="nav-item">
+                    <span>💬</span>
+                    <span>对话助手</span>
+                </a>
+                <a href="/visual_workflow" class="nav-item">
+                    <span>🔄</span>
+                    <span>工作流编排</span>
+                </a>
+                <a href="/knowledge" class="nav-item">
+                    <span>📚</span>
+                    <span>知识库</span>
+                </a>
+                <a href="/api_keys" class="nav-item active">
+                    <span>🔑</span>
+                    <span>API 密钥</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <div class="header">
+                <h1>🔑 API 密钥管理</h1>
+            </div>
+
+            <div class="container">
+        <div class="toolbar">
+            <h2 style="color: #333;">我的 API 密钥</h2>
+            <button class="btn" onclick="showCreateModal()">+ 创建密钥</button>
+        </div>
+
+        <div class="keys-grid" id="keysGrid">
+            <div class="empty-state">
+                <div class="empty-state-icon">🔑</div>
+                <p>暂无 API 密钥，点击"创建密钥"开始</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="createModal">
+        <div class="modal-content">
+            <h2 class="modal-title">创建 API 密钥</h2>
+            <form id="createForm">
+                <div class="form-group">
+                    <label class="form-label">密钥名称</label>
+                    <input type="text" class="form-input" id="keyName" required placeholder="例如: 生产环境密钥">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">每分钟限流</label>
+                    <input type="number" class="form-input" id="rateLimit" value="60" min="1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">每天限流</label>
+                    <input type="number" class="form-input" id="dailyLimit" value="10000" min="1">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="hideCreateModal()">取消</button>
+                    <button type="submit" class="btn">创建</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function showCreateModal() {
+            document.getElementById('createModal').classList.add('active');
+        }
+
+        function hideCreateModal() {
+            document.getElementById('createModal').classList.remove('active');
+        }
+
+        document.getElementById('createForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const data = {
+                name: document.getElementById('keyName').value,
+                rate_limit_per_minute: parseInt(document.getElementById('rateLimit').value),
+                rate_limit_per_day: parseInt(document.getElementById('dailyLimit').value)
+            };
+
+            try {
+                const response = await fetch('/api/keys/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('密钥创建成功！\n\n密钥: ' + result.data.key + '\n\n请妥善保管，此密钥只显示一次！');
+                    hideCreateModal();
+                    loadKeys();
+                    document.getElementById('createForm').reset();
+                } else {
+                    alert('创建失败: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('创建失败');
+            }
+        });
+
+        async function loadKeys() {
+            try {
+                const response = await fetch('/api/keys/');
+                const result = await response.json();
+
+                const grid = document.getElementById('keysGrid');
+
+                if (!result.data || result.data.length === 0) {
+                    grid.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🔑</div>
+                            <p>暂无 API 密钥，点击"创建密钥"开始</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                grid.innerHTML = result.data.map(key => `
+                    <div class="key-card">
+                        <div class="key-header">
+                            <div class="key-name">${key.name}</div>
+                            <div>
+                                <button class="icon-btn" onclick="deleteKey('${key.key_id}')">🗑️</button>
+                            </div>
+                        </div>
+                        <div class="key-value">${key.key_prefix}...</div>
+                        <div class="key-meta">
+                            <div class="meta-item">
+                                <span class="meta-label">每分钟限流</span>
+                                <span class="meta-value">${key.rate_limit_per_minute || 'N/A'}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">每天限流</span>
+                                <span class="meta-value">${key.rate_limit_per_day || 'N/A'}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">创建时间</span>
+                                <span class="meta-value">${new Date(key.created_at).toLocaleDateString()}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">状态</span>
+                                <span class="meta-value">${key.is_active ? '✅ 激活' : '❌ 禁用'}</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading keys:', error);
+            }
+        }
+
+        async function deleteKey(keyId) {
+            if (!confirm('确定要删除这个密钥吗？此操作不可恢复！')) return;
+
+            try {
+                const response = await fetch(`/api/keys/${keyId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('删除成功！');
+                    loadKeys();
+                } else {
+                    alert('删除失败');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('删除失败');
+            }
+        }
+
+        // 加载密钥列表
+        loadKeys();
+    </script>
+        </div>
+    </div>
+</body>
+</html>

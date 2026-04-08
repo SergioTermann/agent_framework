@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统设置 - Agent Framework</title>
+    <link rel="stylesheet" href="/static/common-theme.css?v=3.0">
+    <style>
+        :root {
+            --theme-accent: #1363df;
+            --theme-accent-deep: #0f4eb3;
+            --theme-accent-soft: rgba(19, 99, 223, 0.10);
+            --theme-accent-line: rgba(19, 99, 223, 0.22);
+            --theme-accent-shadow: rgba(19, 99, 223, 0.18);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f8fc 0%, #eff4fb 100%);
+            margin: 0;
+        }
+
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #0f4eb3 0%, #1363df 52%, #2b7fff 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-header {
+            padding: 28px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .sidebar-logo {
+            font-size: 26px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 20px 0;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            padding: 12px 24px;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border-left: 3px solid white;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: #ffffff;
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(101, 120, 144, 0.14);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            color: #253038;
+            font-weight: 600;
+        }
+
+        .container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px 20px;
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .settings-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .setting-item {
+            padding: 20px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .setting-desc {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 12px;
+        }
+
+        .setting-input {
+            width: 100%;
+            max-width: 500px;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .setting-input:focus {
+            outline: none;
+            border-color: var(--theme-accent);
+            box-shadow: 0 0 0 3px rgba(19, 99, 223, 0.12);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--theme-accent-deep) 0%, var(--theme-accent) 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            box-shadow: 0 10px 24px var(--theme-accent-shadow);
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+
+        .info-box p {
+            color: #1565c0;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 侧边栏 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    🤖 Agent Framework
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="/" class="nav-item">
+                    <span>🏠</span>
+                    <span>首页</span>
+                </a>
+                <a href="/chat" class="nav-item">
+                    <span>💬</span>
+                    <span>对话助手</span>
+                </a>
+                <a href="/visual_workflow" class="nav-item">
+                    <span>🔄</span>
+                    <span>工作流编排</span>
+                </a>
+                <a href="/knowledge" class="nav-item">
+                    <span>📚</span>
+                    <span>知识库</span>
+                </a>
+                <a href="/settings" class="nav-item active">
+                    <span>⚙️</span>
+                    <span>系统设置</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <div class="header">
+                <h1>⚙️ 系统设置</h1>
+            </div>
+
+            <div class="container">
+        <div class="settings-section">
+            <h2 class="section-title">🔑 API 配置</h2>
+
+            <div class="setting-item">
+                <div class="setting-label">SiliconFlow API Key</div>
+                <div class="setting-desc">用于调用 LLM 服务的 API 密钥</div>
+                <input type="password" class="setting-input" id="apiKey" placeholder="sk-...">
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">默认模型</div>
+                <div class="setting-desc">系统默认使用的 LLM 模型</div>
+                <select class="setting-input" id="defaultModel">
+                    <option value="Qwen/Qwen3-VL-32B-Instruct">Qwen3-VL-32B-Instruct</option>
+                    <option value="gpt-4o">GPT-4o</option>
+                    <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                </select>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">Base URL</div>
+                <div class="setting-desc">API 服务的基础 URL</div>
+                <input type="text" class="setting-input" id="baseUrl" value="https://api.siliconflow.cn/v1">
+            </div>
+
+            <button class="btn" onclick="saveAPISettings()">保存 API 配置</button>
+        </div>
+
+        <div class="settings-section">
+            <h2 class="section-title">🎨 界面设置</h2>
+
+            <div class="setting-item">
+                <div class="setting-label">主题</div>
+                <div class="setting-desc">选择界面主题</div>
+                <select class="setting-input" id="theme">
+                    <option value="light">浅色</option>
+                    <option value="dark">深色</option>
+                    <option value="auto">跟随系统</option>
+                </select>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">语言</div>
+                <div class="setting-desc">界面显示语言</div>
+                <select class="setting-input" id="language">
+                    <option value="zh-CN">简体中文</option>
+                    <option value="en-US">English</option>
+                </select>
+            </div>
+
+            <button class="btn" onclick="saveUISettings()">保存界面设置</button>
+        </div>
+
+        <div class="settings-section">
+            <h2 class="section-title">📊 系统信息</h2>
+
+            <div class="setting-item">
+                <div class="setting-label">版本</div>
+                <div class="setting-desc">Agent Framework Platform v1.0.0</div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">运行状态</div>
+                <div class="setting-desc" id="systemStatus">检查中...</div>
+            </div>
+
+            <div class="info-box">
+                <p><strong>提示：</strong> 配置更改后需要重启服务器才能生效。建议将配置保存到 .env 文件中。</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 检查系统状态
+        fetch('/health')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('systemStatus').textContent = `✓ 运行正常 (${data.timestamp})`;
+            })
+            .catch(err => {
+                document.getElementById('systemStatus').textContent = '✗ 连接失败';
+            });
+
+        function saveAPISettings() {
+            const apiKey = document.getElementById('apiKey').value;
+            const model = document.getElementById('defaultModel').value;
+            const baseUrl = document.getElementById('baseUrl').value;
+
+            // 保存到 localStorage
+            localStorage.setItem('apiKey', apiKey);
+            localStorage.setItem('defaultModel', model);
+            localStorage.setItem('baseUrl', baseUrl);
+
+            alert('API 配置已保存到本地！\n\n注意：要永久生效，请将配置添加到 .env 文件：\n\nSILICONFLOW_API_KEY=' + apiKey + '\nDEFAULT_MODEL=' + model + '\nBASE_URL=' + baseUrl);
+        }
+
+        function saveUISettings() {
+            const theme = document.getElementById('theme').value;
+            const language = document.getElementById('language').value;
+
+            localStorage.setItem('theme', theme);
+            localStorage.setItem('language', language);
+
+            alert('界面设置已保存！');
+        }
+
+        // 加载已保存的设置
+        window.addEventListener('load', () => {
+            const apiKey = localStorage.getItem('apiKey');
+            const model = localStorage.getItem('defaultModel');
+            const baseUrl = localStorage.getItem('baseUrl');
+            const theme = localStorage.getItem('theme');
+            const language = localStorage.getItem('language');
+
+            if (apiKey) document.getElementById('apiKey').value = apiKey;
+            if (model) document.getElementById('defaultModel').value = model;
+            if (baseUrl) document.getElementById('baseUrl').value = baseUrl;
+            if (theme) document.getElementById('theme').value = theme;
+            if (language) document.getElementById('language').value = language;
+        });
+    </script>
+        </div>
+    </div>
+</body>
+</html>

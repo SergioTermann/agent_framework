@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心 - Agent Framework</title>
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet"> -->
+    <link rel="stylesheet" href="/static/css/base-theme.css">
+    <style>
+        :root {
+            --primary: #1363df;
+            --primary-deep: #0f4eb3;
+            --primary-light: #dbeafe;
+            --primary-soft: rgba(19, 99, 223, 0.08);
+            --primary-glow: rgba(19, 99, 223, 0.28);
+            --line-strong: rgba(19, 99, 223, 0.24);
+            --line-glow: rgba(19, 99, 223, 0.42);
+            --shadow-gold: 0 20px 48px rgba(19, 99, 223, 0.22), 0 0 60px rgba(19, 99, 223, 0.12);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 30px;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+        }
+
+        .profile-sidebar {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 30px;
+            border: 1px solid var(--line);
+            height: fit-content;
+            box-shadow: var(--shadow);
+        }
+
+        .avatar-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            margin: 0 auto 16px;
+            box-shadow: var(--shadow-gold);
+            color: #fff;
+        }
+
+        .avatar-upload {
+            margin-top: 12px;
+        }
+
+        .avatar-upload input {
+            display: none;
+        }
+
+        .avatar-upload label {
+            display: inline-block;
+            padding: 8px 16px;
+            background: var(--primary-soft);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            color: var(--primary-deep);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .avatar-upload label:hover {
+            background: rgba(19, 99, 223, 0.16);
+        }
+
+        .user-info {
+            text-align: center;
+        }
+
+        .user-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .user-role {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--primary-soft);
+            border-radius: 6px;
+            color: var(--primary-deep);
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .user-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 16px;
+            background: rgba(19, 99, 223, 0.05);
+            border-radius: var(--radius-sm);
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        .profile-main {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 30px;
+            border: 1px solid var(--line);
+            box-shadow: var(--shadow);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: var(--text);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .form-section h3 {
+            font-size: 18px;
+            color: var(--text);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: var(--muted);
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--surface-strong);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-soft);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .btn-primary {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border: none;
+            border-radius: var(--radius-sm);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-gold);
+        }
+
+        .btn-secondary {
+            padding: 12px 24px;
+            background: var(--surface-strong);
+            border: 1px solid var(--line-strong);
+            border-radius: var(--radius-sm);
+            color: var(--primary-deep);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: #fff;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-danger {
+            padding: 12px 24px;
+            background: rgba(220, 38, 38, 0.08);
+            border: 1px solid rgba(220, 38, 38, 0.2);
+            border-radius: var(--radius-sm);
+            color: var(--danger);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-danger:hover {
+            background: rgba(220, 38, 38, 0.14);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .alert-success {
+            background: rgba(22, 163, 74, 0.08);
+            border: 1px solid rgba(22, 163, 74, 0.18);
+            color: var(--success);
+        }
+
+        .alert-error {
+            background: rgba(220, 38, 38, 0.08);
+            border: 1px solid rgba(220, 38, 38, 0.18);
+            color: var(--danger);
+        }
+
+        .activity-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .activity-item {
+            padding: 16px;
+            background: rgba(19, 99, 223, 0.05);
+            border-radius: var(--radius-sm);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-sm);
+            background: var(--primary-soft);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            color: var(--text);
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .activity-time {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wide" style="max-width: 1200px;">
+        <nav class="topbar">
+            <div class="brand">
+                <a class="back-link" href="/developer">← 返回</a>
+                <h1>个人中心</h1>
+            </div>
+            <div class="topbar-actions">
+            </div>
+        </nav>
+    </div>
+
+    <div class="container">
+        <div class="profile-grid">
+            <div class="profile-sidebar">
+                <div class="avatar-section">
+                    <div class="avatar" id="userAvatar">👤</div>
+                    <div class="avatar-upload">
+                        <input type="file" id="avatarInput" accept="image/*">
+                        <label for="avatarInput">更换头像</label>
+                    </div>
+                </div>
+
+                <div class="user-info">
+                    <div class="user-name" id="userName">加载中...</div>
+                    <div class="user-role" id="userRole">Member</div>
+                    <div class="user-stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="projectCount">0</div>
+                            <div class="stat-label">项目</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="workflowCount">0</div>
+                            <div class="stat-label">工作流</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-main">
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('profile')">基本信息</button>
+                    <button class="tab" onclick="switchTab('security')">安全设置</button>
+                    <button class="tab" onclick="switchTab('activity')">活动记录</button>
+                </div>
+
+                <div id="alert" class="alert"></div>
+
+                <div id="profileTab" class="tab-content active">
+                    <form id="profileForm">
+                        <div class="form-section">
+                            <h3>个人信息</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>用户名</label>
+                                    <input type="text" id="username" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label>邮箱</label>
+                                    <input type="email" id="email" readonly>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>姓名</label>
+                                    <input type="text" id="fullName" placeholder="请输入姓名">
+                                </div>
+                                <div class="form-group">
+                                    <label>手机号</label>
+                                    <input type="tel" id="phone" placeholder="请输入手机号">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn-primary">保存更改</button>
+                            <button type="button" class="btn-secondary" onclick="loadUserProfile()">取消</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="securityTab" class="tab-content">
+                    <form id="passwordForm">
+                        <div class="form-section">
+                            <h3>修改密码</h3>
+                            <div class="form-group">
+                                <label>当前密码</label>
+                                <input type="password" id="currentPassword" placeholder="请输入当前密码" required>
+                            </div>
+                            <div class="form-group">
+                                <label>新密码</label>
+                                <input type="password" id="newPassword" placeholder="请输入新密码（至少8个字符）" required minlength="8">
+                            </div>
+                            <div class="form-group">
+                                <label>确认新密码</label>
+                                <input type="password" id="confirmPassword" placeholder="请再次输入新密码" required>
+                            </div>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn-primary">修改密码</button>
+                        </div>
+                    </form>
+
+                    <div class="form-section" style="margin-top: 40px;">
+                        <h3>危险操作</h3>
+                        <p style="color: var(--muted); margin-bottom: 16px;">删除账号后，所有数据将无法恢复</p>
+                        <button class="btn-danger" onclick="deleteAccount()">删除账号</button>
+                    </div>
+                </div>
+
+                <div id="activityTab" class="tab-content">
+                    <div class="form-section">
+                        <h3>最近活动</h3>
+                        <ul class="activity-list" id="activityList">
+                            <li class="activity-item">
+                                <div class="activity-icon">🔐</div>
+                                <div class="activity-content">
+                                    <div class="activity-title">登录成功</div>
+                                    <div class="activity-time">2024-03-16 10:30:00</div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+
+        // 切换标签页
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(tabName + 'Tab').classList.add('active');
+        }
+
+        // 加载用户信息
+        async function loadUserProfile() {
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            if (!token) {
+                window.location.href = '/login';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/users/me', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    currentUser = data.data;
+                    displayUserProfile(currentUser);
+                } else {
+                    window.location.href = '/login';
+                }
+            } catch (error) {
+                console.error('加载用户信息失败:', error);
+            }
+        }
+
+        // 显示用户信息
+        function displayUserProfile(user) {
+            document.getElementById('userName').textContent = user.full_name || user.username;
+            document.getElementById('userRole').textContent = user.role.toUpperCase();
+            document.getElementById('username').value = user.username;
+            document.getElementById('email').value = user.email;
+            document.getElementById('fullName').value = user.full_name || '';
+            document.getElementById('phone').value = user.phone || '';
+
+            // 显示头像首字母
+            const initial = (user.full_name || user.username).charAt(0).toUpperCase();
+            document.getElementById('userAvatar').textContent = initial;
+        }
+
+        // 保存个人信息
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            const alert = document.getElementById('alert');
+
+            try {
+                const response = await fetch('/api/users/me', {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        full_name: document.getElementById('fullName').value,
+                        phone: document.getElementById('phone').value
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert.className = 'alert alert-success';
+                    alert.textContent = '保存成功！';
+                    alert.style.display = 'block';
+                    setTimeout(() => alert.style.display = 'none', 3000);
+                    loadUserProfile();
+                } else {
+                    alert.className = 'alert alert-error';
+                    alert.textContent = data.error || '保存失败';
+                    alert.style.display = 'block';
+                }
+            } catch (error) {
+                alert.className = 'alert alert-error';
+                alert.textContent = '网络错误';
+                alert.style.display = 'block';
+            }
+        });
+
+        // 修改密码
+        document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const alert = document.getElementById('alert');
+
+            if (newPassword !== confirmPassword) {
+                alert.className = 'alert alert-error';
+                alert.textContent = '两次输入的密码不一致';
+                alert.style.display = 'block';
+                return;
+            }
+
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+
+            try {
+                const response = await fetch('/api/users/me/password', {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        current_password: document.getElementById('currentPassword').value,
+                        new_password: newPassword
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert.className = 'alert alert-success';
+                    alert.textContent = '密码修改成功！';
+                    alert.style.display = 'block';
+                    document.getElementById('passwordForm').reset();
+                    setTimeout(() => alert.style.display = 'none', 3000);
+                } else {
+                    alert.className = 'alert alert-error';
+                    alert.textContent = data.error || '密码修改失败';
+                    alert.style.display = 'block';
+                }
+            } catch (error) {
+                alert.className = 'alert alert-error';
+                alert.textContent = '网络错误';
+                alert.style.display = 'block';
+            }
+        });
+
+        // 删除账号
+        function deleteAccount() {
+            if (!confirm('确定要删除账号吗？此操作无法撤销！')) {
+                return;
+            }
+
+            if (!confirm('再次确认：删除账号后所有数据将永久丢失！')) {
+                return;
+            }
+
+            alert('账号删除功能开发中');
+        }
+
+        // 页面加载时获取用户信息
+        loadUserProfile();
+    </script>
+</body>
+</html>

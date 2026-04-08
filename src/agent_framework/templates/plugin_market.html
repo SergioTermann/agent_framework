@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>插件市场 - Agent Framework</title>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/base-theme.css">
+    <style>
+        :root {
+            --theme-accent: #1363df;
+            --theme-accent-deep: #0f4eb3;
+            --theme-accent-soft: rgba(19, 99, 223, 0.10);
+            --theme-accent-shadow: rgba(19, 99, 223, 0.18);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f8fc 0%, #eff4fb 100%);
+            margin: 0;
+        }
+
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #0f4eb3 0%, #1363df 52%, #2b7fff 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-header {
+            padding: 28px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .sidebar-logo {
+            font-size: 26px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 20px 0;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            padding: 12px 24px;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border-left: 3px solid white;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: #ffffff;
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(101, 120, 144, 0.14);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            color: #253038;
+            font-weight: 600;
+        }
+
+        .container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px 20px;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        [hidden]{display:none!important}
+        .hero,.controls,.modal-shell,.empty,.card{border:1px solid rgba(101,120,144,.14);background:rgba(255,255,255,.86);box-shadow:var(--shadow-md)}
+        .hero{padding:32px;border-radius:32px;background:radial-gradient(circle at top left,rgba(96,165,250,.18),transparent 28%),radial-gradient(circle at bottom right,rgba(227,236,255,.95),transparent 32%),linear-gradient(140deg,rgba(255,255,255,.98),rgba(239,244,251,.96))}
+        .hero-grid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(320px,.9fr);gap:24px}.eyebrow,.chip,.badge,.tag,.toggle{display:inline-flex;align-items:center;gap:8px}
+        .eyebrow,.chip,.toggle{padding:9px 14px;border-radius:999px;background:rgba(19,99,223,.08);border:1px solid rgba(19,99,223,.12)}.eyebrow{color:#1363df;font-size:13px;font-weight:700;text-transform:uppercase}
+        .hero h2{margin:14px 0 12px;font:700 clamp(34px,4vw,52px)/1.02 var(--font-display);letter-spacing:-.04em;color:#253038}.hero h2 span{display:block;color:#1363df}
+        .hero p{margin:0;color:#617181;max-width:62ch}.hero-points{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}.metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+        .metric{padding:18px;border-radius:22px;background:rgba(19,99,223,.05);border:1px solid rgba(19,99,223,.1)}.metric .label{display:flex;align-items:center;gap:8px;font-size:13px;color:#617181}
+        .metric strong{display:block;margin:12px 0 6px;font-size:30px;line-height:1;color:#253038}.metric span:last-child{font-size:13px;color:#617181}
+        .controls{margin-top:22px;padding:22px;border-radius:28px}.controls-top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center}
+        .search{position:relative}.search .material-symbols-outlined{position:absolute;left:18px;top:50%;transform:translateY(-50%);color:#617181}
+        .search input,.sort{width:100%;height:54px;padding:0 16px 0 52px;border-radius:18px;border:1px solid rgba(101,120,144,.14);background:rgba(255,255,255,.9);color:#253038;font-size:15px}
+        .sort{width:170px;padding-left:16px;height:44px;border-radius:14px}.search input:focus,.sort:focus{outline:none;border-color:#60a5fa;box-shadow:0 0 0 4px rgba(19,99,223,.08)}
+        .actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:flex-end}.toggle{color:#253038;font-size:14px}.toggle input{accent-color:#1363df}.ghost,.primary,.secondary,.close-btn{cursor:pointer;transition:.25s ease}
+        .ghost,.secondary,.close-btn{border:1px solid rgba(101,120,144,.14);background:rgba(255,255,255,.9);color:#253038}.ghost{height:44px;padding:0 16px;border-radius:14px;font-weight:700}.filters{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+        .chip{padding:10px 14px;color:#617181;cursor:pointer}.chip strong{font-size:12px;color:#4c5a68}.chip.active{color:#ffffff;background:linear-gradient(135deg,#1363df,#60a5fa);border-color:transparent;box-shadow:0 14px 28px rgba(19,99,223,.22)}.chip:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+        .summary{margin-top:14px;font-size:14px;color:#617181}.error{margin-top:14px;padding:12px 14px;border-radius:16px;background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.2);color:#dc2626}
+        .section{margin-top:24px}.section-head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:14px}.section-head h3{margin:0;color:#253038;font-size:20px}.section-head span{font-size:14px;color:#617181}
+        .featured-grid,.grid,.loading{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.featured{padding:22px;border-radius:28px;background:linear-gradient(150deg,rgba(239,244,251,.96),rgba(255,255,255,.9));position:relative;overflow:hidden}
+        .featured::before,.card::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at top right,rgba(96,165,250,.08),transparent 24%);pointer-events:none}
+        .card{position:relative;overflow:hidden;min-height:315px;padding:22px;border-radius:26px;background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(239,244,251,.98));cursor:pointer;border:1px solid rgba(101,120,144,.14)}
+        .top{display:flex;justify-content:space-between;gap:16px}.badges,.meta,.tags{display:flex;gap:8px;flex-wrap:wrap}.badge,.tag{padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid rgba(101,120,144,.12)}
+        .badge{background:rgba(19,99,223,.07);color:#253038}.badge.highlight{background:rgba(19,99,223,.16);color:#1363df}.badge.success{background:rgba(34,160,107,.16);color:#22a06b}
+        .icon,.modal-icon{display:grid;place-items:center;width:56px;height:56px;border-radius:18px;background:linear-gradient(135deg,#1363df,#60a5fa);color:#fff;box-shadow:0 14px 30px rgba(19,99,223,.24);font-size:28px}
+        .featured .icon{width:64px;height:64px;border-radius:20px;font-size:32px}.name,.modal-title{margin:16px 0 6px;color:#253038;font:700 22px/1.15 var(--font-display)}.featured .name{font-size:26px}
+        .author,.desc,.modal-author,.modal-desc,.readme,.empty p{color:#617181}.desc{margin:14px 0 16px;min-height:66px;font-size:14px}.meta .item{display:inline-flex;align-items:center;gap:6px;padding:8px 10px;border-radius:14px;background:rgba(19,99,223,.05);font-size:13px;color:#253038}
+        .meta .material-symbols-outlined{font-size:18px;color:#1363df}.tag{background:rgba(19,99,223,.05);color:#253038}.buttons{display:flex;gap:10px;margin-top:18px}
+        .primary,.secondary{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border-radius:16px;font-weight:700}.primary{flex:1;padding:0 16px;border:none;color:#ffffff;background:linear-gradient(135deg,#1363df,#60a5fa);box-shadow:0 16px 28px rgba(19,99,223,.22)}
+        .primary.installed{color:#ffffff;background:linear-gradient(135deg,#22a06b,#86efac);box-shadow:0 16px 28px rgba(34,160,107,.18)}.primary.warning{color:#ffffff;background:linear-gradient(135deg,#f97316,#fb7185);box-shadow:0 16px 28px rgba(249,115,22,.22)}.secondary{min-width:106px;padding:0 16px}.primary[disabled],.secondary[disabled]{opacity:.72;cursor:wait}
+        .loading .card,.empty{padding:28px;border-radius:28px}.loading .card{min-height:220px;cursor:default}.s-line,.s-icon{background:rgba(101,120,144,.08);border-radius:999px}.s-icon{width:56px;height:56px;border-radius:18px;margin-bottom:18px}.s-line{height:14px;margin-bottom:12px}.s-line.s{width:42%}.s-line.m{width:68%}.s-line.l{width:100%}
+        .card.loading::after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(96,165,250,.08),transparent);animation:shimmer 1.5s infinite}.empty{text-align:center;background:rgba(19,99,223,.04)}.empty .material-symbols-outlined{font-size:48px;color:#617181}.empty h4{margin:14px 0 8px;color:#253038;font-size:20px}
+        .modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(37,48,56,.74);backdrop-filter:blur(14px);z-index:1000}.modal-shell{width:min(960px,100%);max-height:calc(100vh - 48px);overflow:auto;padding:24px;border-radius:30px;background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(239,244,251,.98));border:1px solid rgba(101,120,144,.14)}
+        .modal-head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:18px}.close-btn{width:44px;height:44px;border-radius:14px;display:grid;place-items:center}.modal-title{font-size:30px;margin:10px 0 6px}.modal-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(280px,.8fr);gap:18px;margin-top:20px}
+        .panel{padding:20px;border-radius:22px;background:rgba(19,99,223,.04);border:1px solid rgba(101,120,144,.12)}.panel h4{margin:0 0 12px;color:#253038;font-size:17px}.panel-list,.meta-list{display:grid;gap:12px}
+        .panel-item,.meta-row{display:flex;gap:10px;color:#253038;font-size:14px}.panel-item .material-symbols-outlined{font-size:18px;color:#1363df}.readme{margin:0;white-space:pre-wrap;font-size:14px;line-height:1.7}
+        .meta-row{justify-content:space-between;padding-bottom:12px;border-bottom:1px solid rgba(101,120,144,.12)}.meta-row:last-child{padding-bottom:0;border-bottom:none}.meta-row strong{font-weight:500;color:#617181}
+        .rating-box{margin-top:18px;padding-top:18px;border-top:1px solid rgba(101,120,144,.12)}.rating-stars{display:flex;gap:8px;flex-wrap:wrap}.star-btn{display:grid;place-items:center;width:42px;height:42px;border:none;border-radius:14px;background:rgba(19,99,223,.06);color:rgba(19,99,223,.4);cursor:pointer;transition:.2s ease}.star-btn:hover,.star-btn.active{background:rgba(250,204,21,.18);color:#facc15}.star-btn[disabled]{opacity:.6;cursor:wait}.rating-note{margin-top:10px;font-size:13px;color:#617181}
+        .pagination{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:18px;padding:16px 18px;border-radius:22px;border:1px solid rgba(101,120,144,.12);background:rgba(19,99,223,.04)}.pagination-info{font-size:14px;color:#617181}.pagination-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.page-btn{min-width:44px;height:42px;padding:0 14px;border:none;border-radius:14px;background:rgba(19,99,223,.06);color:#253038;cursor:pointer;transition:.2s ease}.page-btn:hover{background:rgba(19,99,223,.1)}.page-btn.active{background:linear-gradient(135deg,#1363df,#60a5fa);color:#ffffff}.page-btn[disabled]{opacity:.45;cursor:not-allowed}
+        .toast{position:fixed;right:24px;bottom:24px;min-width:220px;max-width:360px;padding:14px 16px;border-radius:18px;background:rgba(255,255,255,.94);border:1px solid rgba(101,120,144,.14);box-shadow:var(--shadow-md);color:#253038;opacity:0;pointer-events:none;transform:translateY(14px);transition:.25s ease;z-index:1100}
+        .toast.show{opacity:1;transform:translateY(0)}.toast.error{background:rgba(220,38,38,.94);border-color:rgba(220,38,38,.28);color:#ffffff}.spinner{width:16px;height:16px;border:2px solid rgba(19,99,223,.22);border-top-color:rgba(19,99,223,.82);border-radius:50%;animation:spin .9s linear infinite}
+        @keyframes shimmer{100%{transform:translateX(100%)}}@keyframes spin{to{transform:rotate(360deg)}}
+        @media (max-width:1180px){.hero-grid,.featured-grid,.grid,.loading,.modal-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.hero-grid{grid-template-columns:1fr}}
+        @media (max-width:860px){.page-wide{padding:20px}.controls-top,.featured-grid,.grid,.loading,.modal-head,.modal-grid,.metrics{grid-template-columns:1fr}.actions,.buttons,.pagination-actions{flex-direction:column}.actions>*,.buttons>*,.pagination-actions>*{width:100%}.sort{width:100%}.pagination{align-items:stretch}}
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 侧边栏 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    🤖 Agent Framework
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="/" class="nav-item">
+                    <span>🏠</span>
+                    <span>首页</span>
+                </a>
+                <a href="/chat" class="nav-item">
+                    <span>💬</span>
+                    <span>对话助手</span>
+                </a>
+                <a href="/visual_workflow" class="nav-item">
+                    <span>🔄</span>
+                    <span>工作流编排</span>
+                </a>
+                <a href="/knowledge" class="nav-item">
+                    <span>📚</span>
+                    <span>知识库</span>
+                </a>
+                <a href="/plugin_market" class="nav-item active">
+                    <span>🔌</span>
+                    <span>插件市场</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <div class="header">
+                <h1>🔌 插件市场</h1>
+            </div>
+
+            <div class="container">
+    <div class="market">
+
+        <section class="hero">
+            <div class="hero-grid">
+                <div>
+                    <div class="eyebrow"><span class="material-symbols-outlined">diamond</span>Curated Marketplace</div>
+                    <h2>把插件页从“清单”升级成<span>真正可用的能力目录</span></h2>
+                    <p>现在的重点不是把卡片做得更花，而是让这页更适合实际决策：先看什么值得装，再看装没装、最新版本、兼容性和当前筛选结果。</p>
+                    <div class="hero-points">
+                        <div class="toggle"><span class="material-symbols-outlined">verified</span>官方校验</div>
+                        <div class="toggle"><span class="material-symbols-outlined">bolt</span>安装状态联动</div>
+                        <div class="toggle"><span class="material-symbols-outlined">tune</span>筛选与排序更清晰</div>
+                    </div>
+                </div>
+                <div class="metrics">
+                    <div class="metric"><div class="label"><span class="material-symbols-outlined">extension</span>插件总数</div><strong id="metric-total">0</strong><span id="metric-featured">0 个精选</span></div>
+                    <div class="metric"><div class="label"><span class="material-symbols-outlined">download_done</span>已安装</div><strong id="metric-installed">0</strong><span id="metric-enabled">0 个已启用</span></div>
+                    <div class="metric"><div class="label"><span class="material-symbols-outlined">download</span>总下载量</div><strong id="metric-downloads">0</strong><span>目录聚合统计</span></div>
+                    <div class="metric"><div class="label"><span class="material-symbols-outlined">star</span>平均评分</div><strong id="metric-rating">0.0</strong><span id="metric-verified">0 个已验证</span></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="controls-panel" class="controls">
+            <div class="controls-top">
+                <label class="search">
+                    <span class="material-symbols-outlined">search</span>
+                    <input id="search-input" type="search" placeholder="搜索插件名称、作者、描述或标签">
+                </label>
+                <div class="actions">
+                    <label class="toggle"><input id="installed-only" type="checkbox">仅看已安装</label>
+                    <select id="sort-select" class="sort">
+                        <option value="popular">按热度排序</option>
+                        <option value="rating">按评分排序</option>
+                        <option value="recent">按更新时间排序</option>
+                        <option value="name">按名称排序</option>
+                    </select>
+                    <select id="page-size-select" class="sort" aria-label="每页数量">
+                        <option value="6">每页 6 条</option>
+                        <option value="9">每页 9 条</option>
+                        <option value="12">每页 12 条</option>
+                    </select>
+                    <button id="share-button" class="ghost" type="button"><span class="material-symbols-outlined">link</span>复制当前链接</button>
+                    <button id="refresh-button" class="ghost" type="button"><span class="material-symbols-outlined">refresh</span>刷新</button>
+                </div>
+            </div>
+            <div id="category-filter-bar" class="filters"></div>
+            <div id="filter-summary" class="summary">正在加载插件目录...</div>
+            <div id="error-banner" class="error" hidden></div>
+        </section>
+
+        <section id="featured-section" class="section" hidden>
+            <div class="section-head"><div><h3>精选插件</h3><span>优先展示覆盖面广、稳定度高、适合直接接入的能力。</span></div></div>
+            <div id="featured-grid" class="featured-grid"></div>
+        </section>
+
+        <section class="section">
+            <div class="section-head"><div><h3>插件目录</h3><span id="catalog-note">支持搜索、分类过滤和安装状态联动。</span></div></div>
+            <div id="loading-grid" class="loading">
+                <div class="card loading"><div class="s-icon"></div><div class="s-line m"></div><div class="s-line s"></div><div class="s-line l"></div><div class="s-line l"></div></div>
+                <div class="card loading"><div class="s-icon"></div><div class="s-line m"></div><div class="s-line s"></div><div class="s-line l"></div><div class="s-line l"></div></div>
+                <div class="card loading"><div class="s-icon"></div><div class="s-line m"></div><div class="s-line s"></div><div class="s-line l"></div><div class="s-line l"></div></div>
+            </div>
+            <div id="plugins-grid" class="grid" hidden></div>
+            <div id="pagination-bar" class="pagination" hidden>
+                <div id="pagination-info" class="pagination-info"></div>
+                <div id="pagination-actions" class="pagination-actions"></div>
+            </div>
+            <div id="empty-state" class="empty" hidden>
+                <span class="material-symbols-outlined">search_off</span>
+                <h4>没有找到符合条件的插件</h4>
+                <p>可以尝试放宽关键词、切换分类，或者关闭“仅看已安装”。</p>
+            </div>
+        </section>
+    </div>
+
+    <div id="plugin-modal" class="modal" hidden>
+        <div class="modal-shell" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+            <div class="modal-head">
+                <div id="modal-icon" class="modal-icon material-symbols-outlined">extension</div>
+                <div>
+                    <div id="modal-badges" class="badges"></div>
+                    <h2 id="modal-title" class="modal-title">插件名称</h2>
+                    <div id="modal-author" class="modal-author">插件作者</div>
+                </div>
+                <button id="modal-close" class="close-btn" type="button"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <div class="modal-grid">
+                <div class="panel">
+                    <h4>插件说明</h4>
+                    <p id="modal-desc" class="modal-desc"></p>
+                    <h4 style="margin-top:18px">核心能力</h4>
+                    <div id="modal-highlights" class="panel-list"></div>
+                    <h4 style="margin-top:18px">README</h4>
+                    <pre id="modal-readme" class="readme"></pre>
+                </div>
+                <div class="panel">
+                    <h4>运行信息</h4>
+                    <div id="modal-meta" class="meta-list"></div>
+                    <div class="rating-box">
+                        <h4>给这个插件打分</h4>
+                        <div id="modal-rating-stars" class="rating-stars"></div>
+                        <div id="modal-rating-note" class="rating-note">选择 1 到 5 星后会立即提交评分。</div>
+                    </div>
+                    <h4 style="margin-top:18px">标签</h4>
+                    <div id="modal-tags" class="tags"></div>
+                    <div class="buttons">
+                        <button id="modal-action" class="primary" type="button"></button>
+                        <button id="modal-enable" class="secondary" type="button" hidden></button>
+                        <button id="modal-dismiss" class="secondary" type="button">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        const state = {allPlugins:[], featuredPlugins:[], categories:[], pagination:null, currentFilter:'all', currentSort:'popular', currentPage:1, pageSize:6, search:'', installedOnly:false, stats:null, currentPluginId:null, modalPlugin:null, busy:new Set(), ratingBusyPluginId:null, toastTimer:null, loadTimer:null, listAbortController:null, listRequestToken:0, isLoading:false};
+        const labels = {all:'全部', integration:'系统集成', ai:'AI 能力', data:'数据处理', automation:'自动化', utility:'运维工具'};
+        const sortOptions = new Set(['popular', 'rating', 'recent', 'name']);
+        const pageSizeOptions = new Set([6, 9, 12]);
+        const qs = (id) => document.getElementById(id);
+        const escapeHtml = (v) => String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+        const num = (v) => Number(v || 0).toLocaleString('zh-CN');
+        const dateText = (v) => { if (!v) return '未知'; const d = new Date(v); return Number.isNaN(d.getTime()) ? String(v) : d.toLocaleDateString('zh-CN'); };
+        const pluginById = (id) => state.allPlugins.find((p) => p.id === id) || null;
+        const currentModalPlugin = () => {
+            if (state.modalPlugin && state.modalPlugin.id === state.currentPluginId) return state.modalPlugin;
+            return pluginById(state.currentPluginId);
+        };
+
+        function buildUrl(pluginIdOverride = state.currentPluginId) {
+            const params = new URLSearchParams();
+            if (state.currentFilter !== 'all') params.set('category', state.currentFilter);
+            if (state.currentSort !== 'popular') params.set('sort', state.currentSort);
+            if (state.currentPage > 1) params.set('page', String(state.currentPage));
+            if (state.pageSize !== 6) params.set('page_size', String(state.pageSize));
+            if (state.search.trim()) params.set('search', state.search.trim());
+            if (state.installedOnly) params.set('installed', '1');
+            if (pluginIdOverride) params.set('plugin', pluginIdOverride);
+            const query = params.toString();
+            return `${window.location.pathname}${query ? `?${query}` : ''}`;
+        }
+
+        function buildListApiUrl() {
+            const params = new URLSearchParams();
+            params.set('category', state.currentFilter);
+            params.set('sort', state.currentSort);
+            params.set('page', String(state.currentPage));
+            params.set('page_size', String(state.pageSize));
+            if (state.search.trim()) params.set('search', state.search.trim());
+            if (state.installedOnly) params.set('installed_only', '1');
+            return `/api/plugins/?${params.toString()}`;
+        }
+
+        function readStateFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const category = params.get('category') || 'all';
+            const sort = params.get('sort') || 'popular';
+            state.currentFilter = Object.prototype.hasOwnProperty.call(labels, category) ? category : 'all';
+            state.currentSort = sortOptions.has(sort) ? sort : 'popular';
+            state.currentPage = Math.max(1, Number.parseInt(params.get('page') || '1', 10) || 1);
+            const pageSize = Number.parseInt(params.get('page_size') || '6', 10) || 6;
+            state.pageSize = pageSizeOptions.has(pageSize) ? pageSize : 6;
+            state.search = params.get('search') || '';
+            state.installedOnly = ['1', 'true', 'yes'].includes((params.get('installed') || '').toLowerCase());
+            state.currentPluginId = params.get('plugin') || null;
+        }
+
+        function syncControlsFromState() {
+            qs('search-input').value = state.search;
+            qs('installed-only').checked = state.installedOnly;
+            qs('sort-select').value = state.currentSort;
+            qs('page-size-select').value = String(state.pageSize);
+        }
+
+        function syncUrlState(mode = 'replace', pluginIdOverride = state.currentPluginId) {
+            const nextUrl = buildUrl(pluginIdOverride);
+            if (mode === 'push') {
+                window.history.pushState(null, '', nextUrl);
+                return;
+            }
+            window.history.replaceState(null, '', nextUrl);
+        }
+
+        async function copyCurrentLink() {
+            const url = `${window.location.origin}${buildUrl()}`;
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(url);
+                } else {
+                    const input = document.createElement('textarea');
+                    input.value = url;
+                    input.setAttribute('readonly', 'true');
+                    input.style.position = 'fixed';
+                    input.style.opacity = '0';
+                    document.body.appendChild(input);
+                    input.focus();
+                    input.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(input);
+                }
+                toast('当前链接已复制');
+            } catch (error) {
+                console.error(error);
+                toast('复制链接失败', 'error');
+            }
+        }
+
+        function commitStateToUi({resetPage=false} = {}) {
+            if (resetPage) state.currentPage = 1;
+            syncControlsFromState();
+            syncUrlState();
+            queueLoadPlugins();
+        }
+
+        function queueLoadPlugins() {
+            window.clearTimeout(state.loadTimer);
+            state.loadTimer = window.setTimeout(() => {
+                loadPlugins({silent:true});
+            }, 180);
+        }
+
+        function toast(message, type='success') {
+            const el = qs('toast');
+            el.textContent = message;
+            el.className = `toast ${type === 'error' ? 'error' : ''}`.trim();
+            el.classList.add('show');
+            window.clearTimeout(state.toastTimer);
+            state.toastTimer = window.setTimeout(() => el.classList.remove('show'), 2600);
+        }
+
+        function setError(message='') {
+            qs('error-banner').hidden = !message;
+            qs('error-banner').textContent = message;
+        }
+
+        function setControlsLoadingState(loading) {
+            state.isLoading = loading;
+            qs('controls-panel').dataset.loading = loading ? 'true' : 'false';
+            qs('installed-only').disabled = loading;
+            qs('sort-select').disabled = loading;
+            qs('page-size-select').disabled = loading;
+            qs('refresh-button').disabled = loading;
+            qs('refresh-button').innerHTML = loading
+                ? '<span class="spinner"></span>刷新中...'
+                : '<span class="material-symbols-outlined">refresh</span>刷新';
+        }
+
+        function setLoading(loading, {preserveGrid=false} = {}) {
+            setControlsLoadingState(loading);
+            if (!preserveGrid) {
+                qs('loading-grid').hidden = !loading;
+                qs('plugins-grid').hidden = loading;
+                if (loading) qs('empty-state').hidden = true;
+            }
+            qs('filter-summary').dataset.loading = loading ? 'true' : 'false';
+        }
+
+        function visiblePlugins() {
+            return [...state.allPlugins];
+        }
+
+        function renderStats() {
+            const s = state.stats || {};
+            qs('metric-total').textContent = num(s.total_plugins);
+            qs('metric-installed').textContent = num(s.installed_plugins);
+            qs('metric-enabled').textContent = `${num(s.enabled_plugins)} 个已启用`;
+            qs('metric-downloads').textContent = num(s.total_downloads);
+            qs('metric-rating').textContent = Number(s.avg_rating || 0).toFixed(1);
+            qs('metric-featured').textContent = `${num(s.featured_plugins)} 个精选`;
+            qs('metric-verified').textContent = `${num(s.verified_plugins)} 个已验证`;
+        }
+
+        function renderFilters() {
+            const categories = state.categories.length
+                ? state.categories
+                : [{id:'all', label:labels.all, count:state.allPlugins.length}].concat(
+                    Object.entries(labels)
+                        .filter(([id]) => id !== 'all')
+                        .map(([id, label]) => ({id, label, count:0}))
+                );
+            qs('category-filter-bar').innerHTML = categories.map((item) => `<button type="button" class="chip ${item.id === state.currentFilter ? 'active' : ''}" onclick="selectCategory('${item.id}')" ${state.isLoading ? 'disabled' : ''}><span>${escapeHtml(item.label)}</span><strong>${num(item.count)}</strong></button>`).join('');
+        }
+
+        function renderPagination() {
+            const pagination = state.pagination;
+            const bar = qs('pagination-bar');
+            if (!pagination || pagination.total_pages <= 1) {
+                bar.hidden = true;
+                qs('pagination-info').textContent = '';
+                qs('pagination-actions').innerHTML = '';
+                return;
+            }
+
+            bar.hidden = false;
+            const start = (pagination.page - 1) * pagination.page_size + 1;
+            const end = Math.min(pagination.total_items, pagination.page * pagination.page_size);
+            qs('pagination-info').textContent = `第 ${pagination.page} / ${pagination.total_pages} 页 · 显示 ${start}-${end} / ${pagination.total_items} · 每页 ${pagination.page_size} 条`;
+
+            const pages = [];
+            const startPage = Math.max(1, pagination.page - 1);
+            const endPage = Math.min(pagination.total_pages, pagination.page + 1);
+            for (let page = startPage; page <= endPage; page += 1) {
+                pages.push(page);
+            }
+
+            qs('pagination-actions').innerHTML = `
+                <button type="button" class="page-btn" onclick="changePage(${pagination.page - 1})" ${(pagination.has_prev && !state.isLoading) ? '' : 'disabled'}>上一页</button>
+                ${pages.map((page) => `<button type="button" class="page-btn ${page === pagination.page ? 'active' : ''}" onclick="changePage(${page})" ${state.isLoading ? 'disabled' : ''}>${page}</button>`).join('')}
+                <button type="button" class="page-btn" onclick="changePage(${pagination.page + 1})" ${(pagination.has_next && !state.isLoading) ? '' : 'disabled'}>下一页</button>
+            `;
+        }
+
+        function renderFeatured() {
+            const section = qs('featured-section');
+            const grid = qs('featured-grid');
+            if (state.currentFilter !== 'all' || state.installedOnly || state.search.trim() || state.currentPage !== 1) { section.hidden = true; grid.innerHTML = ''; return; }
+            const list = [...state.featuredPlugins];
+            if (!list.length) { section.hidden = true; return; }
+            section.hidden = false;
+            grid.innerHTML = list.map((p) => {
+                const busy = state.busy.has(p.id) || state.isLoading;
+                return `<article class="featured" style="--plugin-accent:${escapeHtml(p.accent || '#d4a574')}"><div class="top"><div class="badges"><span class="badge highlight">官方精选</span>${p.verified ? '<span class="badge success">已验证</span>' : ''}${p.installed ? `<span class="badge ${p.enabled ? 'success' : ''}">${p.enabled ? '已启用' : '已停用'}</span>` : ''}</div><div class="icon material-symbols-outlined">${escapeHtml(p.icon || 'extension')}</div></div><h4 class="name">${escapeHtml(p.name)}</h4><div class="author">by ${escapeHtml(p.author)}</div><p class="desc">${escapeHtml(p.description)}</p><div class="meta"><span class="item"><span class="material-symbols-outlined">download</span>${num(p.downloads)}</span><span class="item"><span class="material-symbols-outlined">star</span>${Number(p.rating || 0).toFixed(1)}</span><span class="item"><span class="material-symbols-outlined">schedule</span>${escapeHtml(dateText(p.updated_at))}</span></div><div class="buttons"><button type="button" class="primary ${p.installed ? 'installed' : ''}" onclick="toggleInstall('${p.id}', event)" ${busy ? 'disabled' : ''}>${busy ? '<span class="spinner"></span>处理中...' : `<span class="material-symbols-outlined">${p.installed ? 'check_circle' : 'download'}</span>${p.installed ? '已安装' : '立即安装'}`}</button><button type="button" class="secondary" onclick="openModal('${p.id}')">查看详情</button></div></article>`;
+            }).join('');
+        }
+
+        function renderGrid() {
+            const list = visiblePlugins();
+            renderStats();
+            renderFilters();
+            renderFeatured();
+            qs('filter-summary').textContent = [`当前匹配 ${list.length} 个插件`, `总目录 ${num(state.stats?.total_plugins || list.length)} 个`, state.currentFilter !== 'all' ? `分类：${labels[state.currentFilter]}` : '', state.installedOnly ? '仅查看已安装' : '', state.search.trim() ? `关键词：“${state.search.trim()}”` : ''].filter(Boolean).join(' · ');
+            qs('catalog-note').textContent = `当前排序：${qs('sort-select').selectedOptions[0].text}`;
+            if (!list.length) { qs('plugins-grid').innerHTML = ''; qs('plugins-grid').hidden = true; qs('pagination-bar').hidden = true; qs('empty-state').hidden = false; return; }
+            qs('empty-state').hidden = true;
+            qs('plugins-grid').hidden = false;
+            qs('plugins-grid').innerHTML = list.map((p) => {
+                const busy = state.busy.has(p.id) || state.isLoading;
+                return `<article class="card" style="--plugin-accent:${escapeHtml(p.accent || '#d4a574')}" role="button" tabindex="0" onclick="openModal('${p.id}')" onkeydown="handleCardKey(event,'${p.id}')"><div class="top"><div class="badges"><span class="badge ${p.featured ? 'highlight' : ''}">${escapeHtml(p.featured ? '精选' : (p.category_label || labels[p.category] || p.category))}</span>${p.installed ? `<span class="badge ${p.enabled ? 'success' : ''}">${p.enabled ? '已启用' : '已停用'}</span>` : ''}${p.verified ? '<span class="badge">已验证</span>' : ''}</div><div class="icon material-symbols-outlined">${escapeHtml(p.icon || 'extension')}</div></div><h4 class="name">${escapeHtml(p.name)}</h4><div class="author">by ${escapeHtml(p.author)}</div><p class="desc">${escapeHtml(p.description)}</p><div class="meta"><span class="item"><span class="material-symbols-outlined">download</span>${num(p.downloads)}</span><span class="item"><span class="material-symbols-outlined">star</span>${Number(p.rating || 0).toFixed(1)}${p.rating_count ? ` / ${num(p.rating_count)} 评` : ''}</span><span class="item"><span class="material-symbols-outlined">deployed_code_update</span>${escapeHtml(p.version)}</span></div><div class="tags">${(p.tags || []).slice(0,3).map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}</div><div class="buttons"><button type="button" class="primary ${p.installed ? 'installed' : ''}" onclick="toggleInstall('${p.id}', event)" ${busy ? 'disabled' : ''}>${busy ? '<span class="spinner"></span>处理中...' : `<span class="material-symbols-outlined">${p.installed ? 'check_circle' : 'download'}</span>${p.installed ? '已安装' : '安装插件'}`}</button><button type="button" class="secondary" onclick="openModal('${p.id}')">详情</button></div></article>`;
+            }).join('');
+            renderPagination();
+        }
+
+        function renderModal(plugin) {
+            state.modalPlugin = plugin;
+            qs('modal-icon').textContent = plugin.icon || 'extension';
+            qs('modal-badges').innerHTML = `<span class="badge ${plugin.featured ? 'highlight' : ''}">${escapeHtml(plugin.featured ? '官方精选' : (plugin.category_label || labels[plugin.category] || plugin.category))}</span>${plugin.verified ? '<span class="badge success">已验证</span>' : ''}${plugin.installed ? `<span class="badge ${plugin.enabled ? 'success' : ''}">${plugin.enabled ? '已启用' : '已停用'}</span>` : ''}`;
+            qs('modal-title').textContent = plugin.name;
+            qs('modal-author').textContent = `by ${plugin.author}`;
+            qs('modal-desc').textContent = plugin.description;
+            qs('modal-readme').textContent = plugin.readme || '';
+            qs('modal-highlights').innerHTML = (plugin.highlights || []).map((item) => `<div class="panel-item"><span class="material-symbols-outlined">check_circle</span><span>${escapeHtml(item)}</span></div>`).join('');
+            qs('modal-meta').innerHTML = `<div class="meta-row"><strong>版本</strong><span>${escapeHtml(plugin.version)}</span></div><div class="meta-row"><strong>兼容性</strong><span>${escapeHtml(plugin.compatibility || '未说明')}</span></div><div class="meta-row"><strong>下载量</strong><span>${num(plugin.downloads)}</span></div><div class="meta-row"><strong>评分</strong><span>${Number(plugin.rating || 0).toFixed(1)}${plugin.rating_count ? ` / ${num(plugin.rating_count)} 评` : ''}</span></div><div class="meta-row"><strong>最近更新</strong><span>${escapeHtml(dateText(plugin.updated_at))}</span></div><div class="meta-row"><strong>安装状态</strong><span>${plugin.installed ? `已安装${plugin.installed_at ? ` · ${escapeHtml(dateText(plugin.installed_at))}` : ''}` : '未安装'}</span></div><div class="meta-row"><strong>运行状态</strong><span>${plugin.installed ? (plugin.enabled ? '已启用' : '已停用') : '未安装'}</span></div>`;
+            qs('modal-tags').innerHTML = (plugin.tags || []).map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join('');
+            const action = qs('modal-action');
+            const enableButton = qs('modal-enable');
+            const busy = state.busy.has(plugin.id);
+            const ratingBusy = state.ratingBusyPluginId === plugin.id;
+            action.className = `primary ${plugin.installed ? 'installed' : ''}`;
+            action.disabled = busy;
+            action.innerHTML = busy ? '<span class="spinner"></span>处理中...' : `<span class="material-symbols-outlined">${plugin.installed ? 'check_circle' : 'download'}</span>${plugin.installed ? '已安装' : '安装插件'}`;
+            action.onclick = (event) => toggleInstall(plugin.id, event);
+
+            if (plugin.installed) {
+                enableButton.hidden = false;
+                enableButton.disabled = busy;
+                enableButton.className = plugin.enabled ? 'primary warning' : 'secondary';
+                enableButton.innerHTML = busy ? '<span class="spinner"></span>处理中...' : (plugin.enabled ? '停用插件' : '启用插件');
+                enableButton.onclick = (event) => toggleEnabled(plugin.id, event);
+            } else {
+                enableButton.hidden = true;
+                enableButton.onclick = null;
+            }
+
+            qs('modal-rating-stars').innerHTML = [1,2,3,4,5].map((value) => `<button type="button" class="star-btn ${Number(plugin.rating || 0) >= value ? 'active' : ''}" onclick="submitRating('${plugin.id}', ${value}, event)" ${ratingBusy ? 'disabled' : ''}><span class="material-symbols-outlined">star</span></button>`).join('');
+            qs('modal-rating-note').textContent = ratingBusy ? '评分提交中...' : `当前平均 ${Number(plugin.rating || 0).toFixed(1)}${plugin.rating_count ? `，共 ${num(plugin.rating_count)} 次评分` : '，还没有用户评分'}`;
+        }
+
+        async function fetchPluginDetail(id) {
+            const response = await fetch(`/api/plugins/${id}`);
+            const data = await response.json();
+            if (!response.ok || !data.success) throw new Error(data.error || '插件详情加载失败');
+            return data.plugin;
+        }
+
+        async function syncModalFromState() {
+            if (!state.currentPluginId) {
+                state.modalPlugin = null;
+                qs('plugin-modal').hidden = true;
+                return;
+            }
+            let plugin = pluginById(state.currentPluginId);
+            if (!plugin && state.modalPlugin && state.modalPlugin.id === state.currentPluginId) {
+                plugin = state.modalPlugin;
+            }
+            if (!plugin) {
+                try {
+                    plugin = await fetchPluginDetail(state.currentPluginId);
+                } catch (error) {
+                    console.error(error);
+                    state.currentPluginId = null;
+                    state.modalPlugin = null;
+                    qs('plugin-modal').hidden = true;
+                    syncUrlState('replace', null);
+                    toast(error.message || '插件详情加载失败', 'error');
+                    return;
+                }
+            }
+            renderModal(plugin);
+            qs('plugin-modal').hidden = false;
+        }
+
+        async function openModal(id, options = {}) {
+            const {historyMode = 'push'} = options;
+            state.currentPluginId = id;
+            syncUrlState(historyMode, id);
+            await syncModalFromState();
+        }
+
+        function closeModal(options = {}) {
+            const {historyMode = 'replace'} = options;
+            qs('plugin-modal').hidden = true;
+            state.currentPluginId = null;
+            state.modalPlugin = null;
+            syncUrlState(historyMode, null);
+        }
+
+        async function loadPlugins({silent=false} = {}) {
+            setLoading(true, {preserveGrid: silent});
+            setError('');
+            if (state.listAbortController) state.listAbortController.abort();
+            const controller = new AbortController();
+            const requestToken = state.listRequestToken + 1;
+            state.listAbortController = controller;
+            state.listRequestToken = requestToken;
+            try {
+                const response = await fetch(buildListApiUrl(), {signal: controller.signal});
+                const data = await response.json();
+                if (requestToken !== state.listRequestToken) return;
+                if (!response.ok || !data.success) throw new Error(data.error || '插件目录加载失败');
+                state.allPlugins = data.plugins || [];
+                state.featuredPlugins = data.featured_plugins || [];
+                state.categories = data.categories || [];
+                state.pagination = data.pagination || null;
+                if (state.pagination?.page) state.currentPage = state.pagination.page;
+                state.stats = data.stats || {
+                    total_plugins: state.allPlugins.length,
+                    installed_plugins: state.allPlugins.filter((p) => p.installed).length,
+                    enabled_plugins: state.allPlugins.filter((p) => p.enabled).length,
+                    total_downloads: state.allPlugins.reduce((sum, p) => sum + Number(p.downloads || 0), 0),
+                    avg_rating: state.allPlugins.length ? state.allPlugins.reduce((sum, p) => sum + Number(p.rating || 0), 0) / state.allPlugins.length : 0,
+                    verified_plugins: state.allPlugins.filter((p) => p.verified).length,
+                    featured_plugins: state.allPlugins.filter((p) => p.featured).length,
+                };
+                renderGrid();
+                await syncModalFromState();
+            } catch (error) {
+                if (error?.name === 'AbortError') return;
+                if (requestToken !== state.listRequestToken) return;
+                console.error(error);
+                setError(error.message || '插件目录加载失败');
+                qs('plugins-grid').innerHTML = '';
+                qs('plugins-grid').hidden = true;
+                qs('featured-section').hidden = true;
+                qs('empty-state').hidden = false;
+                qs('plugin-modal').hidden = true;
+                qs('filter-summary').textContent = '插件目录加载失败';
+            } finally {
+                if (requestToken === state.listRequestToken) {
+                    state.listAbortController = null;
+                    setLoading(false, {preserveGrid: silent});
+                }
+            }
+        }
+
+        async function toggleInstall(id, event) {
+            if (event) { event.preventDefault(); event.stopPropagation(); }
+            if (state.busy.has(id)) return;
+            const plugin = (state.currentPluginId === id ? currentModalPlugin() : null) || pluginById(id);
+            if (!plugin) return;
+            const endpoint = plugin.installed ? 'uninstall' : 'install';
+            const wasInstalled = plugin.installed;
+            state.busy.add(id);
+            renderGrid();
+            if (state.currentPluginId === id && plugin) renderModal(plugin);
+            try {
+                const response = await fetch(`/api/plugins/${id}/${endpoint}`, {method:'POST'});
+                const data = await response.json();
+                if (!response.ok || !data.success) throw new Error(data.error || '插件操作失败');
+                await loadPlugins({silent:true});
+                if (state.currentPluginId === id) await syncModalFromState();
+                toast(wasInstalled ? '插件已卸载' : '插件已安装');
+            } catch (error) {
+                console.error(error);
+                toast(error.message || '插件操作失败', 'error');
+            } finally {
+                state.busy.delete(id);
+                renderGrid();
+                if (!qs('plugin-modal').hidden && state.currentPluginId) await syncModalFromState();
+            }
+        }
+
+        async function toggleEnabled(id, event) {
+            if (event) { event.preventDefault(); event.stopPropagation(); }
+            if (state.busy.has(id)) return;
+            const plugin = (state.currentPluginId === id ? currentModalPlugin() : null) || pluginById(id);
+            if (!plugin || !plugin.installed) return;
+            const endpoint = plugin.enabled ? 'disable' : 'enable';
+            state.busy.add(id);
+            renderGrid();
+            if (state.currentPluginId === id && plugin) renderModal(plugin);
+            try {
+                const response = await fetch(`/api/plugins/${id}/${endpoint}`, {method:'POST'});
+                const data = await response.json();
+                if (!response.ok || !data.success) throw new Error(data.error || '插件状态切换失败');
+                await loadPlugins({silent:true});
+                if (state.currentPluginId === id) await syncModalFromState();
+                toast(endpoint === 'enable' ? '插件已启用' : '插件已停用');
+            } catch (error) {
+                console.error(error);
+                toast(error.message || '插件状态切换失败', 'error');
+            } finally {
+                state.busy.delete(id);
+                renderGrid();
+                if (!qs('plugin-modal').hidden && state.currentPluginId) await syncModalFromState();
+            }
+        }
+
+        async function submitRating(id, rating, event) {
+            if (event) { event.preventDefault(); event.stopPropagation(); }
+            if (state.ratingBusyPluginId === id) return;
+            state.ratingBusyPluginId = id;
+            const currentBefore = (state.currentPluginId === id ? currentModalPlugin() : null) || pluginById(id);
+            if (currentBefore && state.currentPluginId === id) renderModal(currentBefore);
+            try {
+                const response = await fetch(`/api/plugins/${id}/rate`, {
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify({rating, user_id:'web-user'}),
+                });
+                const data = await response.json();
+                if (!response.ok || !data.success) throw new Error(data.error || '插件评分失败');
+                await loadPlugins({silent:true});
+                if (state.currentPluginId === id) await syncModalFromState();
+                toast(`已提交 ${rating} 星评分`);
+            } catch (error) {
+                console.error(error);
+                toast(error.message || '插件评分失败', 'error');
+            } finally {
+                state.ratingBusyPluginId = null;
+                if (state.currentPluginId === id) await syncModalFromState();
+            }
+        }
+
+        function selectCategory(id) {
+            if (state.isLoading) return;
+            state.currentFilter = id;
+            commitStateToUi({resetPage:true});
+        }
+        function changePage(page) {
+            if (state.isLoading) return;
+            const nextPage = Math.max(1, Number(page || 1));
+            if (nextPage === state.currentPage) return;
+            state.currentPage = nextPage;
+            syncUrlState();
+            loadPlugins({silent:true});
+        }
+        function handleCardKey(event, id) { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openModal(id); } }
+        window.selectCategory = selectCategory; window.changePage = changePage; window.openModal = openModal; window.toggleInstall = toggleInstall; window.toggleEnabled = toggleEnabled; window.submitRating = submitRating; window.handleCardKey = handleCardKey;
+
+        qs('search-input').addEventListener('input', (event) => { state.search = event.target.value || ''; commitStateToUi({resetPage:true}); });
+        qs('installed-only').addEventListener('change', (event) => { state.installedOnly = Boolean(event.target.checked); commitStateToUi({resetPage:true}); });
+        qs('sort-select').addEventListener('change', (event) => { state.currentSort = event.target.value; commitStateToUi({resetPage:true}); });
+        qs('page-size-select').addEventListener('change', (event) => { state.pageSize = Number.parseInt(event.target.value || '6', 10) || 6; commitStateToUi({resetPage:true}); });
+        qs('share-button').addEventListener('click', () => copyCurrentLink());
+        qs('refresh-button').addEventListener('click', () => loadPlugins());
+        qs('modal-close').addEventListener('click', () => closeModal());
+        qs('modal-dismiss').addEventListener('click', () => closeModal());
+        qs('plugin-modal').addEventListener('click', (event) => { if (event.target.id === 'plugin-modal') closeModal(); });
+        document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && !qs('plugin-modal').hidden) closeModal(); });
+        window.addEventListener('popstate', () => { readStateFromUrl(); syncControlsFromState(); loadPlugins({silent:true}); });
+        readStateFromUrl();
+        syncControlsFromState();
+        loadPlugins();
+    </script>
+        </div>
+    </div>
+</body>
+</html>

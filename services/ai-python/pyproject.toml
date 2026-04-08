@@ -1,0 +1,21 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agent-framework-ai-service"
+version = "0.1.0"
+description = "AI-plane service boundary for unified chat, context building, and multi-agent orchestration"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.27",
+    "httpx>=0.27",
+    "pydantic>=2.5",
+]
+
+[project.scripts]
+ai-service = "ai_service.app:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ai_service"]

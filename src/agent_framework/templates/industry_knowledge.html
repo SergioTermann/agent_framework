@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>行业智库 - 风起时域</title>
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet"> -->
+    <link rel="stylesheet" href="/static/common-theme.css?v=3.0">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --theme-accent: #1363df;
+            --theme-accent-deep: #0f4eb3;
+            --theme-accent-soft: rgba(19, 99, 223, 0.12);
+            --theme-accent-line: rgba(19, 99, 223, 0.2);
+            --theme-accent-shadow: rgba(19, 99, 223, 0.18);
+            --theme-accent-text: rgba(15, 78, 179, 0.82);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei UI', sans-serif;
+            background: linear-gradient(135deg, #f5f8fc 0%, #eff4fb 100%);
+            margin: 0;
+        }
+
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #0f4eb3 0%, #1363df 52%, #2b7fff 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-header {
+            padding: 28px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .sidebar-logo {
+            font-size: 26px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 20px 0;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            padding: 12px 24px;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border-left: 3px solid white;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: #ffffff;
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(101, 120, 144, 0.14);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            color: #253038;
+            font-weight: 600;
+        }
+
+        .container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px 20px;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* 功能卡片网格 */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--theme-accent-line);
+            border-radius: 15px;
+            padding: 30px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .feature-card:hover {
+            box-shadow: 0 10px 40px var(--theme-accent-shadow);
+            border-color: rgba(19, 99, 223, 0.36);
+        }
+
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 0 10px rgba(19, 99, 223, 0.22));
+        }
+
+        .feature-title {
+            font-size: 1.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--theme-accent-deep);
+        }
+
+        .feature-desc {
+            color: rgba(15, 78, 179, 0.72);
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .feature-benefits {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-benefits li {
+            padding: 5px 0;
+            color: rgba(15, 78, 179, 0.66);
+            font-size: 0.9em;
+        }
+
+        .feature-benefits li::before {
+            content: "✓ ";
+            color: var(--theme-accent);
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        /* 交互区域 */
+        .interaction-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--theme-accent-line);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .panel-title {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--theme-accent-deep);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--theme-accent-text);
+            font-weight: 500;
+        }
+
+        .input-field {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid var(--theme-accent-line);
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--theme-accent-deep);
+            font-family: 'PingFang SC', 'Microsoft YaHei UI', sans-serif;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: rgba(19, 99, 223, 0.46);
+            box-shadow: 0 0 15px rgba(19, 99, 223, 0.12);
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        textarea.input-field {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: var(--theme-accent-soft);
+            border: 1px solid rgba(19, 99, 223, 0.3);
+            color: var(--theme-accent-deep);
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'PingFang SC', 'Microsoft YaHei UI', sans-serif;
+            font-size: 1em;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            background: rgba(19, 99, 223, 0.18);
+            box-shadow: 0 5px 20px rgba(19, 99, 223, 0.18);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--theme-accent-deep) 0%, var(--theme-accent) 100%);
+            border: none;
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 5px 25px rgba(19, 99, 223, 0.24);
+        }
+
+        /* 结果展示区 */
+        .result-panel {
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(19, 99, 223, 0.15);
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 200px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            line-height: 1.8;
+            color: rgba(15, 78, 179, 0.8);
+        }
+
+        .loading {
+            text-align: center;
+            color: rgba(15, 78, 179, 0.62);
+            padding: 40px;
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        /* 统计卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--theme-accent-line);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: var(--theme-accent-deep);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: rgba(15, 78, 179, 0.62);
+            font-size: 0.9em;
+        }
+
+        .content-section {
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(19, 99, 223, 0.16);
+            border-radius: 15px;
+            padding: 28px;
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--theme-accent-deep);
+            margin-bottom: 16px;
+        }
+
+        .section-lead {
+            color: rgba(15, 78, 179, 0.78);
+            line-height: 1.8;
+            margin-bottom: 18px;
+        }
+
+        .insight-grid,
+        .category-grid,
+        .scenario-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 18px;
+        }
+
+        .insight-card,
+        .category-card,
+        .scenario-card {
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid rgba(19, 99, 223, 0.14);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .insight-card h3,
+        .category-card h3,
+        .scenario-card h3 {
+            font-size: 1.08em;
+            margin-bottom: 10px;
+            color: var(--theme-accent-deep);
+        }
+
+        .insight-card p,
+        .category-card p,
+        .scenario-card p {
+            color: rgba(15, 78, 179, 0.75);
+            line-height: 1.75;
+            font-size: 0.95em;
+        }
+
+        .mini-list {
+            margin-top: 12px;
+            padding-left: 18px;
+            color: rgba(15, 78, 179, 0.72);
+            line-height: 1.8;
+            font-size: 0.92em;
+        }
+
+        .mini-list li {
+            margin-bottom: 4px;
+        }
+
+        .topic-strip {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .topic-tag {
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(19, 99, 223, 0.08);
+            border: 1px solid rgba(19, 99, 223, 0.12);
+            color: rgba(15, 78, 179, 0.8);
+            font-size: 0.9em;
+        }
+
+        .fault-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .fault-table th,
+        .fault-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(19, 99, 223, 0.1);
+            text-align: left;
+            vertical-align: top;
+            font-size: 0.94em;
+            line-height: 1.7;
+            color: rgba(15, 78, 179, 0.78);
+        }
+
+        .fault-table th {
+            background: rgba(19, 99, 223, 0.08);
+            color: var(--theme-accent-deep);
+            font-weight: 700;
+        }
+
+        .fault-table tr:last-child td {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 侧边栏 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    🤖 Agent Framework
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="/" class="nav-item">
+                    <span>🏠</span>
+                    <span>首页</span>
+                </a>
+                <a href="/chat" class="nav-item">
+                    <span>💬</span>
+                    <span>对话助手</span>
+                </a>
+                <a href="/visual_workflow" class="nav-item">
+                    <span>🔄</span>
+                    <span>工作流编排</span>
+                </a>
+                <a href="/knowledge" class="nav-item">
+                    <span>📚</span>
+                    <span>知识库</span>
+                </a>
+                <a href="/industry_knowledge" class="nav-item active">
+                    <span>🏢</span>
+                    <span>行业智库</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <div class="header">
+                <h1>🏢 行业智库</h1>
+            </div>
+
+            <div class="container">
+        <!-- 统计数据 -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">1,250+</div>
+                <div class="stat-label">行业知识条目</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">500+</div>
+                <div class="stat-label">政策法规文档</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">98%</div>
+                <div class="stat-label">问答准确率</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">5秒</div>
+                <div class="stat-label">平均响应时间</div>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2 class="section-title">📚 智库定位与覆盖范围</h2>
+            <p class="section-lead">
+                行业智库面向新能源、风电运维、企业经营与项目拓展场景，沉淀“行业事实 + 业务经验 + 方法模板 + 分析框架”四类内容。
+                它不仅回答问题，还帮助团队形成统一口径、快速输出文档、沉淀可复用知识资产。
+            </p>
+            <div class="topic-strip">
+                <span class="topic-tag">风电行业趋势</span>
+                <span class="topic-tag">机组运维管理</span>
+                <span class="topic-tag">场站经营分析</span>
+                <span class="topic-tag">政策与招投标</span>
+                <span class="topic-tag">设备故障知识</span>
+                <span class="topic-tag">客户方案包装</span>
+                <span class="topic-tag">企业制度与流程</span>
+                <span class="topic-tag">竞争情报研究</span>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2 class="section-title">🔍 行业专题速览</h2>
+            <div class="insight-grid">
+                <div class="insight-card">
+                    <h3>装机增长与存量运维并行</h3>
+                    <p>行业一边追求新增装机，一边进入大规模存量运维阶段。项目价值不再只看建设能力，还要看可利用率、故障恢复速度和全生命周期收益管理能力。</p>
+                </div>
+                <div class="insight-card">
+                    <h3>大机型、海上化、智能化加速</h3>
+                    <p>单机容量增大、叶轮直径扩大、场景复杂度上升，使传统人工经验难以覆盖全部情况，运维体系更依赖知识库、诊断模型和流程编排能力。</p>
+                </div>
+                <div class="insight-card">
+                    <h3>客户关注点转向“经营结果”</h3>
+                    <p>风场业主更加关注发电量损失、非计划停机时长、备件周转、人员配置效率与技改回报，因此智库内容需要同时覆盖技术、管理和经营视角。</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2 class="section-title">🧭 知识地图</h2>
+            <div class="category-grid">
+                <div class="category-card">
+                    <h3>行业研究</h3>
+                    <p>覆盖市场规模、装机趋势、区域布局、海上风电、储能协同、新技术路线等内容。</p>
+                    <ul class="mini-list">
+                        <li>年度发展趋势总结</li>
+                        <li>区域市场机会梳理</li>
+                        <li>行业热点专题解读</li>
+                    </ul>
+                </div>
+                <div class="category-card">
+                    <h3>运维知识</h3>
+                    <p>围绕机组告警、常见故障、检修流程、备件策略、班组协同、现场 SOP 等进行沉淀。</p>
+                    <ul class="mini-list">
+                        <li>故障现象—根因—措施映射</li>
+                        <li>典型案例复盘</li>
+                        <li>停机损失与恢复优先级判断</li>
+                    </ul>
+                </div>
+                <div class="category-card">
+                    <h3>政策制度</h3>
+                    <p>用于支撑内部制度问答、合规查询、流程校验，以及外部项目中的政策环境研判。</p>
+                    <ul class="mini-list">
+                        <li>企业内部制度检索</li>
+                        <li>审批流程与责任边界说明</li>
+                        <li>政策影响分析与摘要提炼</li>
+                    </ul>
+                </div>
+                <div class="category-card">
+                    <h3>文档模板</h3>
+                    <p>内置技术方案、商务汇报、项目建议书、复盘纪要、客户拜访纪要等写作框架。</p>
+                    <ul class="mini-list">
+                        <li>标准章节结构建议</li>
+                        <li>常见表达与专业术语</li>
+                        <li>面向客户的价值包装逻辑</li>
+                    </ul>
+                </div>
+                <div class="category-card">
+                    <h3>竞争情报</h3>
+                    <p>支持对标厂商、合作伙伴、业主类型、产品能力与业务模式的横向研究。</p>
+                    <ul class="mini-list">
+                        <li>竞争对手能力画像</li>
+                        <li>产品差异点与替代风险</li>
+                        <li>市场切入策略建议</li>
+                    </ul>
+                </div>
+                <div class="category-card">
+                    <h3>经营分析</h3>
+                    <p>把行业信息与公司经营动作连接起来，帮助销售、交付、运维、管理层做协同决策。</p>
+                    <ul class="mini-list">
+                        <li>项目优先级评估</li>
+                        <li>客户需求拆解</li>
+                        <li>解决方案投入产出分析</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2 class="section-title">🛠️ 典型使用场景</h2>
+            <div class="scenario-grid">
+                <div class="scenario-card">
+                    <h3>售前方案准备</h3>
+                    <p>快速提炼客户痛点、输出行业背景、整理竞品对比、生成解决方案结构，缩短从需求沟通到正式交付文档的时间。</p>
+                </div>
+                <div class="scenario-card">
+                    <h3>运维知识查询</h3>
+                    <p>针对“故障现象是什么、常见原因有哪些、排查顺序怎么安排、对发电量影响多大”等问题，形成可直接落地的回答。</p>
+                </div>
+                <div class="scenario-card">
+                    <h3>管理层情报分析</h3>
+                    <p>围绕市场趋势、项目机会、政策变化、技术方向给出结构化结论，帮助管理层做资源投入和重点市场判断。</p>
+                </div>
+                <div class="scenario-card">
+                    <h3>内部制度答疑</h3>
+                    <p>让员工在请假、报销、采购、项目立项、合同审批等场景中快速找到制度依据，减少反复沟通成本。</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2 class="section-title">🌬️ 风电行业背景资料</h2>
+            <div class="insight-grid">
+                <div class="insight-card">
+                    <h3>行业进入“建设 + 运维并重”阶段</h3>
+                    <p>随着装机规模持续扩大，新能源企业的核心竞争力逐步从单纯建设能力延伸到发电效率、设备可用率、故障恢复速度和资产经营水平。</p>
+                    <ul class="mini-list">
+                        <li>新增项目关注投产进度与并网效率</li>
+                        <li>存量风场关注可利用率与损失电量</li>
+                        <li>经营指标越来越依赖精细化运维</li>
+                    </ul>
+                </div>
+                <div class="insight-card">
+                    <h3>机组大型化带来新的知识需求</h3>
+                    <p>随着单机容量提升，故障影响范围更大、单次停机损失更高，传统“老师傅经验”难以快速复制，企业更需要标准化知识沉淀和智能辅助工具。</p>
+                    <ul class="mini-list">
+                        <li>故障定位更复杂</li>
+                        <li>备件策略更依赖数据</li>
+                        <li>协同决策需要统一口径</li>
+                    </ul>
+                </div>
+                <div class="insight-card">
+                    <h3>AI 在行业中的价值不只是问答</h3>
+                    <p>行业应用 AI 的重点不只是“能回答问题”，而是把知识检索、运维流程、案例复盘、文档生成和经营分析串起来，形成可落地的工作流。</p>
+                    <ul class="mini-list">
+                        <li>面向售前：方案包装与客户沟通</li>
+                        <li>面向交付：知识标准化与流程模板</li>
+                        <li>面向运维：辅助诊断与复盘提效</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2 class="section-title">⚠️ 常见故障专题</h2>
+            <p class="section-lead">
+                以下内容适合沉淀为“现象—根因—排查—处置”的标准专题，供运维、售前、交付和培训场景复用。
+            </p>
+            <table class="fault-table">
+                <thead>
+                    <tr>
+                        <th style="width: 18%;">故障专题</th>
+                        <th style="width: 26%;">常见表现</th>
+                        <th style="width: 28%;">排查重点</th>
+                        <th>适合沉淀的知识内容</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>偏航系统异常</td>
+                        <td>频繁解缆、偏航误差大、偏航动作异常、功率波动明显</td>
+                        <td>偏航驱动状态、编码器信号、风向一致性、液压/制动部件状态</td>
+                        <td>偏航误差阈值、典型根因树、不同机型的排查顺序、恢复后观察指标</td>
+                    </tr>
+                    <tr>
+                        <td>变桨系统告警</td>
+                        <td>叶片角度异常、变桨响应慢、限功率运行、停机保护触发</td>
+                        <td>变桨电机、驱动器、电池柜、控制链路、叶片角度反馈值</td>
+                        <td>告警分级、停机损失评估、临时处理建议、备件更换策略</td>
+                    </tr>
+                    <tr>
+                        <td>主齿轮箱温升</td>
+                        <td>油温偏高、振动趋势上升、润滑异常、长时间高温运行</td>
+                        <td>润滑系统、油品质量、负荷工况、传感器准确性、历史趋势对比</td>
+                        <td>趋势阈值模板、热失控前兆、巡检项目清单、案例复盘模板</td>
+                    </tr>
+                    <tr>
+                        <td>发电机与变流系统异常</td>
+                        <td>电流波动、并网不稳、故障停机、功率受限</td>
+                        <td>变流器模块、冷却系统、电气连接、环境温度、故障码关联关系</td>
+                        <td>电气故障码词典、跨系统关联分析、恢复策略、运行风险提示</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="content-section">
+            <h2 class="section-title">🌊 海上风电 / 🏔️ 陆上风电差异</h2>
+            <div class="category-grid">
+                <div class="category-card">
+                    <h3>陆上风电</h3>
+                    <p>陆上项目数量多、场景分散、地形和道路条件差异大，更强调班组组织效率、巡检覆盖率和标准化作业体系。</p>
+                    <ul class="mini-list">
+                        <li>适合建立标准 SOP 和常见故障案例库</li>
+                        <li>对备件调度和区域协同要求高</li>
+                        <li>更适合快速复制数字化运维方法</li>
+                    </ul>
+                </div>
+                <div class="category-card">
+                    <h3>海上风电</h3>
+                    <p>海上项目受天气窗口、交通组织、作业安全和单次出海成本影响更大，知识管理应更侧重“高风险、高损失、高时延”问题的提前识别。</p>
+                    <ul class="mini-list">
+                        <li>停机时长和恢复成本更高</li>
+                        <li>天气与作业资源耦合更紧</li>
+                        <li>需要更强的远程诊断和预案支持</li>
+                    </ul>
+                </div>
+                <div class="category-card">
+                    <h3>智库建设建议</h3>
+                    <p>同一套智库不能只讲共性知识，还应区分陆上与海上的组织模式、故障优先级、资源约束和经营指标。</p>
+                    <ul class="mini-list">
+                        <li>建立分场景知识标签</li>
+                        <li>区分不同机型与区域运维策略</li>
+                        <li>沉淀“天气窗口 + 资源调度 + 故障等级”联动知识</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2 class="section-title">👥 典型客户需求画像</h2>
+            <div class="scenario-grid">
+                <div class="scenario-card">
+                    <h3>风场业主 / 资产管理方</h3>
+                    <p>更关注发电量、可利用率、停机损失、技改回报和经营透明度，希望看到“问题发现—诊断建议—收益改善”的闭环能力。</p>
+                </div>
+                <div class="scenario-card">
+                    <h3>运维服务团队</h3>
+                    <p>更关注标准流程、知识继承、告警解读、故障复盘和新人培训，希望把经验沉淀成可检索、可执行、可复用的知识资产。</p>
+                </div>
+                <div class="scenario-card">
+                    <h3>售前与市场团队</h3>
+                    <p>更关注行业趋势、客户痛点、竞品差异和价值表达，希望快速生成专业方案、客户汇报材料和项目建议书。</p>
+                </div>
+                <div class="scenario-card">
+                    <h3>管理层与决策者</h3>
+                    <p>更关注市场方向、重点客户、组织投入产出和 AI 落地价值，希望获得结构化情报与可执行建议，而不是零散信息。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 功能卡片 -->
+        <div class="features-grid">
+            <div class="feature-card" onclick="showPanel('qa')">
+                <div class="feature-icon">💡</div>
+                <h3 class="feature-title">智能问答</h3>
+                <p class="feature-desc">基于行业知识库的精准问答系统</p>
+                <ul class="feature-benefits">
+                    <li>快速理解客户需求</li>
+                    <li>精准匹配行业知识</li>
+                    <li>支持多轮对话</li>
+                </ul>
+            </div>
+
+            <div class="feature-card" onclick="showPanel('document')">
+                <div class="feature-icon">📄</div>
+                <h3 class="feature-title">文书生成</h3>
+                <p class="feature-desc">自动生成各类商业文档和报告</p>
+                <ul class="feature-benefits">
+                    <li>技术方案自动生成</li>
+                    <li>商务报告一键输出</li>
+                    <li>符合行业规范</li>
+                </ul>
+            </div>
+
+            <div class="feature-card" onclick="showPanel('policy')">
+                <div class="feature-icon">📋</div>
+                <h3 class="feature-title">制度管家</h3>
+                <p class="feature-desc">企业制度智能管理和查询</p>
+                <ul class="feature-benefits">
+                    <li>制度快速检索</li>
+                    <li>合规性检查</li>
+                    <li>流程优化建议</li>
+                </ul>
+            </div>
+
+            <div class="feature-card" onclick="showPanel('analysis')">
+                <div class="feature-icon">📊</div>
+                <h3 class="feature-title">情报分析</h3>
+                <p class="feature-desc">行业动态和竞争情报分析</p>
+                <ul class="feature-benefits">
+                    <li>市场趋势分析</li>
+                    <li>竞争对手监测</li>
+                    <li>战略决策支持</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 交互面板 -->
+        <div class="interaction-panel" id="qaPanel" style="display: none;">
+            <h2 class="panel-title">💡 智能问答</h2>
+            <div class="input-group">
+                <label class="input-label">请输入您的问题：</label>
+                <textarea class="input-field" id="qaInput" placeholder="例如：风电场运维成本如何优化？"></textarea>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="submitQA()">提交问题</button>
+                <button class="btn" onclick="clearResult()">清空</button>
+            </div>
+            <div class="result-panel" id="qaResult"></div>
+        </div>
+
+        <div class="interaction-panel" id="documentPanel" style="display: none;">
+            <h2 class="panel-title">📄 文书生成</h2>
+            <div class="input-group">
+                <label class="input-label">文档类型：</label>
+                <select class="input-field" id="docType">
+                    <option value="technical">技术方案</option>
+                    <option value="business">商务报告</option>
+                    <option value="summary">工作总结</option>
+                    <option value="proposal">项目建议书</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label class="input-label">文档主题：</label>
+                <input type="text" class="input-field" id="docTopic" placeholder="例如：风电场智能运维系统方案">
+            </div>
+            <div class="input-group">
+                <label class="input-label">关键要点（可选）：</label>
+                <textarea class="input-field" id="docPoints" placeholder="输入需要包含的关键内容，每行一个要点"></textarea>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="generateDocument()">生成文档</button>
+                <button class="btn" onclick="clearResult()">清空</button>
+            </div>
+            <div class="result-panel" id="docResult"></div>
+        </div>
+
+        <div class="interaction-panel" id="policyPanel" style="display: none;">
+            <h2 class="panel-title">📋 制度管家</h2>
+            <div class="input-group">
+                <label class="input-label">查询内容：</label>
+                <input type="text" class="input-field" id="policyQuery" placeholder="例如：员工请假流程">
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="searchPolicy()">查询制度</button>
+                <button class="btn" onclick="clearResult()">清空</button>
+            </div>
+            <div class="result-panel" id="policyResult"></div>
+        </div>
+
+        <div class="interaction-panel" id="analysisPanel" style="display: none;">
+            <h2 class="panel-title">📊 情报分析</h2>
+            <div class="input-group">
+                <label class="input-label">分析主题：</label>
+                <input type="text" class="input-field" id="analysisTheme" placeholder="例如：2026年风电行业发展趋势">
+            </div>
+            <div class="input-group">
+                <label class="input-label">分析维度：</label>
+                <select class="input-field" id="analysisDimension">
+                    <option value="market">市场趋势</option>
+                    <option value="technology">技术发展</option>
+                    <option value="policy">政策环境</option>
+                    <option value="competition">竞争格局</option>
+                </select>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="analyzeIntelligence()">开始分析</button>
+                <button class="btn" onclick="clearResult()">清空</button>
+            </div>
+            <div class="result-panel" id="analysisResult"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+        const socket = typeof window.io === 'function' ? io() : null;
+
+        function ensureSocket(resultPanel) {
+            if (socket) return true;
+            if (resultPanel) {
+                resultPanel.innerHTML = '<div class="loading">Socket.IO 加载失败，当前环境无法建立实时问答通道。</div>';
+            }
+            return false;
+        }
+
+        function runAssistantTask(message, agentType, resultPanel, loadingText) {
+            if (!ensureSocket(resultPanel)) return;
+            resultPanel.innerHTML = `<div class="loading">${loadingText}</div>`;
+
+            let fullResponse = '';
+            const handleStream = (data) => {
+                fullResponse += data.chunk || '';
+                resultPanel.innerHTML = fullResponse;
+            };
+            const handleComplete = (data) => {
+                resultPanel.innerHTML = data.message;
+                socket.off('assistant_stream', handleStream);
+                socket.off('assistant_complete', handleComplete);
+            };
+
+            socket.on('assistant_stream', handleStream);
+            socket.on('assistant_complete', handleComplete);
+            socket.emit('assistant_message', { message, agent_type: agentType });
+        }
+
+        function showPanel(type) {
+            // 隐藏所有面板
+            document.querySelectorAll('.interaction-panel').forEach(panel => {
+                panel.style.display = 'none';
+            });
+
+            // 显示选中的面板
+            const panelMap = {
+                'qa': 'qaPanel',
+                'document': 'documentPanel',
+                'policy': 'policyPanel',
+                'analysis': 'analysisPanel'
+            };
+            document.getElementById(panelMap[type]).style.display = 'block';
+        }
+
+        function clearResult() {
+            document.querySelectorAll('.result-panel').forEach(panel => {
+                panel.innerHTML = '';
+            });
+        }
+
+        function submitQA() {
+            const input = document.getElementById('qaInput').value;
+            const resultPanel = document.getElementById('qaResult');
+
+            if (!input.trim()) {
+                alert('请输入问题。');
+                return;
+            }
+
+            runAssistantTask(`请以风电行业专家的身份，结合行业背景、场站经营、设备运维和业务落地经验，回答以下问题：${input}`, 'general', resultPanel, '正在分析问题...');
+        }
+
+        function generateDocument() {
+            const docType = document.getElementById('docType').value;
+            const topic = document.getElementById('docTopic').value;
+            const points = document.getElementById('docPoints').value;
+            const resultPanel = document.getElementById('docResult');
+
+            if (!topic.trim()) {
+                alert('请输入文档主题。');
+                return;
+            }
+
+            const typeMap = {
+                'technical': '技术方案',
+                'business': '商务报告',
+                'summary': '工作总结',
+                'proposal': '项目建议书'
+            };
+
+            let prompt = `请生成一份关于“${topic}”的${typeMap[docType]}，要求内容结构清晰、表达专业、适合新能源与风电业务场景。`;
+            if (points.trim()) {
+                prompt += `\n\n请重点覆盖以下要点：\n${points}`;
+            }
+
+            runAssistantTask(prompt, 'general', resultPanel, '正在生成文档...');
+        }
+
+        function searchPolicy() {
+            const query = document.getElementById('policyQuery').value;
+            const resultPanel = document.getElementById('policyResult');
+
+            if (!query.trim()) {
+                alert('请输入查询内容。');
+                return;
+            }
+
+            runAssistantTask(`请查询与“${query}”相关的企业制度、流程要求、审批要点和执行建议，并尽量用清晰条目化方式回答。`, 'general', resultPanel, '正在查询制度...');
+        }
+
+        function analyzeIntelligence() {
+            const theme = document.getElementById('analysisTheme').value;
+            const dimension = document.getElementById('analysisDimension').value;
+            const resultPanel = document.getElementById('analysisResult');
+
+            if (!theme.trim()) {
+                alert('请输入分析主题。');
+                return;
+            }
+
+            const dimensionMap = {
+                'market': '市场趋势',
+                'technology': '技术发展',
+                'policy': '政策环境',
+                'competition': '竞争格局'
+            };
+
+            runAssistantTask(`请围绕“${theme}”，从${dimensionMap[dimension]}角度输出一份结构化情报分析，包含现状判断、关键变化、风险点、机会点和建议动作。`, 'data', resultPanel, '正在进行情报分析...');
+        }
+
+        document.getElementById('qaResult').innerHTML = '可咨询示例：\n1. 风电场非计划停机时间高，通常先从哪些维度排查？\n2. 如何向客户解释”知识库 + 诊断模型 + 运维流程编排”的业务价值？\n3. 老旧机组运维数字化改造，优先级应该怎么排？';
+        document.getElementById('docResult').innerHTML = '可生成内容示例：\n- 风电场智能运维平台建设方案\n- 海上风电故障诊断项目建议书\n- 新能源行业客户拜访纪要\n- 年度市场分析汇报';
+        document.getElementById('policyResult').innerHTML = '可查询示例：\n- 采购申请流程\n- 项目立项审批要求\n- 差旅报销制度\n- 合同评审节点';
+        document.getElementById('analysisResult').innerHTML = '可分析示例：\n- 2026 年风电行业数字化机会点\n- 大机型背景下的运维组织变化\n- 海上风电运维服务市场竞争格局\n- 新能源 AI 应用的商业落地路径';
+    </script>
+        </div>
+    </div>
+</body>
+</html>

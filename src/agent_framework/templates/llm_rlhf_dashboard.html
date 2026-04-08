@@ -1,0 +1,1600 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM 强化学习平台 - Agent Framework</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <link rel="stylesheet" href="/static/css/base-theme.css">
+    <style>
+        :root {
+            --grad-start: #2563eb;
+            --grad-end: #06b6d4;
+            --primary: #2563eb;
+            --card-bg: #ffffff;
+            --text2: #475569;
+            --text3: #94a3b8;
+            --border: rgba(37,99,235,.10);
+            --primary-dark: #1d4ed8;
+            --shadow: 0 10px 30px rgba(15,23,42,.06);
+            --success: #10b981;
+            --success-light: rgba(16,185,129,.1);
+            --danger: #ef4444;
+            --danger-light: rgba(239,68,68,.08);
+            --warning: #06b6d4;
+            --warning-light: rgba(6,182,212,.1);
+            --shadow-sm: 0 4px 15px rgba(0,0,0,.08);
+            --glass: rgba(255,255,255,.95);
+            --panel-blue: #2563eb;
+            --panel-cyan: #0891b2;
+            --panel-green: #059669;
+            --panel-violet: #7c3aed;
+            --panel-amber: #d97706;
+            --panel-rose: #db2777;
+            --panel-slate: #475569;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulseGlow { 0%,100% { box-shadow: 0 0 0 0 rgba(37,99,235,.22); } 50% { box-shadow: 0 0 20px 4px rgba(37,99,235,.12); } }
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes countUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .page-wide { max-width: 1500px; animation: fadeIn .6s ease-out; }
+
+        /* ── Header ── */
+        .header {
+            background: var(--card-bg); padding: 40px;
+            border-radius: 22px; box-shadow: var(--shadow);
+            margin-bottom: 28px; backdrop-filter: blur(12px);
+            text-align: center; position: relative; overflow: hidden;
+            border: 1px solid rgba(37,99,235,.08);
+        }
+        .header::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+            background: linear-gradient(90deg, var(--grad-start), var(--grad-end), #67e8f9, var(--grad-start));
+            background-size: 300% 100%; animation: shimmer 4s linear infinite;
+        }
+        .header h1 {
+            font-size: 2.6em; font-weight: 800;
+            background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            margin-bottom: 10px;
+        }
+        .header p { color: var(--text2); font-size: 16px; line-height: 1.6; }
+        .header-tags { margin-top: 16px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .header-tag {
+            padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 700;
+            background: linear-gradient(135deg, rgba(37,99,235,.08), rgba(6,182,212,.10));
+            color: var(--primary-dark); letter-spacing: .3px;
+            border: 1px solid rgba(37,99,235,.08);
+        }
+
+        /* ── Stats Grid ── */
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(5, 1fr);
+            gap: 16px; margin-bottom: 28px;
+        }
+        @media (max-width: 1100px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 700px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+        .stat-card {
+            background: var(--card-bg); padding: 24px;
+            border-radius: var(--radius); box-shadow: var(--shadow);
+            text-align: center; backdrop-filter: blur(12px);
+            animation: slideUp .5s ease-out both;
+            transition: transform .25s;
+            border: 1px solid rgba(37,99,235,.08);
+        }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(37,99,235,.08); }
+        .stat-card:nth-child(2) { animation-delay: .05s; }
+        .stat-card:nth-child(3) { animation-delay: .1s; }
+        .stat-card:nth-child(4) { animation-delay: .15s; }
+        .stat-card:nth-child(5) { animation-delay: .2s; }
+        .stat-card .icon {
+            width: 44px; height: 44px; border-radius: 12px;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 18px; color: #fff; margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
+        }
+        .stat-card .value {
+            font-size: 2em; font-weight: 800;
+            background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            animation: countUp .4s ease-out;
+        }
+        .stat-card .label { color: var(--text3); font-size: 12px; margin-top: 4px; font-weight: 600; letter-spacing: .2px; }
+
+        /* ── Tab Bar ── */
+        .tab-bar {
+            display: flex; gap: 0; background: var(--card-bg);
+            border-radius: var(--radius); box-shadow: var(--shadow);
+            margin-bottom: 28px; overflow: hidden; backdrop-filter: blur(12px);
+        }
+        .tab-btn {
+            flex: 1; padding: 18px 20px; border: none; background: transparent;
+            font-size: 15px; font-weight: 700; cursor: pointer;
+            transition: all .3s; color: var(--text3); position: relative;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .tab-btn::after {
+            content: ''; position: absolute; bottom: 0; left: 20%; right: 20%;
+            height: 3px; border-radius: 3px 3px 0 0;
+            background: transparent; transition: all .3s;
+        }
+        .tab-btn.active {
+            color: var(--primary);
+            background: linear-gradient(to bottom, rgba(37,99,235,.08), rgba(6,182,212,.02));
+        }
+        .tab-btn.active::after {
+            background: linear-gradient(90deg, var(--grad-start), var(--grad-end));
+            left: 10%; right: 10%;
+        }
+        .tab-btn:hover:not(.active) { color: var(--text2); background: rgba(37,99,235,.035); }
+        .tab-btn i { font-size: 16px; }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; animation: fadeIn .35s ease-out; }
+
+        /* ── Cards ── */
+        .card {
+            background: var(--card-bg); border-radius: var(--radius);
+            box-shadow: var(--shadow); padding: 28px;
+            margin-bottom: 20px; backdrop-filter: blur(12px);
+            transition: box-shadow .3s;
+            border: 1px solid rgba(37,99,235,.08);
+        }
+        .card:hover { box-shadow: 0 14px 32px rgba(15,23,42,.08); }
+        .card-title {
+            font-size: 16px; font-weight: 700; color: var(--text);
+            margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+        }
+        .card-title i {
+            width: 32px; height: 32px; border-radius: 10px;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 14px; color: #fff;
+            background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
+        }
+        .card-title.accent-cyan { color: #0f766e; }
+        .card-title.accent-cyan i { background: linear-gradient(135deg, #06b6d4, #67e8f9); }
+        .card-title.accent-blue { color: #1d4ed8; }
+        .card-title.accent-blue i { background: linear-gradient(135deg, #2563eb, #60a5fa); }
+        .card-title.accent-green { color: #047857; }
+        .card-title.accent-green i { background: linear-gradient(135deg, #10b981, #6ee7b7); }
+        .card-title.accent-violet { color: #6d28d9; }
+        .card-title.accent-violet i { background: linear-gradient(135deg, #8b5cf6, #c4b5fd); }
+        .card-title.accent-amber { color: #0f4eb3; }
+        .card-title.accent-amber i { background: linear-gradient(135deg, #2563eb, #67e8f9); }
+        .card-title.accent-rose { color: #be185d; }
+        .card-title.accent-rose i { background: linear-gradient(135deg, #ec4899, #f9a8d4); }
+        .card-title.accent-slate { color: #475569; }
+        .card-title.accent-slate i { background: linear-gradient(135deg, #64748b, #cbd5e1); }
+        .card-title .badge {
+            margin-left: auto; padding: 4px 12px; border-radius: 20px;
+            font-size: 11px; font-weight: 700;
+        }
+
+        /* ── Forms ── */
+        label { font-size: 13px; color: var(--text2); font-weight: 600; display: block; margin-bottom: 6px; }
+        textarea, input[type=text], input[type=number], select {
+            width: 100%; padding: 12px 16px; border: 2px solid #e8e8ef;
+            border-radius: 12px; font-size: 14px; background: #fafafe;
+            outline: none; transition: all .25s; font-family: inherit;
+        }
+        textarea:focus, input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,.10); }
+        textarea:hover, input:hover, select:hover { border-color: #c5c5d3; }
+        textarea { resize: vertical; min-height: 90px; }
+        .form-row { margin-bottom: 16px; }
+        .form-row-inline { display: flex; gap: 14px; }
+        .form-row-inline > div { flex: 1; }
+
+        /* ── Buttons ── */
+        .btn {
+            padding: 12px 24px; border: none; border-radius: 12px;
+            font-size: 14px; font-weight: 700; cursor: pointer;
+            transition: all .25s; position: relative; overflow: hidden;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn::before {
+            content: ''; position: absolute; top: 0; left: -100%;
+            width: 100%; height: 100%; background: rgba(255,255,255,.2);
+            transition: left .4s;
+        }
+        .btn:hover::before { left: 100%; }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--grad-start), var(--grad-end)); color: #fff;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(37,99,235,.20); }
+        .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-success { background: linear-gradient(135deg, #10b981, #059669); color: #fff; }
+        .btn-success:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(16,185,129,.4); }
+        .btn-outline {
+            background: transparent; color: var(--primary); border: 2px solid var(--primary);
+        }
+        .btn-outline:hover { background: rgba(37,99,235,.06); }
+        .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
+        .btn-sm { padding: 9px 16px; font-size: 13px; border-radius: 10px; }
+        .btn-block { width: 100%; justify-content: center; }
+
+        /* ── Side-by-Side Comparison ── */
+        .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .response-card {
+            padding: 24px; border-radius: 16px;
+            border: 2px solid #e8e8ef; background: #fafafe;
+            cursor: pointer; transition: all .3s;
+            min-height: 140px; position: relative;
+        }
+        .response-card:hover {
+            border-color: var(--primary); transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(37,99,235,.12);
+        }
+        .response-card.chosen {
+            border-color: var(--success); background: var(--success-light);
+            animation: pulseGlow 1.5s ease infinite;
+        }
+        .response-card .tag {
+            position: absolute; top: -12px; left: 16px; padding: 4px 14px;
+            border-radius: 10px; font-size: 12px; font-weight: 800;
+            color: #fff; letter-spacing: .5px;
+        }
+        .response-card .tag.tag-a { background: linear-gradient(135deg, var(--grad-start), var(--grad-end)); }
+        .response-card .tag.tag-b { background: linear-gradient(135deg, #10b981, #059669); }
+        .response-card .content {
+            font-size: 14px; line-height: 1.8; color: var(--text); white-space: pre-wrap;
+            max-height: 350px; overflow-y: auto; margin-top: 8px;
+        }
+        .response-card .content::-webkit-scrollbar { width: 4px; }
+        .response-card .content::-webkit-scrollbar-thumb { background: #c5c5d3; border-radius: 2px; }
+
+        /* ── Variant Cards ── */
+        .variants-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+        .variant-card {
+            padding: 20px; border-radius: 16px;
+            border: 2px solid #e8e8ef; background: #fafafe;
+            font-size: 13px; position: relative; transition: all .3s;
+        }
+        .variant-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,.08); }
+        .variant-card.best {
+            border-color: var(--success); background: var(--success-light);
+            box-shadow: 0 4px 15px rgba(16,185,129,.15);
+        }
+        .variant-card.best::before {
+            content: '\f005'; font-family: 'Font Awesome 6 Free'; font-weight: 900;
+            position: absolute; top: -8px; right: -8px;
+            width: 24px; height: 24px; border-radius: 50%;
+            background: linear-gradient(135deg, #2563eb, #06b6d4);
+            color: #fff; font-size: 10px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .variant-score {
+            position: absolute; top: 12px; right: 14px;
+            padding: 3px 12px; border-radius: 10px; font-weight: 800; font-size: 13px;
+        }
+        .variant-text {
+            white-space: pre-wrap; line-height: 1.7; max-height: 100px;
+            overflow-y: auto; color: var(--text2); margin-top: 10px; font-size: 12px;
+        }
+        .variant-meta { color: var(--text3); font-size: 12px; display: flex; align-items: center; gap: 8px; }
+        .mutation-tag {
+            display: inline-block; padding: 3px 10px; border-radius: 8px;
+            font-size: 11px; font-weight: 700; letter-spacing: .3px;
+            background: linear-gradient(135deg, rgba(37,99,235,.08), rgba(6,182,212,.10));
+            color: var(--primary-dark);
+        }
+
+        /* ── Radar / Scores ── */
+        .eval-scores-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .dim-row {
+            display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+            background: #fafafe; border-radius: 12px; transition: background .2s;
+        }
+        .dim-row:hover { background: #f0f0f8; }
+        .dim-label { min-width: 60px; font-size: 13px; font-weight: 600; color: var(--text2); }
+        .dim-bar-bg { flex: 1; height: 10px; background: #e8e8ef; border-radius: 5px; overflow: hidden; }
+        .dim-bar { height: 100%; border-radius: 5px; transition: width .8s cubic-bezier(.4,0,.2,1); }
+        .dim-val { font-weight: 800; font-size: 15px; min-width: 32px; text-align: right; }
+
+        /* ── Big Score Display ── */
+        .score-hero {
+            text-align: center; padding: 24px;
+            background: linear-gradient(135deg, rgba(37,99,235,.05), rgba(6,182,212,.06));
+            border-radius: 16px; margin-bottom: 20px;
+        }
+        .score-hero .big-num {
+            font-size: 56px; font-weight: 900;
+            background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            line-height: 1;
+        }
+        .score-hero .sub { font-size: 14px; color: var(--text3); margin-top: 4px; }
+
+        /* ── Leaderboard Table ── */
+        .lb-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+        .lb-table th {
+            text-align: left; padding: 12px 18px; color: var(--text3);
+            font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: .5px;
+        }
+        .lb-table td {
+            padding: 14px 18px; background: #fafafe; font-size: 14px;
+            transition: background .2s;
+        }
+        .lb-table tr:hover td { background: #f0f0f8; }
+        .lb-table td:first-child { border-radius: 12px 0 0 12px; }
+        .lb-table td:last-child { border-radius: 0 12px 12px 0; }
+        .rank-medal {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 34px; height: 34px; border-radius: 10px; font-weight: 900; font-size: 14px;
+        }
+        .rank-1 { background: linear-gradient(135deg, #2563eb, #06b6d4); color: #fff; }
+        .rank-2 { background: linear-gradient(135deg, #94a3b8, #64748b); color: #fff; }
+        .rank-3 { background: linear-gradient(135deg, #fb923c, #ea580c); color: #fff; }
+        .rank-n { background: #f1f5f9; color: var(--text3); }
+        .elo-rating { font-weight: 800; font-size: 16px; }
+        .elo-sparkline { height: 30px; }
+
+        /* ── Progress ── */
+        .progress-bar {
+            width: 100%; height: 10px; background: #e8e8ef;
+            border-radius: 5px; overflow: hidden; margin: 10px 0;
+        }
+        .progress-fill {
+            height: 100%; border-radius: 5px; transition: width .5s;
+            background: linear-gradient(90deg, var(--grad-start), var(--grad-end));
+        }
+
+        /* ── Best Prompt Showcase ── */
+        .best-prompt-box {
+            padding: 20px; background: linear-gradient(135deg, rgba(37,99,235,.04), rgba(6,182,212,.05));
+            border: 2px dashed rgba(37,99,235,.18); border-radius: 14px;
+            font-size: 14px; line-height: 1.8; white-space: pre-wrap; color: var(--text);
+            min-height: 50px; position: relative;
+        }
+        .best-prompt-box .copy-btn {
+            position: absolute; top: 8px; right: 8px; padding: 6px 12px;
+            background: var(--primary); color: #fff; border: none; border-radius: 8px;
+            font-size: 11px; cursor: pointer; opacity: 0; transition: opacity .2s;
+        }
+        .best-prompt-box:hover .copy-btn { opacity: 1; }
+
+        /* ── Loading ── */
+        .spinner { display: inline-block; width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; }
+        .spinner-dark { border-color: #e8e8ef; border-top-color: var(--primary); }
+
+        .empty-state { text-align: center; padding: 50px 20px; color: var(--text3); }
+        .empty-state i { font-size: 48px; margin-bottom: 16px; display: block; opacity: .3; }
+        .empty-state p { font-size: 14px; }
+
+        /* ── Pair History Item ── */
+        .pair-item {
+            padding: 12px 16px; border-radius: 12px; background: #fafafe;
+            margin-bottom: 8px; display: flex; align-items: center; gap: 12px;
+            transition: background .2s; cursor: default;
+        }
+        .pair-item:hover { background: #f0f0f8; }
+        .pair-chosen {
+            width: 28px; height: 28px; border-radius: 8px; font-weight: 800; font-size: 12px;
+            display: flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0;
+        }
+        .pair-chosen.chose-a { background: linear-gradient(135deg, var(--grad-start), var(--grad-end)); }
+        .pair-chosen.chose-b { background: linear-gradient(135deg, #10b981, #059669); }
+        .pair-text { flex: 1; font-size: 13px; color: var(--text2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .pair-time { font-size: 11px; color: var(--text3); flex-shrink: 0; }
+
+        /* ── Opt Run List Item ── */
+        .run-item {
+            padding: 14px 16px; border-radius: 12px; background: #fafafe;
+            margin-bottom: 8px; cursor: pointer; transition: all .2s;
+        }
+        .run-item:hover { background: #f0f0f8; transform: translateX(3px); }
+        .run-item.active { background: rgba(37,99,235,.06); border-left: 3px solid var(--primary); }
+        .run-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+        .run-id { font-weight: 700; font-size: 13px; color: var(--primary); }
+        .status-tag {
+            padding: 3px 10px; border-radius: 8px; font-size: 10px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: .5px;
+        }
+        .status-created { background: #fef3c7; color: #92400e; }
+        .status-running { background: rgba(37,99,235,.10); color: var(--primary); }
+        .status-completed { background: var(--success-light); color: var(--success); }
+        .run-info { font-size: 12px; color: var(--text3); }
+
+        /* ── Layout ── */
+        .two-col { display: grid; grid-template-columns: 380px 1fr; gap: 20px; }
+        @media (max-width: 1000px) { .two-col, .comparison { grid-template-columns: 1fr; } }
+
+        /* ── Chart Container ── */
+        .chart-box { width: 100%; height: 280px; border-radius: 12px; }
+
+        /* ── Tooltip ── */
+        .toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(80px);
+            background: #1a1a2e; color: #fff; padding: 14px 28px; border-radius: 14px;
+            font-size: 14px; font-weight: 600; z-index: 9999;
+            opacity: 0; transition: all .4s cubic-bezier(.4,0,.2,1); pointer-events: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,.3);
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* ── Divider ── */
+        .divider { height: 1px; background: #e8e8ef; margin: 20px 0; }
+
+        /* ── Section subtitle ── */
+        .section-sub {
+            font-size: 13px; font-weight: 700; color: var(--primary-dark);
+            text-transform: uppercase; letter-spacing: .8px; margin-bottom: 14px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .section-sub::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(37,99,235,.14), rgba(6,182,212,.04)); }
+        .section-sub.accent-green { color: #047857; }
+        .section-sub.accent-violet { color: #6d28d9; }
+    </style>
+</head>
+<body>
+
+<div class="page-wide">
+    <nav class="topbar">
+        <div class="brand">
+            <a class="back-link" href="{{ url_for('developer_home') }}">← 返回主页</a>
+            <h1><i class="fas fa-brain"></i> LLM 强化学习平台</h1>
+        </div>
+        <div class="topbar-actions">
+            <span class="header-tag">Bradley-Terry</span>
+            <span class="header-tag">DPO 导出</span>
+            <span class="header-tag">演化搜索</span>
+            <span class="header-tag">LLM 裁判</span>
+            <span class="header-tag">ELO 评分</span>
+        </div>
+    </nav>
+
+    <div class="header">
+        <p>基于人类反馈的强化学习（RLHF）· 偏好数据收集 · 奖励模型训练 · 提示词自动优化 · LLM 裁判评估 · ELO 排名</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="icon"><i class="fas fa-database"></i></div>
+            <div class="value" id="statPairs">0</div>
+            <div class="label">偏好对</div>
+        </div>
+        <div class="stat-card">
+            <div class="icon"><i class="fas fa-chart-line"></i></div>
+            <div class="value" id="statEvals">0</div>
+            <div class="label">评估次数</div>
+        </div>
+        <div class="stat-card">
+            <div class="icon"><i class="fas fa-flask"></i></div>
+            <div class="value" id="statRuns">0</div>
+            <div class="label">优化任务</div>
+        </div>
+        <div class="stat-card">
+            <div class="icon"><i class="fas fa-trophy"></i></div>
+            <div class="value" id="statElo">0</div>
+            <div class="label">ELO 选手</div>
+        </div>
+        <div class="stat-card">
+            <div class="icon"><i class="fas fa-robot"></i></div>
+            <div class="value" id="statRM" style="font-size:1.2em;">--</div>
+            <div class="label">奖励模型</div>
+        </div>
+    </div>
+
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+        <button class="tab-btn active" data-tab="pref">
+            <i class="fas fa-hand-pointer"></i> 偏好数据收集
+        </button>
+        <button class="tab-btn" data-tab="opt">
+            <i class="fas fa-magic"></i> 提示词优化
+        </button>
+        <button class="tab-btn" data-tab="eval">
+            <i class="fas fa-gavel"></i> 评估与排名
+        </button>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- Tab 1: Preference Collection                                       -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <div class="tab-panel active" id="tab-pref">
+        <!-- Model Endpoint Selector -->
+        <div class="card" style="margin-bottom:16px;border:2px solid rgba(37,99,235,.10);">
+            <div class="card-title accent-cyan" style="margin-bottom:12px;">
+                <i class="fas fa-server"></i> 模型端点
+                <span id="endpointStatus" style="margin-left:auto;font-size:13px;color:var(--text3);">默认模型</span>
+            </div>
+            <div class="form-row-inline" style="margin-bottom:0;">
+                <div class="form-row" style="flex:2;margin-bottom:0;">
+                    <select id="endpointSelect" onchange="onEndpointSelectChange()">
+                        <option value="default">使用默认模型（全局配置）</option>
+                        <option value="custom">自定义接口地址...</option>
+                    </select>
+                </div>
+                <div class="form-row" id="customUrlRow" style="flex:3;margin-bottom:0;display:none;">
+                    <input type="text" id="customApiUrl" placeholder="http://localhost:8001/v1">
+                </div>
+                <div class="form-row" id="customModelRow" style="flex:1;margin-bottom:0;display:none;">
+                    <input type="text" id="customModelName" placeholder="模型名">
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="applyEndpoint()" style="margin-top:0;height:46px;">
+                    <i class="fas fa-check"></i> 应用
+                </button>
+            </div>
+        </div>
+
+        <div class="two-col">
+            <div>
+                <!-- Generate -->
+                <div class="card">
+                    <div class="card-title accent-blue"><i class="fas fa-pen-fancy"></i> 生成 A/B 对比</div>
+                    <div class="form-row">
+                        <label>提示词</label>
+                        <textarea id="prefPrompt" rows="4" placeholder="输入一个提示词，系统将用不同温度参数生成两个回答&#10;供你左右对比并选择更好的一个..."></textarea>
+                    </div>
+                    <div class="form-row-inline">
+                        <div class="form-row">
+                            <label><i class="fas fa-snowflake" style="color:#3b82f6;"></i> 温度 A（保守）</label>
+                            <input type="number" id="tempA" value="0.3" min="0" max="2" step="0.1">
+                        </div>
+                        <div class="form-row">
+                            <label><i class="fas fa-fire" style="color:#ef4444;"></i> 温度 B（创意）</label>
+                            <input type="number" id="tempB" value="0.9" min="0" max="2" step="0.1">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-block" id="btnGenPair" onclick="generatePair()">
+                        <i class="fas fa-play"></i> 生成对比
+                    </button>
+                </div>
+
+                <!-- Reward Model -->
+                <div class="card">
+                    <div class="card-title accent-green"><i class="fas fa-graduation-cap"></i> 奖励模型</div>
+                    <button class="btn btn-success btn-block" id="btnTrainRM" onclick="trainRM()">
+                        <i class="fas fa-cogs"></i> 训练 Bradley-Terry 奖励模型
+                    </button>
+                    <div id="rmInfo" style="margin-top: 14px;"></div>
+
+                    <div class="divider"></div>
+
+                    <div class="section-sub accent-green">奖励打分</div>
+                    <div class="form-row">
+                        <textarea id="rmScoreText" rows="3" placeholder="输入文本，用训练好的奖励模型打分..."></textarea>
+                    </div>
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <button class="btn btn-outline btn-sm" onclick="scoreText()">
+                            <i class="fas fa-star"></i> 打分
+                        </button>
+                        <span id="rmScoreResult" style="font-size:13px; color:var(--text2);"></span>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <button class="btn btn-outline btn-sm" onclick="exportDPO()">
+                        <i class="fas fa-download"></i> 导出 DPO 数据集
+                    </button>
+                </div>
+            </div>
+
+            <div>
+                <!-- Comparison -->
+                <div class="card">
+                    <div class="card-title accent-blue">
+                        <i class="fas fa-columns"></i> 回答对比
+                        <span class="badge" id="compBadge" style="display:none; background:var(--warning-light); color:var(--warning);">等待选择</span>
+                    </div>
+                    <div id="comparisonContent">
+                        <div class="empty-state">
+                            <i class="fas fa-arrows-alt-h"></i>
+                            <p>输入提示词并点击"生成对比"<br>将在此展示两个回答供你选择</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History -->
+                <div class="card">
+                    <div class="card-title accent-cyan"><i class="fas fa-history"></i> 已收集偏好对</div>
+                    <div id="pairsList">
+                        <div class="empty-state" style="padding:24px;">
+                            <i class="fas fa-inbox"></i>
+                            <p>尚未收集偏好数据</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- Tab 2: Prompt Optimization                                         -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <div class="tab-panel" id="tab-opt">
+        <div class="two-col">
+            <div>
+                <div class="card">
+                    <div class="card-title accent-violet"><i class="fas fa-sliders-h"></i> 优化配置</div>
+                    <div class="form-row">
+                        <label>基础提示词</label>
+                        <textarea id="optBasePrompt" rows="4" placeholder="要优化的提示词模板..."></textarea>
+                    </div>
+                    <div class="form-row">
+                        <label>测试输入</label>
+                        <textarea id="optTestInput" rows="3" placeholder="用于评估提示词效果的测试输入..."></textarea>
+                    </div>
+                    <div class="form-row-inline">
+                        <div class="form-row">
+                            <label>种群大小</label>
+                            <input type="number" id="optPopSize" value="6" min="2" max="20">
+                        </div>
+                        <div class="form-row">
+                            <label>迭代代数</label>
+                            <input type="number" id="optGens" value="3" min="1" max="10">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-block" onclick="createOptimization()">
+                        <i class="fas fa-rocket"></i> 创建优化任务
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div class="card-title accent-slate"><i class="fas fa-list-ol"></i> 优化任务列表</div>
+                    <div id="optRunsList">
+                        <div class="empty-state" style="padding:24px;">
+                            <i class="fas fa-flask"></i>
+                            <p>暂无优化任务</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <!-- Progress Card -->
+                <div class="card" id="optProgressCard" style="display:none;">
+                    <div class="card-title accent-violet">
+                        <i class="fas fa-dna"></i> 优化进度
+                        <span class="badge" id="optStatusBadge" style="background:rgba(37,99,235,.10); color:var(--primary);">未开始</span>
+                    </div>
+                    <div style="display:flex; gap:12px; margin-bottom:16px;">
+                        <button class="btn btn-primary btn-sm" id="btnStep" onclick="runStep()">
+                            <i class="fas fa-step-forward"></i> 运行一代
+                        </button>
+                        <button class="btn btn-success btn-sm" id="btnRunAll" onclick="runAll()">
+                            <i class="fas fa-forward"></i> 运行全部
+                        </button>
+                        <span id="optRunIdLabel" style="margin-left:auto; font-size:11px; color:var(--text3); align-self:center;"></span>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--text2); font-weight:600;">
+                        <span>第 <span id="optCurGen" style="color:var(--primary);">0</span> / <span id="optMaxGen">3</span> 代</span>
+                        <span>最高分 <span id="optBestScore" style="color:var(--primary);">0.00</span></span>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill" id="optProgress" style="width:0%"></div></div>
+
+                    <!-- Score Chart -->
+                    <div id="optScoreChart" class="chart-box" style="height:200px; margin-top:16px;"></div>
+
+                    <div class="divider"></div>
+
+                    <div class="section-sub accent-violet">最优提示词</div>
+                    <div class="best-prompt-box" id="optBestPrompt">
+                        <button class="copy-btn" onclick="copyBestPrompt()"><i class="fas fa-copy"></i> 复制</button>
+                        <span style="color:var(--text3);">(尚未评估)</span>
+                    </div>
+                </div>
+
+                <!-- Variants -->
+                <div class="card">
+                    <div class="card-title accent-blue"><i class="fas fa-th-large"></i> 变体种群</div>
+                    <div class="variants-grid" id="variantsGrid">
+                        <div class="empty-state" style="grid-column:1/-1; padding:36px;">
+                            <i class="fas fa-dna"></i>
+                            <p>创建优化任务后，变体将显示在这里</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <!-- Tab 3: Evaluation & Ranking                                        -->
+    <!-- ═══════════════════════════════════════════════════════════════════ -->
+    <div class="tab-panel" id="tab-eval">
+        <div class="two-col">
+            <div>
+                <!-- Manual Evaluation -->
+                <div class="card">
+                    <div class="card-title accent-amber"><i class="fas fa-gavel"></i> LLM 裁判评估</div>
+                    <div class="form-row">
+                        <label>用户提示词</label>
+                        <textarea id="evalPrompt" rows="3" placeholder="原始用户提示词..."></textarea>
+                    </div>
+                    <div class="form-row">
+                        <label>模型回答</label>
+                        <textarea id="evalResponse" rows="5" placeholder="要评估的模型回答..."></textarea>
+                    </div>
+                    <button class="btn btn-primary btn-block" id="btnEval" onclick="runEvaluate()">
+                        <i class="fas fa-search"></i> 评估
+                    </button>
+                </div>
+
+                <!-- Evaluation Result -->
+                <div class="card" id="evalResultCard" style="display:none;">
+                    <div class="card-title accent-rose"><i class="fas fa-chart-bar"></i> 评估结果</div>
+                    <div class="score-hero">
+                        <div class="big-num" id="evalWeighted">-</div>
+                        <div class="sub">综合加权得分 (满分 10)</div>
+                    </div>
+                    <div class="eval-scores-grid" id="evalScores"></div>
+                    <div id="evalRadarChart" class="chart-box" style="margin-top:16px;"></div>
+                </div>
+            </div>
+
+            <div>
+                <!-- Leaderboard -->
+                <div class="card">
+                    <div class="card-title accent-amber">
+                        <i class="fas fa-trophy"></i> ELO 排行榜
+                    </div>
+                    <div id="leaderboardArea">
+                        <div class="empty-state" style="padding:36px;">
+                            <i class="fas fa-medal"></i>
+                            <p>进行评估对比后，ELO 排名将显示在这里</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ELO History -->
+                <div class="card" id="eloHistoryCard" style="display:none;">
+                    <div class="card-title accent-cyan"><i class="fas fa-chart-area"></i> ELO 分数趋势</div>
+                    <div id="eloHistoryChart" class="chart-box"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '/api/llm-rl';
+const HAS_ECHARTS = typeof window.echarts !== 'undefined';
+let currentPair = null;
+let currentRunId = null;
+let optScoreChart = null;
+let evalRadarChart = null;
+let eloHistoryChart = null;
+
+function renderChartUnavailable(id, message = 'ECharts 加载失败，当前图表不可用。') {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = `
+        <div style="height:100%;min-height:220px;display:flex;align-items:center;justify-content:center;text-align:center;color:#999;padding:24px;line-height:1.8;">
+            <div>
+                <div style="font-size:28px;margin-bottom:8px;">⚠️</div>
+                <div>${message}</div>
+            </div>
+        </div>
+    `;
+}
+
+function getRunStatusLabel(status) {
+    return {
+        created: '未开始',
+        running: '进行中',
+        completed: '已完成',
+    }[status] || status;
+}
+
+function getMutationTypeLabel(type) {
+    return {
+        rephrase: '改写表述',
+        add_constraints: '增加约束',
+        add_examples: '增加示例',
+        change_tone: '调整语气',
+        simplify: '简化表达',
+    }[type] || type;
+}
+
+// ─── Endpoint Selector ──────────────────────────────────────────────
+const LOCAL_ENDPOINT_PREFIX = 'local:';
+
+function findEndpointOption(predicate) {
+    const sel = document.getElementById('endpointSelect');
+    return Array.from(sel.options).find(predicate) || null;
+}
+
+function insertEndpointOption({ value, text, dataset = {} }) {
+    const sel = document.getElementById('endpointSelect');
+    const existing = findEndpointOption(opt => opt.value === value);
+    if (existing) {
+        existing.textContent = text;
+        Object.entries(dataset).forEach(([key, val]) => {
+            existing.dataset[key] = val;
+        });
+        return existing;
+    }
+
+    const opt = document.createElement('option');
+    opt.value = value;
+    opt.textContent = text;
+    Object.entries(dataset).forEach(([key, val]) => {
+        opt.dataset[key] = val;
+    });
+    sel.insertBefore(opt, sel.querySelector('option[value="custom"]'));
+    return opt;
+}
+
+function addRunningEndpointOption(endpoint) {
+    return insertEndpointOption({
+        value: 'ep:' + endpoint.endpoint_id,
+        text: '已运行 · ' + endpoint.model_name + ' (' + endpoint.base_url + ')',
+        dataset: {
+            url: endpoint.base_url,
+            model: endpoint.model_name,
+            path: endpoint.model_path || ''
+        }
+    });
+}
+
+function addInstalledModelOption(model) {
+    return insertEndpointOption({
+        value: LOCAL_ENDPOINT_PREFIX + encodeURIComponent(model.path),
+        text: '已安装 · ' + model.name + ' (' + model.size + ')',
+        dataset: {
+            path: model.path,
+            model: model.name
+        }
+    });
+}
+
+function onEndpointSelectChange() {
+    const val = document.getElementById('endpointSelect').value;
+    const isCustom = val === 'custom';
+    document.getElementById('customUrlRow').style.display = isCustom ? '' : 'none';
+    document.getElementById('customModelRow').style.display = isCustom ? '' : 'none';
+}
+
+async function applyEndpoint() {
+    const sel = document.getElementById('endpointSelect');
+    const val = sel.value;
+    const statusEl = document.getElementById('endpointStatus');
+    try {
+        if (val === 'default') {
+            await fetch(API + '/endpoint/clear', { method: 'POST', headers: {'Content-Type':'application/json'} });
+            statusEl.textContent = '默认模型';
+            statusEl.style.color = 'var(--text3)';
+            showToast('已恢复默认模型');
+        } else if (val.startsWith('ep:')) {
+            const opt = sel.selectedOptions[0];
+            const url = opt.dataset.url;
+            const model = opt.dataset.model;
+            const r = await fetch(API + '/endpoint/set', {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ base_url: url, model: model })
+            });
+            const data = await r.json();
+            if (!r.ok || !data.success) {
+                throw new Error(data.error || '切换端点失败');
+            }
+            statusEl.innerHTML = '<i class="fas fa-check-circle" style="color:var(--success);"></i> ' + model;
+            statusEl.style.color = 'var(--success)';
+            showToast('已切换到: ' + model);
+        } else if (val.startsWith(LOCAL_ENDPOINT_PREFIX)) {
+            const opt = sel.selectedOptions[0];
+            const modelPath = decodeURIComponent(val.slice(LOCAL_ENDPOINT_PREFIX.length));
+            const requestedModelName = opt.dataset.model || 'local-model';
+            statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 启动中...';
+            statusEl.style.color = 'var(--text2)';
+
+            const ensureResp = await fetch('/api/pipeline/endpoints/ensure', {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({
+                    backend: 'vllm',
+                    endpoint_type: 'chat',
+                    model: modelPath,
+                    model_name: requestedModelName,
+                    wait_seconds: 180
+                })
+            });
+            const ensureData = await ensureResp.json();
+            if (!ensureResp.ok || !ensureData.success || !ensureData.data) {
+                throw new Error(ensureData.error || '启动本地模型失败');
+            }
+
+            const endpoint = ensureData.data;
+            addRunningEndpointOption(endpoint);
+
+            const setResp = await fetch(API + '/endpoint/set', {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ base_url: endpoint.base_url, model: endpoint.model_name })
+            });
+            const setData = await setResp.json();
+            if (!setResp.ok || !setData.success) {
+                throw new Error(setData.error || '切换到本地模型失败');
+            }
+
+            const runningValue = 'ep:' + endpoint.endpoint_id;
+            if (findEndpointOption(opt => opt.value === runningValue)) {
+                sel.value = runningValue;
+            }
+            statusEl.innerHTML = '<i class="fas fa-check-circle" style="color:var(--success);"></i> ' + endpoint.model_name;
+            statusEl.style.color = 'var(--success)';
+            showToast(ensureData.created ? '本地模型已启动' : '已切换到已运行模型');
+        } else {
+            const url = document.getElementById('customApiUrl').value.trim();
+            const model = document.getElementById('customModelName').value.trim() || 'default';
+            if (!url) { showToast('请输入 API URL'); return; }
+            const r = await fetch(API + '/endpoint/set', {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ base_url: url, model: model })
+            });
+            const data = await r.json();
+            if (!r.ok || !data.success) {
+                throw new Error(data.error || '设置失败');
+            }
+            statusEl.innerHTML = '<i class="fas fa-check-circle" style="color:var(--success);"></i> 自定义端点: ' + url;
+            statusEl.style.color = 'var(--success)';
+            showToast('已切换到自定义端点');
+        }
+    } catch (error) {
+        statusEl.textContent = '切换失败';
+        statusEl.style.color = 'var(--danger)';
+        showToast(error.message || '切换失败');
+    }
+}
+
+// 页面加载时检查当前端点
+(async function checkEndpoint() {
+    try {
+        const [epR, installedR] = await Promise.all([
+            fetch('/api/pipeline/endpoints/list'),
+            fetch('/api/finetune/installed-models')
+        ]);
+        const epData = await epR.json();
+        const installedData = await installedR.json();
+
+        if (epData.success && epData.data) {
+            epData.data
+                .filter(e => e.status === 'running')
+                .forEach(ep => addRunningEndpointOption(ep));
+        }
+
+        if (installedData.success && Array.isArray(installedData.models)) {
+            installedData.models
+                .filter(model => (model.capability || 'chat') === 'chat')
+                .forEach(model => addInstalledModelOption(model));
+        }
+
+        const r = await fetch(API + '/endpoint/current');
+        const data = await r.json();
+        if (data.success && data.data) {
+            const ep = data.data;
+            const statusEl = document.getElementById('endpointStatus');
+            if (ep.type === 'custom') {
+                statusEl.innerHTML = '<i class="fas fa-check-circle" style="color:var(--success);"></i> 自定义: ' + ep.base_url;
+                statusEl.style.color = 'var(--success)';
+                const matchedOption = findEndpointOption(opt => opt.dataset.url === ep.base_url && opt.dataset.model === ep.model);
+                if (matchedOption) {
+                    document.getElementById('endpointSelect').value = matchedOption.value;
+                } else {
+                    document.getElementById('endpointSelect').value = 'custom';
+                    document.getElementById('customApiUrl').value = ep.base_url;
+                    document.getElementById('customModelName').value = ep.model;
+                }
+            }
+        }
+        onEndpointSelectChange();
+    } catch(e) {}
+})();
+
+// ─── Tabs ──────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+});
+
+// ─── Toast ─────────────────────────────────────────────────────────────
+function showToast(msg, duration = 2500) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), duration);
+}
+
+// ─── Fetch Helper ──────────────────────────────────────────────────────
+async function api(path, opts = {}) {
+    const url = API + path;
+    const config = { headers: { 'Content-Type': 'application/json' }, ...opts };
+    if (config.body && typeof config.body === 'object') config.body = JSON.stringify(config.body);
+    try {
+        const res = await fetch(url, config);
+        return await res.json();
+    } catch (e) {
+        return { success: false, error: e.message };
+    }
+}
+
+// ─── Stats ─────────────────────────────────────────────────────────────
+async function loadStats() {
+    const r = await api('/stats');
+    if (!r.success) return;
+    const d = r.data;
+    animateValue('statPairs', d.preference_pairs);
+    animateValue('statEvals', d.evaluations);
+    animateValue('statRuns', d.optimization_runs);
+    animateValue('statElo', d.elo_entries);
+    document.getElementById('statRM').textContent = d.reward_model_trained ? '已训练' : '未训练';
+    document.getElementById('statRM').style.fontSize = '1.2em';
+}
+
+function animateValue(id, target) {
+    const el = document.getElementById(id);
+    const current = parseInt(el.textContent) || 0;
+    if (current === target) return;
+    el.textContent = target;
+    el.style.animation = 'none';
+    el.offsetHeight;
+    el.style.animation = 'countUp .4s ease-out';
+}
+
+// ═════════════════════════════════════════════════════════════════════════
+// Tab 1: Preference Collection
+// ═════════════════════════════════════════════════════════════════════════
+async function generatePair() {
+    const prompt = document.getElementById('prefPrompt').value.trim();
+    if (!prompt) { showToast('请输入提示词'); return; }
+    const btn = document.getElementById('btnGenPair');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> 正在生成两个回答...';
+
+    const r = await api('/preference/generate', {
+        method: 'POST',
+        body: { prompt, temp_a: +document.getElementById('tempA').value, temp_b: +document.getElementById('tempB').value },
+    });
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-play"></i> 生成对比';
+
+    if (!r.success) { showToast(r.error || '生成失败'); return; }
+    currentPair = r.data;
+    document.getElementById('compBadge').style.display = 'inline-block';
+    renderComparison();
+}
+
+function renderComparison() {
+    if (!currentPair) return;
+    const d = currentPair;
+    document.getElementById('comparisonContent').innerHTML = `
+        <div class="comparison">
+            <div class="response-card" id="respA" onclick="chooseSide('A')">
+                <span class="tag tag-a">回答 A</span>
+                <div class="content">${escHtml(d.response_a)}</div>
+            </div>
+            <div class="response-card" id="respB" onclick="chooseSide('B')">
+                <span class="tag tag-b">回答 B</span>
+                <div class="content">${escHtml(d.response_b)}</div>
+            </div>
+        </div>
+        <p style="text-align:center; margin-top:14px; font-size:13px; color:var(--text3);">
+            <i class="fas fa-hand-pointer" style="margin-right:4px;"></i> 点击你认为更好的回答来记录偏好
+        </p>
+    `;
+}
+
+async function chooseSide(side) {
+    if (!currentPair) return;
+    const other = side === 'A' ? 'B' : 'A';
+    document.getElementById('resp' + side).classList.add('chosen');
+    document.getElementById('resp' + side).style.pointerEvents = 'none';
+    document.getElementById('resp' + other).style.pointerEvents = 'none';
+    document.getElementById('resp' + other).style.opacity = '.5';
+
+    await api('/preference/record', {
+        method: 'POST',
+        body: {
+            pair_id: currentPair.pair_id, prompt: currentPair.prompt,
+            response_a: currentPair.response_a, response_b: currentPair.response_b,
+            chosen: side,
+        },
+    });
+
+    document.getElementById('compBadge').style.display = 'none';
+    showToast(`已记录偏好: 选择了回答 ${side}`);
+    loadStats();
+    loadPairs();
+
+    setTimeout(() => {
+        document.getElementById('comparisonContent').innerHTML = `
+            <div class="empty-state" style="padding:30px;">
+                <i class="fas fa-check-circle" style="color:var(--success); opacity:1;"></i>
+                <p>偏好已记录！输入新提示词继续收集</p>
+            </div>
+        `;
+        currentPair = null;
+    }, 1200);
+}
+
+async function loadPairs() {
+    const r = await api('/preference/pairs?limit=15');
+    if (!r.success) return;
+    const el = document.getElementById('pairsList');
+    if (!r.data.length) {
+        el.innerHTML = '<div class="empty-state" style="padding:24px;"><i class="fas fa-inbox"></i><p>尚未收集偏好数据</p></div>';
+        return;
+    }
+    el.innerHTML = r.data.map(p => {
+        const ts = new Date(p.created_at * 1000);
+        const timeStr = ts.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+        return `
+        <div class="pair-item">
+            <div class="pair-chosen chose-${p.chosen.toLowerCase()}">${p.chosen}</div>
+            <div class="pair-text">${escHtml(p.prompt)}</div>
+            <div class="pair-time">${timeStr}</div>
+        </div>`;
+    }).join('');
+}
+
+async function trainRM() {
+    const btn = document.getElementById('btnTrainRM');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> 训练中...';
+
+    const r = await api('/reward-model/train', { method: 'POST', body: {} });
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-cogs"></i> 训练 Bradley-Terry 奖励模型';
+
+    if (!r.success) { showToast(r.error || '训练失败'); return; }
+    const d = r.data;
+    document.getElementById('rmInfo').innerHTML = `
+        <div style="display:flex; gap:20px; padding:14px; background:#fafafe; border-radius:12px;">
+            <div style="text-align:center;">
+                <div style="font-size:24px; font-weight:800; color:var(--primary);">${d.samples}</div>
+                <div style="font-size:11px; color:var(--text3);">训练样本</div>
+            </div>
+            <div style="text-align:center;">
+                <div style="font-size:24px; font-weight:800; color:var(--success);">${(d.accuracy * 100).toFixed(1)}%</div>
+                <div style="font-size:11px; color:var(--text3);">准确率</div>
+            </div>
+        </div>
+    `;
+    showToast('奖励模型训练完成！');
+    loadStats();
+}
+
+async function scoreText() {
+    const text = document.getElementById('rmScoreText').value.trim();
+    if (!text) return;
+    const r = await api('/reward-model/score', { method: 'POST', body: { text } });
+    const el = document.getElementById('rmScoreResult');
+    if (!r.success) { el.innerHTML = `<span style="color:var(--danger);">${r.error || '打分失败'}</span>`; return; }
+    const color = r.data.score > 0.5 ? 'var(--success)' : r.data.score > 0 ? 'var(--warning)' : 'var(--danger)';
+    el.innerHTML = `<span style="font-weight:800; color:${color}; font-size:18px;">${r.data.score}</span> <span style="color:var(--text3);">奖励分数</span>`;
+}
+
+async function exportDPO() {
+    const r = await api('/preference/export');
+    if (!r.success) { showToast('导出失败'); return; }
+    if (!r.data.length) { showToast('暂无偏好数据可导出'); return; }
+    const blob = new Blob([JSON.stringify(r.data, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'dpo_dataset.json'; a.click();
+    showToast(`已导出 ${r.data.length} 条 DPO 数据`);
+}
+
+// ═════════════════════════════════════════════════════════════════════════
+// Tab 2: Prompt Optimization
+// ═════════════════════════════════════════════════════════════════════════
+async function createOptimization() {
+    const base_prompt = document.getElementById('optBasePrompt').value.trim();
+    const test_input = document.getElementById('optTestInput').value.trim();
+    if (!base_prompt || !test_input) { showToast('请填写基础提示词和测试输入'); return; }
+
+    const r = await api('/optimization/create', {
+        method: 'POST',
+        body: {
+            base_prompt, test_input,
+            population_size: +document.getElementById('optPopSize').value,
+            max_generations: +document.getElementById('optGens').value,
+        },
+    });
+    if (!r.success) { showToast(r.error || '创建失败'); return; }
+    currentRunId = r.data.run_id;
+    showToast('优化任务已创建');
+    loadOptRuns();
+    loadOptDetail(currentRunId);
+    loadStats();
+}
+
+async function loadOptRuns() {
+    const r = await api('/optimization/runs');
+    if (!r.success) return;
+    const el = document.getElementById('optRunsList');
+    if (!r.data.length) {
+        el.innerHTML = '<div class="empty-state" style="padding:24px;"><i class="fas fa-flask"></i><p>暂无优化任务</p></div>';
+        return;
+    }
+    el.innerHTML = r.data.map(run => `
+        <div class="run-item ${run.run_id === currentRunId ? 'active' : ''}" onclick="loadOptDetail('${run.run_id}')">
+            <div class="run-top">
+                <span class="run-id">#${run.run_id}</span>
+                <span class="status-tag status-${run.status}">${getRunStatusLabel(run.status)}</span>
+            </div>
+            <div class="run-info">
+                ${escHtml(run.base_prompt.slice(0, 40))}${run.base_prompt.length > 40 ? '...' : ''}
+                &nbsp;|&nbsp; 代 ${run.current_generation}/${run.max_generations}
+                &nbsp;|&nbsp; 最高 ${(run.best_score || 0).toFixed(2)}
+            </div>
+        </div>
+    `).join('');
+}
+
+async function loadOptDetail(runId) {
+    currentRunId = runId;
+    const r = await api('/optimization/' + runId);
+    if (!r.success) return;
+    const d = r.data;
+
+    document.getElementById('optProgressCard').style.display = 'block';
+    document.getElementById('optRunIdLabel').textContent = '#' + runId;
+    document.getElementById('optCurGen').textContent = d.current_generation;
+    document.getElementById('optMaxGen').textContent = d.max_generations;
+    document.getElementById('optBestScore').textContent = (d.best_score || 0).toFixed(2);
+
+    const statusBadge = document.getElementById('optStatusBadge');
+    statusBadge.textContent = getRunStatusLabel(d.status);
+    statusBadge.className = 'badge status-tag status-' + d.status;
+
+    const pct = d.max_generations > 0 ? (d.current_generation / d.max_generations * 100) : 0;
+    document.getElementById('optProgress').style.width = pct + '%';
+
+    const isFinished = d.status === 'completed';
+    document.getElementById('btnStep').disabled = isFinished;
+    document.getElementById('btnRunAll').disabled = isFinished;
+
+    // best prompt
+    const best = d.variants.reduce((a, b) => (b.score > a.score ? b : a), { score: 0, prompt_text: '' });
+    const bestBox = document.getElementById('optBestPrompt');
+    if (best.prompt_text && best.score > 0) {
+        bestBox.innerHTML = `<button class="copy-btn" onclick="copyBestPrompt()"><i class="fas fa-copy"></i> 复制</button>${escHtml(best.prompt_text)}`;
+    } else {
+        bestBox.innerHTML = '<span style="color:var(--text3);">(尚未评估)</span>';
+    }
+
+    // score chart
+    renderOptScoreChart(d.variants);
+
+    // variants grid
+    const grid = document.getElementById('variantsGrid');
+    if (!d.variants.length) {
+        grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><p>暂无变体</p></div>';
+        return;
+    }
+    const bestId = best.variant_id;
+    grid.innerHTML = d.variants.map(v => {
+        const isBest = v.variant_id === bestId && v.score > 0;
+        const scoreColor = v.score >= 7 ? `background:var(--success-light); color:var(--success)` :
+                          v.score >= 4 ? `background:var(--warning-light); color:var(--warning)` :
+                          `background:#f1f5f9; color:var(--text3)`;
+        return `
+        <div class="variant-card ${isBest ? 'best' : ''}">
+            <span class="variant-score" style="${scoreColor}">${v.score.toFixed(2)}</span>
+            <div class="variant-meta">
+                <span class="mutation-tag">${getMutationTypeLabel(v.mutation_type)}</span>
+                <span>第 ${v.generation} 代</span>
+            </div>
+            <div class="variant-text">${escHtml(v.prompt_text)}</div>
+        </div>`;
+    }).join('');
+
+    // update run list highlight
+    document.querySelectorAll('.run-item').forEach(el => {
+        el.classList.toggle('active', el.onclick && el.onclick.toString().includes(runId));
+    });
+    loadOptRuns();
+}
+
+function renderOptScoreChart(variants) {
+    const el = document.getElementById('optScoreChart');
+    if (!HAS_ECHARTS) {
+        renderChartUnavailable('optScoreChart');
+        return;
+    }
+    if (!optScoreChart) optScoreChart = echarts.init(el);
+
+    const scored = variants.filter(v => v.score > 0).sort((a, b) => b.score - a.score).slice(0, 12);
+    if (!scored.length) { optScoreChart.clear(); return; }
+
+    optScoreChart.setOption({
+        grid: { left: 10, right: 20, top: 10, bottom: 30, containLabel: true },
+        xAxis: {
+            type: 'category',
+            data: scored.map((v, i) => v.mutation_type.slice(0, 8)),
+            axisLabel: { fontSize: 10, color: '#999' },
+            axisLine: { lineStyle: { color: '#e8e8ef' } },
+        },
+        yAxis: {
+            type: 'value', min: 0, max: 10,
+            axisLabel: { fontSize: 10, color: '#999' },
+            splitLine: { lineStyle: { color: '#f0f0f8' } },
+        },
+        series: [{
+            type: 'bar', barWidth: '50%',
+            data: scored.map(v => ({
+                value: v.score,
+                itemStyle: {
+                    borderRadius: [6, 6, 0, 0],
+                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                        { offset: 0, color: '#667eea' },
+                        { offset: 1, color: '#764ba2' },
+                    ]),
+                },
+            })),
+        }],
+        tooltip: {
+            trigger: 'axis',
+            backgroundColor: '#1a1a2e', borderWidth: 0,
+            textStyle: { color: '#fff', fontSize: 12 },
+            formatter: (p) => `${p[0].name}<br/>分数: <b>${p[0].value.toFixed(2)}</b>`,
+        },
+    });
+}
+
+function copyBestPrompt() {
+    const text = document.getElementById('optBestPrompt').innerText.replace('复制', '').trim();
+    navigator.clipboard.writeText(text).then(() => showToast('已复制到剪贴板'));
+}
+
+async function runStep() {
+    if (!currentRunId) return;
+    const btn = document.getElementById('btnStep');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> 运行中...';
+
+    const r = await api('/optimization/' + currentRunId + '/step', { method: 'POST' });
+    btn.innerHTML = '<i class="fas fa-step-forward"></i> 运行一代';
+    btn.disabled = false;
+
+    if (!r.success) { showToast(r.error || '运行失败'); return; }
+    showToast(`第 ${r.data.generation} 代完成，创建 ${r.data.variants_created} 个变体`);
+    loadOptDetail(currentRunId);
+    loadStats();
+}
+
+async function runAll() {
+    if (!currentRunId) return;
+    const btn = document.getElementById('btnRunAll');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> 运行全部代...';
+
+    const r = await api('/optimization/' + currentRunId + '/run-all', { method: 'POST' });
+    btn.innerHTML = '<i class="fas fa-forward"></i> 运行全部';
+    btn.disabled = false;
+
+    if (!r.success) { showToast(r.error || '运行失败'); return; }
+    showToast('优化完成！');
+    loadOptDetail(currentRunId);
+    loadStats();
+}
+
+// ═════════════════════════════════════════════════════════════════════════
+// Tab 3: Evaluation & Ranking
+// ═════════════════════════════════════════════════════════════════════════
+const DIM_COLORS = { accuracy: '#667eea', helpfulness: '#10b981', safety: '#06b6d4', creativity: '#ec4899' };
+const DIM_LABELS = { accuracy: '准确性', helpfulness: '有用性', safety: '安全性', creativity: '创造性' };
+const DIM_ICONS = { accuracy: 'fa-bullseye', helpfulness: 'fa-hands-helping', safety: 'fa-shield-alt', creativity: 'fa-lightbulb' };
+
+async function runEvaluate() {
+    const prompt = document.getElementById('evalPrompt').value.trim();
+    const response = document.getElementById('evalResponse').value.trim();
+    if (!prompt || !response) { showToast('请填写提示词和回答'); return; }
+
+    const btn = document.getElementById('btnEval');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> LLM 评估中...';
+
+    const r = await api('/evaluate', { method: 'POST', body: { prompt, response } });
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-search"></i> 评估';
+
+    if (!r.success) { showToast(r.error || '评估失败'); return; }
+    const d = r.data;
+
+    document.getElementById('evalResultCard').style.display = 'block';
+    document.getElementById('evalWeighted').textContent = d.weighted_score.toFixed(2);
+
+    // Score bars
+    const scoresEl = document.getElementById('evalScores');
+    scoresEl.innerHTML = Object.entries(d.scores).map(([dim, val]) => `
+        <div class="dim-row">
+            <i class="fas ${DIM_ICONS[dim] || 'fa-star'}" style="color:${DIM_COLORS[dim]}; width:18px;"></i>
+            <span class="dim-label">${DIM_LABELS[dim] || dim}</span>
+            <div class="dim-bar-bg">
+                <div class="dim-bar" style="width:${val * 10}%; background:${DIM_COLORS[dim]};"></div>
+            </div>
+            <span class="dim-val" style="color:${DIM_COLORS[dim]};">${val}</span>
+        </div>
+    `).join('');
+
+    // Radar chart
+    renderEvalRadar(d.scores);
+    showToast('评估完成');
+    loadLeaderboard();
+    loadStats();
+}
+
+function renderEvalRadar(scores) {
+    const el = document.getElementById('evalRadarChart');
+    if (!HAS_ECHARTS) {
+        renderChartUnavailable('evalRadarChart');
+        return;
+    }
+    if (!evalRadarChart) evalRadarChart = echarts.init(el);
+
+    const dims = Object.keys(DIM_LABELS);
+    evalRadarChart.setOption({
+        radar: {
+            indicator: dims.map(d => ({ name: DIM_LABELS[d], max: 10 })),
+            shape: 'polygon',
+            axisName: { color: '#666', fontSize: 12 },
+            splitArea: { areaStyle: { color: ['rgba(102,126,234,.03)', 'rgba(102,126,234,.06)'] } },
+            splitLine: { lineStyle: { color: '#e8e8ef' } },
+            axisLine: { lineStyle: { color: '#e8e8ef' } },
+        },
+        series: [{
+            type: 'radar',
+            data: [{ value: dims.map(d => scores[d] || 0), name: '评估分数' }],
+            areaStyle: {
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                    { offset: 0, color: 'rgba(102,126,234,.3)' },
+                    { offset: 1, color: 'rgba(118,75,162,.1)' },
+                ]),
+            },
+            lineStyle: { color: '#667eea', width: 2 },
+            itemStyle: { color: '#667eea' },
+        }],
+        tooltip: {},
+    });
+}
+
+async function loadLeaderboard() {
+    const r = await api('/leaderboard');
+    if (!r.success) return;
+    const el = document.getElementById('leaderboardArea');
+    if (!r.data.length) {
+        el.innerHTML = '<div class="empty-state" style="padding:36px;"><i class="fas fa-medal"></i><p>暂无排名数据</p></div>';
+        document.getElementById('eloHistoryCard').style.display = 'none';
+        return;
+    }
+
+    el.innerHTML = `
+        <table class="lb-table">
+            <thead><tr>
+                <th style="width:60px;">排名</th>
+                <th>名称</th>
+                <th>ELO</th>
+                <th style="width:60px;">胜</th>
+                <th style="width:60px;">负</th>
+                <th style="width:100px;">趋势</th>
+            </tr></thead>
+            <tbody>
+                ${r.data.map((e, i) => {
+                    const rankCls = i < 3 ? `rank-${i + 1}` : 'rank-n';
+                    const eloColor = e.rating >= 1600 ? 'var(--success)' : e.rating >= 1400 ? 'var(--primary)' : 'var(--danger)';
+                    return `
+                    <tr>
+                        <td><span class="rank-medal ${rankCls}">${i + 1}</span></td>
+                        <td style="font-weight:700;">${escHtml(e.name)}</td>
+                        <td><span class="elo-rating" style="color:${eloColor};">${e.rating}</span></td>
+                        <td style="color:var(--success); font-weight:700;">${e.wins}</td>
+                        <td style="color:var(--danger); font-weight:700;">${e.losses}</td>
+                        <td><canvas class="elo-sparkline" data-history='${JSON.stringify(e.history.map(h => h.rating))}' width="80" height="30"></canvas></td>
+                    </tr>`;
+                }).join('')}
+            </tbody>
+        </table>
+    `;
+
+    // Draw sparklines
+    document.querySelectorAll('.elo-sparkline').forEach(canvas => {
+        const data = JSON.parse(canvas.dataset.history || '[]');
+        if (data.length < 2) return;
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width, h = canvas.height;
+        const min = Math.min(...data), max = Math.max(...data);
+        const range = max - min || 1;
+        ctx.clearRect(0, 0, w, h);
+        ctx.beginPath();
+        ctx.strokeStyle = '#667eea';
+        ctx.lineWidth = 2;
+        data.forEach((v, i) => {
+            const x = (i / (data.length - 1)) * w;
+            const y = h - ((v - min) / range) * (h - 4) - 2;
+            i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+    });
+
+    // ELO History Chart
+    renderEloHistory(r.data);
+}
+
+function renderEloHistory(entries) {
+    const withHistory = entries.filter(e => e.history.length > 0);
+    if (!withHistory.length) { document.getElementById('eloHistoryCard').style.display = 'none'; return; }
+
+    document.getElementById('eloHistoryCard').style.display = 'block';
+    const el = document.getElementById('eloHistoryChart');
+    if (!HAS_ECHARTS) {
+        renderChartUnavailable('eloHistoryChart');
+        return;
+    }
+    if (!eloHistoryChart) eloHistoryChart = echarts.init(el);
+
+    const colors = ['#2563eb', '#10b981', '#60a5fa', '#ec4899', '#8b5cf6', '#06b6d4'];
+
+    eloHistoryChart.setOption({
+        grid: { left: 10, right: 20, top: 30, bottom: 30, containLabel: true },
+        legend: { top: 0, textStyle: { fontSize: 11, color: '#666' } },
+        xAxis: {
+            type: 'category',
+            data: Array.from({ length: Math.max(...withHistory.map(e => e.history.length)) }, (_, i) => `#${i + 1}`),
+            axisLabel: { fontSize: 10, color: '#999' },
+            axisLine: { lineStyle: { color: '#e8e8ef' } },
+        },
+        yAxis: {
+            type: 'value',
+            axisLabel: { fontSize: 10, color: '#999' },
+            splitLine: { lineStyle: { color: '#f0f0f8' } },
+        },
+        tooltip: {
+            trigger: 'axis',
+            backgroundColor: '#1a1a2e', borderWidth: 0,
+            textStyle: { color: '#fff', fontSize: 12 },
+        },
+        series: withHistory.slice(0, 6).map((e, i) => ({
+            name: e.name,
+            type: 'line', smooth: true,
+            data: e.history.map(h => h.rating),
+            lineStyle: { color: colors[i % colors.length], width: 2 },
+            itemStyle: { color: colors[i % colors.length] },
+            showSymbol: false,
+            areaStyle: {
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                    { offset: 0, color: colors[i % colors.length] + '30' },
+                    { offset: 1, color: colors[i % colors.length] + '05' },
+                ]),
+            },
+        })),
+    });
+}
+
+// ─── Utils ─────────────────────────────────────────────────────────────
+function escHtml(s) {
+    if (!s) return '';
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ─── Chart Resize ──────────────────────────────────────────────────────
+window.addEventListener('resize', () => {
+    optScoreChart && optScoreChart.resize();
+    evalRadarChart && evalRadarChart.resize();
+    eloHistoryChart && eloHistoryChart.resize();
+});
+
+// ─── Init ──────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    loadStats();
+    loadPairs();
+    loadOptRuns();
+    loadLeaderboard();
+});
+</script>
+</body>
+</html>

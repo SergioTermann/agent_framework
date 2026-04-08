@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>强化学习实验室 - Agent Framework</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/base-theme.css">
+    <style>
+        :root {
+            --card-bg: #fff;
+            --text2: #475569;
+            --text3: #94a3b8;
+            --border: rgba(19,99,223,.14);
+            --primary-light: rgba(19,99,223,.10);
+            --success: #059669;
+            --danger: #dc2626;
+            --canvas-bg: #fafbff;
+            --primary: #1363df;
+            --primary-deep: #0f4eb3;
+        }
+
+        .page-wide { max-width: 1500px; padding: 40px 20px; }
+
+        .header { text-align: center; margin-bottom: 36px; padding-top: 20px; }
+        .header h1 {
+            font-size: 36px; font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-deep), var(--primary));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        .header p { color: var(--text2); font-size: 15px; }
+        .header .algo-tags { margin-top: 12px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+        .header .algo-tag {
+            padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
+            background: var(--primary-light); color: var(--primary-deep);
+        }
+
+        /* ── 三栏布局 ── */
+        .layout { display: grid; grid-template-columns: 300px 1fr; gap: 20px; }
+
+        /* ── 卡片 ── */
+        .card {
+            background: var(--card-bg); border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow); padding: 20px;
+        }
+        .card-title {
+            font-size: 14px; font-weight: 600; color: var(--primary-deep);
+            margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+        }
+        .card-title i { font-size: 15px; }
+
+        .sidebar { display: flex; flex-direction: column; gap: 16px; }
+
+        /* ── 表单 ── */
+        label { font-size: 12px; color: var(--text3); font-weight: 500; display: block; margin-bottom: 5px; }
+        select, input[type=number], input[type=text] {
+            width: 100%; padding: 9px 11px;
+            border: 1px solid #e2e8f0; border-radius: 10px;
+            font-size: 13px; background: #f8fafc; color: var(--text);
+            margin-bottom: 12px; transition: border .2s;
+        }
+        select:focus, input:focus { outline: none; border-color: var(--primary); background: #fff; }
+
+        /* ── 按钮 ── */
+        .btn {
+            padding: 9px 16px; border: none; border-radius: 10px;
+            font-size: 13px; font-weight: 600;
+            cursor: pointer; transition: all .2s;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .btn-primary   { background: linear-gradient(135deg,var(--primary-deep),var(--primary)); color:#fff; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(19,99,223,.28); }
+        .btn-secondary { background: #f1f5f9; color: var(--text2); }
+        .btn-secondary:hover { background: #e2e8f0; }
+        .btn-success   { background: linear-gradient(135deg,#10b981,#059669); color:#fff; }
+        .btn-success:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(16,185,129,.3); }
+        .btn-danger    { background: linear-gradient(135deg,#ef4444,#dc2626); color:#fff; }
+        .btn-danger:hover { transform: translateY(-1px); }
+        .btn-full { width: 100%; justify-content: center; }
+        .btn-sm { padding: 5px 12px; font-size: 12px; }
+        .btn:disabled { opacity: .5; cursor: not-allowed; transform: none !important; }
+
+        .btn-row { display: flex; gap: 8px; }
+        .btn-row .btn { flex: 1; }
+
+        .param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px; }
+
+        .main-content { display: flex; flex-direction: column; gap: 16px; }
+
+        /* ── 统计条 ── */
+        .stats-bar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+        .stat-item {
+            background: var(--card-bg); border-radius: 14px; padding: 16px;
+            border: 1px solid var(--border); text-align: center;
+            box-shadow: 0 2px 10px rgba(19,99,223,.05);
+        }
+        .stat-value { font-size: 24px; font-weight: 700; color: var(--primary-deep); }
+        .stat-label { font-size: 11px; color: var(--text3); margin-top: 3px; }
+
+        /* ── Canvas ── */
+        #curveCanvas, #compareCanvas { width: 100%; height: 240px; border-radius: 12px; display: block; }
+        #heatmapCanvas { width: 100%; height: 200px; border-radius: 12px; display: block; }
+        #mazeCanvas    { width: 100%; height: 180px; border-radius: 12px; display: block; }
+        #rewardDistCanvas { width: 100%; height: 160px; border-radius: 12px; display: block; }
+
+        /* ── Episode 列表 ── */
+        .episode-list { max-height: 260px; overflow-y: auto; }
+        .episode-row {
+            display: grid; grid-template-columns: 36px 1fr auto auto;
+            gap: 8px; align-items: center;
+            padding: 8px 10px; border-radius: 8px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 12px; transition: background .15s;
+        }
+        .episode-row:hover { background: #f8fafc; }
+        .ep-badge {
+            font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 600;
+        }
+        .ep-done { background: #d1fae5; color: #065f46; }
+        .ep-fail { background: #fee2e2; color: #991b1b; }
+        .reward-bar-wrap { background: rgba(19,99,223,.12); border-radius: 4px; height: 5px; overflow: hidden; }
+        .reward-bar { height: 100%; background: linear-gradient(90deg,var(--primary-deep),var(--primary)); border-radius: 4px; transition: width .4s; }
+
+        /* ── Q 表 ── */
+        .q-table-wrap { overflow: auto; max-height: 240px; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th { background: rgba(19,99,223,.06); color: var(--primary-deep); padding: 7px 10px; text-align: left; font-weight: 600; position: sticky; top: 0; }
+        td { padding: 6px 10px; border-bottom: 1px solid #f1f5f9; }
+        tr:hover td { background: #fafbff; }
+        .q-pos { color: var(--success); font-weight: 600; }
+        .q-neg { color: var(--danger); }
+        .q-best { background: #ecfdf5 !important; font-weight: 700; }
+
+        /* ── 日志 ── */
+        .log-box {
+            background: #1e1e2e; color: #cdd6f4; border-radius: 12px;
+            padding: 14px; font-family: 'Consolas', 'Courier New', monospace; font-size: 11px;
+            max-height: 140px; overflow-y: auto; line-height: 1.8;
+        }
+        .log-info  { color: #89b4fa; }
+        .log-ok    { color: #a6e3a1; }
+        .log-warn  { color: #f9e2af; }
+        .log-err   { color: #f38ba8; }
+
+        /* ── 加载指示器 ── */
+        .spinner { display: inline-block; width: 14px; height: 14px;
+            border: 2px solid rgba(19,99,223,.2); border-top-color: var(--primary);
+            border-radius: 50%; animation: spin .7s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .algo-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+            background: var(--primary-light); color: var(--primary-deep);
+        }
+
+        /* ── Tab 切换 ── */
+        .tabs { display: flex; gap: 0; margin-bottom: 14px; border-bottom: 2px solid #e2e8f0; }
+        .tab {
+            padding: 8px 16px; font-size: 13px; font-weight: 500; color: var(--text3);
+            cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px;
+            transition: all .2s;
+        }
+        .tab:hover { color: var(--text2); }
+        .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* ── 进度条 ── */
+        .progress-wrap {
+            width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px;
+            overflow: hidden; margin-top: 8px;
+        }
+        .progress-bar {
+            height: 100%; border-radius: 3px;
+            background: linear-gradient(90deg, var(--primary-deep), var(--primary));
+            transition: width .3s; width: 0%;
+        }
+
+        /* ── Agent 卡片 ── */
+        .agent-item {
+            padding: 8px 10px; border-radius: 8px; border: 1px solid #e2e8f0;
+            margin-bottom: 6px; cursor: pointer; transition: all .15s; font-size: 12px;
+        }
+        .agent-item:hover { border-color: var(--primary); background: #fafbff; }
+        .agent-item.selected { border-color: var(--primary); background: var(--primary-light); }
+        .agent-item .agent-algo { font-weight: 600; color: var(--primary); }
+        .agent-item .agent-stats { color: var(--text3); font-size: 11px; margin-top: 2px; }
+
+        /* ── 比较选择 ── */
+        .compare-check { margin-right: 6px; accent-color: var(--primary); }
+
+        /* ── 两列网格 ── */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+        /* ── 响应式 ── */
+        @media (max-width: 1000px) {
+            .layout { grid-template-columns: 1fr; }
+            .stats-bar { grid-template-columns: repeat(3, 1fr); }
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-wide">
+    <nav class="topbar">
+        <div class="brand">
+            <a class="back-link" href="{{ url_for('developer_home') }}">← 返回主页</a>
+            <h1><i class="fas fa-brain"></i> 强化学习实验室</h1>
+        </div>
+        <div class="topbar-actions">
+            <span class="algo-tag">Q-Learning</span>
+            <span class="algo-tag">SARSA</span>
+            <span class="algo-tag">DQN</span>
+            <span class="algo-tag">REINFORCE</span>
+            <span class="algo-tag">UCB Bandit</span>
+            <span class="algo-tag">LLM-RLHF</span>
+        </div>
+    </nav>
+
+    <div class="header">
+        <p>交互式强化学习训练、可视化与算法比较平台</p>
+    </div>
+
+    <div class="layout">
+        <!-- ─────────── 左侧控制面板 ─────────── -->
+        <div class="sidebar">
+
+            <!-- 环境选择 -->
+            <div class="card">
+                <div class="card-title"><i class="fas fa-globe"></i> 训练环境</div>
+                <label>选择环境</label>
+                <select id="envSelect" onchange="onEnvChange()">
+                    <option value="">加载中...</option>
+                </select>
+                <div id="envDesc" style="font-size:11px;color:var(--text3);margin-bottom:12px;min-height:28px;line-height:1.5"></div>
+
+                <label>学习算法</label>
+                <select id="algoSelect" onchange="onAlgoChange()">
+                    <option value="q_learning">Q-Learning（Off-policy TD）</option>
+                    <option value="sarsa">SARSA（On-policy TD）</option>
+                    <option value="dqn">DQN（函数近似）</option>
+                    <option value="reinforce">REINFORCE（策略梯度）</option>
+                    <option value="ucb_bandit">UCB 多臂老虎机</option>
+                    <option value="llm_rlhf">LLM-RLHF（人类反馈）</option>
+                </select>
+                <div id="algoDesc" style="font-size:11px;color:var(--text3);line-height:1.5;"></div>
+            </div>
+
+            <!-- 超参数 -->
+            <div class="card">
+                <div class="card-title"><i class="fas fa-sliders-h"></i> 超参数</div>
+                <div class="param-grid" id="paramGrid">
+                    <div>
+                        <label>学习率 α</label>
+                        <input type="number" id="alpha" value="0.1" min="0.001" max="1" step="0.01">
+                    </div>
+                    <div>
+                        <label>折扣因子 γ</label>
+                        <input type="number" id="gamma" value="0.95" min="0" max="1" step="0.01">
+                    </div>
+                    <div>
+                        <label>探索率 ε</label>
+                        <input type="number" id="epsilon" value="0.3" min="0" max="1" step="0.05">
+                    </div>
+                    <div>
+                        <label>训练回合</label>
+                        <input type="number" id="nEpisodes" value="30" min="1" max="500">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div class="card">
+                <div class="card-title"><i class="fas fa-play-circle"></i> 训练控制</div>
+                <button class="btn btn-primary btn-full" id="createAgentBtn" onclick="createAgent()">
+                    <i class="fas fa-robot"></i> 创建 Agent
+                </button>
+                <div style="height:8px"></div>
+                <div class="btn-row">
+                    <button class="btn btn-success" id="trainBtn" onclick="startTraining()" disabled>
+                        <i class="fas fa-bolt"></i> 训练
+                    </button>
+                    <button class="btn btn-secondary" onclick="trainSingle()" id="singleBtn" disabled>
+                        <i class="fas fa-step-forward"></i> 单步
+                    </button>
+                </div>
+                <div id="trainProgress" style="display:none">
+                    <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+                    <div style="font-size:11px;color:var(--text3);margin-top:4px;text-align:center" id="progressText"></div>
+                </div>
+                <div style="height:8px"></div>
+                <div class="btn-row">
+                    <button class="btn btn-secondary btn-sm" onclick="resetCurrentAgent()" id="resetBtn" disabled>
+                        <i class="fas fa-undo"></i> 重置
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteCurrentAgent()" id="deleteBtn" disabled>
+                        <i class="fas fa-trash"></i> 删除
+                    </button>
+                </div>
+            </div>
+
+            <!-- Agent 列表 -->
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-list"></i> 已有 Agent
+                    <button class="btn btn-secondary btn-sm" style="margin-left:auto" onclick="compareSelected()">
+                        <i class="fas fa-chart-bar"></i> 比较
+                    </button>
+                </div>
+                <div id="agentList" style="max-height:200px;overflow-y:auto">
+                    <div style="color:var(--text3);font-size:12px;text-align:center;padding:16px">暂无 Agent</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─────────── 右侧结果展示 ─────────── -->
+        <div class="main-content">
+
+            <!-- 统计指标 -->
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-value" id="statEpisodes">0</div>
+                    <div class="stat-label">已训练回合</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statBest">0.00</div>
+                    <div class="stat-label">最佳奖励</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statAvg">0.00</div>
+                    <div class="stat-label">近10期均值</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statEpsilon">--</div>
+                    <div class="stat-label">当前 ε</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statAlgo">--</div>
+                    <div class="stat-label">算法</div>
+                </div>
+            </div>
+
+            <!-- Tab 切换区域 -->
+            <div class="card">
+                <div class="tabs">
+                    <div class="tab active" data-tab="curve" onclick="switchTab('curve')">
+                        <i class="fas fa-chart-line"></i> 训练曲线
+                    </div>
+                    <div class="tab" data-tab="compare" onclick="switchTab('compare')">
+                        <i class="fas fa-chart-bar"></i> 对比分析
+                    </div>
+                    <div class="tab" data-tab="distribution" onclick="switchTab('distribution')">
+                        <i class="fas fa-chart-area"></i> 奖励分布
+                    </div>
+                </div>
+                <div class="tab-content active" id="tab-curve">
+                    <canvas id="curveCanvas"></canvas>
+                </div>
+                <div class="tab-content" id="tab-compare">
+                    <canvas id="compareCanvas"></canvas>
+                    <div id="compareInfo" style="font-size:11px;color:var(--text3);text-align:center;margin-top:8px">
+                        请在左侧勾选 Agent 后点击"比较"按钮
+                    </div>
+                </div>
+                <div class="tab-content" id="tab-distribution">
+                    <canvas id="rewardDistCanvas"></canvas>
+                </div>
+            </div>
+
+            <!-- 两列：Q值热力图 + 状态路径 -->
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-title"><i class="fas fa-fire"></i> Q 值热力图</div>
+                    <canvas id="heatmapCanvas"></canvas>
+                </div>
+                <div class="card">
+                    <div class="card-title"><i class="fas fa-map"></i> 状态路径可视化</div>
+                    <canvas id="mazeCanvas"></canvas>
+                </div>
+            </div>
+
+            <!-- 两列：Q 表 + Episode 列表 -->
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-title"><i class="fas fa-table"></i> Q 值表</div>
+                    <div class="q-table-wrap">
+                        <table id="qTable">
+                            <thead><tr id="qHead"></tr></thead>
+                            <tbody id="qBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fas fa-history"></i> 近期 Episode
+                        <button class="btn btn-secondary btn-sm" style="margin-left:auto" onclick="refreshEpisodes()">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <div class="episode-list" id="episodeList">
+                        <div style="color:var(--text3);font-size:12px;text-align:center;padding:16px">暂无数据</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 日志 -->
+            <div class="card">
+                <div class="card-title"><i class="fas fa-terminal"></i> 运行日志</div>
+                <div class="log-box" id="logBox">
+                    <span class="log-info">>>> 强化学习实验室就绪 | 6 种算法 · 5 个演示环境</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   全局状态
+═══════════════════════════════════════════════════════════ */
+let currentAgentId = null;
+let currentEnvId   = null;
+let currentAlgo    = 'q_learning';
+let curveData      = { episodes: [], rewards: [], avg_rewards: [] };
+let training       = false;
+let algoDescMap    = {};
+let compareData    = null;
+
+const ALGO_NAMES = {
+    q_learning: 'Q-Learning', sarsa: 'SARSA', dqn: 'DQN',
+    reinforce: 'REINFORCE', ucb_bandit: 'UCB Bandit', llm_rlhf: 'LLM-RLHF'
+};
+const ALGO_COLORS = {
+    q_learning: '#6366f1', sarsa: '#0ea5e9', dqn: '#1363df',
+    reinforce: '#10b981', ucb_bandit: '#ec4899', llm_rlhf: '#8b5cf6'
+};
+
+/* ═══════════════════════════════════════════════════════════
+   初始化
+═══════════════════════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', async () => {
+    await Promise.all([loadEnvironments(), loadAlgorithms()]);
+    onAlgoChange();
+    setInterval(autoRefreshCurve, 8000);
+});
+
+async function loadEnvironments() {
+    try {
+        const res  = await fetch('/api/rl/environments');
+        const json = await res.json();
+        const sel  = document.getElementById('envSelect');
+        sel.innerHTML = '';
+        (json.data || []).forEach(env => {
+            const opt = document.createElement('option');
+            opt.value       = env.env_id;
+            opt.textContent = `${env.name}（${env.state_count}状态 × ${env.action_count}动作）`;
+            sel.appendChild(opt);
+        });
+        if (json.data?.length) onEnvChange();
+    } catch(e) { log(`加载环境失败: ${e}`, 'warn'); }
+}
+
+async function loadAlgorithms() {
+    try {
+        const res  = await fetch('/api/rl/algorithms');
+        const json = await res.json();
+        (json.data || []).forEach(a => { algoDescMap[a.id] = a.description; });
+        log('算法加载完成: ' + (json.data||[]).map(a => a.name).join(' · '), 'info');
+    } catch {}
+}
+
+async function onEnvChange() {
+    currentEnvId = document.getElementById('envSelect').value;
+    if (!currentEnvId) return;
+    try {
+        const res  = await fetch(`/api/rl/environments/${currentEnvId}`);
+        const json = await res.json();
+        if (json.data) {
+            document.getElementById('envDesc').textContent = json.data.description || '';
+        }
+    } catch {}
+    await loadAgents();
+}
+
+function onAlgoChange() {
+    currentAlgo = document.getElementById('algoSelect').value;
+    const desc = algoDescMap[currentAlgo] || '';
+    document.getElementById('algoDesc').textContent = desc;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Tab 切换
+═══════════════════════════════════════════════════════════ */
+function switchTab(tabName) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tabName));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === 'tab-' + tabName));
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Agent 管理
+═══════════════════════════════════════════════════════════ */
+async function createAgent() {
+    if (!currentEnvId) { alert('请先选择环境'); return; }
+    const algo    = document.getElementById('algoSelect').value;
+    const alpha   = parseFloat(document.getElementById('alpha').value);
+    const gamma   = parseFloat(document.getElementById('gamma').value);
+    const epsilon = parseFloat(document.getElementById('epsilon').value);
+
+    setLoading('createAgentBtn', true, '创建中...');
+    try {
+        const res  = await fetch('/api/rl/agents', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ env_id: currentEnvId, algorithm: algo, alpha, gamma, epsilon }),
+        });
+        const json = await res.json();
+        if (json.success) {
+            currentAgentId = json.data.agent_id;
+            currentAlgo    = algo;
+            log(`Agent 创建成功: ${currentAgentId.slice(0,8)}… [${ALGO_NAMES[algo]}]`, 'ok');
+            enableControls(true);
+            await loadAgents();
+            resetStats();
+        } else { log(`创建失败: ${json.error}`, 'warn'); }
+    } catch(e) { log(`请求失败: ${e}`, 'warn'); }
+    setLoading('createAgentBtn', false, '<i class="fas fa-robot"></i> 创建 Agent');
+}
+
+async function loadAgents() {
+    if (!currentEnvId) return;
+    try {
+        const res  = await fetch(`/api/rl/agents?env_id=${currentEnvId}`);
+        const json = await res.json();
+        const list = document.getElementById('agentList');
+        const agents = json.data || [];
+        if (!agents.length) {
+            list.innerHTML = '<div style="color:var(--text3);font-size:12px;text-align:center;padding:16px">暂无 Agent</div>';
+            return;
+        }
+        list.innerHTML = agents.map(ag => {
+            const selected = ag.agent_id === currentAgentId ? 'selected' : '';
+            const algoName = ALGO_NAMES[ag.algorithm] || ag.algorithm;
+            return `
+              <div class="agent-item ${selected}" onclick="switchAgent('${ag.agent_id}')">
+                <div style="display:flex;align-items:center;gap:6px">
+                  <input type="checkbox" class="compare-check" data-id="${ag.agent_id}"
+                         onclick="event.stopPropagation()">
+                  <span class="agent-algo">${algoName}</span>
+                  <span style="color:var(--text3);font-size:11px">${ag.agent_id.slice(0,6)}…</span>
+                </div>
+                <div class="agent-stats">回合:${ag.episodes_done} | 最佳:${(ag.best_reward||0).toFixed(2)}</div>
+              </div>`;
+        }).join('');
+    } catch {}
+}
+
+async function switchAgent(agentId) {
+    currentAgentId = agentId;
+    enableControls(true);
+    const res  = await fetch(`/api/rl/agents/${currentAgentId}`);
+    const json = await res.json();
+    if (json.data) {
+        currentAlgo = json.data.algorithm;
+        document.getElementById('algoSelect').value = currentAlgo;
+        onAlgoChange();
+    }
+    document.querySelectorAll('.agent-item').forEach(el => {
+        el.classList.toggle('selected', el.querySelector('.compare-check')?.dataset.id === agentId);
+    });
+    log(`切换至 Agent ${agentId.slice(0,8)}… [${ALGO_NAMES[currentAlgo]}]`, 'info');
+    await refreshAll();
+}
+
+async function resetCurrentAgent() {
+    if (!currentAgentId) return;
+    if (!confirm('确定重置此 Agent？所有训练数据将被清除')) return;
+    try {
+        await fetch(`/api/rl/agents/${currentAgentId}/reset`, { method: 'POST' });
+        log(`Agent ${currentAgentId.slice(0,8)}… 已重置`, 'ok');
+        resetStats();
+        await refreshAll();
+    } catch(e) { log(`重置失败: ${e}`, 'warn'); }
+}
+
+async function deleteCurrentAgent() {
+    if (!currentAgentId) return;
+    if (!confirm('确定删除此 Agent？此操作不可恢复')) return;
+    try {
+        await fetch(`/api/rl/agents/${currentAgentId}`, { method: 'DELETE' });
+        log(`Agent ${currentAgentId.slice(0,8)}… 已删除`, 'ok');
+        currentAgentId = null;
+        enableControls(false);
+        resetStats();
+        await loadAgents();
+    } catch(e) { log(`删除失败: ${e}`, 'warn'); }
+}
+
+function enableControls(enabled) {
+    document.getElementById('trainBtn').disabled  = !enabled;
+    document.getElementById('singleBtn').disabled = !enabled;
+    document.getElementById('resetBtn').disabled  = !enabled;
+    document.getElementById('deleteBtn').disabled = !enabled;
+    document.getElementById('statAlgo').textContent = enabled ? (ALGO_NAMES[currentAlgo] || '--') : '--';
+}
+
+/* ═══════════════════════════════════════════════════════════
+   训练控制
+═══════════════════════════════════════════════════════════ */
+async function startTraining() {
+    if (!currentAgentId || training) return;
+    training = true;
+    const n    = parseInt(document.getElementById('nEpisodes').value);
+    const algo = currentAlgo;
+    setLoading('trainBtn', true, '训练中');
+    document.getElementById('trainProgress').style.display = 'block';
+    log(`▶ 开始训练 ${n} 回合 [${ALGO_NAMES[algo]}]`, 'info');
+
+    try {
+        const res = await fetch('/api/rl/train', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                agent_id: currentAgentId, env_id: currentEnvId,
+                algorithm: algo, n_episodes: n,
+            }),
+        });
+        const json = await res.json();
+        if (json.success) {
+            const d = json.data;
+            document.getElementById('progressBar').style.width = '100%';
+            document.getElementById('progressText').textContent = `${d.n_episodes} 回合完成`;
+            log(`训练完成 | 回合:${d.n_episodes} | 总奖励:${d.total_reward.toFixed(2)} | 均值:${d.avg_reward.toFixed(3)}`, 'ok');
+            await refreshAll();
+        } else { log(`训练失败: ${json.error}`, 'warn'); }
+    } catch(e) { log(`请求错误: ${e}`, 'err'); }
+
+    training = false;
+    setLoading('trainBtn', false, '<i class="fas fa-bolt"></i> 训练');
+    setTimeout(() => { document.getElementById('trainProgress').style.display = 'none'; }, 2000);
+}
+
+async function trainSingle() {
+    if (!currentAgentId) return;
+    try {
+        const res = await fetch('/api/rl/train/single', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                agent_id: currentAgentId, env_id: currentEnvId, algorithm: currentAlgo,
+            }),
+        });
+        const json = await res.json();
+        if (json.success) {
+            const ep = json.data;
+            log(`单步 | 奖励:${ep.total_reward.toFixed(3)} | 步数:${ep.steps} | ${ep.status}`, 'ok');
+            await refreshAll();
+        } else { log(`单步失败: ${json.error}`, 'warn'); }
+    } catch(e) { log(`请求错误: ${e}`, 'err'); }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   比较功能
+═══════════════════════════════════════════════════════════ */
+async function compareSelected() {
+    const checks = document.querySelectorAll('.compare-check:checked');
+    const ids = Array.from(checks).map(c => c.dataset.id);
+    if (ids.length < 2) { alert('请至少勾选 2 个 Agent 进行比较'); return; }
+
+    try {
+        const res  = await fetch('/api/rl/compare', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ agent_ids: ids }),
+        });
+        const json = await res.json();
+        if (json.success) {
+            compareData = json.data;
+            switchTab('compare');
+            drawCompare();
+            log(`对比分析：${ids.length} 个 Agent`, 'ok');
+        }
+    } catch(e) { log(`比较失败: ${e}`, 'warn'); }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   数据刷新
+═══════════════════════════════════════════════════════════ */
+async function refreshAll() {
+    await Promise.all([refreshCurve(), refreshEpisodes(), refreshQTable(), loadAgents()]);
+}
+
+async function autoRefreshCurve() {
+    if (currentAgentId && !training) await refreshCurve();
+}
+
+async function refreshCurve() {
+    if (!currentAgentId) return;
+    try {
+        const res  = await fetch(`/api/rl/agents/${currentAgentId}/curve`);
+        const json = await res.json();
+        if (json.success && json.data.episodes.length) {
+            curveData = json.data;
+            drawCurve();
+            drawRewardDist();
+            updateStats(json.data);
+        }
+    } catch {}
+}
+
+async function refreshEpisodes() {
+    if (!currentAgentId) return;
+    try {
+        const res  = await fetch(`/api/rl/agents/${currentAgentId}/episodes?limit=30`);
+        const json = await res.json();
+        renderEpisodeList(json.data || []);
+    } catch {}
+}
+
+async function refreshQTable() {
+    if (!currentAgentId) return;
+    try {
+        const res  = await fetch(`/api/rl/agents/${currentAgentId}/q_table`);
+        const json = await res.json();
+        if (json.success && json.data) {
+            if (json.data.table) {
+                renderQTable(json.data);
+                drawHeatmap(json.data);
+            }
+            // 更新 epsilon
+            if (json.data.epsilon !== undefined) {
+                document.getElementById('statEpsilon').textContent = json.data.epsilon.toFixed(3);
+            }
+        }
+    } catch {}
+}
+
+/* ═══════════════════════════════════════════════════════════
+   统计更新
+═══════════════════════════════════════════════════════════ */
+function updateStats(data) {
+    const rewards = data.rewards || [];
+    if (!rewards.length) return;
+    document.getElementById('statEpisodes').textContent = rewards.length;
+    document.getElementById('statBest').textContent = Math.max(...rewards).toFixed(2);
+    const last10 = rewards.slice(-10);
+    document.getElementById('statAvg').textContent = (last10.reduce((a,b) => a+b, 0) / last10.length).toFixed(2);
+    document.getElementById('statAlgo').textContent = ALGO_NAMES[currentAlgo] || currentAlgo;
+}
+
+function resetStats() {
+    ['statEpisodes','statBest','statAvg'].forEach(id => document.getElementById(id).textContent = '0');
+    document.getElementById('statEpsilon').textContent = '--';
+    curveData = { episodes: [], rewards: [], avg_rewards: [] };
+}
+
+/* ═══════════════════════════════════════════════════════════
+   训练曲线绘制
+═══════════════════════════════════════════════════════════ */
+function drawCurve() {
+    const canvas = document.getElementById('curveCanvas');
+    const rect   = canvas.parentElement.getBoundingClientRect();
+    canvas.width  = rect.width - 10;
+    canvas.height = 240;
+    const ctx = canvas.getContext('2d');
+    const { episodes, rewards, avg_rewards } = curveData;
+    if (!episodes.length) return;
+
+    const W = canvas.width, H = canvas.height;
+    const PAD = { t: 24, r: 20, b: 36, l: 52 };
+    const cW = W - PAD.l - PAD.r, cH = H - PAD.t - PAD.b;
+    const allVals = [...rewards, ...avg_rewards];
+    const minV = Math.min(...allVals) - 0.1;
+    const maxV = Math.max(...allVals) + 0.1;
+    const scaleX = i => PAD.l + (i / (episodes.length - 1 || 1)) * cW;
+    const scaleY = v => PAD.t + cH - ((v - minV) / (maxV - minV || 1)) * cH;
+
+    ctx.fillStyle = '#fafbff'; ctx.fillRect(0, 0, W, H);
+
+    // 网格 + Y 轴
+    ctx.strokeStyle = '#e8eaf6'; ctx.lineWidth = 1;
+    for (let i = 0; i <= 4; i++) {
+        const y = PAD.t + (cH / 4) * i;
+        ctx.beginPath(); ctx.moveTo(PAD.l, y); ctx.lineTo(W - PAD.r, y); ctx.stroke();
+        const v = maxV - ((maxV - minV) / 4) * i;
+        ctx.fillStyle = '#94a3b8'; ctx.font = '10px sans-serif';
+        ctx.fillText(v.toFixed(2), 4, y + 3);
+    }
+
+    // 零线
+    if (minV < 0 && maxV > 0) {
+        const y0 = scaleY(0);
+        ctx.strokeStyle = 'rgba(220,38,38,.2)'; ctx.setLineDash([4,4]);
+        ctx.beginPath(); ctx.moveTo(PAD.l, y0); ctx.lineTo(W-PAD.r, y0); ctx.stroke();
+        ctx.setLineDash([]);
+    }
+
+    // 填充区域
+    const gradient = ctx.createLinearGradient(0, PAD.t, 0, H - PAD.b);
+    gradient.addColorStop(0, 'rgba(99,102,241,0.15)');
+    gradient.addColorStop(1, 'rgba(99,102,241,0.01)');
+    ctx.fillStyle = gradient;
+    ctx.beginPath(); ctx.moveTo(scaleX(0), scaleY(0));
+    avg_rewards.forEach((v, i) => ctx.lineTo(scaleX(i), scaleY(v)));
+    ctx.lineTo(scaleX(avg_rewards.length - 1), scaleY(0)); ctx.closePath(); ctx.fill();
+
+    // 原始奖励
+    ctx.strokeStyle = 'rgba(139,92,246,0.3)'; ctx.lineWidth = 1;
+    ctx.beginPath();
+    rewards.forEach((v, i) => { i === 0 ? ctx.moveTo(scaleX(i), scaleY(v)) : ctx.lineTo(scaleX(i), scaleY(v)); });
+    ctx.stroke();
+
+    // 移动均值
+    const color = ALGO_COLORS[currentAlgo] || '#6366f1';
+    ctx.strokeStyle = color; ctx.lineWidth = 2.5;
+    ctx.shadowColor = color + '66'; ctx.shadowBlur = 8;
+    ctx.beginPath();
+    avg_rewards.forEach((v, i) => { i === 0 ? ctx.moveTo(scaleX(i), scaleY(v)) : ctx.lineTo(scaleX(i), scaleY(v)); });
+    ctx.stroke(); ctx.shadowBlur = 0;
+
+    // 末端圆点
+    const li = episodes.length - 1;
+    ctx.fillStyle = color; ctx.beginPath();
+    ctx.arc(scaleX(li), scaleY(avg_rewards[li]), 5, 0, Math.PI*2); ctx.fill();
+
+    // X 轴
+    ctx.fillStyle = '#94a3b8'; ctx.font = '10px sans-serif';
+    const step = Math.max(1, Math.floor(episodes.length / 8));
+    for (let i = 0; i < episodes.length; i += step) ctx.fillText(episodes[i], scaleX(i) - 6, H - 6);
+
+    // 图例
+    ctx.fillStyle = 'rgba(139,92,246,0.3)'; ctx.fillRect(PAD.l, 6, 16, 3);
+    ctx.fillStyle = color; ctx.fillRect(PAD.l + 70, 6, 16, 3);
+    ctx.fillStyle = '#64748b'; ctx.font = '10px sans-serif';
+    ctx.fillText('原始', PAD.l + 20, 11); ctx.fillText('移动均值', PAD.l + 90, 11);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   奖励分布直方图
+═══════════════════════════════════════════════════════════ */
+function drawRewardDist() {
+    const canvas = document.getElementById('rewardDistCanvas');
+    const rect   = canvas.parentElement.getBoundingClientRect();
+    canvas.width  = rect.width - 10; canvas.height = 160;
+    const ctx = canvas.getContext('2d');
+    const rewards = curveData.rewards || [];
+    if (rewards.length < 3) return;
+
+    const W = canvas.width, H = canvas.height;
+    const PAD = { t: 16, r: 16, b: 28, l: 40 };
+    ctx.fillStyle = '#fafbff'; ctx.fillRect(0, 0, W, H);
+
+    const minR = Math.min(...rewards), maxR = Math.max(...rewards);
+    const bins = 15;
+    const binWidth = (maxR - minR) / bins || 1;
+    const counts = new Array(bins).fill(0);
+    rewards.forEach(r => {
+        const idx = Math.min(Math.floor((r - minR) / binWidth), bins - 1);
+        counts[idx]++;
+    });
+    const maxCount = Math.max(...counts);
+
+    const barW = (W - PAD.l - PAD.r) / bins;
+    const cH   = H - PAD.t - PAD.b;
+
+    counts.forEach((c, i) => {
+        const h  = (c / maxCount) * cH;
+        const x  = PAD.l + i * barW;
+        const y  = PAD.t + cH - h;
+        const gradient = ctx.createLinearGradient(x, y, x, PAD.t + cH);
+        gradient.addColorStop(0, ALGO_COLORS[currentAlgo] || '#6366f1');
+        gradient.addColorStop(1, (ALGO_COLORS[currentAlgo] || '#6366f1') + '33');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(x + 1, y, barW - 2, h);
+    });
+
+    // X 轴标签
+    ctx.fillStyle = '#94a3b8'; ctx.font = '9px sans-serif';
+    for (let i = 0; i <= bins; i += Math.max(1, Math.floor(bins/5))) {
+        const val = minR + i * binWidth;
+        ctx.fillText(val.toFixed(1), PAD.l + i * barW - 8, H - 6);
+    }
+    // Y 轴
+    ctx.fillText(maxCount.toString(), 4, PAD.t + 8);
+    ctx.fillText('0', 4, H - PAD.b);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   对比分析图
+═══════════════════════════════════════════════════════════ */
+function drawCompare() {
+    const canvas = document.getElementById('compareCanvas');
+    const rect   = canvas.parentElement.getBoundingClientRect();
+    canvas.width  = rect.width - 10; canvas.height = 240;
+    const ctx = canvas.getContext('2d');
+    if (!compareData) return;
+
+    const W = canvas.width, H = canvas.height;
+    const PAD = { t: 24, r: 20, b: 36, l: 52 };
+    const cW = W - PAD.l - PAD.r, cH = H - PAD.t - PAD.b;
+    ctx.fillStyle = '#fafbff'; ctx.fillRect(0, 0, W, H);
+
+    const entries = Object.entries(compareData);
+    let allRewards = [], maxEp = 0;
+    entries.forEach(([, d]) => {
+        const r = d.curve?.avg_rewards || [];
+        allRewards.push(...r);
+        maxEp = Math.max(maxEp, r.length);
+    });
+    if (!allRewards.length) return;
+
+    const minV = Math.min(...allRewards) - 0.1;
+    const maxV = Math.max(...allRewards) + 0.1;
+    const scaleX = i => PAD.l + (i / (maxEp - 1 || 1)) * cW;
+    const scaleY = v => PAD.t + cH - ((v - minV) / (maxV - minV || 1)) * cH;
+
+    // 网格
+    ctx.strokeStyle = '#e8eaf6'; ctx.lineWidth = 1;
+    for (let i = 0; i <= 4; i++) {
+        const y = PAD.t + (cH / 4) * i;
+        ctx.beginPath(); ctx.moveTo(PAD.l, y); ctx.lineTo(W - PAD.r, y); ctx.stroke();
+        const v = maxV - ((maxV - minV) / 4) * i;
+        ctx.fillStyle = '#94a3b8'; ctx.font = '10px sans-serif';
+        ctx.fillText(v.toFixed(2), 4, y + 3);
+    }
+
+    // 绘制各 Agent 曲线
+    let legendY = 6;
+    entries.forEach(([aid, d], idx) => {
+        const avg   = d.curve?.avg_rewards || [];
+        const color = Object.values(ALGO_COLORS)[idx % 6];
+        ctx.strokeStyle = color; ctx.lineWidth = 2;
+        ctx.beginPath();
+        avg.forEach((v, i) => { i === 0 ? ctx.moveTo(scaleX(i), scaleY(v)) : ctx.lineTo(scaleX(i), scaleY(v)); });
+        ctx.stroke();
+
+        // 图例
+        ctx.fillStyle = color; ctx.fillRect(PAD.l + idx * 120, legendY, 14, 3);
+        ctx.fillStyle = '#64748b'; ctx.font = '10px sans-serif';
+        ctx.fillText(`${ALGO_NAMES[d.algorithm]||d.algorithm} ${aid.slice(0,4)}`, PAD.l + idx * 120 + 18, legendY + 5);
+    });
+
+    // 比较信息
+    const info = entries.map(([aid, d]) =>
+        `${ALGO_NAMES[d.algorithm]}(${aid.slice(0,4)}): 均值=${d.avg_reward.toFixed(3)}, 最佳=${d.best_reward.toFixed(2)}`
+    ).join(' | ');
+    document.getElementById('compareInfo').textContent = info;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Q 值热力图
+═══════════════════════════════════════════════════════════ */
+function drawHeatmap(data) {
+    const canvas = document.getElementById('heatmapCanvas');
+    const rect   = canvas.parentElement.getBoundingClientRect();
+    canvas.width  = rect.width - 10; canvas.height = 200;
+    const ctx = canvas.getContext('2d');
+    const table = data.table || {};
+    const states = Object.keys(table);
+    if (!states.length) { ctx.fillStyle = '#fafbff'; ctx.fillRect(0,0,canvas.width,canvas.height); return; }
+
+    const actions = Array.from(new Set(states.flatMap(s => Object.keys(table[s]))));
+    const W = canvas.width, H = canvas.height;
+    const PAD = { t: 24, r: 10, b: 16, l: 80 };
+    ctx.fillStyle = '#fafbff'; ctx.fillRect(0, 0, W, H);
+
+    const cellW = (W - PAD.l - PAD.r) / actions.length;
+    const cellH = (H - PAD.t - PAD.b) / states.length;
+
+    // 收集所有值用于归一化
+    let allVals = [];
+    states.forEach(s => actions.forEach(a => allVals.push(table[s]?.[a] || 0)));
+    const vMin = Math.min(...allVals), vMax = Math.max(...allVals);
+    const vRange = vMax - vMin || 1;
+
+    // 绘制热力图格子
+    states.forEach((s, si) => {
+        // 行标签
+        ctx.fillStyle = '#4f46e5'; ctx.font = 'bold 10px sans-serif';
+        ctx.textAlign = 'right';
+        const label = s.length > 10 ? s.slice(0, 9) + '…' : s;
+        ctx.fillText(label, PAD.l - 6, PAD.t + si * cellH + cellH / 2 + 3);
+
+        actions.forEach((a, ai) => {
+            const v   = table[s]?.[a] || 0;
+            const norm = (v - vMin) / vRange;
+            const x = PAD.l + ai * cellW, y = PAD.t + si * cellH;
+
+            // 颜色：红(负) -> 白(0) -> 绿(正)
+            let r, g, b;
+            if (norm < 0.5) {
+                const t = norm * 2;
+                r = Math.round(239 + (255 - 239) * t);
+                g = Math.round(68 + (255 - 68) * t);
+                b = Math.round(68 + (255 - 68) * t);
+            } else {
+                const t = (norm - 0.5) * 2;
+                r = Math.round(255 - (255 - 16) * t);
+                g = Math.round(255 - (255 - 185) * t);
+                b = Math.round(255 - (255 - 129) * t);
+            }
+            ctx.fillStyle = `rgb(${r},${g},${b})`;
+            ctx.fillRect(x + 1, y + 1, cellW - 2, cellH - 2);
+
+            // 数值
+            ctx.fillStyle = norm > 0.3 && norm < 0.7 ? '#333' : '#fff';
+            ctx.font = '9px sans-serif'; ctx.textAlign = 'center';
+            ctx.fillText(v.toFixed(2), x + cellW / 2, y + cellH / 2 + 3);
+        });
+    });
+
+    // 列标签（动作）
+    ctx.fillStyle = '#4f46e5'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
+    actions.forEach((a, ai) => {
+        ctx.fillText(a, PAD.l + ai * cellW + cellW / 2, PAD.t - 6);
+    });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Episode 列表
+═══════════════════════════════════════════════════════════ */
+function renderEpisodeList(episodes) {
+    const el = document.getElementById('episodeList');
+    if (!episodes.length) {
+        el.innerHTML = '<div style="color:var(--text3);font-size:12px;text-align:center;padding:16px">暂无 Episode</div>';
+        return;
+    }
+    const maxR = Math.max(...episodes.map(e => Math.abs(e.total_reward)), 0.01);
+    el.innerHTML = episodes.slice(0, 25).map((ep, i) => {
+        const pct  = Math.max(0, Math.min(100, (Math.abs(ep.total_reward) / maxR) * 100)).toFixed(0);
+        const badge = ep.status === 'completed'
+            ? '<span class="ep-badge ep-done">OK</span>'
+            : '<span class="ep-badge ep-fail">ERR</span>';
+        const color = ep.total_reward >= 0 ? '#059669' : '#dc2626';
+        return `
+          <div class="episode-row">
+            <span style="color:var(--primary);font-weight:600">#${i+1}</span>
+            <div class="reward-bar-wrap" style="max-width:120px">
+              <div class="reward-bar" style="width:${pct}%;background:${ep.total_reward>=0?'linear-gradient(90deg,#6366f1,#8b5cf6)':'linear-gradient(90deg,#ef4444,#dc2626)'}"></div>
+            </div>
+            <span style="font-weight:600;color:${color};font-size:12px">${ep.total_reward.toFixed(3)}</span>
+            <span style="color:var(--text3);font-size:11px">${ep.steps}步 ${badge}</span>
+          </div>`;
+    }).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Q 表渲染
+═══════════════════════════════════════════════════════════ */
+function renderQTable(data) {
+    const table  = data.table || {};
+    const states = Object.keys(table);
+    if (!states.length) return;
+
+    const actions = Array.from(new Set(states.flatMap(s => Object.keys(table[s]))));
+    const head = document.getElementById('qHead');
+    head.innerHTML = '<th>状态 \\ 动作</th>' + actions.map(a => `<th>${a}</th>`).join('');
+
+    const body = document.getElementById('qBody');
+    body.innerHTML = states.map(s => {
+        const qs = actions.map(a => table[s]?.[a] || 0);
+        const maxQ = Math.max(...qs);
+        const cells = actions.map((a, i) => {
+            const v = qs[i];
+            const cls = v >= 0 ? 'q-pos' : 'q-neg';
+            const best = v === maxQ && v !== 0 ? ' q-best' : '';
+            return `<td class="${cls}${best}">${v.toFixed(3)}</td>`;
+        }).join('');
+        return `<tr><td style="font-weight:600;color:var(--primary)">${s}</td>${cells}</tr>`;
+    }).join('');
+
+    drawMaze(table, actions);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   迷宫路径可视化
+═══════════════════════════════════════════════════════════ */
+function drawMaze(table, actions) {
+    const canvas = document.getElementById('mazeCanvas');
+    const rect   = canvas.parentElement.getBoundingClientRect();
+    canvas.width  = rect.width - 10; canvas.height = 180;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    ctx.fillStyle = '#fafbff'; ctx.fillRect(0, 0, W, H);
+
+    const states = Object.keys(table);
+    if (!states.length) return;
+
+    const n   = Math.min(states.length, 12);
+    const r   = Math.min(24, (W - 60) / (n * 2.5));
+    const gap = (W - 40) / Math.max(n - 1, 1);
+    const cy  = H / 2;
+
+    states.slice(0, n).forEach((s, i) => {
+        const x = 20 + i * gap;
+        const qs = table[s] || {};
+        const entries = Object.entries(qs).sort((a,b) => b[1]-a[1]);
+        const best = entries[0];
+
+        // 箭头
+        if (best && i < n - 1) {
+            const nx = 20 + (i+1) * gap;
+            const color = best[1] > 0 ? ALGO_COLORS[currentAlgo] || '#6366f1' : '#ef4444';
+            ctx.strokeStyle = color; ctx.lineWidth = 2;
+            ctx.setLineDash([]); ctx.beginPath();
+            ctx.moveTo(x + r + 4, cy); ctx.lineTo(nx - r - 4, cy); ctx.stroke();
+            ctx.fillStyle = color; ctx.beginPath();
+            ctx.moveTo(nx - r - 2, cy);
+            ctx.lineTo(nx - r - 9, cy - 4);
+            ctx.lineTo(nx - r - 9, cy + 4); ctx.fill();
+        }
+
+        // 节点
+        const isGoal = s.includes('goal'); const isTrap = s.includes('trap');
+        ctx.beginPath(); ctx.arc(x, cy, r, 0, Math.PI*2);
+        ctx.fillStyle = isGoal ? '#d1fae5' : isTrap ? '#fee2e2' : '#ede9fe'; ctx.fill();
+        ctx.strokeStyle = isGoal ? '#059669' : isTrap ? '#dc2626' : (ALGO_COLORS[currentAlgo] || '#6366f1');
+        ctx.lineWidth = 2; ctx.stroke();
+
+        ctx.fillStyle = isGoal ? '#065f46' : isTrap ? '#991b1b' : '#4f46e5';
+        ctx.font = `bold ${Math.min(10, r * 0.45)}px sans-serif`;
+        ctx.textAlign = 'center';
+        const label = s.length > 8 ? s.slice(0, 7) + '…' : s;
+        ctx.fillText(label.replace('_start','').replace('_goal','*').replace('_trap','x'), x, cy + 3);
+
+        if (best) {
+            ctx.fillStyle = '#64748b'; ctx.font = '9px sans-serif';
+            ctx.fillText(`${best[0]}=${best[1].toFixed(2)}`, x, cy + r + 13);
+        }
+    });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   工具函数
+═══════════════════════════════════════════════════════════ */
+function log(msg, type='info') {
+    const box = document.getElementById('logBox');
+    const cls = { info:'log-info', ok:'log-ok', warn:'log-warn', err:'log-err' }[type] || '';
+    const t   = new Date().toLocaleTimeString('zh-CN', {hour12:false});
+    box.innerHTML += `\n<span class="${cls}">[${t}] ${msg}</span>`;
+    box.scrollTop = box.scrollHeight;
+}
+
+function setLoading(id, loading, html) {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    btn.disabled  = loading;
+    btn.innerHTML = loading ? `<span class="spinner"></span> ${html}` : html;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>永久记忆系统 - Agent Framework</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --theme-accent: #1363df;
+            --theme-accent-deep: #0f4eb3;
+            --theme-accent-line: rgba(19, 99, 223, 0.2);
+            --theme-accent-shadow: rgba(19, 99, 223, 0.18);
+        }
+
+        body {
+            background: linear-gradient(135deg, #eef5ff 0%, #f7fbff 52%, #edf4fb 100%);
+            min-height: 100vh;
+        }
+
+        .memory-card {
+            border-left: 4px solid var(--theme-accent);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+        }
+        .memory-card:hover {
+            box-shadow: 0 8px 20px var(--theme-accent-shadow);
+        }
+        .memory-type-episodic { border-left-color: #28a745; }
+        .memory-type-semantic { border-left-color: var(--theme-accent-deep); }
+        .memory-type-procedural { border-left-color: #60a5fa; }
+        .memory-type-working { border-left-color: #c0392b; }
+
+        .importance-bar {
+            height: 4px;
+            background: linear-gradient(90deg, #dc2626 0%, var(--theme-accent) 50%, #28a745 100%);
+            border-radius: 2px;
+        }
+
+        .search-container {
+            background: linear-gradient(135deg, var(--theme-accent-deep) 0%, var(--theme-accent) 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 14px 30px rgba(19, 99, 223, 0.16);
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, var(--theme-accent-deep) 0%, var(--theme-accent) 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 24px rgba(19, 99, 223, 0.14);
+        }
+
+        .memory-content {
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        .tag {
+            background: #e9ecef;
+            color: #495057;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            margin-right: 0.25rem;
+        }
+
+        /* 三层架构 Tab 样式 */
+        .memory-tabs .nav-link {
+            color: #495057;
+            font-weight: 500;
+            border: none;
+            padding: 0.75rem 1.5rem;
+        }
+        .memory-tabs .nav-link.active {
+            color: var(--theme-accent);
+            border-bottom: 3px solid var(--theme-accent);
+            background: transparent;
+        }
+        .memory-tabs .nav-link i {
+            margin-right: 0.5rem;
+        }
+
+        /* 每日笔记样式 */
+        .daily-note-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .daily-note-item {
+            cursor: pointer;
+            padding: 0.75rem 1rem;
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+        }
+        .daily-note-item:hover, .daily-note-item.active {
+            background: #f8f9fa;
+            border-left-color: var(--theme-accent);
+        }
+        .daily-note-content {
+            min-height: 300px;
+            white-space: pre-wrap;
+            font-family: 'Segoe UI', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* MEMORY.md 编辑器样式 */
+        .memory-md-editor {
+            min-height: 400px;
+            font-family: 'Segoe UI', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        .memory-md-preview {
+            min-height: 400px;
+            padding: 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            background: #fafafa;
+            white-space: pre-wrap;
+            font-family: 'Segoe UI', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #0f172a 0%, var(--theme-accent-deep) 100%) !important;
+            box-shadow: 0 10px 24px rgba(15, 78, 179, 0.16);
+        }
+
+        .card {
+            border: 1px solid var(--theme-accent-line);
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+        }
+
+        .card-header {
+            background: rgba(19, 99, 223, 0.05);
+            border-bottom: 1px solid var(--theme-accent-line);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--theme-accent-deep) 0%, var(--theme-accent) 100%);
+            border-color: transparent;
+        }
+
+        .btn-outline-primary {
+            color: var(--theme-accent);
+            border-color: rgba(19, 99, 223, 0.35);
+        }
+
+        .btn-outline-primary:hover {
+            background: var(--theme-accent);
+            border-color: var(--theme-accent);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-brain"></i> 永久记忆系统
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/dashboard">返回主控台</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- 三层架构 Tab 导航 -->
+        <ul class="nav nav-tabs memory-tabs mb-4" id="memoryTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="sqlite-tab" data-bs-toggle="tab"
+                    data-bs-target="#sqlite-panel" type="button" role="tab">
+                    <i class="fas fa-database"></i> SQLite 记忆
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="daily-tab" data-bs-toggle="tab"
+                    data-bs-target="#daily-panel" type="button" role="tab">
+                    <i class="fas fa-calendar-day"></i> 每日笔记
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="memory-md-tab" data-bs-toggle="tab"
+                    data-bs-target="#memory-md-panel" type="button" role="tab">
+                    <i class="fas fa-file-alt"></i> 长期记忆 (MEMORY.md)
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="memoryTabContent">
+
+            <!-- ═══ Tab 1: SQLite 记忆（原有内容） ═══ -->
+            <div class="tab-pane fade show active" id="sqlite-panel" role="tabpanel">
+                <!-- 搜索区域 -->
+                <div class="search-container">
+                    <h3><i class="fas fa-search"></i> 记忆搜索与回忆</h3>
+                    <div class="row mt-3">
+                        <div class="col-md-8">
+                            <input type="text" id="searchQuery" class="form-control" placeholder="输入关键词搜索记忆...">
+                        </div>
+                        <div class="col-md-2">
+                            <select id="memoryType" class="form-select">
+                                <option value="">所有类型</option>
+                                <option value="episodic">情节记忆</option>
+                                <option value="semantic">语义记忆</option>
+                                <option value="procedural">程序性记忆</option>
+                                <option value="working">工作记忆</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button id="searchBtn" class="btn btn-light w-100">
+                                <i class="fas fa-search"></i> 搜索
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 统计信息 -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="stats-card text-center">
+                            <h4 id="totalMemories">0</h4>
+                            <p>总记忆数</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card text-center">
+                            <h4 id="episodicCount">0</h4>
+                            <p>情节记忆</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card text-center">
+                            <h4 id="semanticCount">0</h4>
+                            <p>语义记忆</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card text-center">
+                            <h4 id="proceduralCount">0</h4>
+                            <p>程序性记忆</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 添加记忆 -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="fas fa-plus"></i> 添加新记忆</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="addMemoryForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label class="form-label">记忆类型</label>
+                                    <select id="newMemoryType" class="form-select" required>
+                                        <option value="episodic">情节记忆</option>
+                                        <option value="semantic">语义记忆</option>
+                                        <option value="procedural">程序性记忆</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">重要性 (0-1)</label>
+                                    <input type="number" id="newImportance" class="form-control" min="0" max="1" step="0.1" value="0.5">
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <label class="form-label">记忆内容</label>
+                                <textarea id="newContent" class="form-control" rows="3" placeholder="输入记忆内容..." required></textarea>
+                            </div>
+                            <div class="mt-3">
+                                <label class="form-label">标签 (用逗号分隔)</label>
+                                <input type="text" id="newTags" class="form-control" placeholder="标签1, 标签2, 标签3">
+                            </div>
+                            <div class="mt-3">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> 保存记忆
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 记忆列表 -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-list"></i> 记忆列表</h5>
+                        <button id="refreshBtn" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-refresh"></i> 刷新
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="memoriesContainer">
+                            <!-- 记忆卡片将在这里动态加载 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ Tab 2: 每日笔记 ═══ -->
+            <div class="tab-pane fade" id="daily-panel" role="tabpanel">
+                <div class="row">
+                    <!-- 左侧：日期列表 -->
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0"><i class="fas fa-calendar"></i> 日期列表</h6>
+                                <button id="refreshDailyBtn" class="btn btn-outline-primary btn-sm" title="刷新">
+                                    <i class="fas fa-refresh"></i>
+                                </button>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="daily-note-list" id="dailyDateList">
+                                    <p class="text-muted text-center py-3">加载中...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 右侧：笔记内容 + 添加 -->
+                    <div class="col-md-9">
+                        <!-- 添加笔记 -->
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="fas fa-plus"></i> 添加笔记</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="input-group">
+                                    <input type="text" id="newDailyNote" class="form-control"
+                                        placeholder="输入笔记内容...">
+                                    <button id="addDailyNoteBtn" class="btn btn-primary">
+                                        <i class="fas fa-paper-plane"></i> 添加
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 笔记内容 -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0" id="dailyNoteTitle">
+                                    <i class="fas fa-sticky-note"></i> 选择日期查看笔记
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="daily-note-content" id="dailyNoteContent">
+                                    <p class="text-muted">请从左侧选择一个日期</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ Tab 3: 长期记忆 (MEMORY.md) ═══ -->
+            <div class="tab-pane fade" id="memory-md-panel" role="tabpanel">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-file-alt"></i> MEMORY.md 长期记忆</h5>
+                        <div>
+                            <button id="memoryMdEditToggle" class="btn btn-outline-secondary btn-sm me-2">
+                                <i class="fas fa-edit"></i> 编辑
+                            </button>
+                            <button id="memoryMdRefreshBtn" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-refresh"></i> 刷新
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- 查看模式 -->
+                        <div id="memoryMdViewMode">
+                            <div class="memory-md-preview" id="memoryMdPreview">
+                                <p class="text-muted">加载中...</p>
+                            </div>
+                        </div>
+
+                        <!-- 编辑模式（默认隐藏） -->
+                        <div id="memoryMdEditMode" style="display:none;">
+                            <textarea id="memoryMdEditor" class="form-control memory-md-editor"
+                                placeholder="编辑 MEMORY.md 内容..."></textarea>
+                            <div class="mt-3">
+                                <button id="memoryMdSaveBtn" class="btn btn-primary me-2">
+                                    <i class="fas fa-save"></i> 保存
+                                </button>
+                                <button id="memoryMdCancelBtn" class="btn btn-secondary">
+                                    取消
+                                </button>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- 章节更新 -->
+                        <h6><i class="fas fa-puzzle-piece"></i> 按章节更新</h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <input type="text" id="sectionName" class="form-control"
+                                    placeholder="章节名（如：用户偏好）">
+                            </div>
+                            <div class="col-md-6">
+                                <input type="text" id="sectionContent" class="form-control"
+                                    placeholder="章节内容">
+                            </div>
+                            <div class="col-md-2">
+                                <button id="updateSectionBtn" class="btn btn-outline-primary w-100">
+                                    <i class="fas fa-plus"></i> 更新
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /tab-content -->
+    </div>
+
+    <!-- 记忆详情模态框 -->
+    <div class="modal fade" id="memoryModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">记忆详情</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="memoryDetails">
+                    <!-- 记忆详情将在这里显示 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        class MemoryDashboard {
+            constructor() {
+                this.memories = [];
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.loadStatistics();
+                this.loadMemories();
+
+                // Tab 切换事件
+                document.getElementById('daily-tab').addEventListener('shown.bs.tab', () => this.loadDailyFiles());
+                document.getElementById('memory-md-tab').addEventListener('shown.bs.tab', () => this.loadMemoryMd());
+            }
+
+            bindEvents() {
+                // SQLite 记忆 Tab
+                document.getElementById('searchBtn').addEventListener('click', () => this.searchMemories());
+                document.getElementById('searchQuery').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.searchMemories();
+                });
+                document.getElementById('addMemoryForm').addEventListener('submit', (e) => this.addMemory(e));
+                document.getElementById('refreshBtn').addEventListener('click', () => this.loadMemories());
+
+                // 每日笔记 Tab
+                document.getElementById('refreshDailyBtn').addEventListener('click', () => this.loadDailyFiles());
+                document.getElementById('addDailyNoteBtn').addEventListener('click', () => this.addDailyNote());
+                document.getElementById('newDailyNote').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.addDailyNote();
+                });
+
+                // MEMORY.md Tab
+                document.getElementById('memoryMdRefreshBtn').addEventListener('click', () => this.loadMemoryMd());
+                document.getElementById('memoryMdEditToggle').addEventListener('click', () => this.toggleMemoryMdEdit());
+                document.getElementById('memoryMdSaveBtn').addEventListener('click', () => this.saveMemoryMd());
+                document.getElementById('memoryMdCancelBtn').addEventListener('click', () => this.cancelMemoryMdEdit());
+                document.getElementById('updateSectionBtn').addEventListener('click', () => this.updateMemoryMdSection());
+            }
+
+            // ── SQLite 记忆（原有功能） ──────────────────────────────────────
+
+            async loadStatistics() {
+                try {
+                    const response = await fetch('/api/memory/statistics');
+                    const data = await response.json();
+
+                    if (data.success) {
+                        const stats = data.statistics;
+                        let total = 0;
+
+                        Object.values(stats).forEach(stat => total += stat.count);
+
+                        document.getElementById('totalMemories').textContent = total;
+                        document.getElementById('episodicCount').textContent = stats.episodic?.count || 0;
+                        document.getElementById('semanticCount').textContent = stats.semantic?.count || 0;
+                        document.getElementById('proceduralCount').textContent = stats.procedural?.count || 0;
+                    }
+                } catch (error) {
+                    console.error('加载统计信息失败:', error);
+                }
+            }
+
+            async searchMemories() {
+                const query = document.getElementById('searchQuery').value;
+                const memoryType = document.getElementById('memoryType').value;
+
+                if (!query.trim()) {
+                    this.loadMemories();
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/memory/search', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            query: query,
+                            memory_type: memoryType || null,
+                            limit: 20
+                        })
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        this.displayMemories(data.memories);
+                    }
+                } catch (error) {
+                    console.error('搜索记忆失败:', error);
+                }
+            }
+
+            async loadMemories() {
+                try {
+                    const response = await fetch('/api/memory/search', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            query: '',
+                            limit: 50
+                        })
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        this.displayMemories(data.memories);
+                    }
+                } catch (error) {
+                    console.error('加载记忆失败:', error);
+                }
+            }
+
+            displayMemories(memories) {
+                const container = document.getElementById('memoriesContainer');
+
+                if (memories.length === 0) {
+                    container.innerHTML = '<p class="text-muted text-center">暂无记忆数据</p>';
+                    return;
+                }
+
+                container.innerHTML = memories.map(memory => {
+                    const similarityScore = memory.similarity_score ? memory.similarity_score.toFixed(3) : 'N/A';
+                    return `
+                        <div class="card memory-card memory-type-${memory.memory_type} mb-3" onclick="memoryDashboard.showMemoryDetails('${memory.id}')">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="card-title mb-0">
+                                        <i class="fas fa-${this.getMemoryIcon(memory.memory_type)}"></i>
+                                        ${this.getMemoryTypeName(memory.memory_type)}
+                                    </h6>
+                                    <small class="text-muted">${this.formatDate(memory.created_at)}</small>
+                                </div>
+
+                                <div class="memory-content mb-2">
+                                    <p class="card-text">${memory.content}</p>
+                                </div>
+
+                                <div class="importance-bar mb-2" style="width: ${memory.importance * 100}%"></div>
+
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        ${memory.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                                    </div>
+                                    <small class="text-muted">
+                                        访问 ${memory.access_count} 次 | 相似度: ${similarityScore}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            async showMemoryDetails(memoryId) {
+                try {
+                    const response = await fetch(`/api/memory/${memoryId}`);
+                    const data = await response.json();
+
+                    if (data.success) {
+                        const memory = data.memory;
+                        document.getElementById('memoryDetails').innerHTML = `
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>ID:</strong> ${memory.id}<br>
+                                    <strong>类型:</strong> ${this.getMemoryTypeName(memory.memory_type)}<br>
+                                    <strong>重要性:</strong> ${memory.importance}<br>
+                                    <strong>访问次数:</strong> ${memory.access_count}
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>创建时间:</strong> ${this.formatDate(memory.created_at)}<br>
+                                    <strong>最后访问:</strong> ${this.formatDate(memory.last_accessed)}<br>
+                                    <strong>标签:</strong> ${memory.tags.join(', ') || '无'}
+                                </div>
+                            </div>
+                            <hr>
+                            <strong>内容:</strong>
+                            <p>${memory.content}</p>
+                            <hr>
+                            <strong>上下文:</strong>
+                            <pre>${JSON.stringify(memory.context, null, 2)}</pre>
+                        `;
+
+                        new bootstrap.Modal(document.getElementById('memoryModal')).show();
+                    }
+                } catch (error) {
+                    console.error('获取记忆详情失败:', error);
+                }
+            }
+
+            async addMemory(event) {
+                event.preventDefault();
+
+                const memoryType = document.getElementById('newMemoryType').value;
+                const content = document.getElementById('newContent').value;
+                const importance = parseFloat(document.getElementById('newImportance').value);
+                const tagsStr = document.getElementById('newTags').value;
+                const tags = tagsStr ? tagsStr.split(',').map(tag => tag.trim()) : [];
+
+                try {
+                    const response = await fetch(`/api/memory/${memoryType}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            content: content,
+                            importance: importance,
+                            tags: tags,
+                            context: {
+                                source: 'manual_input',
+                                timestamp: new Date().toISOString()
+                            }
+                        })
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        document.getElementById('addMemoryForm').reset();
+                        document.getElementById('newImportance').value = '0.5';
+                        this.loadMemories();
+                        this.loadStatistics();
+                        alert('记忆添加成功！');
+                    } else {
+                        alert('添加失败: ' + data.error);
+                    }
+                } catch (error) {
+                    console.error('添加记忆失败:', error);
+                    alert('添加失败: ' + error.message);
+                }
+            }
+
+            // ── 每日笔记 ────────────────────────────────────────────────────
+
+            async loadDailyFiles() {
+                try {
+                    const response = await fetch('/api/memory/daily-notes/files');
+                    const data = await response.json();
+
+                    const container = document.getElementById('dailyDateList');
+
+                    if (!data.success || data.files.length === 0) {
+                        container.innerHTML = '<p class="text-muted text-center py-3">暂无笔记</p>';
+                        return;
+                    }
+
+                    container.innerHTML = data.files.map(dateStr => `
+                        <div class="daily-note-item" onclick="memoryDashboard.loadDailyNote('${dateStr}', this)">
+                            <i class="fas fa-calendar-day me-2"></i> ${dateStr}
+                        </div>
+                    `).join('');
+
+                    // 自动加载第一个
+                    const firstItem = container.querySelector('.daily-note-item');
+                    if (firstItem) firstItem.click();
+
+                } catch (error) {
+                    console.error('加载日期列表失败:', error);
+                }
+            }
+
+            async loadDailyNote(dateStr, element) {
+                // 高亮选中
+                document.querySelectorAll('.daily-note-item').forEach(el => el.classList.remove('active'));
+                if (element) element.classList.add('active');
+
+                try {
+                    const response = await fetch(`/api/memory/daily-notes/${dateStr}`);
+                    const data = await response.json();
+
+                    document.getElementById('dailyNoteTitle').innerHTML =
+                        `<i class="fas fa-sticky-note"></i> ${dateStr} 的笔记`;
+
+                    if (data.success) {
+                        document.getElementById('dailyNoteContent').textContent = data.content;
+                    } else {
+                        document.getElementById('dailyNoteContent').innerHTML =
+                            '<p class="text-muted">该日期无笔记</p>';
+                    }
+                } catch (error) {
+                    console.error('加载笔记失败:', error);
+                }
+            }
+
+            async addDailyNote() {
+                const input = document.getElementById('newDailyNote');
+                const content = input.value.trim();
+
+                if (!content) return;
+
+                try {
+                    const response = await fetch('/api/memory/daily-notes', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ content })
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        input.value = '';
+                        this.loadDailyFiles();
+                    } else {
+                        alert('添加失败: ' + data.error);
+                    }
+                } catch (error) {
+                    console.error('添加笔记失败:', error);
+                }
+            }
+
+            // ── MEMORY.md ───────────────────────────────────────────────────
+
+            async loadMemoryMd() {
+                try {
+                    const response = await fetch('/api/memory/memory-md');
+                    const data = await response.json();
+
+                    if (data.success) {
+                        document.getElementById('memoryMdPreview').textContent = data.content || '(空)';
+                        document.getElementById('memoryMdEditor').value = data.content || '';
+                    }
+                } catch (error) {
+                    console.error('加载 MEMORY.md 失败:', error);
+                }
+            }
+
+            toggleMemoryMdEdit() {
+                const viewMode = document.getElementById('memoryMdViewMode');
+                const editMode = document.getElementById('memoryMdEditMode');
+                const toggle = document.getElementById('memoryMdEditToggle');
+
+                if (editMode.style.display === 'none') {
+                    editMode.style.display = 'block';
+                    viewMode.style.display = 'none';
+                    toggle.innerHTML = '<i class="fas fa-eye"></i> 预览';
+                } else {
+                    editMode.style.display = 'none';
+                    viewMode.style.display = 'block';
+                    toggle.innerHTML = '<i class="fas fa-edit"></i> 编辑';
+                }
+            }
+
+            async saveMemoryMd() {
+                const content = document.getElementById('memoryMdEditor').value;
+
+                try {
+                    const response = await fetch('/api/memory/memory-md', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ content })
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        this.loadMemoryMd();
+                        this.cancelMemoryMdEdit();
+                        alert('MEMORY.md 已保存');
+                    } else {
+                        alert('保存失败: ' + data.error);
+                    }
+                } catch (error) {
+                    console.error('保存 MEMORY.md 失败:', error);
+                }
+            }
+
+            cancelMemoryMdEdit() {
+                document.getElementById('memoryMdEditMode').style.display = 'none';
+                document.getElementById('memoryMdViewMode').style.display = 'block';
+                document.getElementById('memoryMdEditToggle').innerHTML = '<i class="fas fa-edit"></i> 编辑';
+            }
+
+            async updateMemoryMdSection() {
+                const section = document.getElementById('sectionName').value.trim();
+                const content = document.getElementById('sectionContent').value.trim();
+
+                if (!section || !content) {
+                    alert('请输入章节名和内容');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/memory/memory-md/section', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ section, content })
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        document.getElementById('sectionName').value = '';
+                        document.getElementById('sectionContent').value = '';
+                        this.loadMemoryMd();
+                        alert(`章节 "${section}" 已更新`);
+                    } else {
+                        alert('更新失败: ' + data.error);
+                    }
+                } catch (error) {
+                    console.error('更新章节失败:', error);
+                }
+            }
+
+            // ── 工具方法 ────────────────────────────────────────────────────
+
+            getMemoryIcon(type) {
+                const icons = {
+                    'episodic': 'calendar-alt',
+                    'semantic': 'book',
+                    'procedural': 'cogs',
+                    'working': 'memory'
+                };
+                return icons[type] || 'circle';
+            }
+
+            getMemoryTypeName(type) {
+                const names = {
+                    'episodic': '情节记忆',
+                    'semantic': '语义记忆',
+                    'procedural': '程序性记忆',
+                    'working': '工作记忆'
+                };
+                return names[type] || type;
+            }
+
+            formatDate(dateStr) {
+                return new Date(dateStr).toLocaleString('zh-CN');
+            }
+        }
+
+        // 初始化
+        const memoryDashboard = new MemoryDashboard();
+    </script>
+</body>
+</html>

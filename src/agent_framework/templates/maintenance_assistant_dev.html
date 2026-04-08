@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>风电运维智导助手 · 开发版</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/base-theme.css">
+  <style>
+    :root{--bg:#f4f7fb;--card:#fff;--line:#dbe4f0;--text:#10233f;--muted:#5f728c;--primary:#1363df;--soft:#e9f1ff;--ok:#2563eb;--warn:#60a5fa;--accent:#c5892f;--accent-soft:rgba(197,137,47,.12);--shadow:0 12px 28px rgba(16,35,63,.08);--radius:18px}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}.material-symbols-outlined{font-variation-settings:"FILL" 0,"wght" 400,"GRAD" 0,"opsz" 24;user-select:none}body{margin:0;font-family:"Inter","Segoe UI","Microsoft YaHei",sans-serif;color:var(--text)}
+    .platform-sidebar{position:fixed;left:0;top:0;z-index:50;display:flex;flex-direction:column;gap:10px;width:16rem;height:100vh;padding:24px 16px;background:#f0f4f7;border-right:1px solid rgba(219,228,240,.7)}.platform-brand{display:flex;align-items:center;gap:12px;padding:0 8px 10px;text-decoration:none;color:inherit}.platform-brand-mark{display:grid;place-items:center;width:40px;height:40px;border-radius:14px;background:linear-gradient(135deg,#1363df,#5794fd);color:#fff;font-size:22px}.platform-brand-copy strong{display:block;font-family:"Manrope",sans-serif;font-size:17px;line-height:1.1}.platform-brand-copy small{display:block;margin-top:4px;color:var(--muted);font-size:11px;letter-spacing:.04em}.platform-primary-entry{display:flex;align-items:center;justify-content:center;gap:8px;margin:2px 0 8px;padding:14px 16px;border-radius:16px;background:linear-gradient(135deg,#1363df,#0f4eb3);color:#fff;text-decoration:none;font-weight:700;box-shadow:0 18px 32px rgba(19,99,223,.2)}.platform-nav{display:grid;gap:4px}.platform-nav-link,.platform-nav-utility{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;color:rgba(44,52,55,.78);text-decoration:none;font-weight:600;transition:.2s ease}.platform-nav-link:hover,.platform-nav-utility:hover{background:rgba(213,227,253,.55);color:#005cc0}.platform-nav-link.active{background:#d5e3fd;color:#005cc0;box-shadow:inset 0 0 0 1px rgba(0,92,192,.08)}.platform-sidebar-footer{margin-top:auto;padding-top:14px;border-top:1px solid rgba(172,179,183,.18);display:grid;gap:4px}.platform-user-pill{display:flex;align-items:center;gap:12px;padding:12px 14px 0}.platform-user-mark{width:32px;height:32px;border-radius:999px;background:linear-gradient(135deg,#1363df,#5794fd)}.platform-user-pill strong{display:block;font-size:12px}.platform-user-pill small{display:block;margin-top:2px;color:var(--muted);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+    .platform-header{position:fixed;left:16rem;right:0;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:16px;height:72px;padding:0 32px;background:rgba(247,249,251,.86);backdrop-filter:blur(18px);border-bottom:1px solid rgba(219,228,240,.55)}.platform-header-title{display:flex;align-items:center;gap:12px}.platform-header-title strong{font-family:"Manrope",sans-serif;font-size:20px;font-weight:900}.platform-header-badge{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;background:#d5e3fd;color:#005cc0;font-size:12px;font-weight:700}.platform-header-tools{display:flex;align-items:center;gap:12px}.platform-header-search{position:relative}.platform-header-search .material-symbols-outlined{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--muted)}.platform-header-search input{width:300px;padding:10px 16px 10px 40px;border:1px solid rgba(219,228,240,.95);border-radius:999px;background:#f0f4f7;color:var(--text);font:inherit;outline:none}.platform-header-icon{display:grid;place-items:center;width:40px;height:40px;border-radius:999px;color:var(--muted);text-decoration:none;transition:.2s ease}.platform-header-icon:hover{background:#e9f1ff;color:#1363df}
+    .dev-page-shell{position:relative;z-index:5;min-height:100vh;width:calc(100% - 16rem);max-width:none;margin:0 0 0 16rem;padding:96px 32px 32px;display:flex;flex-direction:column;gap:20px}.dev-page-shell>*{width:100%;max-width:none}.dev-topbar{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start}.title-block{max-width:1120px}.title-block h1{margin:0;font-family:"Manrope",sans-serif;font-size:36px;line-height:1.1}.title-block p{margin:8px 0 0;color:var(--muted);max-width:1040px;line-height:1.7}.mode-badge{display:inline-flex;align-items:center;gap:8px;margin-bottom:10px;padding:6px 12px;border-radius:999px;background:var(--accent-soft);border:1px solid rgba(197,137,47,.2);color:var(--accent);font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.top-actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center}.btn{border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:12px;padding:10px 16px;cursor:pointer;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:8px;box-shadow:var(--shadow)}.btn.primary{background:var(--primary);color:#fff;border-color:var(--primary)}.mode-switch{display:inline-flex;padding:4px;border-radius:999px;background:#edf3fb;border:1px solid rgba(19,99,223,.10)}.mode-link{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:999px;font-size:13px;font-weight:800;color:var(--muted);text-decoration:none}.mode-link.active{background:linear-gradient(135deg,#c5892f,#a56e1c);color:#fff;box-shadow:0 10px 24px rgba(197,137,47,.18)}
+    .dev-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.summary-card{padding:16px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,#fff,#f7faff);box-shadow:var(--shadow);display:grid;gap:8px}.summary-card strong{font-size:15px}.summary-card p{margin:0;color:var(--muted);font-size:12px;line-height:1.7}.summary-card .meta{color:var(--primary);font-size:12px;font-weight:800}
+    .dev-layout{display:grid;grid-template-columns:minmax(360px,.95fr) minmax(0,1.35fr) minmax(280px,.82fr);gap:18px;align-items:start;width:100%;max-width:none;margin:0}.dev-config,.dev-chat,.dev-side{background:var(--card);border:1px solid rgba(219,228,240,.95);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}.dev-config{display:grid;gap:16px}.dev-head{display:grid;gap:8px}.dev-kicker{display:inline-flex;width:max-content;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;background:rgba(19,99,223,.08);border:1px solid rgba(19,99,223,.14);color:var(--primary);font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+    .grid2,.toggle-grid,.tool-grid,.action-row,.side-stack,.chips{display:grid;gap:12px}.grid2,.toggle-grid,.tool-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.field{display:grid;gap:8px}.field.full{grid-column:1/-1}.field label{font-size:13px;font-weight:700;color:var(--muted)}.field input,.field textarea,.field select,.composer textarea{width:100%;border:1px solid var(--line);border-radius:14px;padding:13px 14px;background:#fbfdff;color:var(--text);outline:none;font:inherit}.field textarea{min-height:90px;resize:vertical}.field select[multiple]{min-height:144px}.field small{color:var(--muted);line-height:1.6}.toggle-item{border:1px solid var(--line);border-radius:16px;padding:14px;background:#fbfdff;display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.toggle-item strong{display:block;margin-bottom:4px;font-size:14px}.toggle-item span{font-size:12px;color:var(--muted);line-height:1.6}.switch{position:relative;width:46px;height:26px;flex:0 0 auto}.switch input{opacity:0;width:0;height:0}.slider{position:absolute;inset:0;background:#d7e0ed;border-radius:999px}.slider:before{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s}.switch input:checked+.slider{background:var(--primary)}.switch input:checked+.slider:before{transform:translateX(20px)}
+    .helper-box,.preview-box,.toolbox{padding:16px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,#fbfdff,#fff)}.toolcode{display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;background:#eef4ff;color:var(--primary);font-size:11px;font-weight:700}.chips{display:flex;gap:8px;flex-wrap:wrap}.hint{padding:8px 12px;border:1px solid rgba(19,99,223,.14);background:#fff;color:var(--primary);border-radius:999px;cursor:pointer;font-size:12px;font-weight:700}
+    .dev-chat{display:grid;grid-template-rows:auto auto minmax(420px,1fr) auto;gap:0}.chathead{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:flex-start;padding-bottom:16px;border-bottom:1px solid rgba(219,228,240,.8)}.pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;background:#eef4ff;color:var(--primary);font-size:12px;font-weight:800;border-radius:999px}.pill.warn{background:#fff5e8;color:var(--accent)}.statusbar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:16px 0 6px}.statuscard{padding:15px 16px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,#fbfdff,#fff)}.statuscard span{display:block;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.statuscard strong{display:block;margin-top:8px;font-size:18px;line-height:1.2}.statuscard small{display:block;margin-top:8px;color:var(--muted);line-height:1.6}.messages{padding:18px 0;display:flex;flex-direction:column;gap:14px;max-height:64vh;overflow:auto}.message{display:flex;gap:12px;align-items:flex-start}.message.user{flex-direction:row-reverse}.avatar{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#fff;flex:0 0 auto}.message.user .avatar{background:#0f766e}.message.assistant .avatar{background:var(--primary)}.bubble{max-width:min(840px,100%);padding:14px 16px;border-radius:18px;border:1px solid var(--line);background:#fff;line-height:1.75}.message.user .bubble{background:#ecfaf5;border-color:#cbeee1}.meta-line{margin-top:10px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted)}.composer{display:grid;gap:12px;padding-top:14px;border-top:1px solid rgba(219,228,240,.8)}.composer textarea{min-height:104px;resize:vertical}.composer-actions{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center}.chip{display:inline-flex;align-items:center;padding:8px 12px;border-radius:999px;background:#eef4ff;color:var(--primary);font-size:12px;font-weight:800}.chip.gold{background:#fff5e8;color:var(--accent)}.chip.green{background:#ecfaf5;color:#147a54}
+    .side-stack{display:grid;gap:16px}.dev-side h3{margin:0 0 12px;font-size:16px}.box{color:var(--muted);font-size:13px;line-height:1.7}.kv,.list{display:grid;gap:10px}.item{padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:#fbfdff}.item strong{display:block;margin-bottom:6px;font-size:13px;color:var(--muted)}pre{margin:0;white-space:pre-wrap;word-break:break-word;font-size:12px;line-height:1.7}
+    @media (max-width:1320px){.dev-summary,.dev-layout,.statusbar{grid-template-columns:1fr}.messages{max-height:none}}@media (max-width:1180px){.platform-sidebar{position:static;width:auto;height:auto;margin:0 14px 12px;border-right:none;border-bottom:1px solid rgba(219,228,240,.7);border-radius:0 0 24px 24px}.platform-header{position:static;left:auto;right:auto;height:auto;margin:0 14px 8px;padding:14px 18px;border:1px solid rgba(219,228,240,.55);border-radius:20px}.platform-header-tools{width:100%;justify-content:space-between;flex-wrap:wrap}.platform-header-search{flex:1 1 320px}.platform-header-search input{width:100%}.dev-page-shell{width:100%;margin-left:0;padding:16px 14px 24px}}@media (max-width:760px){.dev-page-shell{padding:14px}.dev-topbar,.grid2,.toggle-grid,.tool-grid,.composer-actions{grid-template-columns:1fr}.mode-switch{width:100%;justify-content:space-between}.top-actions{width:100%}.btn{width:100%;justify-content:center}.platform-header{margin:0 12px 8px;padding:14px}.platform-header-title{flex-wrap:wrap}.platform-sidebar{margin:0 12px 10px;padding:18px 14px}}
+  </style>
+  <link rel="stylesheet" href="/static/css/submodule-theme.css?v=1.0">
+  <style>
+    :root{--theme-primary:#1363df;--theme-primary-deep:#0f4eb3;--theme-primary-light:#60a5fa;--theme-primary-soft:rgba(19,99,223,.10);--theme-line-strong:rgba(19,99,223,.18);--theme-shadow-gold:0 14px 30px rgba(19,99,223,.18);--theme-success:#2563eb;--theme-warning:#60a5fa}
+    html,body{background:radial-gradient(circle at top left,rgba(19,99,223,.10),transparent 28%),radial-gradient(circle at top right,rgba(96,165,250,.08),transparent 24%),linear-gradient(180deg,#f9fbff 0%,#f4f8ff 100%)!important}
+    body::before{background-image:radial-gradient(ellipse 820px 110px at 0% 18%,rgba(19,99,223,.08) 0%,transparent 50%),radial-gradient(ellipse 700px 90px at 100% 40%,rgba(96,165,250,.06) 0%,transparent 50%),radial-gradient(ellipse 920px 120px at 30% 82%,rgba(19,99,223,.06) 0%,transparent 50%)!important}
+  </style>
+  <style>
+    .platform-brand-copy small,
+    .platform-user-pill small,
+    .platform-header-badge,
+    .mode-badge,
+    .summary-card p,
+    .summary-card .meta,
+    .dev-kicker,
+    .toggle-item span,
+    .toolcode,
+    .hint,
+    .pill,
+    .statuscard span,
+    .statuscard small,
+    .meta-line,
+    .chip,
+    .field small,
+    pre {
+      font-size: 13px;
+    }
+
+    .platform-user-pill strong,
+    .mode-link,
+    .box,
+    .field label,
+    .item strong {
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <aside class="platform-sidebar">
+    <a class="platform-brand" href="/">
+      <span class="platform-brand-mark material-symbols-outlined">bolt</span>
+      <span class="platform-brand-copy">
+        <strong>风起时域</strong>
+        <small>新能源 AI 平台入口</small>
+      </span>
+    </a>
+    <a class="platform-primary-entry" href="/dev/assistant">
+      <span class="material-symbols-outlined">terminal</span>
+      <span>当前开发版</span>
+    </a>
+    <nav class="platform-nav" aria-label="平台导航">
+      <a class="platform-nav-link" href="/maintenance-assistant"><span class="material-symbols-outlined">neurology</span><span>智导助手</span></a>
+      <a class="platform-nav-link" href="/modules/weather-siting/app"><span class="material-symbols-outlined">wind_power</span><span>气象选址</span></a>
+      <a class="platform-nav-link" href="/modules/power-trading/app"><span class="material-symbols-outlined">query_stats</span><span>电力交易</span></a>
+      <a class="platform-nav-link" href="/modules/smart-workorder/app"><span class="material-symbols-outlined">assignment</span><span>智能工单</span></a>
+      <a class="platform-nav-link active" href="/dev/assistant"><span class="material-symbols-outlined">code</span><span>开发版助手</span></a>
+      <a class="platform-nav-link" href="/dev"><span class="material-symbols-outlined">dashboard</span><span>开发控制台</span></a>
+    </nav>
+    <div class="platform-sidebar-footer">
+      <a class="platform-nav-utility" href="/knowledge"><span class="material-symbols-outlined">library_books</span><span>知识库</span></a>
+      <a class="platform-nav-utility" href="/plugins"><span class="material-symbols-outlined">extension</span><span>插件市场</span></a>
+      <a class="platform-nav-utility" href="/settings"><span class="material-symbols-outlined">settings</span><span>平台设置</span></a>
+      <a class="platform-nav-utility" href="/logs"><span class="material-symbols-outlined">receipt_long</span><span>日志中心</span></a>
+      <div class="platform-user-pill">
+        <span class="platform-user-mark"></span>
+        <div>
+          <strong>统一体验风格</strong>
+          <small>开发版</small>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <header class="platform-header">
+    <div class="platform-header-title">
+      <strong>风电运维智导助手 · 开发版</strong>
+      <span class="platform-header-badge">
+        <span class="material-symbols-outlined" style="font-size:16px">construction</span>
+        <span>调试配置与链路观测</span>
+      </span>
+    </div>
+    <div class="platform-header-tools">
+      <label class="platform-header-search">
+        <span class="material-symbols-outlined">search</span>
+        <input type="text" value="开发提示词 / 工具编排 / Gateway 回传 / 统一聊天调试" readonly aria-label="页面说明">
+      </label>
+      <a class="platform-header-icon" href="/system-status" aria-label="系统状态"><span class="material-symbols-outlined">monitor_heart</span></a>
+      <a class="platform-header-icon" href="/logs" aria-label="日志中心"><span class="material-symbols-outlined">notifications</span></a>
+      <a class="platform-header-icon" href="/dev" aria-label="开发控制台"><span class="material-symbols-outlined">account_circle</span></a>
+    </div>
+  </header>
+
+  <div class="dev-page-shell">
+    <div class="dev-topbar">
+      <div class="title-block">
+        <div class="mode-badge"><i class="fas fa-screwdriver-wrench"></i><span>开发版 · 可编排调试</span></div>
+        <h1>风电运维智导助手 · 开发版</h1>
+        <p>保留提示词、上下文、工具策略和 Gateway 传输调试能力，同时把页面壳层、导航和对齐方式统一到平台主界面，避免再出现单独一页一套风格。</p>
+      </div>
+      <div class="top-actions">
+        <div class="mode-switch">
+          <a class="mode-link" href="/maintenance-assistant"><i class="fas fa-user"></i> 用户版</a>
+          <span class="mode-link active"><i class="fas fa-laptop-code"></i> 开发版</span>
+        </div>
+        <a class="btn" href="/dev"><i class="fas fa-arrow-left"></i> 返回开发首页</a>
+        <a class="btn" href="/maintenance-assistant"><i class="fas fa-up-right-from-square"></i> 打开用户版</a>
+      </div>
+    </div>
+
+    <section class="dev-summary">
+      <article class="summary-card"><div class="meta">提示词层</div><strong>系统提示可直接改写</strong><p>快速验证不同回答风格、结构模板和风险表达方式的变化。</p></article>
+      <article class="summary-card"><div class="meta">工具链</div><strong>工具集与白名单可控</strong><p>内置工具、预设工具集、排除列表和插件工具都能在当前页编排。</p></article>
+      <article class="summary-card"><div class="meta">传输层</div><strong>网关 / HTTP 双路径</strong><p>优先走 Gateway 长连接，失败后自动回退统一聊天接口。</p></article>
+      <article class="summary-card"><div class="meta">可解释性</div><strong>链路结果同屏可见</strong><p>路由、检索、因果和模型策略面板保持在右侧，便于联调观察。</p></article>
+    </section>
+
+    <section class="dev-layout">
+      <aside class="dev-config">
+        <div class="dev-head">
+          <span class="dev-kicker">开发配置面板</span>
+          <h2>请求编排与诊断配置</h2>
+          <p class="box">左侧配置会和当前消息一起进入统一聊天入口，用来验证提示词、资产上下文、工具权限和链路策略的真实效果。</p>
+        </div>
+        <div class="field"><label for="assistantName">助手显示名称</label><input id="assistantName" value="风电运维智导助手 · 开发版"><small>只影响当前页面显示与调试标识，不会改动线上用户版名称。</small></div>
+        <div class="field"><label for="developerSystemPrompt">系统提示词</label><textarea id="developerSystemPrompt">你是开发版中的风电运维智导助手。回答时优先输出：结论摘要、根因排序、排查动作、风险提醒、是否需要升级专家支持。保持结构化、专业、可执行。</textarea></div>
+        <div class="field"><label for="developerContext">附加上下文</label><textarea id="developerContext">当前为开发调试场景。如果用户给出故障码、机组号、工况和已执行动作，请在回答中明确引用；若信息不足，请列出待补字段。</textarea></div>
+        <div class="field"><label for="developerAnswerStyle">回答风格要求</label><textarea id="developerAnswerStyle">默认输出结构：结论摘要 + 根因排序 + 排查步骤 + 风险提醒 + 下一步建议。</textarea></div>
+        <div class="grid2">
+          <div class="field"><label for="farmName">场站</label><input id="farmName" placeholder="例如：华北某风电场"></div>
+          <div class="field"><label for="turbineId">机组编号</label><input id="turbineId" placeholder="例如：WTG-07"></div>
+          <div class="field"><label for="faultCode">故障代码</label><input id="faultCode" placeholder="例如：Yaw_021 / GearboxTempHigh"></div>
+          <div class="field"><label for="operatingMode">运行工况</label><input id="operatingMode" placeholder="例如：并网 / 待检"></div>
+        </div>
+        <div class="field"><label for="symptomInput">现场现象</label><textarea id="symptomInput" placeholder="例如：偏航动作频繁，10 分钟内出现 3 次偏航超差告警。"></textarea></div>
+        <div class="toggle-grid">
+          <div class="toggle-item"><div><strong>启用因果推断</strong><span>观察根因排序和因果链路是否进入本轮回答。</span></div><label class="switch"><input type="checkbox" id="enableCausal" checked><span class="slider"></span></label></div>
+          <div class="toggle-item"><div><strong>启用知识检索</strong><span>验证知识库和会话记忆是否实际参与本轮结果。</span></div><label class="switch"><input type="checkbox" id="enableRetrieval" checked><span class="slider"></span></label></div>
+          <div class="toggle-item"><div><strong>优先微调模型</strong><span>如果存在领域模型，优先走微调路由。</span></div><label class="switch"><input type="checkbox" id="preferFinetuned" checked><span class="slider"></span></label></div>
+          <div class="toggle-item"><div><strong>启用 RLHF 闭环</strong><span>保留反馈闭环信息，便于观察回写状态。</span></div><label class="switch"><input type="checkbox" id="enableRlhf" checked><span class="slider"></span></label></div>
+        </div>
+        <div class="toolbox">
+          <strong>工具编排</strong>
+          <p class="box">开发版保留工具集选择、白名单、黑名单和插件工具开关，用来验证真实工具调用策略。</p>
+          <div class="tool-grid">
+            <div class="field"><label for="toolsetSelection">工具集预设</label><select id="toolsetSelection" multiple size="6">{% for toolset in toolset_presets %}<option value="{{ toolset }}">{{ toolset }}</option>{% endfor %}</select></div>
+            <div class="field"><label for="allowedToolsInput">额外允许工具</label><textarea id="allowedToolsInput" placeholder="例如：get_datetime, calculate"></textarea></div>
+            <div class="field"><label for="blockedToolsInput">排除工具</label><textarea id="blockedToolsInput" placeholder="例如：fetch_url"></textarea></div>
+            <div class="field"><label for="includePluginTools">插件工具</label><div class="toggle-item"><div><strong>包含插件工具</strong><span>关闭后只保留内置工具。</span></div><label class="switch"><input type="checkbox" id="includePluginTools" checked><span class="slider"></span></label></div></div>
+            <div class="field full"><label>可用工具参考</label><div class="chips">{% for tool_name in available_tool_names %}<span class="toolcode">{{ tool_name }}</span>{% endfor %}</div></div>
+          </div>
+        </div>
+        <div class="helper-box">
+          <strong>快捷拼装</strong>
+          <div class="chips">
+            <button class="hint" type="button" data-example="请把本轮输出改成更保守、以风险优先的运维建议。">风险优先输出</button>
+            <button class="hint" type="button" data-example="请强调排查顺序、现场动作和停止条件。">强化排查步骤</button>
+            <button class="hint" type="button" data-example="请输出成工程师交接单格式。">交接单格式</button>
+            <button class="hint" type="button" data-example="请比较通用模型和领域微调模型的回答差异。">比较模型差异</button>
+          </div>
+        </div>
+        <div class="action-row">
+          <button class="btn" id="resetPromptBtn" type="button"><i class="fas fa-rotate-left"></i> 恢复默认</button>
+          <button class="btn" id="saveLocalBtn" type="button"><i class="fas fa-floppy-disk"></i> 保存本地配置</button>
+        </div>
+        <div class="preview-box"><strong>当前发送预览</strong><pre id="payloadPreview">正在生成开发版请求预览...</pre></div>
+      </aside>
+
+      <main class="dev-chat">
+        <div class="chathead">
+          <div class="dev-head">
+            <span class="dev-kicker">统一聊天调试</span>
+            <h2 id="chatTitle">风电运维智导助手 · 开发版</h2>
+            <p class="box">优先走 Gateway 长连接，失败后自动回退到 HTTP 统一聊天接口。你可以直接观察配置变化如何影响本轮回复和调试链路。</p>
+          </div>
+          <div class="pill" id="gatewayStatus"><i class="fas fa-circle-nodes"></i><span id="gatewayStatusText">Gateway 状态检测中</span></div>
+        </div>
+        <div class="statusbar">
+          <article class="statuscard"><span>当前模式</span><strong id="statusModeValue">智能协同</strong><small id="statusModeMeta">因果推断与检索会共同参与当前请求。</small></article>
+          <article class="statuscard"><span>工具策略</span><strong id="statusToolValue">内置工具</strong><small id="statusToolMeta">尚未选择工具集预设，插件工具默认开启。</small></article>
+          <article class="statuscard"><span>回传方式</span><strong id="statusDeliveryValue">Gateway 优先</strong><small id="statusDeliveryMeta">长连接可用时，优先通过 Gateway 回传事件。</small></article>
+        </div>
+        <div class="messages" id="messages"><div class="message assistant"><div class="avatar"><i class="fas fa-robot"></i></div><div class="bubble"><div>这里是开发版风电运维助手。你可以先调整左侧提示词、上下文或工具策略，再发起诊断，观察右侧链路面板如何变化。</div><div class="meta-line"><span>开发调试模式</span><span>可编排</span></div></div></div></div>
+        <div class="composer">
+          <textarea id="messageInput" placeholder="例如：WTG-07 在 3.2MW 负荷下频繁出现偏航超差告警，请结合当前开发配置输出结构化诊断结论。"></textarea>
+          <div class="composer-actions">
+            <div>
+              <div class="box">Enter 发送，Shift + Enter 换行，Ctrl/Cmd + Enter 也可直接提交。</div>
+              <div class="chips"><span class="chip">统一链路</span><span class="chip gold">开发配置覆盖</span><span class="chip green">Gateway 优先</span></div>
+            </div>
+            <div class="top-actions">
+              <button class="btn" id="clearBtn" type="button"><i class="fas fa-broom"></i> 清空会话</button>
+              <button class="btn primary" id="sendBtn" type="button"><i class="fas fa-paper-plane"></i> 发送开发诊断</button>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <aside class="side-stack">
+        <section class="dev-side"><h3>路由信息</h3><div id="routePanel" class="box">发送问题后，这里会显示当前轮次的模式、模型和路由原因。</div></section>
+        <section class="dev-side"><h3>因果分析</h3><div id="causalPanel" class="box">启用因果推断后，这里会显示根因候选、链路和推荐动作。</div></section>
+        <section class="dev-side"><h3>检索结果</h3><div id="retrievalPanel" class="box">这里会显示命中的知识片段、记忆结果和会话摘要。</div></section>
+        <section class="dev-side"><h3>模型策略</h3><div id="modelPanel" class="box">这里会显示当前模型来源、微调偏好和 RLHF 状态。</div></section>
+      </aside>
+    </section>
+  </div>
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+  <script src="/static/js/maintenance-assistant-gateway.js"></script>
+  <script>
+    const SETTINGS_KEY = 'wind_maintenance_dev_settings_v2';
+    const TOOL_KEY = 'wind_maintenance_dev_tool_selection';
+    const DEFAULTS = {
+      assistantName: '风电运维智导助手 · 开发版',
+      systemPrompt: '你是开发版中的风电运维智导助手。回答时优先输出：结论摘要、根因排序、排查动作、风险提醒、是否需要升级专家支持。保持结构化、专业、可执行。',
+      context: '当前为开发调试场景。如果用户给出故障码、机组号、工况和已执行动作，请在回答中明确引用；若信息不足，请列出待补字段。',
+      answerStyle: '默认输出结构：结论摘要 + 根因排序 + 排查步骤 + 风险提醒 + 下一步建议。'
+    };
+
+    let conversationId = null;
+    let isSending = false;
+    let lastDeliveryState = null;
+
+    const messagesEl = document.getElementById('messages');
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const routePanel = document.getElementById('routePanel');
+    const causalPanel = document.getElementById('causalPanel');
+    const retrievalPanel = document.getElementById('retrievalPanel');
+    const modelPanel = document.getElementById('modelPanel');
+    const payloadPreview = document.getElementById('payloadPreview');
+    const chatTitle = document.getElementById('chatTitle');
+    const gatewayStatusText = document.getElementById('gatewayStatusText');
+    const gatewayStatus = document.getElementById('gatewayStatus');
+    const assistantNameInput = document.getElementById('assistantName');
+    const developerSystemPrompt = document.getElementById('developerSystemPrompt');
+    const developerContext = document.getElementById('developerContext');
+    const developerAnswerStyle = document.getElementById('developerAnswerStyle');
+    const resetPromptBtn = document.getElementById('resetPromptBtn');
+    const saveLocalBtn = document.getElementById('saveLocalBtn');
+    const toolsetSelection = document.getElementById('toolsetSelection');
+    const allowedToolsInput = document.getElementById('allowedToolsInput');
+    const blockedToolsInput = document.getElementById('blockedToolsInput');
+    const includePluginTools = document.getElementById('includePluginTools');
+    const statusModeValue = document.getElementById('statusModeValue');
+    const statusModeMeta = document.getElementById('statusModeMeta');
+    const statusToolValue = document.getElementById('statusToolValue');
+    const statusToolMeta = document.getElementById('statusToolMeta');
+    const statusDeliveryValue = document.getElementById('statusDeliveryValue');
+    const statusDeliveryMeta = document.getElementById('statusDeliveryMeta');
+
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+    }
+
+    function formatText(value) {
+      return escapeHtml(value).replace(/\n/g, '<br>');
+    }
+
+    function parseToolList(value) {
+      return String(value || '').split(/[\n,]/).map((item) => item.trim()).filter(Boolean);
+    }
+
+    function getSelectedMultiValues(select) {
+      return Array.from(select?.selectedOptions || []).map((option) => option.value).filter(Boolean);
+    }
+
+    function setSelectedMultiValues(select, values) {
+      const selected = new Set(Array.isArray(values) ? values : []);
+      Array.from(select?.options || []).forEach((option) => {
+        option.selected = selected.has(option.value);
+      });
+    }
+
+    function getToolSelectionConfig() {
+      return {
+        toolsets: getSelectedMultiValues(toolsetSelection),
+        allowed_tools: parseToolList(allowedToolsInput.value),
+        blocked_tools: parseToolList(blockedToolsInput.value),
+        include_plugin_tools: includePluginTools.checked !== false
+      };
+    }
+
+    function applyToolSelectionConfig(config = {}) {
+      setSelectedMultiValues(toolsetSelection, config.toolsets || []);
+      allowedToolsInput.value = Array.isArray(config.allowed_tools) ? config.allowed_tools.join('\n') : '';
+      blockedToolsInput.value = Array.isArray(config.blocked_tools) ? config.blocked_tools.join('\n') : '';
+      includePluginTools.checked = config.include_plugin_tools !== false;
+    }
+
+    function persistToolSelection() {
+      try {
+        window.localStorage.setItem(TOOL_KEY, JSON.stringify(getToolSelectionConfig()));
+      } catch (_error) {}
+    }
+
+    function loadStoredToolSelection() {
+      try {
+        const raw = window.localStorage.getItem(TOOL_KEY);
+        if (!raw) return;
+        applyToolSelectionConfig(JSON.parse(raw));
+      } catch (_error) {}
+    }
+
+    function resolveMode() {
+      const causal = document.getElementById('enableCausal').checked;
+      const retrieval = document.getElementById('enableRetrieval').checked;
+      return causal ? 'agent' : (retrieval ? 'rag' : 'chat');
+    }
+
+    function getAssetContext() {
+      return {
+        farm_name: document.getElementById('farmName').value.trim(),
+        turbine_id: document.getElementById('turbineId').value.trim(),
+        fault_code: document.getElementById('faultCode').value.trim(),
+        operating_mode: document.getElementById('operatingMode').value.trim(),
+        symptom: document.getElementById('symptomInput').value.trim()
+      };
+    }
+
+    function buildPayload(message) {
+      const toolConfig = getToolSelectionConfig();
+      return {
+        message,
+        conversation_id: conversationId,
+        mode: resolveMode(),
+        use_agent: resolveMode() === 'agent',
+        prefer_finetuned: document.getElementById('preferFinetuned').checked,
+        metadata: {
+          assistant_profile: 'wind_maintenance',
+          enable_causal: document.getElementById('enableCausal').checked,
+          enable_retrieval: document.getElementById('enableRetrieval').checked,
+          enable_rlhf: document.getElementById('enableRlhf').checked,
+          prefer_finetuned: document.getElementById('preferFinetuned').checked,
+          asset_context: getAssetContext(),
+          developer_label: assistantNameInput.value.trim(),
+          developer_system_prompt: developerSystemPrompt.value.trim(),
+          developer_context: developerContext.value.trim(),
+          developer_answer_style: developerAnswerStyle.value.trim(),
+          developer_mode: true,
+          toolsets: toolConfig.toolsets,
+          allowed_tools: toolConfig.allowed_tools,
+          blocked_tools: toolConfig.blocked_tools,
+          include_plugin_tools: toolConfig.include_plugin_tools
+        }
+      };
+    }
+
+    function getIntroMarkup(message, label, value) {
+      return `<div class="message assistant"><div class="avatar"><i class="fas fa-robot"></i></div><div class="bubble"><div>${message}</div><div class="meta-line"><span>${label}</span><span>${value}</span></div></div></div>`;
+    }
+
+    function renderEmptyPanels() {
+      routePanel.innerHTML = '<div class="box">发送问题后，这里会显示当前轮次的模式、模型和路由原因。</div>';
+      causalPanel.innerHTML = '<div class="box">启用因果推断后，这里会显示根因候选、链路和推荐动作。</div>';
+      retrievalPanel.innerHTML = '<div class="box">这里会显示命中的知识片段、记忆结果和会话摘要。</div>';
+      modelPanel.innerHTML = '<div class="box">这里会显示当前模型来源、微调偏好和 RLHF 状态。</div>';
+    }
+
+    function refreshStatusCards() {
+      const mode = resolveMode();
+      const toolConfig = getToolSelectionConfig();
+      const gateway = window.MaintenanceAssistantGatewayBridge;
+      const toolsets = toolConfig.toolsets || [];
+
+      statusModeValue.textContent = mode === 'agent' ? '智能协同' : (mode === 'rag' ? '检索增强' : '纯对话');
+      statusModeMeta.textContent = mode === 'agent' ? '因果推断与检索会共同参与当前请求。' : (mode === 'rag' ? '当前以检索增强回答为主。' : '当前关闭因果与检索，走纯对话链路。');
+      statusToolValue.textContent = toolsets.length ? `${toolsets.length} 个工具集` : (toolConfig.allowed_tools.length ? '自定义工具白名单' : '内置工具');
+      statusToolMeta.textContent = `允许 ${toolConfig.allowed_tools.length} 项 ｜ 排除 ${toolConfig.blocked_tools.length} 项 ｜ 插件${toolConfig.include_plugin_tools ? '开启' : '关闭'}`;
+
+      if (lastDeliveryState) {
+        statusDeliveryValue.textContent = lastDeliveryState.title;
+        statusDeliveryMeta.textContent = lastDeliveryState.detail;
+        return;
+      }
+
+      const gatewayPreferred = Boolean(gateway?.isGatewayPreferred?.());
+      statusDeliveryValue.textContent = gatewayPreferred ? 'Gateway 优先' : 'HTTP 回退';
+      statusDeliveryMeta.textContent = gatewayPreferred ? '长连接可用时，优先通过 Gateway 回传事件。' : '当前以统一聊天接口为主，等待 Gateway 可用。';
+    }
+
+    function refreshPreview() {
+      chatTitle.textContent = assistantNameInput.value.trim() || DEFAULTS.assistantName;
+      payloadPreview.textContent = JSON.stringify(buildPayload(messageInput.value.trim() || '（这里显示当前开发版请求预览）'), null, 2);
+      refreshStatusCards();
+    }
+
+    function appendMessage(role, content, meta = {}) {
+      const wrap = document.createElement('div');
+      wrap.className = `message ${role}`;
+      wrap.innerHTML = `<div class="avatar"><i class="fas ${role === 'user' ? 'fa-user' : 'fa-robot'}"></i></div><div class="bubble"><div>${formatText(content)}</div><div class="meta-line"><span>${role === 'user' ? '开发者输入' : '助手回复'}</span><span>${meta.time || new Date().toLocaleTimeString('zh-CN')}</span></div></div>`;
+      messagesEl.appendChild(wrap);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+      return wrap;
+    }
+
+    function appendTyping() {
+      const hint = window.MaintenanceAssistantGatewayBridge?.isGatewayPreferred?.() ? '正在通过 Gateway 长连接执行本轮开发诊断...' : '正在通过 /api/unified/chat 执行本轮开发诊断...';
+      const row = document.createElement('div');
+      row.className = 'message assistant';
+      row.id = 'typingRow';
+      row.innerHTML = `<div class="avatar"><i class="fas fa-robot"></i></div><div class="bubble">${hint}<div class="meta-line"><span>开发调试中</span><span>${new Date().toLocaleTimeString('zh-CN')}</span></div></div>`;
+      messagesEl.appendChild(row);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function removeTyping() {
+      document.getElementById('typingRow')?.remove();
+    }
+
+    function setGatewayStatus(message, isPreferred) {
+      gatewayStatusText.textContent = message;
+      gatewayStatus.classList.toggle('warn', !isPreferred);
+      if (!lastDeliveryState) {
+        refreshStatusCards();
+      }
+    }
+
+    function syncGatewayStatus() {
+      const gateway = window.MaintenanceAssistantGatewayBridge;
+      if (!gateway) {
+        setGatewayStatus('Gateway 脚本未加载，当前只走 HTTP', false);
+        return;
+      }
+      setGatewayStatus(gateway.statusLabel(), gateway.isGatewayPreferred());
+    }
+
+    function renderRoutePanel(data) {
+      const route = data.route || {};
+      const delivery = data.delivery || {};
+      routePanel.innerHTML = `<div class="kv"><div class="item"><strong>模式</strong>${escapeHtml(route.mode || '-')}</div><div class="item"><strong>模型</strong>${escapeHtml(route.model || '-')}</div><div class="item"><strong>模型来源</strong>${escapeHtml(route.model_source || '-')}</div><div class="item"><strong>路由原因</strong>${escapeHtml(route.reason || '-')}</div><div class="item"><strong>传输回执</strong>delivered=${escapeHtml(delivery.delivered_count ?? '-')} / offline=${escapeHtml(delivery.offline_queued ?? '-')}</div></div>`;
+    }
+
+    function renderCausalPanel(causal) {
+      if (!causal || !causal.enabled) {
+        causalPanel.innerHTML = '<div class="box">本轮未启用因果分析。</div>';
+        return;
+      }
+      const causes = (causal.root_causes || []).map((item, index) => `<div class="item"><strong>${index + 1}. ${escapeHtml(item.cause || '未命名根因')}</strong><div>置信度：${escapeHtml(item.confidence ?? '-')} ｜ 类别：${escapeHtml(item.category || '-')} ｜ 严重度：${escapeHtml(item.severity || '-')}</div></div>`).join('');
+      causalPanel.innerHTML = `<div class="list">${causes || '<div class="box">暂无根因候选。</div>'}</div>`;
+    }
+
+    function renderRetrievalPanel(retrieval) {
+      const retrievalData = retrieval || {};
+      const knowledge = (retrievalData.knowledge_chunks || []).slice(0, 3).map((item, index) => {
+        const content = item.content || '';
+        return `<div class="item"><strong>${index + 1}. ${escapeHtml(item.kb_name || item.kb_id || '知识库')}</strong><div>片段：${escapeHtml(item.chunk_id || '-')} ｜ 相关度：${escapeHtml(item.score ?? '-')}</div><div>${escapeHtml(content.slice(0, 140))}${content.length > 140 ? '...' : ''}</div></div>`;
+      }).join('');
+      retrievalPanel.innerHTML = `<div class="list">${knowledge || '<div class="box">暂无知识命中。</div>'}</div>`;
+    }
+
+    function renderModelPanel(model) {
+      if (!model) {
+        modelPanel.innerHTML = '<div class="box">暂无模型策略信息。</div>';
+        return;
+      }
+      const rlhf = model.rlhf || {};
+      modelPanel.innerHTML = `<div class="kv"><div class="item"><strong>当前模型</strong>${escapeHtml(model.current_model || '-')}</div><div class="item"><strong>模型来源</strong>${escapeHtml(model.model_source || '-')}</div><div class="item"><strong>微调偏好</strong>${model.prefer_finetuned ? '已启用' : '未启用'} ｜ 可用端点 ${escapeHtml(model.available_finetuned_endpoints ?? 0)}</div><div class="item"><strong>RLHF 状态</strong>${rlhf.feedback_loop_enabled ? '已启用' : '未启用'} ｜ 本轮 ${rlhf.enabled_for_this_turn ? '开启' : '关闭'}</div></div>`;
+    }
+
+    async function requestAssistantReply(payload) {
+      const gateway = window.MaintenanceAssistantGatewayBridge;
+      if (gateway?.isGatewayPreferred?.()) {
+        try {
+          setGatewayStatus('Gateway 已接管本轮请求', true);
+          return await gateway.sendChatPayload(payload);
+        } catch (error) {
+          setGatewayStatus(`Gateway 失败，已回退 HTTP：${error.message || '未知错误'}`, false);
+        }
+      }
+
+      const response = await fetch('/api/unified/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || `请求失败：${response.status}`);
+      }
+      setGatewayStatus('当前通过 HTTP /api/unified/chat 返回', false);
+      return { ...data, __transport: 'http' };
+    }
+
+    async function sendMessage() {
+      const message = messageInput.value.trim();
+      if (!message || isSending) return;
+      isSending = true;
+      sendBtn.disabled = true;
+      appendMessage('user', message);
+      messageInput.value = '';
+      refreshPreview();
+      appendTyping();
+      try {
+        const data = await requestAssistantReply(buildPayload(message));
+        conversationId = data.conversation_id || conversationId;
+        lastDeliveryState = {
+          title: data.__transport === 'http' ? 'HTTP 已响应' : 'Gateway 已投递',
+          detail: `delivered ${data.delivery?.delivered_count ?? 0} ｜ offline ${data.delivery?.offline_queued ?? 0}`
+        };
+        removeTyping();
+        appendMessage('assistant', data.reply || '本轮未返回内容。', { time: new Date(data.timestamp || Date.now()).toLocaleTimeString('zh-CN') });
+        renderRoutePanel(data);
+        renderCausalPanel(data.causal_result);
+        renderRetrievalPanel(data.retrieval_results || data.context);
+        renderModelPanel(data.model_info);
+      } catch (error) {
+        lastDeliveryState = { title: '发送失败', detail: error.message || '未知错误' };
+        removeTyping();
+        appendMessage('assistant', `发送失败：${error.message || '未知错误'}`);
+      } finally {
+        isSending = false;
+        sendBtn.disabled = false;
+        messageInput.focus();
+        refreshPreview();
+      }
+    }
+
+    function clearChat() {
+      conversationId = null;
+      lastDeliveryState = null;
+      messagesEl.innerHTML = getIntroMarkup('开发会话已清空。你可以继续修改左侧配置，再重新发起诊断。', '新会话', new Date().toLocaleTimeString('zh-CN'));
+      renderEmptyPanels();
+      refreshPreview();
+    }
+
+    function restoreDefaults() {
+      assistantNameInput.value = DEFAULTS.assistantName;
+      developerSystemPrompt.value = DEFAULTS.systemPrompt;
+      developerContext.value = DEFAULTS.context;
+      developerAnswerStyle.value = DEFAULTS.answerStyle;
+      refreshPreview();
+    }
+
+    function saveLocalSettings() {
+      const payload = {
+        assistantName: assistantNameInput.value,
+        systemPrompt: developerSystemPrompt.value,
+        context: developerContext.value,
+        answerStyle: developerAnswerStyle.value
+      };
+      try {
+        window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(payload));
+        saveLocalBtn.innerHTML = '<i class="fas fa-check"></i> 已保存';
+        window.setTimeout(() => {
+          saveLocalBtn.innerHTML = '<i class="fas fa-floppy-disk"></i> 保存本地配置';
+        }, 1200);
+      } catch (_error) {}
+    }
+
+    function loadLocalSettings() {
+      try {
+        const raw = window.localStorage.getItem(SETTINGS_KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        assistantNameInput.value = data.assistantName || DEFAULTS.assistantName;
+        developerSystemPrompt.value = data.systemPrompt || DEFAULTS.systemPrompt;
+        developerContext.value = data.context || DEFAULTS.context;
+        developerAnswerStyle.value = data.answerStyle || DEFAULTS.answerStyle;
+      } catch (_error) {}
+    }
+
+    function applyExample(text) {
+      developerContext.value = `${developerContext.value.trim()}\n${text}`.trim();
+      refreshPreview();
+    }
+
+    window.addEventListener('maintenance-gateway-status', (event) => {
+      const detail = event.detail || {};
+      setGatewayStatus(detail.message || 'Gateway 状态更新', detail.connected || false);
+    });
+
+    document.querySelectorAll('[data-example]').forEach((button) => {
+      button.addEventListener('click', () => applyExample(button.dataset.example || ''));
+    });
+
+    [
+      assistantNameInput,
+      developerSystemPrompt,
+      developerContext,
+      developerAnswerStyle,
+      messageInput,
+      document.getElementById('farmName'),
+      document.getElementById('turbineId'),
+      document.getElementById('faultCode'),
+      document.getElementById('operatingMode'),
+      document.getElementById('symptomInput'),
+      document.getElementById('enableCausal'),
+      document.getElementById('enableRetrieval'),
+      document.getElementById('preferFinetuned'),
+      document.getElementById('enableRlhf'),
+      toolsetSelection,
+      allowedToolsInput,
+      blockedToolsInput,
+      includePluginTools
+    ].forEach((element) => {
+      element?.addEventListener('input', refreshPreview);
+      element?.addEventListener('change', refreshPreview);
+    });
+
+    [toolsetSelection, allowedToolsInput, blockedToolsInput, includePluginTools].forEach((element) => {
+      element?.addEventListener('input', persistToolSelection);
+      element?.addEventListener('change', persistToolSelection);
+    });
+
+    sendBtn.addEventListener('click', sendMessage);
+    clearBtn.addEventListener('click', clearChat);
+    resetPromptBtn.addEventListener('click', restoreDefaults);
+    saveLocalBtn.addEventListener('click', saveLocalSettings);
+    messageInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' && !event.shiftKey && !event.ctrlKey && !event.metaKey) {
+        event.preventDefault();
+        sendMessage();
+      }
+      if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+        event.preventDefault();
+        sendMessage();
+      }
+    });
+
+    renderEmptyPanels();
+    loadLocalSettings();
+    loadStoredToolSelection();
+    syncGatewayStatus();
+    refreshPreview();
+  </script>
+</body>
+</html>

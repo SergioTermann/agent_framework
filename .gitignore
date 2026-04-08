@@ -1,0 +1,85 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv/
+.venv_*/
+
+# Environment Variables
+.env
+.env.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Claude Code
+.claude/
+
+# Agent Threads (运行时数据)
+.agent_threads/
+
+# RAG Knowledge Base
+.rag_kb/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Runtime data
+data/*.db
+data/test_gateway_*/
+data/chroma/
+data/feedback/
+data/knowledge/
+data/model_endpoints.json
+data/pipelines.json
+data/schedules.db
+data/webhooks.db
+data/plugins.db
+data/rl_engine.db
+data/llm_rlhf.db
+
+# Generated assets / parsed documents
+static/images/
+风起时域商业计划书-2026-new.pdf-969b5b8f-9b2b-4b84-b81e-74e53fbacbf0/
+
+# 嵌套的示例项目（不需要版本控制）
+12-factor-agents-main/
+
+# 临时文件
+*.tmp
+*.bak
+*.err
+*.out
+.tmp*/

@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多 Agent 协作 - Agent Framework</title>
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet"> -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/base-theme.css">
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        :root {
+            --theme-accent: #1363df;
+            --theme-accent-deep: #0f4eb3;
+            --theme-accent-soft: rgba(19, 99, 223, 0.10);
+            --theme-accent-line: rgba(19, 99, 223, 0.22);
+            --theme-accent-shadow: rgba(19, 99, 223, 0.2);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--theme-accent-deep), var(--theme-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #334155;
+            font-size: 16px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .agents-panel {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .agents-panel h2 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #0f172a;
+        }
+
+        .agent-card {
+            background: #f8fafc;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: all 0.3s;
+        }
+
+        .agent-card:hover {
+            background: #f9fafc;
+            border-color: var(--theme-accent);
+        }
+
+        .agent-card.active {
+            border-color: var(--theme-accent);
+            background: var(--theme-accent-soft);
+        }
+
+        .agent-name {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 4px;
+            color: #0f172a;
+        }
+
+        .agent-role {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .agent-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            margin-top: 8px;
+        }
+
+        .agent-status.idle {
+            background: #f0fdf4;
+            color: #15803d;
+            border: 1px solid #16a34a;
+        }
+
+        .agent-status.working {
+            background: #fff7ed;
+            color: #c2410c;
+            border: 1px solid #ea580c;
+        }
+
+        .workspace {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-area {
+            margin-bottom: 20px;
+        }
+
+        .input-area textarea {
+            width: 100%;
+            min-height: 100px;
+            background: #ffffff;
+            border: 1px solid rgba(15, 23, 42, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            color: #0f172a;
+            font-size: 14px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .input-area textarea:focus {
+            outline: none;
+            border-color: var(--theme-accent);
+            box-shadow: 0 0 0 3px rgba(19, 99, 223, 0.15);
+        }
+
+        .input-area textarea::placeholder {
+            color: #64748b;
+        }
+
+        .execute-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--theme-accent-deep), var(--theme-accent));
+            border: none;
+            border-radius: 12px;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px var(--theme-accent-shadow);
+        }
+
+        .execute-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(19, 99, 223, 0.28);
+        }
+
+        .execute-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .progress-area {
+            flex: 1;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .progress-item {
+            background: #f8fafc;
+            border-left: 3px solid var(--theme-accent);
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            animation: slideIn 0.3s ease-out;
+            border: 1px solid rgba(15, 23, 42, 0.1);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .progress-item.task-assigned {
+            border-left-color: #2563eb;
+            background: #eff6ff;
+        }
+
+        .progress-item.task-executing {
+            border-left-color: #ea580c;
+            background: #fff7ed;
+        }
+
+        .progress-item.task-completed {
+            border-left-color: #16a34a;
+            background: #f0fdf4;
+        }
+
+        .progress-item.task-failed {
+            border-left-color: #dc2626;
+            background: #fef2f2;
+        }
+
+        .progress-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .progress-content {
+            font-size: 14px;
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        .final-result {
+            background: #f9fafc;
+            border: 2px solid var(--theme-accent);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 4px 12px rgba(19, 99, 223, 0.14);
+        }
+
+        .final-result h3 {
+            color: #0f172a;
+            margin-bottom: 12px;
+        }
+
+        .final-result-content {
+            line-height: 1.8;
+            white-space: pre-wrap;
+            color: #334155;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wide">
+        <nav class="topbar">
+            <div class="brand">
+                <a class="back-link" href="{{ url_for('developer_home') }}">← 返回主页</a>
+                <h1><i class="fas fa-users"></i> 多 Agent 协作</h1>
+            </div>
+            <div class="topbar-actions">
+            </div>
+        </nav>
+
+    <div class="container">
+        <div class="header">
+            <p>多个智能 Agent 协同工作，完成复杂任务</p>
+        </div>
+
+        <div class="main-content">
+            <div class="agents-panel">
+                <h2><i class="fas fa-robot"></i> Agent 团队</h2>
+                <div id="agentsList"></div>
+            </div>
+
+            <div class="workspace">
+                <div class="input-area">
+                    <textarea id="queryInput" placeholder="输入您的任务，多个 Agent 将协作完成...&#10;&#10;示例：&#10;- 帮我研究人工智能的发展历史，并写一篇文章&#10;- 分析电商用户数据，并提供优化建议&#10;- 设计一个待办事项应用，并实现核心功能"></textarea>
+                    <button class="execute-btn" id="executeBtn" onclick="executeTask()">
+                        <i class="fas fa-play"></i> 开始协作
+                    </button>
+                </div>
+
+                <div class="progress-area" id="progressArea"></div>
+            </div>
+        </div>
+    </div>
+
+    </div> <!-- page-wide -->
+
+    <script>
+        const socket = typeof window.io === 'function' ? io() : null;
+        let isExecuting = false;
+
+        function showSocketUnavailable(message = 'Socket.IO 加载失败，实时协作能力暂不可用。') {
+            const progressArea = document.getElementById('progressArea');
+            if (!progressArea) return;
+            progressArea.innerHTML = `
+                <div class="progress-item task-failed">
+                    <div class="progress-header">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>实时通道不可用</span>
+                    </div>
+                    <div class="progress-content">${message}</div>
+                </div>
+            `;
+        }
+
+        // 加载 Agent 列表
+        async function loadAgents() {
+            try {
+                const response = await fetch('/api/multi-agent/agents');
+                const data = await response.json();
+                displayAgents(data.agents);
+            } catch (error) {
+                console.error('加载 Agent 失败:', error);
+            }
+        }
+
+        function displayAgents(agents) {
+            const agentsList = document.getElementById('agentsList');
+            agentsList.innerHTML = agents.map(agent => `
+                <div class="agent-card" id="agent-${agent.agent_id}">
+                    <div class="agent-name">${agent.name}</div>
+                    <div class="agent-role">${getRoleIcon(agent.role)} ${getRoleName(agent.role)}</div>
+                    <span class="agent-status idle">空闲</span>
+                </div>
+            `).join('');
+        }
+
+        function getRoleIcon(role) {
+            const icons = {
+                'researcher': '🔍',
+                'coder': '💻',
+                'analyst': '📊',
+                'writer': '✍️'
+            };
+            return icons[role] || '🤖';
+        }
+
+        function getRoleName(role) {
+            const names = {
+                'researcher': '研究员',
+                'coder': '程序员',
+                'analyst': '分析师',
+                'writer': '写作者'
+            };
+            return names[role] || role;
+        }
+
+        function setAgentStatus(agentId, status) {
+            const agentCard = document.getElementById(`agent-${agentId}`);
+            if (agentCard) {
+                const statusEl = agentCard.querySelector('.agent-status');
+                statusEl.className = `agent-status ${status}`;
+                statusEl.textContent = status === 'working' ? '工作中' : '空闲';
+                agentCard.className = status === 'working' ? 'agent-card active' : 'agent-card';
+            }
+        }
+
+        function executeTask() {
+            const query = document.getElementById('queryInput').value.trim();
+            if (!query || isExecuting) return;
+            if (!socket) {
+                showSocketUnavailable();
+                return;
+            }
+
+            isExecuting = true;
+            document.getElementById('executeBtn').disabled = true;
+            document.getElementById('progressArea').innerHTML = '';
+
+            socket.emit('multi_agent_execute', { query });
+        }
+
+        if (socket) socket.on('multi_agent_progress', function(event) {
+            console.log('进度更新:', event);
+            const progressArea = document.getElementById('progressArea');
+
+            if (event.type === 'task_assigned') {
+                const item = document.createElement('div');
+                item.className = 'progress-item task-assigned';
+                item.innerHTML = `
+                    <div class="progress-header">
+                        <i class="fas fa-tasks"></i>
+                        <span>任务分配</span>
+                    </div>
+                    <div class="progress-content">
+                        任务: ${event.task.description}<br>
+                        分配给: ${event.agent_id}
+                    </div>
+                `;
+                progressArea.appendChild(item);
+                setAgentStatus(event.agent_id, 'working');
+            }
+            else if (event.type === 'task_executing') {
+                const item = document.createElement('div');
+                item.className = 'progress-item task-executing';
+                item.innerHTML = `
+                    <div class="progress-header">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span>执行中</span>
+                    </div>
+                    <div class="progress-content">
+                        ${event.agent.name} 正在执行任务...
+                    </div>
+                `;
+                progressArea.appendChild(item);
+            }
+            else if (event.type === 'task_completed') {
+                const item = document.createElement('div');
+                item.className = 'progress-item task-completed';
+                item.innerHTML = `
+                    <div class="progress-header">
+                        <i class="fas fa-check-circle"></i>
+                        <span>任务完成</span>
+                    </div>
+                    <div class="progress-content">
+                        ${event.result}
+                    </div>
+                `;
+                progressArea.appendChild(item);
+                setAgentStatus(event.task.assigned_to, 'idle');
+            }
+            else if (event.type === 'task_failed') {
+                const item = document.createElement('div');
+                item.className = 'progress-item task-failed';
+                item.innerHTML = `
+                    <div class="progress-header">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>任务失败</span>
+                    </div>
+                    <div class="progress-content">
+                        错误: ${event.error}
+                    </div>
+                `;
+                progressArea.appendChild(item);
+                setAgentStatus(event.task.assigned_to, 'idle');
+            }
+            else if (event.type === 'all_completed') {
+                const item = document.createElement('div');
+                item.className = 'final-result';
+                item.innerHTML = `
+                    <h3><i class="fas fa-trophy"></i> 最终结果</h3>
+                    <div class="final-result-content">${event.final_result}</div>
+                `;
+                progressArea.appendChild(item);
+            }
+
+            progressArea.scrollTop = progressArea.scrollHeight;
+        });
+
+        if (socket) socket.on('multi_agent_complete', function(result) {
+            console.log('任务完成:', result);
+            isExecuting = false;
+            document.getElementById('executeBtn').disabled = false;
+        });
+
+        if (socket) socket.on('multi_agent_error', function(data) {
+            console.error('任务失败:', data);
+            alert('任务执行失败: ' + data.error);
+            isExecuting = false;
+            document.getElementById('executeBtn').disabled = false;
+        });
+
+        // 页面加载时加载 Agent 列表
+        loadAgents();
+        if (!socket) {
+            const executeBtn = document.getElementById('executeBtn');
+            if (executeBtn) executeBtn.disabled = true;
+            showSocketUnavailable();
+        }
+    </script>
+</body>
+</html>

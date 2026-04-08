@@ -1,0 +1,92 @@
+{
+  "变桨系统": {
+    "name": "变桨系统",
+    "number": "变桨系统-001",
+    "status": "normal",
+    "temperature": 45.5,
+    "vibration": 2.3,
+    "runningHours": 15680,
+    "lastMaintenance": "2024-11-15",
+    "remarks": "运行正常"
+  },
+  "转子": {
+    "name": "转子",
+    "number": "转子-001",
+    "status": "normal",
+    "temperature": 52.3,
+    "vibration": 3.1,
+    "runningHours": 15680,
+    "lastMaintenance": "2024-11-10",
+    "remarks": ""
+  },
+  "主轴": {
+    "name": "主轴",
+    "number": "主轴-001",
+    "status": "normal",
+    "temperature": 48.7,
+    "vibration": 2.8,
+    "runningHours": 15680,
+    "lastMaintenance": "2024-11-12",
+    "remarks": ""
+  },
+  "齿轮箱": {
+    "name": "齿轮箱",
+    "number": "齿轮箱-001",
+    "status": "normal",
+    "temperature": 65.2,
+    "vibration": 4.5,
+    "runningHours": 15680,
+    "lastMaintenance": "2024-10-20",
+    "remarks": "温度略高，需关注"
+  },
+  "油冷装置": {
+    "name": "油冷装置",
+    "number": "油冷装置-001",
+    "status": "normal",
+    "temperature": 38.5,
+    "vibration": 1.2,
+    "runningHours": 15680,
+    "lastMaintenance": "2024-11-18",
+    "remarks": ""
+  },
+  "偏航电机": {
+    "name": "偏航电机",
+    "number": "偏航电机-001",
+    "status": "normal",
+    "temperature": 55.8,
+    "vibration": 3.5,
+    "runningHours": 15680,
+    "lastMaintenance": "2024-11-05",
+    "remarks": ""
+  },
+  "风冷装置": {
+    "name": "风冷装置",
+    "number": "风冷装置-001",
+    "status": "normal",
+    "temperature": 42.3,
+    "vibration": 1.8,
+    "runningHours": 15680,
+    "lastMaintenance": "2024-11-20",
+    "remarks": ""
+  },
+  "发电机": {
+    "name": "发电机",
+    "number": "发电机-001",
+    "status": "normal",
+    "temperature": 68.5,
+    "vibration": 5.2,
+    "runningHours": 15680,
+    "lastMaintenance": "2024-10-25",
+    "remarks": "核心部件，定期检查"
+  },
+  "控制柜": {
+    "name": "控制柜",
+    "number": "控制柜-001",
+    "status": "normal",
+    "temperature": 35.2,
+    "vibration": 0.5,
+    "runningHours": 15680,
+    "lastMaintenance": "2024-11-22",
+    "remarks": ""
+  }
+}

@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工作流编排 - Agent Framework</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --theme-accent: #1363df;
+            --theme-accent-deep: #0f4eb3;
+            --theme-accent-soft: rgba(19, 99, 223, 0.12);
+            --theme-accent-line: rgba(19, 99, 223, 0.18);
+            --theme-accent-grid: rgba(19, 99, 223, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #f5f8fc 0%, #eff4fb 100%);
+            margin: 0;
+        }
+
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* 导航侧边栏 */
+        .nav-sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #0f4eb3 0%, #1363df 52%, #2b7fff 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+        }
+
+        .nav-sidebar-header {
+            padding: 28px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .nav-sidebar-logo {
+            font-size: 26px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-sidebar-nav {
+            flex: 1;
+            padding: 20px 0;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            padding: 12px 24px;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border-left: 3px solid white;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: #ffffff;
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(101, 120, 144, 0.14);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            color: #253038;
+            font-weight: 600;
+        }
+
+        .workflow-container {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* 工具侧边栏 */
+        .sidebar {
+            width: 280px;
+            background: rgba(255, 255, 255, 0.95);
+            border-right: 1px solid var(--theme-accent-line);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--theme-accent-line);
+        }
+
+        .sidebar-title {
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--theme-accent-deep), var(--theme-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .sidebar-copy {
+            margin-top: 10px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #64748b;
+        }
+
+        .sidebar-section {
+            padding: 20px;
+            border-bottom: 1px solid var(--theme-accent-line);
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #4a4a4a;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .node-palette {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .node-item {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            cursor: grab;
+            transition: all 0.3s;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .node-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--theme-accent);
+        }
+
+        .node-item:active {
+            cursor: grabbing;
+        }
+
+        .node-icon {
+            font-size: 24px;
+            margin-bottom: 6px;
+        }
+
+        /* 工具栏 */
+        .toolbar {
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-bottom: 1px solid var(--theme-accent-line);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .toolbar-left {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .toolbar-right {
+            display: flex;
+            gap: 10px;
+        }
+
+        .workflow-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c2c2c;
+        }
+
+        .workflow-note {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #2c2c2c;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--theme-accent);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--theme-accent-deep), var(--theme-accent));
+            border: none;
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(19, 99, 223, 0.22);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #34d399, #10b981);
+            border: none;
+        }
+
+        /* 画布区域 */
+        .canvas-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .canvas {
+            flex: 1;
+            position: relative;
+            background:
+                linear-gradient(90deg, var(--theme-accent-grid) 1px, transparent 1px),
+                linear-gradient(var(--theme-accent-grid) 1px, transparent 1px);
+            background-size: 20px 20px;
+            overflow: hidden;
+        }
+
+        .canvas-content {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        /* 节点样式 */
+        .workflow-node {
+            position: absolute;
+            min-width: 150px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid var(--theme-accent-line);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: move;
+            transition: all 0.3s;
+        }
+
+        .workflow-node:hover {
+            border-color: rgba(19, 99, 223, 0.45);
+            box-shadow: 0 8px 24px rgba(19, 99, 223, 0.14);
+        }
+
+        .workflow-node.selected {
+            border-color: var(--theme-accent);
+            box-shadow: 0 0 0 3px var(--theme-accent-soft);
+        }
+
+        .node-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .node-icon-large {
+            font-size: 20px;
+        }
+
+        .node-label {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .node-type {
+            font-size: 11px;
+            color: #666666;
+        }
+
+        .node-ports {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+        }
+
+        .node-port {
+            width: 12px;
+            height: 12px;
+            background: var(--theme-accent);
+            border: 2px solid rgba(26, 26, 46, 0.95);
+            border-radius: 50%;
+            cursor: crosshair;
+        }
+
+        .node-port:hover {
+            box-shadow: 0 0 8px rgba(19, 99, 223, 0.4);
+        }
+
+        /* 配置面板 */
+        .config-panel {
+            width: 320px;
+            background: rgba(255, 255, 255, 0.95);
+            border-left: 1px solid var(--theme-accent-line);
+            display: none;
+            flex-direction: column;
+        }
+
+        .config-panel.active {
+            display: flex;
+        }
+
+        .config-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--theme-accent-line);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .config-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .config-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #4a4a4a;
+            margin-bottom: 6px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: #2c2c2c;
+            font-size: 13px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--theme-accent);
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+            font-family: monospace;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 24px;
+            left: 24px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #2c2c2c;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--theme-accent-line);
+        }
+
+        /* 连接线 */
+        .connection-line {
+            position: absolute;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .connection-line line {
+            stroke: var(--theme-accent);
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .connection-line.temp {
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 导航侧边栏 -->
+        <div class="nav-sidebar">
+            <div class="nav-sidebar-header">
+                <div class="nav-sidebar-logo">
+                    🤖 Agent Framework
+                </div>
+            </div>
+            <nav class="nav-sidebar-nav">
+                <a href="/" class="nav-item">
+                    <span>🏠</span>
+                    <span>首页</span>
+                </a>
+                <a href="/chat" class="nav-item">
+                    <span>💬</span>
+                    <span>对话助手</span>
+                </a>
+                <a href="/visual_workflow" class="nav-item active">
+                    <span>🔄</span>
+                    <span>工作流编排</span>
+                </a>
+                <a href="/knowledge" class="nav-item">
+                    <span>📚</span>
+                    <span>知识库</span>
+                </a>
+                <a href="/api_keys" class="nav-item">
+                    <span>🔑</span>
+                    <span>API 密钥</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <div class="header">
+                <h1>🔄 工作流编排</h1>
+            </div>
+
+            <div class="workflow-container">
+        <!-- 工具侧边栏 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">
+                    <i class="fas fa-project-diagram"></i> 工作流编排
+                </div>
+                <div class="sidebar-copy">把多步 Agent 调用从“零散操作”收束成“可复用流程”，先决定要拼哪些能力，再决定怎么串、怎么跑、怎么复用。</div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="section-title">能力节点</div>
+                <div class="node-palette" id="nodePalette"></div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="section-title">可复用模板</div>
+                <div id="templateList"></div>
+            </div>
+        </div>
+
+        <!-- 主工作区 -->
+        <div class="canvas-area">
+            <div class="toolbar">
+                <div class="toolbar-left">
+                    <div>
+                        <div class="workflow-name">把流程从“想法”变成“能执行的编排”</div>
+                        <div class="workflow-note">先命名这条流程，再把节点拖进画布，最后检查、保存并直接执行。</div>
+                    </div>
+                    <input type="text" class="form-input" id="workflowName"
+                           placeholder="给这条流程起个名字" style="width: 220px;">
+                </div>
+                <div class="toolbar-right">
+                    <button class="btn" onclick="clearCanvas()">
+                        <i class="fas fa-trash"></i> 清空画布
+                    </button>
+                    <button class="btn" onclick="validateWorkflow()">
+                        <i class="fas fa-check-circle"></i> 检查流程
+                    </button>
+                    <button class="btn btn-primary" onclick="saveWorkflow()">
+                        <i class="fas fa-save"></i> 保存编排
+                    </button>
+                    <button class="btn btn-success" onclick="executeWorkflow()">
+                        <i class="fas fa-play"></i> 立即执行
+                    </button>
+                </div>
+            </div>
+
+            <div class="canvas" id="canvas">
+                <div class="canvas-content" id="canvasContent"></div>
+                <svg id="connectionsSvg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></svg>
+            </div>
+        </div>
+
+        <!-- 右侧配置面板 -->
+        <div class="config-panel" id="configPanel">
+            <div class="config-header">
+                <div class="config-title">节点配置</div>
+                <button class="btn" onclick="closeConfigPanel()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="config-content" id="configContent"></div>
+        </div>
+    </div>
+        </div>
+    </div>
+
+    <script src="/static/js/visual-workflow.js"></script>
+</body>
+</html>

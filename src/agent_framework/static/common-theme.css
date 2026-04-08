@@ -1,0 +1,153 @@
+/* 通用白色主题 + 蓝色风格 */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Rajdhani', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #f5f8fc 0%, #eff4fb 50%, #f5f8fc 100%);
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* 蓝色波纹动画 */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 200%;
+    height: 100%;
+    background-image:
+        radial-gradient(ellipse 800px 100px at 0% 20%, rgba(19, 99, 223, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse 600px 80px at 100% 40%, rgba(96, 165, 250, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse 700px 90px at 50% 60%, rgba(19, 99, 223, 0.05) 0%, transparent 50%),
+        radial-gradient(ellipse 900px 120px at 30% 80%, rgba(96, 165, 250, 0.07) 0%, transparent 50%);
+    animation: windFlow 25s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes windFlow {
+    0% {
+        transform: translateX(0) translateY(0);
+        opacity: 0.4;
+    }
+    50% {
+        transform: translateX(-30%) translateY(-5%);
+        opacity: 0.7;
+    }
+    100% {
+        transform: translateX(0) translateY(0);
+        opacity: 0.4;
+    }
+}
+
+/* 水墨画线条 */
+.ink-lines {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.15;
+}
+
+.ink-line {
+    stroke: #1363df;
+    stroke-width: 1.5;
+    fill: none;
+    stroke-linecap: round;
+    opacity: 0.3;
+    animation: inkFade 8s ease-in-out infinite;
+}
+
+.ink-line.thin {
+    stroke-width: 0.8;
+    opacity: 0.2;
+}
+
+.ink-line.thick {
+    stroke-width: 2.5;
+    opacity: 0.4;
+}
+
+@keyframes inkFade {
+    0%, 100% {
+        opacity: 0.2;
+        stroke-dashoffset: 0;
+    }
+    50% {
+        opacity: 0.4;
+        stroke-dashoffset: 20;
+    }
+}
+
+/* 通用 header 样式 */
+.header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    color: #253038;
+    padding: 20px;
+    box-shadow: 0 2px 20px rgba(19, 99, 223, 0.1);
+    border-bottom: 2px solid rgba(19, 99, 223, 0.2);
+    position: relative;
+    z-index: 10;
+}
+
+/* 通用返回按钮 */
+.back-btn {
+    position: fixed !important;
+    top: 20px !important;
+    left: 20px !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: 1px solid rgba(19, 99, 223, 0.3) !important;
+    color: #253038 !important;
+    padding: 10px 20px !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    transition: all 0.3s ease !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    z-index: 1000 !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+.back-btn:hover {
+    background: rgba(255, 255, 255, 1) !important;
+    border-color: rgba(19, 99, 223, 0.6) !important;
+    box-shadow: 0 4px 16px rgba(19, 99, 223, 0.2) !important;
+    transform: translateX(-3px) !important;
+}
+
+.back-btn:active {
+    transform: translateX(-3px) scale(0.98) !important;
+}
+
+.back-btn-icon {
+    font-size: 16px !important;
+    font-weight: bold !important;
+}
+
+/* 通用卡片样式 */
+.card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 20px rgba(19, 99, 223, 0.1);
+    border: 1px solid rgba(101, 120, 144, 0.14);
+    position: relative;
+    z-index: 5;
+}

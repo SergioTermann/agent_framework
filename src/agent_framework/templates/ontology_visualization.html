@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>本体论因果推理可视化 - Palantir Ontology</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        .container { max-width: 1900px; margin: 0 auto; animation: fadeIn 0.6s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        .header {
+            background: rgba(255, 255, 255, 0.98);
+            padding: 35px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+        .header h1 {
+            font-size: 2.8em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+        .header p { color: #666; font-size: 1.15em; line-height: 1.6; }
+        .controls {
+            background: rgba(255, 255, 255, 0.98);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 25px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        .control-group { display: flex; align-items: center; gap: 12px; }
+        .control-group label { font-weight: 600; color: #333; font-size: 14px; }
+        select, input, button {
+            padding: 12px 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        select:hover, input:hover { border-color: #667eea; }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+        }
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: left 0.3s ease;
+        }
+        button:hover::before { left: 100%; }
+        button:hover { box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4); }
+        button:active { transform: translateY(0); }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+        .visualization-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(550px, 1fr));
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        .viz-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 18px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        .viz-card h3 {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .viz-card h3::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+        #graph-container {
+            width: 100%;
+            height: 600px;
+            border-radius: 12px;
+            background: #f8f9fa;
+            overflow: hidden;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .stat-card {
+            background: rgba(255, 255, 255, 0.98);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            backdrop-filter: blur(10px);
+            animation: slideUp 0.6s ease-out;
+        }
+        .stat-card .number {
+            font-size: 2.5em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+        .stat-card .label {
+            color: #666;
+            font-size: 0.95em;
+            font-weight: 500;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        .empty-state .icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        .empty-state h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            color: #666;
+        }
+        .empty-state p {
+            font-size: 1em;
+            color: #999;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+        .node circle {
+            cursor: pointer;
+            stroke-width: 2px;
+        }
+        .node text {
+            font-size: 12px;
+            pointer-events: none;
+            text-anchor: middle;
+        }
+        .link {
+            stroke-opacity: 0.6;
+        }
+        .link-label {
+            font-size: 10px;
+            fill: #666;
+            pointer-events: none;
+        }
+    </style>
+    <link rel="stylesheet" href="/static/css/submodule-theme.css?v=1.0">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>本体论因果推理可视化</h1>
+            <p>基于 Palantir Ontology 的因果推理系统 - 可视化对象、关系和因果链路</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <button onclick="loadGraph()">刷新图谱</button>
+                <button onclick="createDemoData()">简单示例</button>
+                <button onclick="createComplexDemoData()">复杂示例</button>
+                <button onclick="clearData()">清空数据</button>
+            </div>
+        </div>
+
+        <div class="stats-grid" id="stats-grid">
+            <div class="stat-card">
+                <div class="number" id="stat-objects">0</div>
+                <div class="label">对象数量</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="stat-links">0</div>
+                <div class="label">关系数量</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="stat-object-types">0</div>
+                <div class="label">对象类型</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="stat-link-types">0</div>
+                <div class="label">关系类型</div>
+            </div>
+        </div>
+
+        <div class="visualization-grid">
+            <div class="viz-card">
+                <h3>本体论图谱</h3>
+                <div id="graph-container">
+                    <div class="empty-state">
+                        <div class="icon">📊</div>
+                        <h3>暂无数据</h3>
+                        <p>Click "Simple Demo" or "Complex Demo" to get started.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let graphData = { nodes: [], links: [] };
+        let simulation = null;
+        const HAS_D3 = typeof window.d3 !== 'undefined';
+
+        function renderDependencyNotice(container, message) {
+            if (!container) return;
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="icon">⚠️</div>
+                    <h3>依赖不可用</h3>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        async function loadGraph() {
+            try {
+                const response = await fetch('/api/ontology/graph');
+                const data = await response.json();
+                
+                graphData = {
+                    nodes: data.nodes || [],
+                    links: data.links || []
+                };
+
+                updateStats(data.stats || {});
+                renderGraph();
+            } catch (error) {
+                console.error('加载图谱失败:', error);
+                showError('加载图谱失败');
+            }
+        }
+
+        async function createDemoData() {
+            try {
+                const response = await fetch('/api/ontology/demo', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    await loadGraph();
+                } else {
+                    showError('创建演示数据失败');
+                }
+            } catch (error) {
+                console.error('创建演示数据失败:', error);
+                showError('创建演示数据失败');
+            }
+        }
+
+        async function createComplexDemoData() {
+            try {
+                const response = await fetch('/api/ontology/demo/complex', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Complex demo created:', result);
+                    await loadGraph();
+                } else {
+                    showError('Failed to create complex demo data');
+                }
+            } catch (error) {
+                console.error('Failed to create complex demo data:', error);
+                showError('Failed to create complex demo data');
+            }
+        }
+
+        async function clearData() {
+            if (!confirm('确定要清空所有数据吗？')) return;
+            
+            try {
+                const response = await fetch('/api/ontology/objects', {
+                    method: 'GET'
+                });
+                const objects = await response.json();
+                
+                for (const obj of objects.objects) {
+                    await fetch(`/api/ontology/objects/${obj.id}`, {
+                        method: 'DELETE'
+                    });
+                }
+                
+                await loadGraph();
+            } catch (error) {
+                console.error('清空数据失败:', error);
+                showError('清空数据失败');
+            }
+        }
+
+        function updateStats(stats) {
+            document.getElementById('stat-objects').textContent = stats.total_objects || 0;
+            document.getElementById('stat-links').textContent = stats.total_links || 0;
+            document.getElementById('stat-object-types').textContent = stats.object_types || 0;
+            document.getElementById('stat-link-types').textContent = stats.link_types || 0;
+        }
+
+        function renderGraph() {
+            const container = document.getElementById('graph-container');
+
+            if (!HAS_D3) {
+                renderDependencyNotice(container, 'D3.js 加载失败，当前环境无法渲染关系图。');
+                return;
+            }
+            
+            if (graphData.nodes.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">📊</div>
+                        <h3>暂无数据</h3>
+                        <p>点击"简单示例"、"复杂示例"或"风力发电"按钮开始体验</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+            
+            const width = container.clientWidth;
+            const height = 600;
+
+            const svg = d3.select('#graph-container')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+
+            const g = svg.append('g');
+
+            const zoom = d3.zoom()
+                .scaleExtent([0.1, 4])
+                .on('zoom', (event) => {
+                    g.attr('transform', event.transform);
+                });
+
+            svg.call(zoom);
+
+            simulation = d3.forceSimulation(graphData.nodes)
+                .force('link', d3.forceLink(graphData.links).id(d => d.id).distance(150))
+                .force('charge', d3.forceManyBody().strength(-500))
+                .force('center', d3.forceCenter(width / 2, height / 2))
+                .force('collision', d3.forceCollide().radius(50));
+
+            const link = g.append('g')
+                .selectAll('line')
+                .data(graphData.links)
+                .enter()
+                .append('line')
+                .attr('class', 'link')
+                .attr('stroke', '#999')
+                .attr('stroke-width', d => Math.sqrt(d.confidence || 1) * 2);
+
+            const linkLabels = g.append('g')
+                .selectAll('text')
+                .data(graphData.links)
+                .enter()
+                .append('text')
+                .attr('class', 'link-label')
+                .text(d => d.label || '');
+
+            const node = g.append('g')
+                .selectAll('.node')
+                .data(graphData.nodes)
+                .enter()
+                .append('g')
+                .attr('class', 'node')
+                .call(d3.drag()
+                    .on('start', dragstarted)
+                    .on('drag', dragged)
+                    .on('end', dragended));
+
+            node.append('circle')
+                .attr('r', 25)
+                .attr('fill', d => d.color || '#3498db')
+                .attr('stroke', '#fff')
+                .on('mouseover', function(event, d) {
+                    d3.select(this)
+                        .transition()
+                        .duration(200)
+                        .attr('r', 30);
+                    
+                    showTooltip(event, d);
+                })
+                .on('mouseout', function() {
+                    d3.select(this)
+                        .transition()
+                        .duration(200)
+                        .attr('r', 25);
+                    
+                    hideTooltip();
+                });
+
+            node.append('text')
+                .attr('dy', 35)
+                .text(d => d.label || d.id)
+                .attr('fill', '#333')
+                .attr('font-size', '12px')
+                .attr('text-anchor', 'middle');
+
+            simulation.on('tick', () => {
+                link
+                    .attr('x1', d => d.source.x)
+                    .attr('y1', d => d.source.y)
+                    .attr('x2', d => d.target.x)
+                    .attr('y2', d => d.target.y);
+
+                linkLabels
+                    .attr('x', d => (d.source.x + d.target.x) / 2)
+                    .attr('y', d => (d.source.y + d.target.y) / 2);
+
+                node
+                    .attr('transform', d => `translate(${d.x},${d.y})`);
+            });
+
+            function dragstarted(event, d) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+            }
+
+            function dragged(event, d) {
+                d.fx = event.x;
+                d.fy = event.y;
+            }
+
+            function dragended(event, d) {
+                if (!event.active) simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+            }
+        }
+
+        function showTooltip(event, data) {
+            const tooltip = d3.select('body')
+                .append('div')
+                .attr('class', 'tooltip')
+                .style('position', 'absolute')
+                .style('padding', '10px')
+                .style('background', 'rgba(0, 0, 0, 0.8)')
+                .style('color', '#fff')
+                .style('border-radius', '5px')
+                .style('font-size', '12px')
+                .style('pointer-events', 'none')
+                .style('opacity', 0);
+
+            let content = `<strong>${data.label || data.id}</strong><br>`;
+            content += `类型: ${data.type}<br>`;
+            if (data.properties) {
+                for (const [key, value] of Object.entries(data.properties)) {
+                    content += `${key}: ${value}<br>`;
+                }
+            }
+
+            tooltip.html(content)
+                .style('left', (event.pageX + 10) + 'px')
+                .style('top', (event.pageY - 10) + 'px')
+                .transition()
+                .duration(200)
+                .style('opacity', 1);
+        }
+
+        function hideTooltip() {
+            d3.selectAll('.tooltip').remove();
+        }
+
+        function showError(message) {
+            alert(message);
+        }
+
+        window.addEventListener('resize', () => {
+            if (graphData.nodes.length > 0) {
+                renderGraph();
+            }
+        });
+
+        loadGraph();
+    </script>
+</body>
+</html>
