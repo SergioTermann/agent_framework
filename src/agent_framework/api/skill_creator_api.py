@@ -355,16 +355,39 @@ def execute_skill(skill_id: str):
             for key, value in input_data.items():
                 prompt = prompt.replace(f"{{{key}}}", str(value))
 
-            # 这里应该调用 LLM，暂时返回模拟结果
+            # 调用 LLM 执行技能
             import time
             start_time = time.time()
 
-            # TODO: 实际调用 LLM
-            output_data = {
-                "result": f"执行技能 '{skill['name']}' 的结果",
-                "prompt": prompt,
-                "input": input_data
-            }
+            try:
+                # 尝试使用 OpenAI API
+                from openai import OpenAI
+                client = OpenAI()
+
+                response = client.chat.completions.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "system", "content": "你是一个专业的AI助手，请根据用户的提示词完成任务。"},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.7
+                )
+
+                result_text = response.choices[0].message.content
+                output_data = {
+                    "result": result_text,
+                    "prompt": prompt,
+                    "input": input_data,
+                    "model": "gpt-3.5-turbo"
+                }
+            except Exception as e:
+                # 如果 LLM 调用失败，返回模拟结果
+                output_data = {
+                    "result": f"执行技能 '{skill['name']}' 的结果（模拟模式，LLM调用失败: {str(e)}）",
+                    "prompt": prompt,
+                    "input": input_data,
+                    "error": str(e)
+                }
 
             execution_time = time.time() - start_time
 
