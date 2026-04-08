@@ -845,3 +845,57 @@ textarea {
         margin: 0 16px 18px;
     }
 }
+
+/* Power Trading Module Enhancements */
+.module-metric-card[data-module="power-trading"] {
+    position: relative;
+    overflow: hidden;
+}
+
+.module-metric-card[data-module="power-trading"]::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--primary-soft));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.module-metric-card[data-module="power-trading"]:hover::before {
+    opacity: 1;
+}
+
+.module-board-section[data-module="power-trading"] tbody tr {
+    transition: all 0.2s ease;
+}
+
+.module-board-section[data-module="power-trading"] tbody tr:hover {
+    background: var(--accent);
+    transform: translateX(4px);
+}
+
+.module-board-section[data-module="power-trading"] td:nth-child(3) {
+    font-weight: 600;
+}
+
+.module-board-section[data-module="power-trading"] td:nth-child(3):contains("↗") {
+    color: var(--success);
+}
+
+.module-board-section[data-module="power-trading"] td:nth-child(3):contains("↘") {
+    color: #dc2626;
+}
+
+.module-action-card[data-module="power-trading"] {
+    border-left: 3px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.module-action-card[data-module="power-trading"]:hover {
+    border-left-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}

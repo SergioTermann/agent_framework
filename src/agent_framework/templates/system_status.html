@@ -1,20 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>System Status</title>
+    <title>系统状态</title>
     <style>
         :root {
-            --bg: #f3efe7;
-            --panel: rgba(255, 251, 245, 0.88);
-            --ink: #1f2937;
-            --muted: #6b7280;
-            --line: #d5c7b5;
-            --accent: #0f766e;
-            --accent-soft: rgba(15, 118, 110, 0.12);
-            --warn: #b45309;
-            --error: #b91c1c;
+            --bg: #f4f7fb;
+            --panel: rgba(255, 255, 255, 0.94);
+            --ink: #10233f;
+            --muted: #5f728c;
+            --line: #dbe4f0;
+            --accent: #1363df;
+            --accent-soft: rgba(19, 99, 223, 0.1);
+            --warn: #2563eb;
+            --error: #dc2626;
         }
 
         * { box-sizing: border-box; }
@@ -22,10 +22,11 @@
         body {
             margin: 0;
             color: var(--ink);
-            font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+            font-family: "Inter", "Segoe UI", "Microsoft YaHei", sans-serif;
             background:
-                radial-gradient(circle at top right, rgba(15, 118, 110, 0.1), transparent 28%),
-                linear-gradient(180deg, #fbf7f0 0%, var(--bg) 100%);
+                radial-gradient(circle at top left, rgba(19, 99, 223, 0.10), transparent 28%),
+                radial-gradient(circle at top right, rgba(96, 165, 250, 0.08), transparent 24%),
+                linear-gradient(180deg, #f9fbff 0%, #f4f8ff 100%);
         }
 
         main {
@@ -66,11 +67,19 @@
             border: 1px solid var(--line);
             background: var(--panel);
             color: var(--ink);
-            padding: 10px 14px;
-            border-radius: 999px;
+            padding: 10px 16px;
+            border-radius: 12px;
             text-decoration: none;
             cursor: pointer;
             font: inherit;
+            transition: all 0.2s;
+        }
+
+        button:hover,
+        a.button:hover {
+            background: var(--accent-soft);
+            border-color: var(--accent);
+            color: var(--accent);
         }
 
         .grid {
@@ -85,7 +94,7 @@
             background: var(--panel);
             border: 1px solid var(--line);
             border-radius: 20px;
-            box-shadow: 0 10px 26px rgba(31, 41, 55, 0.06);
+            box-shadow: 0 16px 34px rgba(16, 35, 63, 0.09);
         }
 
         .card { padding: 18px; }
@@ -150,12 +159,12 @@
         }
 
         .pill.warn {
-            background: rgba(180, 83, 9, 0.12);
+            background: rgba(37, 99, 235, 0.12);
             color: var(--warn);
         }
 
         .pill.error {
-            background: rgba(185, 28, 28, 0.12);
+            background: rgba(220, 38, 38, 0.12);
             color: var(--error);
         }
 
@@ -179,15 +188,15 @@
     <main>
         <section class="hero">
             <div>
-                <h1>Harness Status</h1>
+                <h1>Harness 状态</h1>
                 <p class="subhead">
-                    Live runtime snapshot of the current Flask app, gateway mode, memory backend, tool surface, and
-                    migration posture. This page reads from <code>/api/system/status</code>.
+                    当前 Flask 应用、网关模式、内存后端、工具接口和迁移状态的实时运行快照。
+                    此页面从 <code>/api/system/status</code> 读取数据。
                 </p>
             </div>
             <div class="actions">
-                <button id="refreshButton" type="button">Refresh</button>
-                <a class="button" href="/api/system/status">Raw JSON</a>
+                <button id="refreshButton" type="button">刷新</button>
+                <a class="button" href="/api/system/status">原始 JSON</a>
                 <a class="button" href="/api/openapi.json">OpenAPI</a>
             </div>
         </section>
@@ -214,10 +223,10 @@
         function renderSummary(data) {
             const cards = [
                 { label: "Harness", value: data.status, hint: data.timestamp },
-                { label: "Readiness", value: data.readiness.status, hint: "ready=" + data.readiness.ready },
-                { label: "Gateway Mode", value: data.gateway.mode, hint: data.gateway.namespace },
-                { label: "Routes", value: data.routes.total, hint: data.routes.api + " API / " + data.routes.ui + " UI" },
-                { label: "Tools", value: data.tools.builtin_count, hint: data.tools.plugin_tool_count + " plugin tools" },
+                { label: "就绪状态", value: data.readiness.status, hint: "就绪=" + data.readiness.ready },
+                { label: "网关模式", value: data.gateway.mode, hint: data.gateway.namespace },
+                { label: "路由", value: data.routes.total, hint: data.routes.api + " API / " + data.routes.ui + " UI" },
+                { label: "工具", value: data.tools.builtin_count, hint: data.tools.plugin_tool_count + " 插件工具" },
             ];
             return cards.map((card) => `
                 <article class="card">
@@ -246,7 +255,7 @@
                     <div class="hint">${escapeHtml((info.notes || []).join(" | ") || "")}</div>
                 </div>
             `).join("");
-            return `<section class="section"><h2>Services</h2><div class="kv">${entries}</div></section>`;
+            return `<section class="section"><h2>服务</h2><div class="kv">${entries}</div></section>`;
         }
 
         function renderJsonBlock(title, data) {
@@ -256,8 +265,8 @@
         async function loadStatus() {
             const summary = document.getElementById("summary");
             const details = document.getElementById("details");
-            summary.innerHTML = `<article class="card"><div class="label">Status</div><div class="value">Loading</div></article>`;
-            details.innerHTML = `<section class="section empty">Collecting runtime snapshot...</section>`;
+            summary.innerHTML = `<article class="card"><div class="label">状态</div><div class="value">加载中</div></article>`;
+            details.innerHTML = `<section class="section empty">正在收集运行时快照...</section>`;
 
             try {
                 const response = await fetch("/api/system/status");
@@ -265,42 +274,42 @@
                 const data = await response.json();
                 summary.innerHTML = renderSummary(data);
                 details.innerHTML = [
-                    renderDetailSection("Runtime", [
+                    renderDetailSection("运行时", [
                         { label: "Python", value: data.runtime.python_version },
-                        { label: "Platform", value: data.runtime.platform },
-                        { label: "Host", value: data.runtime.host + ":" + data.runtime.port },
-                        { label: "Debug", value: String(data.runtime.debug) },
+                        { label: "平台", value: data.runtime.platform },
+                        { label: "主机", value: data.runtime.host + ":" + data.runtime.port },
+                        { label: "调试", value: String(data.runtime.debug) },
                     ]),
-                    renderDetailSection("Gateway", [
-                        { label: "Mode", value: data.gateway.mode, kind: "pill" },
-                        { label: "Storage", value: data.gateway.storage },
-                        { label: "Control Plane URL", value: data.gateway.control_plane.configured_url },
-                        { label: "Control Plane Status", value: data.gateway.control_plane.status, kind: "pill" },
+                    renderDetailSection("网关", [
+                        { label: "模式", value: data.gateway.mode, kind: "pill" },
+                        { label: "存储", value: data.gateway.storage },
+                        { label: "控制平面 URL", value: data.gateway.control_plane.configured_url },
+                        { label: "控制平面状态", value: data.gateway.control_plane.status, kind: "pill" },
                     ]),
-                    renderDetailSection("LLM + Memory", [
-                        { label: "Provider", value: data.llm.provider },
-                        { label: "Model", value: data.llm.model },
-                        { label: "Memory Active", value: data.memory.active, kind: "pill" },
-                        { label: "Memory Fallback", value: String(Boolean(data.memory.fallback)) },
+                    renderDetailSection("LLM + 内存", [
+                        { label: "提供商", value: data.llm.provider },
+                        { label: "模型", value: data.llm.model },
+                        { label: "内存激活", value: data.memory.active, kind: "pill" },
+                        { label: "内存回退", value: String(Boolean(data.memory.fallback)) },
                     ]),
-                    renderDetailSection("Plugins + Migration", [
-                        { label: "Loaded Plugins", value: data.plugins.loaded_count },
-                        { label: "Preset Count", value: data.tools.preset_count },
-                        { label: "Migration Status", value: data.migration.status, kind: "pill" },
-                        { label: "Source Of Truth", value: data.migration.source_of_truth },
+                    renderDetailSection("插件 + 迁移", [
+                        { label: "已加载插件", value: data.plugins.loaded_count },
+                        { label: "预设数量", value: data.tools.preset_count },
+                        { label: "迁移状态", value: data.migration.status, kind: "pill" },
+                        { label: "真实来源", value: data.migration.source_of_truth },
                     ]),
-                    renderDetailSection("Readiness Summary", [
-                        { label: "Ready", value: String(data.readiness.ready), kind: "pill" },
-                        { label: "Status", value: data.readiness.status, kind: "pill" },
-                        { label: "Passing Checks", value: data.readiness.summary.pass },
-                        { label: "Warnings", value: data.readiness.summary.warn + " / Failures " + data.readiness.summary.fail },
+                    renderDetailSection("就绪摘要", [
+                        { label: "就绪", value: String(data.readiness.ready), kind: "pill" },
+                        { label: "状态", value: data.readiness.status, kind: "pill" },
+                        { label: "通过检查", value: data.readiness.summary.pass },
+                        { label: "警告", value: data.readiness.summary.warn + " / 失败 " + data.readiness.summary.fail },
                     ]),
                     renderServices(data.services),
-                    renderJsonBlock("Loaded Plugin Names", data.plugins.loaded_names),
+                    renderJsonBlock("已加载插件名称", data.plugins.loaded_names),
                 ].join("");
             } catch (error) {
-                summary.innerHTML = `<article class="card"><div class="label">Status</div><div class="value">Error</div><div class="hint">${escapeHtml(error.message)}</div></article>`;
-                details.innerHTML = `<section class="section empty">Failed to load status: ${escapeHtml(error.message)}</section>`;
+                summary.innerHTML = `<article class="card"><div class="label">状态</div><div class="value">错误</div><div class="hint">${escapeHtml(error.message)}</div></article>`;
+                details.innerHTML = `<section class="section empty">加载状态失败: ${escapeHtml(error.message)}</section>`;
             }
         }
 

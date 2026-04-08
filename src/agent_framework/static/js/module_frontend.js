@@ -141,6 +141,54 @@ function bindModuleFrontend() {
             console.warn("module draft unavailable", error);
         }
     });
+
+    // Power Trading Module Enhancements
+    if (moduleName === "电力交易") {
+        enhancePowerTradingModule();
+    }
+}
+
+function enhancePowerTradingModule() {
+    // Add real-time price update simulation
+    const metricCards = document.querySelectorAll('.module-metric-card');
+    metricCards.forEach(card => {
+        card.setAttribute('data-module', 'power-trading');
+    });
+
+    // Add hover effects to action cards
+    const actionCards = document.querySelectorAll('.module-action-card');
+    actionCards.forEach(card => {
+        card.setAttribute('data-module', 'power-trading');
+    });
+
+    // Add data attributes to board section
+    const boardSection = document.querySelector('.module-board-section');
+    if (boardSection) {
+        boardSection.setAttribute('data-module', 'power-trading');
+    }
+
+    // Simulate real-time price updates (demo only)
+    const priceElement = document.querySelector('.module-metric-card strong');
+    if (priceElement && priceElement.textContent.includes('428')) {
+        let basePrice = 428.5;
+        setInterval(() => {
+            const fluctuation = (Math.random() - 0.5) * 2;
+            basePrice = Math.max(400, Math.min(500, basePrice + fluctuation));
+            priceElement.textContent = basePrice.toFixed(1);
+        }, 5000);
+    }
+
+    // Add trend indicators animation
+    const trendCells = document.querySelectorAll('td:nth-child(3)');
+    trendCells.forEach(cell => {
+        if (cell.textContent.includes('↗')) {
+            cell.style.color = '#22a06b';
+            cell.style.fontWeight = '600';
+        } else if (cell.textContent.includes('↘')) {
+            cell.style.color = '#dc2626';
+            cell.style.fontWeight = '600';
+        }
+    });
 }
 
 bindModuleFrontend();

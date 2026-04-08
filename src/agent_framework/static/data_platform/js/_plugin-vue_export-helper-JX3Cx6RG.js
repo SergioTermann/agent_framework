@@ -21,7 +21,7 @@ var I=Object.defineProperty;var _=(n,s,e)=>s in n?I(n,s,{enumerable:!0,configura
 • 故障记录分析
 • 维护保养记录
 
-请告诉我您需要哪方面的数据？`:e.includes("你好")||e.includes("您好")||e.includes("hi")||e.includes("hello")?t=`您好！我是风起时域科技有限公司AI故障定位系统的智能助手。我可以帮您：
+请告诉我您需要哪方面的数据？`:e.includes("你好")||e.includes("您好")||e.includes("hi")||e.includes("hello")?t=`您好！我是智能值守系统的智能助手。我可以帮您：
 
 • 查询风场和风机运行状态
 • 分析故障和告警信息
