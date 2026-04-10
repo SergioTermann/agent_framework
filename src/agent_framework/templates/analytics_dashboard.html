@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>数据分析面板 - Agent Framework</title>
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js?v=20260410" crossorigin="anonymous"></script>
     <style>
         * {
             margin: 0;
@@ -522,7 +522,50 @@
     <script>
         let currentTimeRange = '24h';
         let charts = {};
-        const HAS_ECHARTS = typeof window.echarts !== 'undefined';
+        let HAS_ECHARTS = typeof window.echarts !== 'undefined';
+        const ECHARTS_SOURCES = [
+            'https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js?v=20260410',
+            'https://unpkg.com/echarts@5.4.3/dist/echarts.min.js?v=20260410',
+            'https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js?v=20260410'
+        ];
+
+        function loadScript(src) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.async = true;
+                script.crossOrigin = 'anonymous';
+                script.onload = () => resolve(true);
+                script.onerror = () => reject(new Error(`Failed to load ${src}`));
+                document.head.appendChild(script);
+            });
+        }
+
+        async function ensureEcharts() {
+            if (window.echarts) {
+                HAS_ECHARTS = true;
+                return true;
+            }
+            if (window.__analyticsEchartsLoader) {
+                HAS_ECHARTS = await window.__analyticsEchartsLoader;
+                return HAS_ECHARTS;
+            }
+            window.__analyticsEchartsLoader = (async () => {
+                for (const src of ECHARTS_SOURCES) {
+                    try {
+                        await loadScript(src);
+                        if (window.echarts) {
+                            return true;
+                        }
+                    } catch (_error) {
+                        // Try the next CDN mirror.
+                    }
+                }
+                return false;
+            })();
+            HAS_ECHARTS = await window.__analyticsEchartsLoader;
+            return HAS_ECHARTS;
+        }
 
         function renderChartNotice(containerId, message) {
             const container = document.getElementById(containerId);
@@ -538,7 +581,8 @@
         }
 
         // 初始化
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
+            await ensureEcharts();
             initCharts();
             loadData();
 

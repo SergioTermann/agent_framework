@@ -26,6 +26,10 @@
             margin: 0;
         }
 
+        body.is-embedded {
+            background: transparent;
+        }
+
         .app-container {
             display: flex;
             min-height: 100vh;
@@ -113,6 +117,15 @@
             margin: 0 auto;
         }
 
+        body.is-embedded .main-content {
+            width: 100%;
+        }
+
+        body.is-embedded .container {
+            max-width: none;
+            padding: 16px;
+        }
+
         [hidden]{display:none!important}
         .hero,.controls,.modal-shell,.empty,.card{border:1px solid rgba(101,120,144,.14);background:rgba(255,255,255,.86);box-shadow:var(--shadow-md)}
         .hero{padding:32px;border-radius:32px;background:radial-gradient(circle at top left,rgba(96,165,250,.18),transparent 28%),radial-gradient(circle at bottom right,rgba(227,236,255,.95),transparent 32%),linear-gradient(140deg,rgba(255,255,255,.98),rgba(239,244,251,.96))}
@@ -158,9 +171,10 @@
         @media (max-width:860px){.page-wide{padding:20px}.controls-top,.featured-grid,.grid,.loading,.modal-head,.modal-grid,.metrics{grid-template-columns:1fr}.actions,.buttons,.pagination-actions{flex-direction:column}.actions>*,.buttons>*,.pagination-actions>*{width:100%}.sort{width:100%}.pagination{align-items:stretch}}
     </style>
 </head>
-<body>
+<body{% if embedded %} class="is-embedded"{% endif %}>
     <div class="app-container">
         <!-- 侧边栏 -->
+        {% if not embedded %}
         <div class="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-logo">
@@ -184,18 +198,21 @@
                     <span>📚</span>
                     <span>知识库</span>
                 </a>
-                <a href="/plugin_market" class="nav-item active">
+                <a href="/plugins" class="nav-item active">
                     <span>🔌</span>
                     <span>插件市场</span>
                 </a>
             </nav>
         </div>
+        {% endif %}
 
         <!-- 主内容区 -->
         <div class="main-content">
+            {% if not embedded %}
             <div class="header">
                 <h1>🔌 插件市场</h1>
             </div>
+            {% endif %}
 
             <div class="container">
     <div class="market">

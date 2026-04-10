@@ -290,44 +290,15 @@
         }
     </style>
 </head>
-<body>
+<body{% if embedded %} class="is-embedded"{% endif %}>
     <div class="app-container">
-        <!-- 侧边栏 -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <div class="sidebar-logo">
-                    🤖 Agent Framework
-                </div>
-            </div>
-            <nav class="sidebar-nav">
-                <a href="/" class="nav-item">
-                    <span>🏠</span>
-                    <span>首页</span>
-                </a>
-                <a href="/chat" class="nav-item">
-                    <span>💬</span>
-                    <span>对话助手</span>
-                </a>
-                <a href="/visual_workflow" class="nav-item">
-                    <span>🔄</span>
-                    <span>工作流编排</span>
-                </a>
-                <a href="/knowledge" class="nav-item">
-                    <span>📚</span>
-                    <span>知识库</span>
-                </a>
-                <a href="/api_keys" class="nav-item active">
-                    <span>🔑</span>
-                    <span>API 密钥</span>
-                </a>
-            </nav>
-        </div>
-
         <!-- 主内容区 -->
         <div class="main-content">
+            {% if not embedded %}
             <div class="header">
                 <h1>🔑 API 密钥管理</h1>
             </div>
+            {% endif %}
 
             <div class="container">
         <div class="toolbar">

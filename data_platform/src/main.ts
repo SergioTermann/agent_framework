@@ -18,11 +18,13 @@ const boostrap = async () => {
     normal: [1920, 1080],
     small: [1280, 720],
   }['normal']
+  const readabilityScaleBoost = 1.02
 
   autofit.init({
     el: '#app',
-    dw: ScreenSize[0],
-    dh: ScreenSize[1],
+    // Slightly reduce the design baseline so the rendered UI reads a touch larger.
+    dw: Math.round(ScreenSize[0] / readabilityScaleBoost),
+    dh: Math.round(ScreenSize[1] / readabilityScaleBoost),
     resize: true,
     // ignore: ['.main-middle', '.css2d-renderer', 'webgl-renderer'],
   })

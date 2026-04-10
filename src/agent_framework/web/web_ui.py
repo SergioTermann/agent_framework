@@ -9,6 +9,7 @@ import threading
 import uuid
 from datetime import datetime
 from pathlib import Path
+from urllib.parse import urlparse
 
 from flask import Flask, render_template, request, jsonify, redirect, url_for, send_file, send_from_directory
 from flask_socketio import SocketIO, emit
@@ -405,6 +406,155 @@ for _slug, _page in MODULE_FRONTENDS.items():
         MODULE_WORKSPACES[_slug]["primary_href"] = _page["route"]
 
 
+PORTAL_SECTIONS = [
+    {
+        "title": "AI 助手",
+        "summary": "对话、诊断、协作和开发版助手入口。",
+        "items": [
+            {"name": "智能运维助手", "href": "/maintenance-assistant", "summary": "统一问答、诊断和运维建议入口。"},
+            {"name": "助手视图", "href": "/user", "summary": "面向使用者的助手界面。"},
+            {"name": "开发版助手", "href": "/dev/assistant", "summary": "可编辑配置的开发版助手。"},
+            {"name": "简易对话", "href": "/chat", "summary": "轻量聊天页。"},
+            {"name": "多 Agent 协作", "href": "/multi-agent", "summary": "多智能体协同工作入口。"},
+        ],
+    },
+    {
+        "title": "业务模块",
+        "summary": "已有业务场景页面，直接打开，不再经首页中转。",
+        "items": [
+            {"name": "风场选址", "href": "/modules/weather-siting/app", "summary": "气象与选址分析模块。"},
+            {"name": "智能工单", "href": "/modules/smart-workorder/app", "summary": "工单生成、派发和闭环处理。"},
+            {"name": "智能值守", "href": "/data-platform", "summary": "监控大屏和值守场景。"},
+            {"name": "电力交易", "href": "/modules/power-trading/app", "summary": "交易分析与策略支持。"},
+            {"name": "智慧办公", "href": "/modules/smart-office/app", "summary": "办公协同和知识整理场景。"},
+        ],
+    },
+    {
+        "title": "知识与流程",
+        "summary": "知识库、插件、工作流和应用能力。",
+        "items": [
+            {"name": "知识库", "href": "/knowledge", "summary": "知识库管理与检索。"},
+            {"name": "本体可视化", "href": "/ontology", "summary": "本体与关系结构展示。"},
+            {"name": "插件市场", "href": "/plugins", "summary": "插件浏览与管理。"},
+            {"name": "应用中心", "href": "/apps", "summary": "平台应用与工具入口。"},
+            {"name": "技能创建器", "href": "/skill-creator", "summary": "快速创建技能配置。"},
+            {"name": "可视化工作流", "href": "/workflow", "summary": "统一工作流编排入口，覆盖可视化与复杂流程配置。"},
+            {"name": "协作管理", "href": "/collaboration", "summary": "团队协作与流程管理。"},
+        ],
+    },
+    {
+        "title": "分析与运营",
+        "summary": "监控、分析、日志、任务和文档类页面。",
+        "items": [
+            {"name": "分析面板", "href": "/analytics", "summary": "分析看板与业务数据汇总。"},
+            {"name": "管理后台", "href": "/dashboard", "summary": "后台管理总览。"},
+            {"name": "行业知识", "href": "/industry-knowledge", "summary": "行业知识内容入口。"},
+            {"name": "性能监控", "href": "/performance", "summary": "性能指标和状态跟踪。"},
+            {"name": "系统状态", "href": "/system-status", "summary": "运行状态与健康展示。"},
+            {"name": "监控面板", "href": "/monitoring", "summary": "平台监控页面。"},
+            {"name": "异步任务", "href": "/async-tasks", "summary": "异步任务执行与管理。"},
+            {"name": "日志中心", "href": "/logs", "summary": "日志查看与筛选。"},
+            {"name": "文档中心", "href": "/documents", "summary": "文档与资料管理。"},
+            {"name": "代码片段", "href": "/code-snippets", "summary": "代码片段存取与复用。"},
+            {"name": "提示词库", "href": "/prompts", "summary": "提示词管理入口。"},
+            {"name": "Webhook 管理", "href": "/webhooks", "summary": "Webhook 配置与查看。"},
+            {"name": "HTTP 工具", "href": "/http-tools", "summary": "HTTP 请求调试与测试。"},
+        ],
+    },
+    {
+        "title": "模型与实验",
+        "summary": "推理、微调、训练和实验相关页面。",
+        "items": [
+            {"name": "因果推理", "href": "/causal-reasoning", "summary": "因果推理引擎页面。"},
+            {"name": "因果链", "href": "/causal-chain", "summary": "因果链路分析。"},
+            {"name": "因果树", "href": "/causal-tree", "summary": "因果树实验与示例。"},
+            {"name": "高级推理", "href": "/reasoning", "summary": "推理实验页面。"},
+            {"name": "模型微调", "href": "/finetune", "summary": "微调任务配置页面。"},
+            {"name": "A/B 测试", "href": "/ab-testing", "summary": "实验对比和评估。"},
+            {"name": "LLM 强化学习", "href": "/llm-rl", "summary": "RLHF / LLM-RL 入口。"},
+            {"name": "训练流水线", "href": "/pipeline", "summary": "SFT 到 RLHF 的统一流水线。"},
+            {"name": "多模态", "href": "/multimodal", "summary": "多模态能力页面。"},
+            {"name": "记忆系统", "href": "/memory", "summary": "持久化记忆与观察面板。"},
+            {"name": "发布管理", "href": "/publish", "summary": "发布与交付入口。"},
+            {"name": "配置预设", "href": "/config-presets", "summary": "配置模板与预设管理。"},
+        ],
+    },
+    {
+        "title": "平台与账号",
+        "summary": "开发控制台、系统设置与账号页面。",
+        "items": [
+            {"name": "开发控制台", "href": "/dev", "summary": "平台开发总入口。"},
+            {"name": "设置", "href": "/settings", "summary": "平台设置页面。"},
+            {"name": "API Keys", "href": "/api-keys", "summary": "API 密钥管理。"},
+            {"name": "扩展管理", "href": "/extensions", "summary": "扩展与能力管理。"},
+            {"name": "登录", "href": "/login", "summary": "用户登录页面。"},
+            {"name": "注册", "href": "/register", "summary": "用户注册页面。"},
+            {"name": "个人中心", "href": "/profile", "summary": "个人资料与账号信息。"},
+        ],
+    },
+]
+
+
+def _portal_allowed_targets() -> set[str]:
+    return {
+        item["href"]
+        for section in PORTAL_SECTIONS
+        for item in section["items"]
+    }
+
+
+def _portal_iframe_src(href: str) -> str:
+    if href.startswith("/"):
+        separator = "&" if "?" in href else "?"
+        return f"{href}{separator}embed=1"
+    if href.startswith("/modules/") and href.endswith("/app"):
+        return f"{href}?embed=1"
+    return href
+
+
+def _build_portal_sections(current_target: str | None = None) -> list[dict]:
+    sections: list[dict] = []
+    for section in PORTAL_SECTIONS:
+        items = []
+        for item in section["items"]:
+            item_copy = dict(item)
+            item_copy["shell_href"] = url_for("portal_home", target=item["href"])
+            item_copy["iframe_src"] = _portal_iframe_src(item["href"])
+            item_copy["active"] = item["href"] == current_target
+            items.append(item_copy)
+        section_copy = dict(section)
+        section_copy["items"] = items
+        sections.append(section_copy)
+    return sections
+
+
+def _resolve_portal_target(raw_target: str | None) -> str | None:
+    if not raw_target:
+        return None
+    target = raw_target.strip()
+    if not target or not target.startswith("/"):
+        return None
+    parsed = urlparse(target)
+    normalized = parsed.path
+    if parsed.query:
+        normalized = f"{normalized}?{parsed.query}"
+    if normalized not in _portal_allowed_targets():
+        return None
+    return normalized
+
+
+def _find_portal_item(target: str | None) -> dict | None:
+    if target is None:
+        return None
+    for section in PORTAL_SECTIONS:
+        for item in section["items"]:
+            if item["href"] == target:
+                item_copy = dict(item)
+                item_copy["iframe_src"] = _portal_iframe_src(item["href"])
+                return item_copy
+    return None
+
+
 def _socketio_kwargs() -> dict:
     kwargs = {}
     if _platform_cfg.server.cors_allowed_origins:
@@ -666,15 +816,27 @@ def root_home():
 @app.route('/portal')
 def portal_home():
     """前端门户首页。"""
-    return render_template('portal.html')
+    current_target = _resolve_portal_target(request.args.get("target"))
+    current_item = _find_portal_item(current_target)
+    portal_sections = _build_portal_sections(current_target)
+    total_features = sum(len(section["items"]) for section in PORTAL_SECTIONS)
+    return render_template(
+        'portal.html',
+        portal_sections=portal_sections,
+        portal_total_features=total_features,
+        current_target=current_target,
+        current_item=current_item,
+    )
 
 
 @app.route('/user')
 def user_home():
     """用户版 - 风电运维智导助手"""
+    embedded = request.args.get("embed") == "1"
     return render_template(
         'maintenance_assistant.html',
         knowledge_base_examples=_get_knowledge_base_examples(),
+        embedded=embedded,
         **_get_agent_tool_ui_options(),
     )
 
@@ -690,7 +852,8 @@ def developer_home():
 @app.route('/dev/assistant')
 def developer_assistant():
     """开发版 - 可编辑的风电运维智导助手"""
-    return render_template('maintenance_assistant_dev.html', **_get_agent_tool_ui_options())
+    embedded = request.args.get("embed") == "1"
+    return render_template('maintenance_assistant_dev.html', embedded=embedded, **_get_agent_tool_ui_options())
 
 
 @app.route('/modules/<slug>')
@@ -709,13 +872,8 @@ def module_frontend(slug: str):
     page = MODULE_FRONTENDS.get(slug)
     if module is None or page is None:
         return redirect(url_for('portal_home'))
-    return render_template('module_frontend.html', module=module, page=page)
-
-
-@app.route('/gateway-demo')
-def gateway_demo():
-    """Gateway + WebSocket 联调页"""
-    return render_template('gateway_demo.html')
+    embedded = request.args.get("embed") == "1"
+    return render_template('module_frontend.html', module=module, page=page, embedded=embedded)
 
 
 @app.route('/home')
@@ -727,9 +885,11 @@ def home():
 @app.route('/maintenance-assistant')
 def maintenance_assistant():
     """风电运维智导助手"""
+    embedded = request.args.get("embed") == "1"
     return render_template(
         'maintenance_assistant.html',
         knowledge_base_examples=_get_knowledge_base_examples(),
+        embedded=embedded,
         **_get_agent_tool_ui_options(),
     )
 
@@ -737,13 +897,13 @@ def maintenance_assistant():
 @app.route('/chat')
 def chat():
     """简单对话助手"""
-    return render_template('chat.html')
+    embedded = request.args.get("embed") == "1"
+    return render_template('chat.html', embedded=embedded)
 
 
 @app.route('/chat-interface')
-def chat_interface():
-    """自适应对话界面"""
-    return render_template('chat_interface.html')
+def chat_interface_redirect():
+    return redirect(url_for('chat'))
 
 
 @app.route('/api/chat', methods=['POST'])
@@ -777,7 +937,8 @@ def multi_agent():
 @app.route('/workflow')
 def visual_workflow():
     """可视化工作流编排"""
-    return render_template('visual_workflow.html')
+    embedded = request.args.get("embed") == "1"
+    return render_template('visual_workflow.html', embedded=embedded)
 
 
 @app.route('/test-visual-workflow')
@@ -801,7 +962,8 @@ def ontology_visualization():
 @app.route('/plugins')
 def plugins():
     """插件市场"""
-    return render_template('plugin_market.html')
+    embedded = request.args.get("embed") == "1"
+    return render_template('plugin_market.html', embedded=embedded)
 
 
 @app.route('/causal_chain_viz')
@@ -841,13 +1003,15 @@ def tools():
 @app.route('/settings')
 def settings():
     """系统设置"""
-    return render_template('settings.html')
+    embedded = request.args.get("embed") == "1"
+    return render_template('settings.html', embedded=embedded)
 
 
 @app.route('/api-keys')
 def api_keys():
     """API 密钥管理"""
-    return render_template('api_keys.html')
+    embedded = request.args.get("embed") == "1"
+    return render_template('api_keys.html', embedded=embedded)
 
 
 @app.route('/data-platform')
@@ -890,7 +1054,8 @@ def profile():
 @app.route('/finetune')
 def finetune():
     """模型微调"""
-    return render_template('finetune.html')
+    embedded = request.args.get("embed") == "1"
+    return render_template('finetune.html', embedded=embedded)
 
 
 @app.route('/causal-reasoning')
@@ -946,7 +1111,8 @@ def memory_dashboard():
 @app.route('/dashboard')
 def dashboard():
     """管理后台"""
-    return render_template('dashboard.html')
+    embedded = request.args.get("embed") == "1"
+    return render_template('dashboard.html', embedded=embedded)
 
 
 @app.route('/analytics')
@@ -970,7 +1136,8 @@ def simple_test():
 @app.route('/industry-knowledge')
 def industry_knowledge():
     """行业智库"""
-    return render_template('industry_knowledge.html')
+    embedded = request.args.get("embed") == "1"
+    return render_template('industry_knowledge.html', embedded=embedded)
 
 
 
@@ -1073,8 +1240,8 @@ def http_tools_page():
 
 @app.route('/workflow-advanced')
 def workflow_advanced_page():
-    """高级工作流编排"""
-    return render_template('workflow_advanced.html')
+    """兼容旧高级工作流入口，统一回到工作流页"""
+    return redirect(url_for('visual_workflow'))
 
 
 @app.route('/collaboration')

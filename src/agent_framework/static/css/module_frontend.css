@@ -113,13 +113,13 @@ textarea {
 }
 
 .module-brand-copy strong {
-    font-size: 17px;
+    font-size: 18px;
     font-weight: 800;
 }
 
 .module-brand-copy small {
     color: var(--muted);
-    font-size: 11px;
+    font-size: 12px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
 }
@@ -145,7 +145,7 @@ textarea {
     background: linear-gradient(135deg, var(--primary), var(--primary-soft));
     color: #ffffff;
     font-family: var(--font-display);
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 700;
     box-shadow: 0 26px 42px -26px rgba(0, 92, 192, 0.9);
 }
@@ -169,7 +169,7 @@ textarea {
     gap: 12px;
     color: var(--muted-strong);
     font-family: var(--font-display);
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 700;
 }
 

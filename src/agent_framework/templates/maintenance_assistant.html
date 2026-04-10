@@ -42,6 +42,10 @@
     body::before{background-image:radial-gradient(ellipse 820px 110px at 0% 18%,rgba(19,99,223,.08) 0%,transparent 50%),radial-gradient(ellipse 700px 90px at 100% 40%,rgba(96,165,250,.06) 0%,transparent 50%),radial-gradient(ellipse 920px 120px at 30% 82%,rgba(19,99,223,.06) 0%,transparent 50%)!important}
   </style>
   <style>
+    .platform-brand-copy strong {
+      font-size: 18px;
+    }
+
     .platform-brand-copy small,
     .platform-user-pill small,
     .platform-header-badge,
@@ -86,6 +90,17 @@
       font-size: 13px;
     }
 
+    .platform-brand-copy small,
+    .platform-user-pill small {
+      font-size: 12px;
+    }
+
+    .platform-primary-entry,
+    .platform-nav-link,
+    .platform-nav-utility {
+      font-size: 15px;
+    }
+
     .platform-user-pill strong,
     .mode-link,
     .assistant-nav a,
@@ -106,6 +121,10 @@
       font-size: 14px;
     }
 
+    .platform-user-pill strong {
+      font-size: 13px;
+    }
+
     .workbench-step small,
     .guide-banner strong,
     .toggle-meta strong,
@@ -116,7 +135,8 @@
     }
   </style>
 </head>
-<body>
+<body{% if embedded %} class="is-embedded"{% endif %}>
+  {% if not embedded %}
   <aside class="platform-sidebar">
     <a class="platform-brand" href="/">
       <span class="platform-brand-mark material-symbols-outlined">bolt</span>
@@ -209,8 +229,9 @@
       </a>
     </div>
   </header>
+  {% endif %}
 
-  <div class="assistant-page-shell">
+  <div class="assistant-page-shell"{% if embedded %} style="width:100%;margin:0;padding:16px;"{% endif %}>
     <div class="assistant-topbar">
       <div class="title-block">
         <div class="mode-badge"><i class="fas fa-user"></i><span>用户版</span></div>

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LLM 强化学习平台 - Agent Framework</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js?v=20260410" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="/static/css/base-theme.css">
     <style>
         :root {
@@ -757,12 +757,55 @@
 
 <script>
 const API = '/api/llm-rl';
-const HAS_ECHARTS = typeof window.echarts !== 'undefined';
+let HAS_ECHARTS = typeof window.echarts !== 'undefined';
+const ECHARTS_SOURCES = [
+    'https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js?v=20260410',
+    'https://unpkg.com/echarts@5.4.3/dist/echarts.min.js?v=20260410',
+    'https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js?v=20260410'
+];
 let currentPair = null;
 let currentRunId = null;
 let optScoreChart = null;
 let evalRadarChart = null;
 let eloHistoryChart = null;
+
+function loadScript(src) {
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.async = true;
+        script.crossOrigin = 'anonymous';
+        script.onload = () => resolve(true);
+        script.onerror = () => reject(new Error(`Failed to load ${src}`));
+        document.head.appendChild(script);
+    });
+}
+
+async function ensureEcharts() {
+    if (window.echarts) {
+        HAS_ECHARTS = true;
+        return true;
+    }
+    if (window.__llmRlEchartsLoader) {
+        HAS_ECHARTS = await window.__llmRlEchartsLoader;
+        return HAS_ECHARTS;
+    }
+    window.__llmRlEchartsLoader = (async () => {
+        for (const src of ECHARTS_SOURCES) {
+            try {
+                await loadScript(src);
+                if (window.echarts) {
+                    return true;
+                }
+            } catch (_error) {
+                // Try the next CDN mirror.
+            }
+        }
+        return false;
+    })();
+    HAS_ECHARTS = await window.__llmRlEchartsLoader;
+    return HAS_ECHARTS;
+}
 
 function renderChartUnavailable(id, message = 'ECharts 加载失败，当前图表不可用。') {
     const el = document.getElementById(id);
@@ -1589,7 +1632,8 @@ window.addEventListener('resize', () => {
 });
 
 // ─── Init ──────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    await ensureEcharts();
     loadStats();
     loadPairs();
     loadOptRuns();

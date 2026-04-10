@@ -26,6 +26,10 @@
             margin: 0;
         }
 
+        body.is-embedded {
+            background: transparent;
+        }
+
         .app-container {
             display: flex;
             min-height: 100vh;
@@ -41,22 +45,9 @@
             box-shadow: 4px 0 20px rgba(0,0,0,0.1);
         }
 
-        .nav-sidebar-header {
-            padding: 28px 24px;
-            border-bottom: 1px solid rgba(255,255,255,0.15);
-        }
-
-        .nav-sidebar-logo {
-            font-size: 26px;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
         .nav-sidebar-nav {
             flex: 1;
-            padding: 20px 0;
+            padding: 28px 0;
             overflow-y: auto;
         }
 
@@ -89,6 +80,10 @@
             overflow: hidden;
         }
 
+        body.is-embedded .main-content {
+            width: 100%;
+        }
+
         .header {
             background: #ffffff;
             padding: 16px 24px;
@@ -110,6 +105,10 @@
             overflow: hidden;
         }
 
+        body.is-embedded .workflow-container {
+            flex-direction: column;
+        }
+
         /* 工具侧边栏 */
         .sidebar {
             width: 280px;
@@ -117,6 +116,12 @@
             border-right: 1px solid var(--theme-accent-line);
             display: flex;
             flex-direction: column;
+        }
+
+        body.is-embedded .sidebar {
+            width: 100%;
+            border-right: none;
+            border-bottom: 1px solid var(--theme-accent-line);
         }
 
         .sidebar-header {
@@ -142,6 +147,10 @@
         .sidebar-section {
             padding: 20px;
             border-bottom: 1px solid var(--theme-accent-line);
+        }
+
+        body.is-embedded .sidebar-section:last-child {
+            border-bottom: none;
         }
 
         .section-title {
@@ -443,44 +452,15 @@
         }
     </style>
 </head>
-<body>
+<body{% if embedded %} class="is-embedded"{% endif %}>
     <div class="app-container">
-        <!-- 导航侧边栏 -->
-        <div class="nav-sidebar">
-            <div class="nav-sidebar-header">
-                <div class="nav-sidebar-logo">
-                    🤖 Agent Framework
-                </div>
-            </div>
-            <nav class="nav-sidebar-nav">
-                <a href="/" class="nav-item">
-                    <span>🏠</span>
-                    <span>首页</span>
-                </a>
-                <a href="/chat" class="nav-item">
-                    <span>💬</span>
-                    <span>对话助手</span>
-                </a>
-                <a href="/visual_workflow" class="nav-item active">
-                    <span>🔄</span>
-                    <span>工作流编排</span>
-                </a>
-                <a href="/knowledge" class="nav-item">
-                    <span>📚</span>
-                    <span>知识库</span>
-                </a>
-                <a href="/api_keys" class="nav-item">
-                    <span>🔑</span>
-                    <span>API 密钥</span>
-                </a>
-            </nav>
-        </div>
-
         <!-- 主内容区 -->
         <div class="main-content">
+            {% if not embedded %}
             <div class="header">
                 <h1>🔄 工作流编排</h1>
             </div>
+            {% endif %}
 
             <div class="workflow-container">
         <!-- 工具侧边栏 -->

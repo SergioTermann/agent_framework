@@ -149,17 +149,6 @@ def test_gateway_nodes_require_admin(workspace_tmp_dir, make_auth_headers):
     assert admin_user.user_id
 
 
-def test_gateway_demo_assets_exist():
-    from agent_framework.web.web_ui import app
-
-    client = app.test_client()
-    response = client.get("/gateway-demo")
-    assert response.status_code == 200
-    html = response.get_data(as_text=True)
-    assert "/static/js/gateway-demo.js" in html
-    assert "Gateway + WebSocket" in html
-
-
 def test_maintenance_assistant_pages_include_gateway_bridge():
     from agent_framework.web.web_ui import app
 

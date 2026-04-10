@@ -2,7 +2,6 @@
 
 ## 页面联调入口
 
-- 页面：`GET /gateway-demo`
 - Namespace：`/gateway`
 - 已接入页面：
   - `GET /maintenance-assistant`

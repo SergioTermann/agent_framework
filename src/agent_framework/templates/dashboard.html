@@ -648,14 +648,17 @@
         }
     </style>
 </head>
-<body>
+<body{% if embedded %} class="is-embedded"{% endif %}>
+    {% if not embedded %}
     <a href="{{ url_for('developer_home') }}" class="back-btn">
         <span class="back-btn-icon">←</span>
         <span>返回主页</span>
     </a>
+    {% endif %}
 
     <div class="app-container">
         <!-- 侧边栏 -->
+        {% if not embedded %}
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-logo">
@@ -750,10 +753,12 @@
                 </div>
             </div>
         </aside>
+        {% endif %}
 
         <!-- 主内容区 -->
         <main class="main-content">
             <!-- 顶部栏 -->
+            {% if not embedded %}
             <header class="topbar">
                 <div class="search-box">
                     <span class="search-icon">🔍</span>
@@ -769,6 +774,7 @@
                     </button>
                 </div>
             </header>
+            {% endif %}
 
             <!-- 内容区域 -->
             <div class="content-area" id="content-area">

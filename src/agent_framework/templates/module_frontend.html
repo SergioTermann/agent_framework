@@ -10,8 +10,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@300..700,0..1&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/module_frontend.css') }}">
 </head>
-<body>
+<body{% if embedded %} class="is-embedded"{% endif %}>
     <div class="module-app-shell">
+        {% if not embedded %}
         <aside class="module-sidebar">
             <div class="module-brand">
                 <a class="module-brand-home" href="/">
@@ -66,8 +67,10 @@
                 </a>
             </div>
         </aside>
+        {% endif %}
 
-        <div class="module-main-shell">
+        <div class="module-main-shell"{% if embedded %} style="margin-left: 0; width: 100%;"{% endif %}>
+            {% if not embedded %}
             <header class="module-topbar">
                 <div class="module-topbar-title">
                     <small>模块 {{ module.index }}</small>
@@ -84,6 +87,7 @@
                     </a>
                 </div>
             </header>
+            {% endif %}
 
             <main class="module-canvas">
                 <section class="module-hero">

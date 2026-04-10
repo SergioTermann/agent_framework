@@ -1,281 +1,506 @@
 <!DOCTYPE html>
-<html class="light" lang="zh-CN">
+<html lang="zh-CN">
 <head>
     <meta charset="utf-8">
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>Windrise Domain - AI Technical Suite</title>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@700;800;900&amp;display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "on-error": "#fff7f6",
-                        "surface-tint": "#005cc0",
-                        "secondary-dim": "#465469",
-                        "on-tertiary-container": "#4c5a63",
-                        "surface-container-low": "#f0f4f7",
-                        "on-tertiary": "#f4faff",
-                        "on-secondary": "#f8f8ff",
-                        "surface-container": "#eaeff2",
-                        "tertiary-fixed-dim": "#d3e2ed",
-                        "on-secondary-container": "#455268",
-                        "on-background": "#2c3437",
-                        "on-secondary-fixed": "#324055",
-                        "surface-variant": "#dce4e8",
-                        "primary-dim": "#0050a9",
-                        "surface": "#f7f9fb",
-                        "secondary-fixed": "#d5e3fd",
-                        "error-container": "#fa746f",
-                        "inverse-surface": "#0b0f10",
-                        "on-tertiary-fixed-variant": "#56656e",
-                        "primary-container": "#5794fd",
-                        "background": "#f7f9fb",
-                        "inverse-on-surface": "#9a9d9f",
-                        "on-secondary-fixed-variant": "#4e5c72",
-                        "outline-variant": "#acb3b7",
-                        "surface-dim": "#d4dbdf",
-                        "tertiary": "#53616a",
-                        "error": "#a83836",
-                        "surface-container-highest": "#dce4e8",
-                        "surface-container-lowest": "#ffffff",
-                        "on-primary-fixed-variant": "#00204c",
-                        "on-tertiary-fixed": "#3a4851",
-                        "surface-container-high": "#e3e9ed",
-                        "secondary": "#526076",
-                        "on-primary-container": "#001638",
-                        "primary-fixed": "#5794fd",
-                        "inverse-primary": "#5794fd",
-                        "on-primary": "#f9f8ff",
-                        "tertiary-dim": "#47555e",
-                        "primary": "#005cc0",
-                        "error-dim": "#67040d",
-                        "secondary-container": "#d5e3fd",
-                        "tertiary-fixed": "#e1f0fb",
-                        "primary-fixed-dim": "#4787ef",
-                        "on-surface-variant": "#596064",
-                        "surface-bright": "#f7f9fb",
-                        "on-surface": "#2c3437",
-                        "on-primary-fixed": "#000000",
-                        "on-error-container": "#6e0a12",
-                        "tertiary-container": "#e1f0fb",
-                        "secondary-fixed-dim": "#c7d5ef",
-                        "outline": "#747c80"
-                    },
-                    borderRadius: {
-                        DEFAULT: "0.25rem",
-                        lg: "0.5rem",
-                        xl: "0.75rem",
-                        full: "9999px"
-                    },
-                    fontFamily: {
-                        headline: ["Manrope"],
-                        body: ["Inter"],
-                        label: ["Inter"]
-                    }
-                }
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>风起时域 - 功能总览</title>
+    <style>
+        :root {
+            --bg: #eef3f7;
+            --panel: rgba(255, 255, 255, 0.92);
+            --panel-strong: #ffffff;
+            --line: rgba(58, 81, 107, 0.12);
+            --text: #132238;
+            --muted: #5d7088;
+            --primary: #0f63d8;
+            --primary-soft: rgba(15, 99, 216, 0.10);
+            --primary-strong: #0d57bd;
+            --shadow: 0 24px 48px rgba(18, 33, 54, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            min-height: 100%;
+            font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(15, 99, 216, 0.10), transparent 28%),
+                radial-gradient(circle at bottom right, rgba(91, 140, 255, 0.10), transparent 30%),
+                linear-gradient(180deg, #f7fafc 0%, #eef3f7 100%);
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .layout {
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            width: 320px;
+            padding: 24px 18px;
+            overflow-y: auto;
+            background: rgba(246, 249, 252, 0.95);
+            border-right: 1px solid var(--line);
+            backdrop-filter: blur(20px);
+        }
+
+        .brand {
+            padding: 8px 10px 18px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .brand-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: var(--primary-soft);
+            color: var(--primary);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        .brand h1 {
+            margin: 14px 0 8px;
+            font-size: 28px;
+            line-height: 1.15;
+        }
+
+        .brand p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .sidebar-tip {
+            margin-top: 16px;
+            padding: 14px 16px;
+            border-radius: 16px;
+            background: var(--panel);
+            border: 1px solid var(--line);
+            box-shadow: var(--shadow);
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .sidebar-section {
+            margin-top: 20px;
+        }
+
+        .sidebar-section h2 {
+            margin: 0 0 10px;
+            padding: 0 10px;
+            color: var(--muted);
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .nav-list {
+            display: grid;
+            gap: 8px;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 12px 14px;
+            border-radius: 16px;
+            border: 1px solid transparent;
+            transition: 0.18s ease;
+        }
+
+        .nav-link:hover {
+            background: var(--panel);
+            border-color: var(--line);
+            transform: translateX(2px);
+        }
+
+        .nav-link.active {
+            background: var(--panel-strong);
+            border-color: rgba(15, 99, 216, 0.18);
+            box-shadow: inset 0 0 0 1px rgba(15, 99, 216, 0.08);
+        }
+
+        .nav-link strong {
+            display: block;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .nav-link span {
+            display: block;
+            margin-top: 4px;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .main {
+            margin-left: 320px;
+            padding: 24px 24px 32px;
+        }
+
+        .hero {
+            padding: 28px 32px;
+            border: 1px solid var(--line);
+            border-radius: 28px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(242, 247, 255, 0.92));
+            box-shadow: var(--shadow);
+        }
+
+        .hero h2 {
+            margin: 14px 0 10px;
+            font-size: 40px;
+            line-height: 1.1;
+        }
+
+        .hero p {
+            max-width: 880px;
+            margin: 0;
+            color: var(--muted);
+            font-size: 16px;
+            line-height: 1.75;
+        }
+
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+            margin-top: 24px;
+        }
+
+        .stat-card {
+            padding: 18px 20px;
+            border-radius: 20px;
+            background: var(--panel-strong);
+            border: 1px solid var(--line);
+        }
+
+        .stat-card strong {
+            display: block;
+            font-size: 28px;
+            line-height: 1;
+        }
+
+        .stat-card span {
+            display: block;
+            margin-top: 8px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .workspace-shell {
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - 48px);
+            border: 1px solid var(--line);
+            border-radius: 28px;
+            background: rgba(255, 255, 255, 0.78);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .workspace-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 18px 22px;
+            border-bottom: 1px solid var(--line);
+            background: rgba(248, 250, 253, 0.94);
+        }
+
+        .workspace-head h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .workspace-head p {
+            margin: 6px 0 0;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .workspace-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .action-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 14px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 700;
+            border: 1px solid var(--line);
+            background: #fff;
+        }
+
+        .action-link.primary {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+        }
+
+        .workspace-frame-wrap {
+            flex: 1;
+            min-height: 720px;
+            background: #fff;
+        }
+
+        .workspace-frame {
+            display: block;
+            width: 100%;
+            height: calc(100vh - 190px);
+            min-height: 720px;
+            border: 0;
+            background: #fff;
+        }
+
+        .content-section {
+            margin-top: 28px;
+        }
+
+        .section-head {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 14px;
+        }
+
+        .section-head h3 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .section-head p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .feature-card {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            min-height: 180px;
+            padding: 20px;
+            border-radius: 24px;
+            background: var(--panel);
+            border: 1px solid var(--line);
+            box-shadow: var(--shadow);
+        }
+
+        .feature-card strong {
+            display: block;
+            font-size: 18px;
+            line-height: 1.35;
+        }
+
+        .feature-path {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: var(--primary-soft);
+            color: var(--primary);
+            font-size: 12px;
+            word-break: break-all;
+        }
+
+        .feature-card p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.7;
+            flex: 1;
+        }
+
+        .feature-card a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 88px;
+            padding: 10px 14px;
+            border-radius: 14px;
+            background: var(--primary);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        @media (max-width: 1280px) {
+            .card-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .workspace-head {
+                align-items: flex-start;
+                flex-direction: column;
             }
         }
-    </script>
-    <style>
-        .material-symbols-outlined {
-            font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
-            user-select: none;
-        }
-        .fill-icon {
-            font-variation-settings: "FILL" 1;
-        }
-        body {
-            font-family: "Inter", sans-serif;
-            -webkit-font-smoothing: antialiased;
-        }
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(24px);
+
+        @media (max-width: 960px) {
+            .sidebar {
+                position: static;
+                width: auto;
+                height: auto;
+                border-right: 0;
+                border-bottom: 1px solid var(--line);
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 18px;
+            }
+
+            .hero {
+                padding: 22px 20px;
+            }
+
+            .hero h2 {
+                font-size: 30px;
+            }
+
+            .hero-stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .workspace-frame-wrap {
+                min-height: 640px;
+            }
+
+            .workspace-frame {
+                height: 70vh;
+                min-height: 640px;
+            }
         }
     </style>
 </head>
-<body class="bg-background text-on-surface overflow-hidden">
-    <aside class="fixed left-0 top-0 z-50 flex h-screen w-64 flex-col border-r-0 bg-[#f0f4f7] py-6 transition-colors">
-        <div class="mb-8 px-6">
-            <div class="flex items-center gap-3">
-                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-container text-on-primary">
-                    <span class="material-symbols-outlined fill-icon">bolt</span>
-                </div>
-                <div>
-                    <h1 class="font-['Manrope'] text-lg font-bold text-[#2c3437]">Luminous Intelligence</h1>
-                    <p class="text-xs font-medium tracking-tight text-on-surface-variant/70">AI Technical Suite</p>
-                </div>
-            </div>
-        </div>
-        <div class="mb-6 px-4">
-            <a class="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 font-['Manrope'] text-sm font-semibold text-on-primary transition-transform active:opacity-80" href="/maintenance-assistant">
-                <span class="material-symbols-outlined text-[20px]">add</span>
-                <span>New Analysis</span>
-            </a>
-        </div>
-        <nav class="flex-1 space-y-1">
-            <a class="mx-2 flex items-center gap-3 rounded-xl bg-[#d5e3fd] px-4 py-3 font-['Manrope'] text-sm font-medium tracking-tight text-[#005cc0]" href="/maintenance-assistant">
-                <span class="material-symbols-outlined fill-icon">neurology</span>
-                <span>Smart Assistant</span>
-            </a>
-            <a class="mx-2 flex items-center gap-3 px-4 py-3 font-['Manrope'] text-sm font-medium tracking-tight text-[#2c3437]/70 transition-all hover:bg-[#d5e3fd]/50" href="/modules/weather-siting/app">
-                <span class="material-symbols-outlined">wind_power</span>
-                <span>Wind Farm Selection</span>
-            </a>
-            <a class="mx-2 flex items-center gap-3 px-4 py-3 font-['Manrope'] text-sm font-medium tracking-tight text-[#2c3437]/70 transition-all hover:bg-[#d5e3fd]/50" href="/modules/power-trading/app">
-                <span class="material-symbols-outlined">query_stats</span>
-                <span>Power Trading</span>
-            </a>
-            <a class="mx-2 flex items-center gap-3 px-4 py-3 font-['Manrope'] text-sm font-medium tracking-tight text-[#2c3437]/70 transition-all hover:bg-[#d5e3fd]/50" href="/maintenance-assistant">
-                <span class="material-symbols-outlined">settings_suggest</span>
-                <span>Smart Maintenance</span>
-            </a>
-            <a class="mx-2 flex items-center gap-3 px-4 py-3 font-['Manrope'] text-sm font-medium tracking-tight text-[#2c3437]/70 transition-all hover:bg-[#d5e3fd]/50" href="/data-platform">
-                <span class="material-symbols-outlined">monitoring</span>
-                <span>Data Platform</span>
-            </a>
-            <a class="mx-2 flex items-center gap-3 px-4 py-3 font-['Manrope'] text-sm font-medium tracking-tight text-[#2c3437]/70 transition-all hover:bg-[#d5e3fd]/50" href="/skill-creator">
-                <span class="material-symbols-outlined">psychology</span>
-                <span>Skill Creator</span>
-            </a>
-        </nav>
-        <div class="mt-auto border-t border-outline-variant/10 pt-4">
-            <a class="mx-2 flex items-center gap-3 px-4 py-3 font-['Manrope'] text-sm font-medium tracking-tight text-[#2c3437]/70 transition-all hover:bg-[#d5e3fd]/50" href="/user">
-                <span class="material-symbols-outlined">forum</span>
-                <span>Assistant View</span>
-            </a>
-            <a class="mx-2 flex items-center gap-3 px-4 py-3 font-['Manrope'] text-sm font-medium tracking-tight text-[#2c3437]/70 transition-all hover:bg-[#d5e3fd]/50" href="/dev">
-                <span class="material-symbols-outlined">tune</span>
-                <span>Developer Console</span>
-            </a>
-            <div class="mt-4 flex items-center gap-3 px-6">
-                <div class="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-primary-container"></div>
-                <div class="overflow-hidden">
-                    <p class="truncate text-xs font-bold text-on-surface">Windrise Ops</p>
-                    <p class="text-[10px] uppercase tracking-widest text-on-surface-variant">Platform Entry</p>
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-label">固定功能目录</div>
+                <h1>风起时域</h1>
+                <p>左侧目录始终保留。点击功能后，在右侧工作区内打开，不再整页切走。</p>
+                <div class="sidebar-tip">
+                    当前共整理了 {{ portal_total_features }} 个可直接访问入口。建议以后都从这里进入功能页。
                 </div>
             </div>
-        </div>
-    </aside>
 
-    <header class="fixed right-0 top-0 z-40 flex h-16 w-[calc(100%-16rem)] items-center justify-between bg-[#f7f9fb]/80 px-8 backdrop-blur-xl">
-        <div class="flex items-center gap-4">
-            <span class="font-['Manrope'] text-xl font-black text-[#2c3437]">Luminous AI</span>
-        </div>
-        <div class="flex items-center gap-6">
-            <div class="relative group">
-                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-lg text-on-surface-variant">search</span>
-                <input class="w-64 rounded-full border-none bg-surface-container-low py-1.5 pl-10 pr-4 text-sm outline-none transition-all focus:ring-2 focus:ring-primary/20" placeholder="Search insights..." type="text">
-            </div>
-            <div class="flex items-center gap-4">
-                <a class="cursor-pointer p-2 text-on-surface-variant transition-colors hover:text-primary active:opacity-70" href="/system-status" aria-label="System status">
-                    <span class="material-symbols-outlined">monitor_heart</span>
-                </a>
-                <a class="cursor-pointer p-2 text-on-surface-variant transition-colors hover:text-primary active:opacity-70" href="/dev" aria-label="Developer console">
-                    <span class="material-symbols-outlined">account_circle</span>
-                </a>
-            </div>
-        </div>
-    </header>
-
-    <main class="ml-64 flex min-h-screen flex-col items-center justify-center p-8 pt-16">
-        <div class="mb-12 w-full max-w-4xl text-center">
-            <div class="mb-8 inline-flex items-center justify-center rounded-3xl bg-surface-container-lowest p-4 shadow-[0_32px_64px_-12px_rgba(0,92,192,0.08)]">
-                <div class="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary-container text-on-primary">
-                    <span class="material-symbols-outlined fill-icon text-5xl">wind_power</span>
+            {% for section in portal_sections %}
+            <section class="sidebar-section">
+                <h2>{{ section["title"] }}</h2>
+                <div class="nav-list">
+                    {% for item in section["items"] %}
+                    <a class="nav-link{% if item['active'] %} active{% endif %}" href="{{ item['shell_href'] }}">
+                        <strong>{{ item["name"] }}</strong>
+                        <span>{{ item["summary"] }}</span>
+                    </a>
+                    {% endfor %}
                 </div>
-            </div>
-            <h2 class="mb-4 font-['Manrope'] text-5xl font-black leading-tight tracking-tight text-on-surface">
-                Windrise Domain Platform
-            </h2>
-            <p class="mx-auto max-w-2xl text-lg font-medium text-on-surface-variant">
-                Harnessing the power of Luminous Intelligence to route diagnosis, knowledge work, and operational guidance through one unified business entry.
-            </p>
-        </div>
+            </section>
+            {% endfor %}
+        </aside>
 
-        <div class="flex w-full max-w-3xl flex-col gap-8">
-            <div class="grid grid-cols-2 gap-4 md:grid-cols-3">
-                <button class="group rounded-2xl border border-outline-variant/15 bg-surface-container-lowest p-4 text-left transition-all hover:bg-secondary-container/30 active:scale-95" type="button" data-prompt="分析风机齿轮箱过热的可能根因，并给出排查顺序。">
-                    <span class="material-symbols-outlined mb-3 block text-primary">warning</span>
-                    <p class="text-sm font-semibold text-on-surface">Gearbox Overheating</p>
-                    <p class="mt-1 text-xs text-on-surface-variant">Explain the root causes of gearbox thermal spikes.</p>
-                </button>
-                <button class="group rounded-2xl border border-outline-variant/15 bg-surface-container-lowest p-4 text-left transition-all hover:bg-secondary-container/30 active:scale-95" type="button" data-prompt="预测某风场未来 48 小时功率波动，并说明风险。">
-                    <span class="material-symbols-outlined mb-3 block text-primary">trending_up</span>
-                    <p class="text-sm font-semibold text-on-surface">Yield Prediction</p>
-                    <p class="mt-1 text-xs text-on-surface-variant">Forecast output for the Inner Mongolia farm next 48h.</p>
-                </button>
-                <button class="group col-span-2 rounded-2xl border border-outline-variant/15 bg-surface-container-lowest p-4 text-left transition-all hover:bg-secondary-container/30 active:scale-95 md:col-span-1" type="button" data-prompt="给出降低晚高峰限电损失的策略建议。">
-                    <span class="material-symbols-outlined mb-3 block text-primary">energy_savings_leaf</span>
-                    <p class="text-sm font-semibold text-on-surface">Grid Curtailment</p>
-                    <p class="mt-1 text-xs text-on-surface-variant">Strategy to mitigate evening curtailment losses.</p>
-                </button>
-            </div>
-
-            <form class="relative group" id="portal-dialog-form">
-                <div class="absolute inset-0 rounded-[2.5rem] bg-primary/5 opacity-0 blur-2xl transition-opacity group-focus-within:opacity-100"></div>
-                <div class="relative flex items-end gap-3 rounded-[2.5rem] border border-outline-variant/10 bg-surface-container-lowest p-2 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.05)]">
-                    <div class="flex-1 px-4">
-                        <textarea
-                            class="w-full resize-none border-none bg-transparent py-3 font-medium text-on-surface placeholder:text-on-surface-variant/50 focus:ring-0"
-                            id="route-search"
-                            placeholder="Ask Luminous about your wind farm operations..."
-                            rows="4"
-                        ></textarea>
+        <main class="main">
+            {% if current_item %}
+            <section class="workspace-shell">
+                <div class="workspace-head">
+                    <div>
+                        <div class="brand-label">工作区</div>
+                        <h2>{{ current_item["name"] }}</h2>
+                        <p>{{ current_item["summary"] }}</p>
                     </div>
-                    <div class="flex items-center gap-2 pr-2">
-                        <button class="rounded-full p-3 text-on-surface-variant transition-all hover:bg-surface-container hover:text-primary active:scale-90" type="button" data-prompt="补充设备编号、故障码、工况和已执行动作。">
-                            <span class="material-symbols-outlined">attach_file</span>
-                        </button>
-                        <button class="rounded-full p-3 text-on-surface-variant transition-all hover:bg-surface-container hover:text-primary active:scale-90" type="button" data-prompt="输出为结论摘要、根因排序、排查步骤和风险提醒。">
-                            <span class="material-symbols-outlined">notes</span>
-                        </button>
-                        <button class="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-container text-on-primary shadow-lg shadow-primary/20 transition-all hover:shadow-primary/40 active:scale-95" id="dialog-submit" type="submit">
-                            <span class="material-symbols-outlined fill-icon">send</span>
-                        </button>
+                    <div class="workspace-actions">
+                        <a class="action-link" href="{{ url_for('portal_home') }}">返回总览</a>
                     </div>
                 </div>
-            </form>
-
-            <div class="flex flex-wrap justify-center gap-3">
-                <button class="cursor-pointer rounded-full bg-surface-container px-4 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:bg-secondary-container" type="button" data-prompt="总结维护日志中的关键异常和待办。">Maintenance Logs</button>
-                <button class="cursor-pointer rounded-full bg-surface-container px-4 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:bg-secondary-container" type="button" data-prompt="梳理传感器校准异常的优先级和影响。">Sensor Calibration</button>
-                <button class="cursor-pointer rounded-full bg-surface-container px-4 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:bg-secondary-container" type="button" data-prompt="整理叶片巡检结果并生成后续动作。">Blade Inspection</button>
-                <button class="cursor-pointer rounded-full bg-surface-container px-4 py-1.5 text-xs font-semibold text-on-surface-variant transition-colors hover:bg-secondary-container" type="button" data-prompt="分析近期电价波动下的能量套利策略。">Energy Arbitrage</button>
-            </div>
-        </div>
-
-        <div class="glass-panel fixed bottom-12 right-12 max-w-xs rounded-3xl border border-white/40 p-6 shadow-2xl">
-            <div class="mb-4 flex items-center justify-between">
-                <span class="text-xs font-bold uppercase tracking-widest text-primary">Live Fleet Health</span>
-                <span class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
-            </div>
-            <div class="mb-4 flex items-end gap-3">
-                <div class="h-12 w-2 rounded-full bg-primary/20"><div class="h-3/4 w-full rounded-full bg-primary"></div></div>
-                <div class="h-12 w-2 rounded-full bg-primary/20"><div class="h-2/4 w-full rounded-full bg-primary"></div></div>
-                <div class="h-12 w-2 rounded-full bg-primary/20"><div class="h-full w-full rounded-full bg-primary"></div></div>
-                <div class="h-12 w-2 rounded-full bg-primary/20"><div class="h-2/3 w-full rounded-full bg-primary"></div></div>
-                <div class="ml-2 flex-1">
-                    <p class="font-['Manrope'] text-2xl font-black text-on-surface">98.4%</p>
-                    <p class="text-[10px] font-medium text-on-surface-variant">Global Efficiency</p>
+                <div class="workspace-frame-wrap">
+                    <iframe class="workspace-frame" src="{{ current_item['iframe_src'] }}" title="{{ current_item['name'] }}"></iframe>
                 </div>
-            </div>
-            <div class="flex w-full items-center gap-3 rounded-xl bg-surface-container-low p-3">
-                <span class="material-symbols-outlined text-sm text-primary">auto_awesome</span>
-                <p class="text-[11px] leading-tight text-on-surface-variant">AI recommends pitch adjustment for <b>Site B</b> to optimize wind capture.</p>
-            </div>
-        </div>
-    </main>
+            </section>
+            {% else %}
+            <section class="hero">
+                <div class="brand-label">Portal</div>
+                <h2>点击左侧功能，右侧保留工作区</h2>
+                <p>首页现在是固定壳。左侧是全量功能目录，右侧是内容承载区；从左栏打开功能时，会保持导航不动，只在右侧工作区加载页面。</p>
+                <div class="hero-stats">
+                    <div class="stat-card">
+                        <strong>{{ portal_total_features }}</strong>
+                        <span>可直接访问功能</span>
+                    </div>
+                    <div class="stat-card">
+                        <strong>{{ portal_sections|length }}</strong>
+                        <span>功能分组</span>
+                    </div>
+                    <div class="stat-card">
+                        <strong>左栏</strong>
+                        <span>固定主导航</span>
+                    </div>
+                    <div class="stat-card">
+                        <strong>右侧</strong>
+                        <span>工作区承载页</span>
+                    </div>
+                </div>
+            </section>
 
-    <div class="pointer-events-none fixed inset-0 -z-10 opacity-30 mix-blend-multiply">
-        <div class="absolute right-[-10%] top-[-10%] h-[600px] w-[600px] rounded-full bg-primary-container opacity-20 blur-[120px]"></div>
-        <div class="absolute bottom-[-10%] left-[20%] h-[500px] w-[500px] rounded-full bg-secondary-container opacity-30 blur-[100px]"></div>
+            {% for section in portal_sections %}
+            <section class="content-section">
+                <div class="section-head">
+                    <div>
+                        <h3>{{ section["title"] }}</h3>
+                        <p>{{ section["summary"] }}</p>
+                    </div>
+                </div>
+                <div class="card-grid">
+                    {% for item in section["items"] %}
+                    <article class="feature-card">
+                        <div>
+                            <strong>{{ item["name"] }}</strong>
+                            <span class="feature-path">{{ item["href"] }}</span>
+                        </div>
+                        <p>{{ item["summary"] }}</p>
+                        <div>
+                            <a href="{{ item['shell_href'] }}">打开功能</a>
+                        </div>
+                    </article>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endfor %}
+            {% endif %}
+        </main>
     </div>
-
-    <script src="{{ url_for('static', filename='js/portal.js') }}"></script>
 </body>
 </html>
