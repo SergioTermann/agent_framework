@@ -25,6 +25,7 @@
         html, body {
             margin: 0;
             min-height: 100%;
+            font-size: 17px;
             font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
             color: var(--text);
             background:
@@ -66,8 +67,8 @@
             border-radius: 999px;
             background: var(--primary-soft);
             color: var(--primary);
-            font-size: 12px;
-            font-weight: 700;
+            font-size: 16px;
+            font-weight: 800;
             letter-spacing: 0.04em;
         }
 
@@ -77,48 +78,108 @@
             line-height: 1.15;
         }
 
-        .brand p {
-            margin: 0;
-            color: var(--muted);
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        .sidebar-tip {
-            margin-top: 16px;
-            padding: 14px 16px;
-            border-radius: 16px;
-            background: var(--panel);
-            border: 1px solid var(--line);
-            box-shadow: var(--shadow);
-            color: var(--muted);
-            font-size: 13px;
-            line-height: 1.6;
-        }
-
         .sidebar-section {
             margin-top: 20px;
         }
 
-        .sidebar-section h2 {
-            margin: 0 0 10px;
-            padding: 0 10px;
-            color: var(--muted);
+        .sidebar-group {
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.72);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .sidebar-group[open] {
+            background: var(--panel-strong);
+        }
+
+        .sidebar-group-summary {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 16px 16px 14px;
+            cursor: pointer;
+        }
+
+        .sidebar-group-summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .sidebar-group-copy {
+            min-width: 0;
+        }
+
+        .sidebar-group-kicker {
+            display: inline-flex;
+            margin-bottom: 8px;
+            color: var(--primary);
             font-size: 12px;
+            font-weight: 800;
             letter-spacing: 0.08em;
             text-transform: uppercase;
+        }
+
+        .sidebar-group-copy strong {
+            display: block;
+            font-size: 17px;
+            line-height: 1.35;
+        }
+
+        .sidebar-group-copy span:last-child {
+            display: block;
+            margin-top: 6px;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .sidebar-group-meta {
+            display: grid;
+            justify-items: end;
+            gap: 8px;
+            flex: 0 0 auto;
+        }
+
+        .sidebar-group-count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 34px;
+            min-height: 34px;
+            padding: 0 10px;
+            border-radius: 999px;
+            background: var(--primary-soft);
+            color: var(--primary);
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .sidebar-group-chevron {
+            color: var(--muted);
+            font-size: 18px;
+            line-height: 1;
+            transition: transform 0.18s ease;
+        }
+
+        .sidebar-group[open] .sidebar-group-chevron {
+            transform: rotate(180deg);
         }
 
         .nav-list {
             display: grid;
             gap: 8px;
+            padding: 0 12px 12px;
         }
 
         .nav-link {
             display: block;
             padding: 12px 14px;
             border-radius: 16px;
-            border: 1px solid transparent;
+            border: 1px solid rgba(58, 81, 107, 0.08);
+            background: rgba(248, 250, 253, 0.88);
             transition: 0.18s ease;
         }
 
@@ -136,7 +197,7 @@
 
         .nav-link strong {
             display: block;
-            font-size: 14px;
+            font-size: 16px;
             line-height: 1.4;
         }
 
@@ -144,7 +205,7 @@
             display: block;
             margin-top: 4px;
             color: var(--muted);
-            font-size: 12px;
+            font-size: 15px;
             line-height: 1.5;
         }
 
@@ -171,7 +232,7 @@
             max-width: 880px;
             margin: 0;
             color: var(--muted);
-            font-size: 16px;
+            font-size: 18px;
             line-height: 1.75;
         }
 
@@ -199,7 +260,7 @@
             display: block;
             margin-top: 8px;
             color: var(--muted);
-            font-size: 13px;
+            font-size: 14px;
         }
 
         .workspace-shell {
@@ -231,7 +292,7 @@
         .workspace-head p {
             margin: 6px 0 0;
             color: var(--muted);
-            font-size: 14px;
+            font-size: 15px;
             line-height: 1.6;
         }
 
@@ -247,7 +308,7 @@
             justify-content: center;
             padding: 10px 14px;
             border-radius: 14px;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 700;
             border: 1px solid var(--line);
             background: #fff;
@@ -294,7 +355,7 @@
         .section-head p {
             margin: 0;
             color: var(--muted);
-            font-size: 14px;
+            font-size: 15px;
             line-height: 1.6;
         }
 
@@ -329,14 +390,14 @@
             border-radius: 999px;
             background: var(--primary-soft);
             color: var(--primary);
-            font-size: 12px;
+            font-size: 14px;
             word-break: break-all;
         }
 
         .feature-card p {
             margin: 0;
             color: var(--muted);
-            font-size: 14px;
+            font-size: 15px;
             line-height: 1.7;
             flex: 1;
         }
@@ -350,7 +411,7 @@
             border-radius: 14px;
             background: var(--primary);
             color: #fff;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 700;
         }
 
@@ -410,25 +471,31 @@
     <div class="layout">
         <aside class="sidebar">
             <div class="brand">
-                <div class="brand-label">固定功能目录</div>
                 <h1>风起时域</h1>
-                <p>左侧目录始终保留。点击功能后，在右侧工作区内打开，不再整页切走。</p>
-                <div class="sidebar-tip">
-                    当前共整理了 {{ portal_total_features }} 个可直接访问入口。建议以后都从这里进入功能页。
-                </div>
             </div>
 
             {% for section in portal_sections %}
             <section class="sidebar-section">
-                <h2>{{ section["title"] }}</h2>
-                <div class="nav-list">
-                    {% for item in section["items"] %}
-                    <a class="nav-link{% if item['active'] %} active{% endif %}" href="{{ item['shell_href'] }}">
-                        <strong>{{ item["name"] }}</strong>
-                        <span>{{ item["summary"] }}</span>
-                    </a>
-                    {% endfor %}
-                </div>
+                <details class="sidebar-group"{% if section["active"] %} open{% endif %}>
+                    <summary class="sidebar-group-summary">
+                        <div class="sidebar-group-copy">
+                            <strong>{{ section["title"] }}</strong>
+                            <span>{{ section["summary"] }}</span>
+                        </div>
+                        <div class="sidebar-group-meta">
+                            <span class="sidebar-group-count">{{ section["items"]|length }}</span>
+                            <span class="sidebar-group-chevron">⌄</span>
+                        </div>
+                    </summary>
+                    <div class="nav-list">
+                        {% for item in section["items"] %}
+                        <a class="nav-link{% if item['active'] %} active{% endif %}" href="{{ item['shell_href'] }}">
+                            <strong>{{ item["name"] }}</strong>
+                            <span>{{ item["summary"] }}</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </details>
             </section>
             {% endfor %}
         </aside>
@@ -452,9 +519,7 @@
             </section>
             {% else %}
             <section class="hero">
-                <div class="brand-label">Portal</div>
-                <h2>点击左侧功能，右侧保留工作区</h2>
-                <p>首页现在是固定壳。左侧是全量功能目录，右侧是内容承载区；从左栏打开功能时，会保持导航不动，只在右侧工作区加载页面。</p>
+                <h2>功能总览</h2>
                 <div class="hero-stats">
                     <div class="stat-card">
                         <strong>{{ portal_total_features }}</strong>
@@ -463,14 +528,6 @@
                     <div class="stat-card">
                         <strong>{{ portal_sections|length }}</strong>
                         <span>功能分组</span>
-                    </div>
-                    <div class="stat-card">
-                        <strong>左栏</strong>
-                        <span>固定主导航</span>
-                    </div>
-                    <div class="stat-card">
-                        <strong>右侧</strong>
-                        <span>工作区承载页</span>
                     </div>
                 </div>
             </section>
@@ -502,5 +559,21 @@
             {% endif %}
         </main>
     </div>
+    <script>
+        const sidebarGroups = Array.from(document.querySelectorAll(".sidebar-group"));
+
+        sidebarGroups.forEach((group) => {
+            group.addEventListener("toggle", () => {
+                if (!group.open) {
+                    return;
+                }
+                sidebarGroups.forEach((other) => {
+                    if (other !== group) {
+                        other.open = false;
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

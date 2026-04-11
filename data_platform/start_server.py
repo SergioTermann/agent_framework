@@ -14,6 +14,7 @@ import threading
 import subprocess
 import sys
 import io
+import errno
 
 # 修复 Windows 控制台输出编码问题
 if sys.platform == "win32":
@@ -45,6 +46,10 @@ def open_browser(url, delay=1.5):
     time.sleep(delay)
     print(f"\n🚀 正在浏览器中打开: {url}")
     webbrowser.open(url)
+
+
+def is_address_in_use_error(error):
+    return error.errno in {errno.EADDRINUSE, 10048}
 
 
 def build_project():
@@ -152,7 +157,7 @@ def start_server():
             httpd.serve_forever()
             
     except OSError as e:
-        if e.errno == 10048:  # Windows 端口被占用错误码
+        if is_address_in_use_error(e):
             print(f"❌ 错误: 端口 {PORT} 已被占用！")
             print(f"💡 解决方案:")
             print(f"   1. 关闭占用端口的程序")
@@ -165,4 +170,3 @@ def start_server():
 
 if __name__ == "__main__":
     start_server()
-

@@ -9,7 +9,7 @@ export default defineConfig({
   base: './',
   build: {
     outDir: './docs',
-    emptyOutDir: false, // 不清空输出目录，避免删除 videos 文件夹
+    emptyOutDir: true,
     rollupOptions: {
       output: {
         chunkFileNames: 'js/[name]-[hash].js', // 引入文件名的名称

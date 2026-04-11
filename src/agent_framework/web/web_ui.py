@@ -524,6 +524,7 @@ def _build_portal_sections(current_target: str | None = None) -> list[dict]:
             items.append(item_copy)
         section_copy = dict(section)
         section_copy["items"] = items
+        section_copy["active"] = any(item["active"] for item in items)
         sections.append(section_copy)
     return sections
 
@@ -1018,13 +1019,21 @@ def api_keys():
 @app.route('/data-platform/')
 def data_platform_home():
     """数据平台 - 风机监控可视化"""
-    return send_file(_PKG_ROOT / 'static' / 'data_platform' / 'index.html')
+    response = send_file(_PKG_ROOT / 'static' / 'data_platform' / 'index.html')
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 
 
 @app.route('/data-platform/<path:filename>')
 def data_platform_static(filename):
     """数据平台静态资源"""
-    return send_from_directory(_PKG_ROOT / 'static' / 'data_platform', filename)
+    response = send_from_directory(_PKG_ROOT / 'static' / 'data_platform', filename)
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 
 
 @app.route('/skill-creator')

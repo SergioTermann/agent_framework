@@ -297,7 +297,25 @@ class VectorStore:
         os.makedirs(persist_directory, exist_ok=True)
 
         if CHROMA_SUPPORT:
-            self.client = chromadb.PersistentClient(path=persist_directory)
+            telemetry_enabled = os.getenv("CHROMA_ANONYMIZED_TELEMETRY", "").strip().lower() in (
+                "1",
+                "true",
+                "yes",
+                "on",
+            )
+            telemetry_impl = (
+                "chromadb.telemetry.product.posthog.Posthog"
+                if telemetry_enabled
+                else "agent_framework.vector_db.chroma_telemetry.NoOpProductTelemetryClient"
+            )
+            self.client = chromadb.PersistentClient(
+                path=persist_directory,
+                settings=Settings(
+                    anonymized_telemetry=telemetry_enabled,
+                    chroma_product_telemetry_impl=telemetry_impl,
+                    chroma_telemetry_impl=telemetry_impl,
+                ),
+            )
         else:
             # 简单的内存存储
             self.collections = {}

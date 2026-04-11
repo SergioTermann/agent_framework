@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import errno
 import os
 import subprocess
 import sys
@@ -8,6 +9,7 @@ import time
 import urllib.error
 import urllib.request
 import webbrowser
+from collections.abc import Callable
 from pathlib import Path
 
 
@@ -76,10 +78,23 @@ def ensure_env_file(repo_root: Path) -> None:
     print("[info] created .env from .env.example")
 
 
-def build_legacy_gateway(repo_root: Path) -> Path | None:
-    gateway_bin = repo_root / "go_services" / "gateway" / "gateway"
+def resolve_go_binary_path(directory: Path, binary_name: str) -> Path:
+    binary = directory / binary_name
     if sys.platform == "win32":
-        gateway_bin = gateway_bin.with_suffix(".exe")
+        return binary.with_suffix(".exe")
+    return binary
+
+
+def build_legacy_gateway(repo_root: Path, *, force_rebuild: bool = False) -> Path | None:
+    gateway_bin = resolve_go_binary_path(repo_root / "go_services" / "gateway", "gateway")
+    if gateway_bin.exists() and not force_rebuild:
+        return gateway_bin
+
+    if force_rebuild and gateway_bin.exists():
+        gateway_bin.unlink()
+
+    output_dir = gateway_bin.parent
+    output_dir.mkdir(parents=True, exist_ok=True)
     if gateway_bin.exists():
         return gateway_bin
 
@@ -94,10 +109,16 @@ def build_legacy_gateway(repo_root: Path) -> Path | None:
     return gateway_bin
 
 
-def build_gateway_control_plane(repo_root: Path) -> Path | None:
-    gateway_bin = repo_root / "services" / "gateway-go" / "gateway-go"
-    if sys.platform == "win32":
-        gateway_bin = gateway_bin.with_suffix(".exe")
+def build_gateway_control_plane(repo_root: Path, *, force_rebuild: bool = False) -> Path | None:
+    gateway_bin = resolve_go_binary_path(repo_root / "services" / "gateway-go", "gateway-go")
+    if gateway_bin.exists() and not force_rebuild:
+        return gateway_bin
+
+    if force_rebuild and gateway_bin.exists():
+        gateway_bin.unlink()
+
+    output_dir = gateway_bin.parent
+    output_dir.mkdir(parents=True, exist_ok=True)
     if gateway_bin.exists():
         return gateway_bin
 
@@ -110,6 +131,28 @@ def build_gateway_control_plane(repo_root: Path) -> Path | None:
     if build_result.returncode != 0:
         return None
     return gateway_bin
+
+
+def launch_process(
+    command: list[str],
+    *,
+    cwd: Path,
+    env: dict[str, str],
+    rebuild: Callable[[], Path | None] | None = None,
+    label: str = "service",
+) -> subprocess.Popen[bytes]:
+    try:
+        return subprocess.Popen(command, cwd=cwd, env=env)
+    except OSError as exc:
+        if rebuild is None or exc.errno not in {errno.ENOEXEC, errno.EACCES}:
+            raise
+
+        print(f"[info] {label} binary is not runnable on {sys.platform}, rebuilding ...")
+        rebuilt = rebuild()
+        if rebuilt is None:
+            raise
+        retry_command = [str(rebuilt), *command[1:]]
+        return subprocess.Popen(retry_command, cwd=cwd, env=env)
 
 
 def main() -> int:
@@ -189,10 +232,12 @@ def main() -> int:
                 control_plane_env["APP_AUTH_SECRET"] = control_plane_env["JWT_SECRET_KEY"]
             control_plane_env.setdefault("GATEWAY_REQUIRE_AUTH", "true")
 
-            go_control_plane_process = subprocess.Popen(
+            go_control_plane_process = launch_process(
                 [str(control_plane_bin)],
                 cwd=repo_root,
                 env=control_plane_env,
+                rebuild=lambda: build_gateway_control_plane(repo_root, force_rebuild=True),
+                label="gateway-go control plane",
             )
             if not wait_until_ready(f"{go_control_plane_url}/health", go_control_plane_process, 15):
                 print("[error] gateway-go control plane failed to start")
@@ -212,7 +257,13 @@ def main() -> int:
             gw_env["PYTHON_BACKEND_URL"] = f"http://127.0.0.1:{flask_port}"
             gw_env["GATEWAY_CONTROL_PLANE_URL"] = go_control_plane_url
             gw_env["STATIC_DIR"] = str(repo_root / "src" / "agent_framework" / "static")
-            gateway_process = subprocess.Popen([str(gateway_bin)], cwd=repo_root, env=gw_env)
+            gateway_process = launch_process(
+                [str(gateway_bin)],
+                cwd=repo_root,
+                env=gw_env,
+                rebuild=lambda: build_legacy_gateway(repo_root, force_rebuild=True),
+                label="legacy go gateway",
+            )
 
             if not wait_until_ready(f"{app_url}/health", gateway_process, 15):
                 print("[error] legacy go gateway failed to start")
@@ -252,10 +303,12 @@ def main() -> int:
                     gw_env["APP_AUTH_SECRET"] = gw_env["JWT_SECRET_KEY"]
                 gw_env.setdefault("GATEWAY_REQUIRE_AUTH", "true")
 
-                go_control_plane_process = subprocess.Popen(
+                go_control_plane_process = launch_process(
                     [str(gateway_bin)],
                     cwd=repo_root,
                     env=gw_env,
+                    rebuild=lambda: build_gateway_control_plane(repo_root, force_rebuild=True),
+                    label="gateway-go control plane",
                 )
                 if not wait_until_ready(f"{go_control_plane_url}/health", go_control_plane_process, 15):
                     print("[error] gateway-go control plane failed to start")

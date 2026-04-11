@@ -1,7 +1,15 @@
 <template>
-  <div class="video-analysis-view">
+  <div class="video-analysis-view" :class="{ 'left-panel-collapsed': isLeftPanelCollapsed }">
+    <button
+      class="left-panel-toggle"
+      :class="{ collapsed: isLeftPanelCollapsed }"
+      :title="isLeftPanelCollapsed ? '展开左侧面板' : '收起左侧面板'"
+      @click="toggleLeftPanel"
+    >
+      <i :class="isLeftPanelCollapsed ? 'fa-solid fa-chevron-right' : 'fa-solid fa-chevron-left'"></i>
+    </button>
     <!-- 左侧视频检测区域 -->
-    <div class="left-panel">
+    <div class="left-panel" :class="{ collapsed: isLeftPanelCollapsed }">
       <div class="panel-header">
         <div class="panel-title">
           <i class="fa-solid fa-brain"></i>
@@ -387,6 +395,7 @@ const detectionCanvas = ref<HTMLCanvasElement | null>(null)
 const videoContainer = ref<HTMLElement | null>(null)
 const videoSrc = ref('/videos/turbine-view.mp4')
 const videoSourceType = ref<'file' | 'camera'>('file')
+const isLeftPanelCollapsed = ref(true)
 const isPlaying = ref(false)
 const videoError = ref(false)
 const isAnalyzing = ref(false)
@@ -491,6 +500,10 @@ let realTimeAnalysisInterval: number | null = null
 // 返回地图
 const goBack = () => {
   router.push('/')
+}
+
+const toggleLeftPanel = () => {
+  isLeftPanelCollapsed.value = !isLeftPanelCollapsed.value
 }
 
 // 视频加载
@@ -1183,6 +1196,7 @@ onUnmounted(() => {
 
 <style lang="scss" scoped>
 .video-analysis-view {
+  --left-panel-width: 35%;
   position: absolute;
   top: 0;
   right: 0;
@@ -1195,13 +1209,53 @@ onUnmounted(() => {
   background: #0a0e1a;
 }
 
+.left-panel-toggle {
+  position: absolute;
+  top: 18px;
+  left: calc(var(--left-panel-width) - 18px);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  color: #d7fffb;
+  cursor: pointer;
+  background: linear-gradient(135deg, rgba(20, 184, 166, 92%) 0%, rgba(13, 148, 136, 95%) 100%);
+  border: 1px solid rgba(94, 234, 212, 45%);
+  border-radius: 999px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 35%);
+  transition: left 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  &:hover {
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 42%);
+    transform: translateX(2px);
+  }
+  &.collapsed:hover {
+    transform: translateX(0);
+  }
+  i {
+    font-size: 14px;
+  }
+}
+
 // 左侧面板
 .left-panel {
   display: flex;
-  flex: 0 0 35%;
+  flex: 0 0 var(--left-panel-width);
+  width: var(--left-panel-width);
+  min-width: 0;
   flex-direction: column;
+  overflow: hidden;
   background: rgba(0, 20, 40, 50%);
   border-right: 1px solid rgba(94, 234, 212, 20%);
+  transition: flex-basis 0.3s ease, width 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
+  &.collapsed {
+    flex-basis: 0;
+    width: 0;
+    border-right-color: transparent;
+    opacity: 0;
+    pointer-events: none;
+  }
   .panel-header {
     display: flex;
     align-items: center;
@@ -1771,7 +1825,8 @@ onUnmounted(() => {
 // 右侧面板
 .right-panel {
   display: flex;
-  flex: 0 0 65%;
+  flex: 1 1 auto;
+  min-width: 0;
   background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
   
   // 聊天侧边栏
@@ -2545,6 +2600,12 @@ onUnmounted(() => {
         }
       }
     }
+  }
+}
+
+.video-analysis-view.left-panel-collapsed {
+  .left-panel-toggle {
+    left: 12px;
   }
 }
 

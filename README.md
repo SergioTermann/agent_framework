@@ -310,3 +310,29 @@ agent_framework/
 ## 许可证
 
 [MIT License](LICENSE)
+
+## macOS Quick Start
+
+On macOS you can start the project directly with the same Python entrypoint:
+
+```bash
+uv sync
+cp .env.example .env
+uv run python start_app.py
+```
+
+If you prefer a local virtualenv instead of `uv`:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e .
+python3 start_app.py
+```
+
+For Finder-based startup on macOS, use `start.command`.
+
+Notes:
+
+- `--with-gateway` and `--with-go-control-plane` require Go to be installed on macOS because the launcher will build the local Go binaries for the current platform.
+- If an old Go binary from another platform is present, `start_app.py` now rebuilds it automatically when startup detects an exec-format or permission mismatch.
