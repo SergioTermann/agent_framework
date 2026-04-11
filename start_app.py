@@ -33,12 +33,16 @@ def load_server_config(repo_root: Path) -> tuple[str, int]:
         return host, port
 
 
-def build_runtime_env(repo_root: Path) -> dict[str, str]:
+def build_runtime_env(repo_root: Path, *, host: str | None = None, port: int | None = None) -> dict[str, str]:
     env = os.environ.copy()
     src_path = str(repo_root / "src")
     existing_pythonpath = env.get("PYTHONPATH", "").strip()
     env["PYTHONPATH"] = src_path if not existing_pythonpath else f"{src_path}{os.pathsep}{existing_pythonpath}"
     env.setdefault("PYTHONIOENCODING", "utf-8")
+    if host:
+        env["HOST"] = host
+    if port is not None:
+        env["PORT"] = str(port)
     return env
 
 
@@ -157,6 +161,8 @@ def launch_process(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Agent Framework launcher")
+    parser.add_argument("--host", default=None, help="Override the listen host for this run")
+    parser.add_argument("--port", type=int, default=None, help="Override the listen port for this run")
     parser.add_argument("--no-browser", action="store_true", help="Do not open a browser after startup")
     parser.add_argument("--timeout", type=float, default=60, help="Startup timeout in seconds")
     parser.add_argument("--smoke-test", action="store_true", help="Exit after readiness checks pass")
@@ -179,7 +185,9 @@ def main() -> int:
     repo_root = Path(__file__).resolve().parent
     ensure_env_file(repo_root)
 
-    host, port = load_server_config(repo_root)
+    config_host, config_port = load_server_config(repo_root)
+    host = args.host or config_host
+    port = args.port or config_port
     browser_host = "127.0.0.1" if host in {"0.0.0.0", "::"} else host
     app_url = f"http://{browser_host}:{port}"
 
@@ -202,7 +210,7 @@ def main() -> int:
             print(f"go gateway  : {app_url}")
             print("=" * 72)
 
-            flask_env = build_runtime_env(repo_root)
+            flask_env = build_runtime_env(repo_root, host=host, port=flask_port)
             flask_env["INTERNAL_PORT"] = str(flask_port)
             process = subprocess.Popen(
                 [sys.executable, "-m", "agent_framework.web.web_ui"],
@@ -272,7 +280,7 @@ def main() -> int:
                 stop_process(process)
                 return 1
         else:
-            runtime_env = build_runtime_env(repo_root)
+            runtime_env = build_runtime_env(repo_root, host=host, port=port)
             if args.with_go_control_plane:
                 go_control_plane_port = int(os.environ.get("GATEWAY_CONTROL_PLANE_PORT", "7000"))
                 go_control_plane_url = f"http://127.0.0.1:{go_control_plane_port}"

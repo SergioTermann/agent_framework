@@ -35,6 +35,21 @@ def test_resolve_go_binary_path_uses_platform_suffix(monkeypatch):
         shutil.rmtree(temp_dir, ignore_errors=True)
 
 
+def test_build_runtime_env_accepts_host_and_port(monkeypatch):
+    temp_dir = _workspace_temp_dir()
+    try:
+        monkeypatch.delenv("HOST", raising=False)
+        monkeypatch.delenv("PORT", raising=False)
+
+        env = start_app.build_runtime_env(temp_dir, host="127.0.0.1", port=9100)
+
+        assert env["HOST"] == "127.0.0.1"
+        assert env["PORT"] == "9100"
+        assert str(temp_dir / "src") in env["PYTHONPATH"]
+    finally:
+        shutil.rmtree(temp_dir, ignore_errors=True)
+
+
 def test_launch_process_rebuilds_unrunnable_binary(monkeypatch):
     temp_path = _workspace_temp_dir()
     try:
