@@ -12,8 +12,12 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #f5f8fc 0%, #eff4fb 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background:
+                radial-gradient(circle at 8% 10%, rgba(19, 99, 223, 0.14), transparent 22%),
+                radial-gradient(circle at 88% 12%, rgba(217, 119, 6, 0.12), transparent 20%),
+                radial-gradient(circle at 76% 86%, rgba(20, 184, 166, 0.10), transparent 24%),
+                #eef4fb;
         }
 
         .app-container {
@@ -24,16 +28,18 @@
         /* 侧边栏 */
         .sidebar {
             width: 280px;
-            background: linear-gradient(180deg, #0f4eb3 0%, #1363df 52%, #2b7fff 100%);
-            color: white;
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(255, 250, 244, 0.58)),
+                rgba(247, 242, 234, 0.72);
+            color: #202a36;
             display: flex;
             flex-direction: column;
-            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+            box-shadow: 0 18px 42px -28px rgba(34, 44, 63, 0.16);
         }
 
         .sidebar-header {
             padding: 28px 24px;
-            border-bottom: 1px solid rgba(255,255,255,0.15);
+            border-bottom: 1px solid rgba(101, 120, 144, 0.12);
         }
 
         .sidebar-logo {
@@ -52,7 +58,7 @@
 
         .nav-item {
             padding: 12px 24px;
-            color: rgba(255,255,255,0.8);
+            color: #525b62;
             text-decoration: none;
             display: flex;
             align-items: center;
@@ -61,14 +67,14 @@
         }
 
         .nav-item:hover {
-            background: rgba(255,255,255,0.1);
-            color: white;
+            background: rgba(19, 99, 223, 0.06);
+            color: #0f4eb3;
         }
 
         .nav-item.active {
-            background: rgba(255,255,255,0.15);
-            color: white;
-            border-left: 3px solid white;
+            background: rgba(19, 99, 223, 0.08);
+            color: #0f4eb3;
+            border-left: 3px solid #1363df;
         }
 
         /* 主内容区 */
@@ -80,17 +86,18 @@
         }
 
         .header {
-            background: #ffffff;
+            background: rgba(255,255,255,0.82);
             padding: 16px 24px;
             border-bottom: 1px solid rgba(101, 120, 144, 0.14);
             display: flex;
             align-items: center;
             gap: 12px;
+            backdrop-filter: blur(16px);
         }
 
         .header h1 {
             font-size: 20px;
-            color: #253038;
+            color: #202a36;
             font-weight: 600;
         }
 
@@ -141,12 +148,12 @@
         }
 
         .message.user .message-avatar {
-            background: linear-gradient(135deg, #1363df, #60a5fa);
+            background: linear-gradient(135deg, #0f4eb3, #1363df);
             color: #ffffff;
         }
 
         .message.assistant .message-avatar {
-            background: #e3ecff;
+            background: rgba(19, 99, 223, 0.08);
             color: #1363df;
         }
 
@@ -160,7 +167,7 @@
         }
 
         .message.user .message-content {
-            background: linear-gradient(135deg, #1363df, #60a5fa);
+            background: linear-gradient(135deg, #0f4eb3, #1363df);
             color: #ffffff;
             border: none;
         }
@@ -188,7 +195,7 @@
         }
 
         .input-area button {
-            background: linear-gradient(135deg, #1363df, #60a5fa);
+            background: linear-gradient(135deg, #0f4eb3, #1363df);
             color: #ffffff;
             border: none;
             border-radius: 12px;

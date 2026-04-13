@@ -4,867 +4,1318 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>永久记忆系统 - Agent Framework</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@300..700,0..1&display=swap" rel="stylesheet">
     <style>
         :root {
-            --theme-accent: #1363df;
-            --theme-accent-deep: #0f4eb3;
-            --theme-accent-line: rgba(19, 99, 223, 0.2);
-            --theme-accent-shadow: rgba(19, 99, 223, 0.18);
+            --mem-accent:      #6d28d9;
+            --mem-accent-deep: #4c1d95;
+            --mem-accent-soft: rgba(109, 40, 217, 0.10);
+            --mem-bg:          #f5f3ff;
+            --mem-surface:     rgba(255, 255, 255, 0.84);
+            --mem-border:      rgba(109, 40, 217, 0.13);
+            --mem-text:        #1e1535;
+            --mem-muted:       #6b5fa8;
+            --mem-shadow:      0 2px 14px rgba(109, 40, 217, 0.07);
+            --mem-shadow-md:   0 8px 32px rgba(109, 40, 217, 0.12);
+            --mem-radius:      20px;
+            --mem-radius-sm:   12px;
+            --mem-episodic:    #16a34a;
+            --mem-semantic:    #1d4ed8;
+            --mem-procedural:  #0891b2;
+            --mem-working:     #dc2626;
         }
 
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { min-height: 100%; }
+
         body {
-            background: linear-gradient(135deg, #eef5ff 0%, #f7fbff 52%, #edf4fb 100%);
+            font-family: 'Inter', sans-serif;
+            background-color: var(--mem-bg);
+            background-image:
+                radial-gradient(circle at 15% 18%, rgba(109, 40, 217, 0.16), transparent 36%),
+                radial-gradient(circle at 82% 74%, rgba(139, 92, 246, 0.12), transparent 30%),
+                radial-gradient(circle at 50% 96%, rgba(109, 40, 217, 0.07), transparent 26%);
+            color: var(--mem-text);
             min-height: 100vh;
         }
 
-        .memory-card {
-            border-left: 4px solid var(--theme-accent);
-            transition: all 0.3s ease;
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(109,40,217,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(109,40,217,0.04) 1px, transparent 1px);
+            background-size: 48px 48px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .mem-shell {
+            position: relative;
+            z-index: 1;
+            max-width: 1360px;
+            margin: 0 auto;
+            padding: 32px 28px 80px;
+        }
+
+        /* ── Topbar ── */
+        .mem-topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+
+        .mem-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .mem-brand-mark {
+            width: 38px; height: 38px;
+            background: var(--mem-accent);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .mem-brand-copy strong {
+            display: block;
+            font-family: 'Manrope', sans-serif;
+            font-size: 15px;
+            color: var(--mem-text);
+        }
+
+        .mem-brand-copy small { font-size: 12px; color: var(--mem-muted); }
+
+        /* ── Buttons ── */
+        .mem-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 18px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
             cursor: pointer;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(20px);
-        }
-        .memory-card:hover {
-            box-shadow: 0 8px 20px var(--theme-accent-shadow);
-        }
-        .memory-type-episodic { border-left-color: #28a745; }
-        .memory-type-semantic { border-left-color: var(--theme-accent-deep); }
-        .memory-type-procedural { border-left-color: #60a5fa; }
-        .memory-type-working { border-left-color: #c0392b; }
-
-        .importance-bar {
-            height: 4px;
-            background: linear-gradient(90deg, #dc2626 0%, var(--theme-accent) 50%, #28a745 100%);
-            border-radius: 2px;
-        }
-
-        .search-container {
-            background: linear-gradient(135deg, var(--theme-accent-deep) 0%, var(--theme-accent) 100%);
-            color: white;
-            padding: 2rem;
-            border-radius: 10px;
-            margin-bottom: 2rem;
-            box-shadow: 0 14px 30px rgba(19, 99, 223, 0.16);
-        }
-
-        .stats-card {
-            background: linear-gradient(135deg, var(--theme-accent-deep) 0%, var(--theme-accent) 100%);
-            color: white;
-            border-radius: 10px;
-            padding: 1.5rem;
-            box-shadow: 0 10px 24px rgba(19, 99, 223, 0.14);
-        }
-
-        .memory-content {
-            max-height: 100px;
-            overflow-y: auto;
-        }
-
-        .tag {
-            background: #e9ecef;
-            color: #495057;
-            padding: 0.25rem 0.5rem;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            margin-right: 0.25rem;
-        }
-
-        /* 三层架构 Tab 样式 */
-        .memory-tabs .nav-link {
-            color: #495057;
-            font-weight: 500;
             border: none;
-            padding: 0.75rem 1.5rem;
-        }
-        .memory-tabs .nav-link.active {
-            color: var(--theme-accent);
-            border-bottom: 3px solid var(--theme-accent);
-            background: transparent;
-        }
-        .memory-tabs .nav-link i {
-            margin-right: 0.5rem;
+            font-family: inherit;
+            transition: background 0.18s, transform 0.12s;
         }
 
-        /* 每日笔记样式 */
-        .daily-note-list {
-            max-height: 500px;
+        .mem-btn:active { transform: scale(0.97); }
+
+        .mem-btn-primary {
+            background: var(--mem-accent);
+            color: #fff;
+        }
+
+        .mem-btn-primary:hover { background: var(--mem-accent-deep); }
+
+        .mem-btn-ghost {
+            background: var(--mem-surface);
+            color: var(--mem-text);
+            border: 1px solid var(--mem-border);
+            backdrop-filter: blur(8px);
+        }
+
+        .mem-btn-ghost:hover { background: rgba(255,255,255,0.95); }
+
+        .mem-btn-danger {
+            background: rgba(220,38,38,0.09);
+            color: #dc2626;
+            border: 1px solid rgba(220,38,38,0.17);
+        }
+
+        .mem-btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
+
+        /* ── Stats strip ── */
+        .mem-stats-strip {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .mem-stat-card {
+            background: var(--mem-surface);
+            border: 1px solid var(--mem-border);
+            border-radius: var(--mem-radius-sm);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            backdrop-filter: blur(10px);
+            box-shadow: var(--mem-shadow);
+        }
+
+        .mem-stat-icon {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .mem-stat-icon .material-symbols-outlined { font-size: 20px; }
+
+        .mem-stat-icon.is-episodic   { background: rgba(22,163,74,0.12);   color: var(--mem-episodic); }
+        .mem-stat-icon.is-semantic   { background: rgba(29,78,216,0.10);   color: var(--mem-semantic); }
+        .mem-stat-icon.is-procedural { background: rgba(8,145,178,0.10);   color: var(--mem-procedural); }
+        .mem-stat-icon.is-total      { background: var(--mem-accent-soft); color: var(--mem-accent); }
+
+        .mem-stat-card strong {
+            display: block;
+            font-size: 22px;
+            font-weight: 700;
+            font-family: 'Manrope', sans-serif;
+            line-height: 1;
+            margin-bottom: 3px;
+        }
+
+        .mem-stat-card small { font-size: 12px; color: var(--mem-muted); }
+
+        /* ── Tabs ── */
+        .mem-tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--mem-surface);
+            border: 1px solid var(--mem-border);
+            border-radius: var(--mem-radius-sm);
+            padding: 5px;
+            margin-bottom: 24px;
+            width: fit-content;
+            backdrop-filter: blur(8px);
+        }
+
+        .mem-tab-btn {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 18px;
+            border: none;
+            border-radius: 9px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            background: transparent;
+            color: var(--mem-muted);
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .mem-tab-btn .material-symbols-outlined { font-size: 16px; }
+
+        .mem-tab-btn.is-active {
+            background: var(--mem-accent);
+            color: #fff;
+        }
+
+        .mem-tab-btn:not(.is-active):hover {
+            background: var(--mem-accent-soft);
+            color: var(--mem-accent);
+        }
+
+        /* ── Tab panels ── */
+        .mem-panel { display: none; }
+        .mem-panel.is-active { display: block; }
+
+        /* ── Panel / Card ── */
+        .mem-card {
+            background: var(--mem-surface);
+            border: 1px solid var(--mem-border);
+            border-radius: var(--mem-radius);
+            box-shadow: var(--mem-shadow);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .mem-card-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--mem-border);
+            flex-wrap: wrap;
+        }
+
+        .mem-card-head strong {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .mem-card-head .material-symbols-outlined { font-size: 18px; color: var(--mem-accent); }
+
+        .mem-card-body { padding: 20px 24px; }
+
+        /* ── Search section ── */
+        .mem-search-hero {
+            background: linear-gradient(135deg, var(--mem-accent-deep) 0%, var(--mem-accent) 100%);
+            border-radius: var(--mem-radius);
+            padding: 28px 32px;
+            margin-bottom: 20px;
+            color: #fff;
+            box-shadow: 0 8px 28px rgba(109,40,217,0.22);
+        }
+
+        .mem-search-hero h3 {
+            font-family: 'Manrope', sans-serif;
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mem-search-row {
+            display: grid;
+            grid-template-columns: 1fr 180px auto;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .mem-search-input,
+        .mem-search-select {
+            padding: 10px 14px;
+            border: 1.5px solid rgba(255,255,255,0.30);
+            border-radius: 10px;
+            font-size: 13px;
+            font-family: inherit;
+            background: rgba(255,255,255,0.12);
+            color: #fff;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        .mem-search-input::placeholder { color: rgba(255,255,255,0.55); }
+        .mem-search-input:focus,
+        .mem-search-select:focus { border-color: rgba(255,255,255,0.65); }
+        .mem-search-select option { color: var(--mem-text); background: #fff; }
+
+        .mem-search-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.22);
+            border: 1.5px solid rgba(255,255,255,0.35);
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            font-family: inherit;
+            color: #fff;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.15s;
+        }
+
+        .mem-search-btn:hover { background: rgba(255,255,255,0.30); }
+
+        /* ── Form ── */
+        .mem-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .mem-form-group { margin-bottom: 16px; }
+
+        .mem-form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--mem-muted);
+            margin-bottom: 6px;
+        }
+
+        .mem-form-group input,
+        .mem-form-group textarea,
+        .mem-form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid var(--mem-border);
+            border-radius: 10px;
+            font-size: 13px;
+            font-family: inherit;
+            background: #fafafa;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        .mem-form-group input:focus,
+        .mem-form-group textarea:focus,
+        .mem-form-group select:focus {
+            border-color: var(--mem-accent);
+            background: #fff;
+        }
+
+        .mem-form-group textarea { min-height: 80px; resize: vertical; }
+
+        .mem-form-span { grid-column: 1 / -1; }
+
+        /* ── Memory list ── */
+        .mem-memory-card {
+            background: var(--mem-surface);
+            border: 1px solid var(--mem-border);
+            border-left-width: 4px;
+            border-radius: var(--mem-radius-sm);
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: transform 0.14s, box-shadow 0.14s;
+            backdrop-filter: blur(8px);
+        }
+
+        .mem-memory-card:hover {
+            transform: translateX(3px);
+            box-shadow: var(--mem-shadow-md);
+        }
+
+        .mem-memory-card.is-episodic   { border-left-color: var(--mem-episodic); }
+        .mem-memory-card.is-semantic   { border-left-color: var(--mem-semantic); }
+        .mem-memory-card.is-procedural { border-left-color: var(--mem-procedural); }
+        .mem-memory-card.is-working    { border-left-color: var(--mem-working); }
+
+        .mem-memory-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .mem-memory-type {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--mem-accent);
+        }
+
+        .mem-memory-date { font-size: 11px; color: var(--mem-muted); }
+
+        .mem-memory-content {
+            font-size: 13px;
+            color: var(--mem-text);
+            line-height: 1.5;
+            margin-bottom: 10px;
+            max-height: 80px;
+            overflow: hidden;
+        }
+
+        .mem-importance-bar {
+            height: 3px;
+            background: linear-gradient(90deg, #dc2626 0%, var(--mem-accent) 50%, #16a34a 100%);
+            border-radius: 2px;
+            margin-bottom: 10px;
+        }
+
+        .mem-memory-foot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mem-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            background: var(--mem-accent-soft);
+            border: 1px solid var(--mem-border);
+            border-radius: 99px;
+            font-size: 11px;
+            color: var(--mem-accent-deep);
+            margin-right: 4px;
+        }
+
+        .mem-memory-meta {
+            font-size: 11px;
+            color: var(--mem-muted);
+        }
+
+        /* ── Daily notes layout ── */
+        .mem-daily-layout {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 20px;
+        }
+
+        .mem-date-list {
+            max-height: 420px;
             overflow-y: auto;
         }
-        .daily-note-item {
+
+        .mem-date-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            font-size: 13px;
             cursor: pointer;
-            padding: 0.75rem 1rem;
             border-left: 3px solid transparent;
-            transition: all 0.2s;
+            transition: background 0.14s, border-color 0.14s;
         }
-        .daily-note-item:hover, .daily-note-item.active {
-            background: #f8f9fa;
-            border-left-color: var(--theme-accent);
+
+        .mem-date-item .material-symbols-outlined { font-size: 15px; color: var(--mem-muted); }
+
+        .mem-date-item:hover {
+            background: var(--mem-accent-soft);
         }
-        .daily-note-content {
-            min-height: 300px;
+
+        .mem-date-item.is-active {
+            border-left-color: var(--mem-accent);
+            background: var(--mem-accent-soft);
+            font-weight: 600;
+            color: var(--mem-accent);
+        }
+
+        .mem-note-content {
+            min-height: 280px;
             white-space: pre-wrap;
-            font-family: 'Segoe UI', monospace;
-            font-size: 0.9rem;
-            line-height: 1.6;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.65;
+            color: var(--mem-text);
         }
 
-        /* MEMORY.md 编辑器样式 */
-        .memory-md-editor {
-            min-height: 400px;
-            font-family: 'Segoe UI', monospace;
-            font-size: 0.9rem;
-            line-height: 1.6;
+        /* ── MEMORY.md ── */
+        .mem-md-editor {
+            width: 100%;
+            min-height: 360px;
+            padding: 14px;
+            border: 1.5px solid var(--mem-border);
+            border-radius: var(--mem-radius-sm);
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.65;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.15s;
         }
-        .memory-md-preview {
-            min-height: 400px;
-            padding: 1rem;
-            border: 1px solid #dee2e6;
-            border-radius: 0.375rem;
-            background: #fafafa;
+
+        .mem-md-editor:focus { border-color: var(--mem-accent); }
+
+        .mem-md-preview {
+            min-height: 360px;
+            padding: 16px;
+            background: rgba(109,40,217,0.03);
+            border: 1.5px solid var(--mem-border);
+            border-radius: var(--mem-radius-sm);
             white-space: pre-wrap;
-            font-family: 'Segoe UI', monospace;
-            font-size: 0.9rem;
-            line-height: 1.6;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.65;
+            color: var(--mem-text);
         }
 
-        .navbar {
-            background: linear-gradient(135deg, #0f172a 0%, var(--theme-accent-deep) 100%) !important;
-            box-shadow: 0 10px 24px rgba(15, 78, 179, 0.16);
+        .mem-section-row {
+            display: grid;
+            grid-template-columns: 180px 1fr auto;
+            gap: 10px;
+            align-items: center;
         }
 
-        .card {
-            border: 1px solid var(--theme-accent-line);
-            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+        /* ── Modal ── */
+        .mem-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(30, 21, 53, 0.55);
+            backdrop-filter: blur(6px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
         }
 
-        .card-header {
-            background: rgba(19, 99, 223, 0.05);
-            border-bottom: 1px solid var(--theme-accent-line);
+        .mem-modal.is-open { display: flex; }
+
+        .mem-modal-box {
+            background: #fff;
+            border-radius: var(--mem-radius);
+            box-shadow: var(--mem-shadow-md);
+            max-width: 680px;
+            width: 100%;
+            max-height: 88vh;
+            overflow-y: auto;
+            padding: 32px;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, var(--theme-accent-deep) 0%, var(--theme-accent) 100%);
-            border-color: transparent;
+        .mem-modal-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
         }
 
-        .btn-outline-primary {
-            color: var(--theme-accent);
-            border-color: rgba(19, 99, 223, 0.35);
+        .mem-modal-head h2 {
+            font-family: 'Manrope', sans-serif;
+            font-size: 18px;
+            font-weight: 800;
         }
 
-        .btn-outline-primary:hover {
-            background: var(--theme-accent);
-            border-color: var(--theme-accent);
+        .mem-close {
+            background: rgba(0,0,0,0.06);
+            border: none;
+            border-radius: 8px;
+            width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            color: var(--mem-muted);
+            transition: background 0.15s;
+        }
+
+        .mem-close:hover { background: rgba(0,0,0,0.11); }
+
+        .mem-detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px 24px;
+            margin-bottom: 16px;
+        }
+
+        .mem-detail-row strong { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--mem-muted); display: block; margin-bottom: 3px; }
+        .mem-detail-row span { font-size: 14px; color: var(--mem-text); }
+
+        .mem-detail-divider { border: none; border-top: 1px solid var(--mem-border); margin: 16px 0; }
+
+        .mem-detail-pre {
+            background: rgba(109,40,217,0.04);
+            border: 1px solid var(--mem-border);
+            border-radius: var(--mem-radius-sm);
+            padding: 12px 14px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 1100px) {
+            .mem-stats-strip { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 860px) {
+            .mem-daily-layout { grid-template-columns: 1fr; }
+            .mem-search-row { grid-template-columns: 1fr; }
+            .mem-form-grid { grid-template-columns: 1fr; }
+            .mem-section-row { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 600px) {
+            .mem-shell { padding: 20px 16px 60px; }
+            .mem-stats-strip { grid-template-columns: 1fr 1fr; }
+            .mem-modal-box { padding: 24px 16px; }
         }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="/">
-                <i class="fas fa-brain"></i> 永久记忆系统
-            </a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="/dashboard">返回主控台</a>
+<div class="mem-shell">
+
+    <!-- ── Topbar ── -->
+    <header class="mem-topbar">
+        <a class="mem-brand" href="/">
+            <div class="mem-brand-mark">
+                <span class="material-symbols-outlined" style="font-size:20px;color:#fff;">psychology</span>
+            </div>
+            <div class="mem-brand-copy">
+                <strong>永久记忆系统</strong>
+                <small>Agent Framework</small>
+            </div>
+        </a>
+    </header>
+
+    <!-- ── Stats strip ── -->
+    <div class="mem-stats-strip">
+        <div class="mem-stat-card">
+            <div class="mem-stat-icon is-total">
+                <span class="material-symbols-outlined">database</span>
+            </div>
+            <div>
+                <strong id="totalMemories">0</strong>
+                <small>总记忆数</small>
             </div>
         </div>
-    </nav>
+        <div class="mem-stat-card">
+            <div class="mem-stat-icon is-episodic">
+                <span class="material-symbols-outlined">event_note</span>
+            </div>
+            <div>
+                <strong id="episodicCount">0</strong>
+                <small>情节记忆</small>
+            </div>
+        </div>
+        <div class="mem-stat-card">
+            <div class="mem-stat-icon is-semantic">
+                <span class="material-symbols-outlined">menu_book</span>
+            </div>
+            <div>
+                <strong id="semanticCount">0</strong>
+                <small>语义记忆</small>
+            </div>
+        </div>
+        <div class="mem-stat-card">
+            <div class="mem-stat-icon is-procedural">
+                <span class="material-symbols-outlined">settings</span>
+            </div>
+            <div>
+                <strong id="proceduralCount">0</strong>
+                <small>程序性记忆</small>
+            </div>
+        </div>
+    </div>
 
-    <div class="container mt-4">
-        <!-- 三层架构 Tab 导航 -->
-        <ul class="nav nav-tabs memory-tabs mb-4" id="memoryTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="sqlite-tab" data-bs-toggle="tab"
-                    data-bs-target="#sqlite-panel" type="button" role="tab">
-                    <i class="fas fa-database"></i> SQLite 记忆
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="daily-tab" data-bs-toggle="tab"
-                    data-bs-target="#daily-panel" type="button" role="tab">
-                    <i class="fas fa-calendar-day"></i> 每日笔记
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="memory-md-tab" data-bs-toggle="tab"
-                    data-bs-target="#memory-md-panel" type="button" role="tab">
-                    <i class="fas fa-file-alt"></i> 长期记忆 (MEMORY.md)
-                </button>
-            </li>
-        </ul>
+    <!-- ── Tab nav ── -->
+    <div class="mem-tabs">
+        <button class="mem-tab-btn is-active" onclick="switchTab('sqlite', this)">
+            <span class="material-symbols-outlined">storage</span>
+            SQLite 记忆
+        </button>
+        <button class="mem-tab-btn" onclick="switchTab('daily', this)">
+            <span class="material-symbols-outlined">calendar_today</span>
+            每日笔记
+        </button>
+        <button class="mem-tab-btn" onclick="switchTab('memory-md', this)">
+            <span class="material-symbols-outlined">description</span>
+            长期记忆 (MEMORY.md)
+        </button>
+    </div>
 
-        <div class="tab-content" id="memoryTabContent">
+    <!-- ═══ Tab 1: SQLite 记忆 ═══ -->
+    <div class="mem-panel is-active" id="panel-sqlite">
 
-            <!-- ═══ Tab 1: SQLite 记忆（原有内容） ═══ -->
-            <div class="tab-pane fade show active" id="sqlite-panel" role="tabpanel">
-                <!-- 搜索区域 -->
-                <div class="search-container">
-                    <h3><i class="fas fa-search"></i> 记忆搜索与回忆</h3>
-                    <div class="row mt-3">
-                        <div class="col-md-8">
-                            <input type="text" id="searchQuery" class="form-control" placeholder="输入关键词搜索记忆...">
-                        </div>
-                        <div class="col-md-2">
-                            <select id="memoryType" class="form-select">
-                                <option value="">所有类型</option>
+        <!-- Search hero -->
+        <div class="mem-search-hero">
+            <h3>
+                <span class="material-symbols-outlined" style="font-size:20px;">search</span>
+                记忆搜索与回忆
+            </h3>
+            <div class="mem-search-row">
+                <input type="text" id="searchQuery" class="mem-search-input" placeholder="输入关键词搜索记忆…">
+                <select id="memoryType" class="mem-search-select">
+                    <option value="">所有类型</option>
+                    <option value="episodic">情节记忆</option>
+                    <option value="semantic">语义记忆</option>
+                    <option value="procedural">程序性记忆</option>
+                    <option value="working">工作记忆</option>
+                </select>
+                <button id="searchBtn" class="mem-search-btn">
+                    <span class="material-symbols-outlined" style="font-size:15px;">search</span>
+                    搜索
+                </button>
+            </div>
+        </div>
+
+        <!-- Add memory -->
+        <div class="mem-card" style="margin-bottom:20px;">
+            <div class="mem-card-head">
+                <strong>
+                    <span class="material-symbols-outlined">add_circle</span>
+                    添加新记忆
+                </strong>
+            </div>
+            <div class="mem-card-body">
+                <form id="addMemoryForm">
+                    <div class="mem-form-grid">
+                        <div class="mem-form-group">
+                            <label>记忆类型</label>
+                            <select id="newMemoryType" required>
                                 <option value="episodic">情节记忆</option>
                                 <option value="semantic">语义记忆</option>
                                 <option value="procedural">程序性记忆</option>
-                                <option value="working">工作记忆</option>
                             </select>
                         </div>
-                        <div class="col-md-2">
-                            <button id="searchBtn" class="btn btn-light w-100">
-                                <i class="fas fa-search"></i> 搜索
-                            </button>
+                        <div class="mem-form-group">
+                            <label>重要性 (0–1)</label>
+                            <input type="number" id="newImportance" min="0" max="1" step="0.1" value="0.5">
+                        </div>
+                        <div class="mem-form-group mem-form-span">
+                            <label>记忆内容 *</label>
+                            <textarea id="newContent" placeholder="输入记忆内容…" required></textarea>
+                        </div>
+                        <div class="mem-form-group mem-form-span">
+                            <label>标签（用逗号分隔）</label>
+                            <input type="text" id="newTags" placeholder="标签1, 标签2, 标签3">
                         </div>
                     </div>
-                </div>
-
-                <!-- 统计信息 -->
-                <div class="row mb-4">
-                    <div class="col-md-3">
-                        <div class="stats-card text-center">
-                            <h4 id="totalMemories">0</h4>
-                            <p>总记忆数</p>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="stats-card text-center">
-                            <h4 id="episodicCount">0</h4>
-                            <p>情节记忆</p>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="stats-card text-center">
-                            <h4 id="semanticCount">0</h4>
-                            <p>语义记忆</p>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="stats-card text-center">
-                            <h4 id="proceduralCount">0</h4>
-                            <p>程序性记忆</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 添加记忆 -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5><i class="fas fa-plus"></i> 添加新记忆</h5>
-                    </div>
-                    <div class="card-body">
-                        <form id="addMemoryForm">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <label class="form-label">记忆类型</label>
-                                    <select id="newMemoryType" class="form-select" required>
-                                        <option value="episodic">情节记忆</option>
-                                        <option value="semantic">语义记忆</option>
-                                        <option value="procedural">程序性记忆</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">重要性 (0-1)</label>
-                                    <input type="number" id="newImportance" class="form-control" min="0" max="1" step="0.1" value="0.5">
-                                </div>
-                            </div>
-                            <div class="mt-3">
-                                <label class="form-label">记忆内容</label>
-                                <textarea id="newContent" class="form-control" rows="3" placeholder="输入记忆内容..." required></textarea>
-                            </div>
-                            <div class="mt-3">
-                                <label class="form-label">标签 (用逗号分隔)</label>
-                                <input type="text" id="newTags" class="form-control" placeholder="标签1, 标签2, 标签3">
-                            </div>
-                            <div class="mt-3">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save"></i> 保存记忆
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- 记忆列表 -->
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5><i class="fas fa-list"></i> 记忆列表</h5>
-                        <button id="refreshBtn" class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-refresh"></i> 刷新
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <div id="memoriesContainer">
-                            <!-- 记忆卡片将在这里动态加载 -->
-                        </div>
-                    </div>
-                </div>
+                    <button type="submit" class="mem-btn mem-btn-primary">
+                        <span class="material-symbols-outlined" style="font-size:15px;">save</span>
+                        保存记忆
+                    </button>
+                </form>
             </div>
+        </div>
 
-            <!-- ═══ Tab 2: 每日笔记 ═══ -->
-            <div class="tab-pane fade" id="daily-panel" role="tabpanel">
-                <div class="row">
-                    <!-- 左侧：日期列表 -->
-                    <div class="col-md-3">
-                        <div class="card">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <h6 class="mb-0"><i class="fas fa-calendar"></i> 日期列表</h6>
-                                <button id="refreshDailyBtn" class="btn btn-outline-primary btn-sm" title="刷新">
-                                    <i class="fas fa-refresh"></i>
-                                </button>
-                            </div>
-                            <div class="card-body p-0">
-                                <div class="daily-note-list" id="dailyDateList">
-                                    <p class="text-muted text-center py-3">加载中...</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 右侧：笔记内容 + 添加 -->
-                    <div class="col-md-9">
-                        <!-- 添加笔记 -->
-                        <div class="card mb-3">
-                            <div class="card-header">
-                                <h6 class="mb-0"><i class="fas fa-plus"></i> 添加笔记</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="input-group">
-                                    <input type="text" id="newDailyNote" class="form-control"
-                                        placeholder="输入笔记内容...">
-                                    <button id="addDailyNoteBtn" class="btn btn-primary">
-                                        <i class="fas fa-paper-plane"></i> 添加
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 笔记内容 -->
-                        <div class="card">
-                            <div class="card-header">
-                                <h6 class="mb-0" id="dailyNoteTitle">
-                                    <i class="fas fa-sticky-note"></i> 选择日期查看笔记
-                                </h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="daily-note-content" id="dailyNoteContent">
-                                    <p class="text-muted">请从左侧选择一个日期</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <!-- Memory list -->
+        <div class="mem-card">
+            <div class="mem-card-head">
+                <strong>
+                    <span class="material-symbols-outlined">list_alt</span>
+                    记忆列表
+                </strong>
+                <button id="refreshBtn" class="mem-btn mem-btn-ghost mem-btn-sm">
+                    <span class="material-symbols-outlined" style="font-size:14px;">refresh</span>
+                    刷新
+                </button>
             </div>
-
-            <!-- ═══ Tab 3: 长期记忆 (MEMORY.md) ═══ -->
-            <div class="tab-pane fade" id="memory-md-panel" role="tabpanel">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="fas fa-file-alt"></i> MEMORY.md 长期记忆</h5>
-                        <div>
-                            <button id="memoryMdEditToggle" class="btn btn-outline-secondary btn-sm me-2">
-                                <i class="fas fa-edit"></i> 编辑
-                            </button>
-                            <button id="memoryMdRefreshBtn" class="btn btn-outline-primary btn-sm">
-                                <i class="fas fa-refresh"></i> 刷新
-                            </button>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <!-- 查看模式 -->
-                        <div id="memoryMdViewMode">
-                            <div class="memory-md-preview" id="memoryMdPreview">
-                                <p class="text-muted">加载中...</p>
-                            </div>
-                        </div>
-
-                        <!-- 编辑模式（默认隐藏） -->
-                        <div id="memoryMdEditMode" style="display:none;">
-                            <textarea id="memoryMdEditor" class="form-control memory-md-editor"
-                                placeholder="编辑 MEMORY.md 内容..."></textarea>
-                            <div class="mt-3">
-                                <button id="memoryMdSaveBtn" class="btn btn-primary me-2">
-                                    <i class="fas fa-save"></i> 保存
-                                </button>
-                                <button id="memoryMdCancelBtn" class="btn btn-secondary">
-                                    取消
-                                </button>
-                            </div>
-                        </div>
-
-                        <hr>
-
-                        <!-- 章节更新 -->
-                        <h6><i class="fas fa-puzzle-piece"></i> 按章节更新</h6>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <input type="text" id="sectionName" class="form-control"
-                                    placeholder="章节名（如：用户偏好）">
-                            </div>
-                            <div class="col-md-6">
-                                <input type="text" id="sectionContent" class="form-control"
-                                    placeholder="章节内容">
-                            </div>
-                            <div class="col-md-2">
-                                <button id="updateSectionBtn" class="btn btn-outline-primary w-100">
-                                    <i class="fas fa-plus"></i> 更新
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div><!-- /tab-content -->
-    </div>
-
-    <!-- 记忆详情模态框 -->
-    <div class="modal fade" id="memoryModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">记忆详情</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body" id="memoryDetails">
-                    <!-- 记忆详情将在这里显示 -->
+            <div class="mem-card-body">
+                <div id="memoriesContainer">
+                    <p style="text-align:center;color:var(--mem-muted);padding:32px;">加载中…</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        class MemoryDashboard {
-            constructor() {
-                this.memories = [];
-                this.init();
-            }
+    <!-- ═══ Tab 2: 每日笔记 ═══ -->
+    <div class="mem-panel" id="panel-daily">
+        <div class="mem-daily-layout">
 
-            init() {
-                this.bindEvents();
-                this.loadStatistics();
-                this.loadMemories();
+            <!-- Date list -->
+            <div class="mem-card">
+                <div class="mem-card-head">
+                    <strong>
+                        <span class="material-symbols-outlined">calendar_month</span>
+                        日期列表
+                    </strong>
+                    <button id="refreshDailyBtn" class="mem-btn mem-btn-ghost mem-btn-sm">
+                        <span class="material-symbols-outlined" style="font-size:14px;">refresh</span>
+                    </button>
+                </div>
+                <div class="mem-date-list" id="dailyDateList">
+                    <p style="text-align:center;color:var(--mem-muted);padding:24px;font-size:13px;">加载中…</p>
+                </div>
+            </div>
 
-                // Tab 切换事件
-                document.getElementById('daily-tab').addEventListener('shown.bs.tab', () => this.loadDailyFiles());
-                document.getElementById('memory-md-tab').addEventListener('shown.bs.tab', () => this.loadMemoryMd());
-            }
+            <!-- Note content -->
+            <div>
+                <!-- Add note -->
+                <div class="mem-card" style="margin-bottom:16px;">
+                    <div class="mem-card-head">
+                        <strong>
+                            <span class="material-symbols-outlined">add_circle</span>
+                            添加笔记
+                        </strong>
+                    </div>
+                    <div class="mem-card-body" style="display:flex;gap:10px;">
+                        <input type="text" id="newDailyNote" class="mem-form-group" style="margin:0;flex:1;padding:10px 14px;border:1.5px solid var(--mem-border);border-radius:10px;font-size:13px;font-family:inherit;outline:none;" placeholder="输入笔记内容…">
+                        <button id="addDailyNoteBtn" class="mem-btn mem-btn-primary">
+                            <span class="material-symbols-outlined" style="font-size:15px;">send</span>
+                            添加
+                        </button>
+                    </div>
+                </div>
 
-            bindEvents() {
-                // SQLite 记忆 Tab
-                document.getElementById('searchBtn').addEventListener('click', () => this.searchMemories());
-                document.getElementById('searchQuery').addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') this.searchMemories();
-                });
-                document.getElementById('addMemoryForm').addEventListener('submit', (e) => this.addMemory(e));
-                document.getElementById('refreshBtn').addEventListener('click', () => this.loadMemories());
+                <!-- Content -->
+                <div class="mem-card">
+                    <div class="mem-card-head">
+                        <strong>
+                            <span class="material-symbols-outlined">sticky_note_2</span>
+                            <span id="dailyNoteTitle">选择日期查看笔记</span>
+                        </strong>
+                    </div>
+                    <div class="mem-card-body">
+                        <div class="mem-note-content" id="dailyNoteContent" style="color:var(--mem-muted);">请从左侧选择一个日期</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                // 每日笔记 Tab
-                document.getElementById('refreshDailyBtn').addEventListener('click', () => this.loadDailyFiles());
-                document.getElementById('addDailyNoteBtn').addEventListener('click', () => this.addDailyNote());
-                document.getElementById('newDailyNote').addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') this.addDailyNote();
-                });
+    <!-- ═══ Tab 3: MEMORY.md ═══ -->
+    <div class="mem-panel" id="panel-memory-md">
+        <div class="mem-card" style="margin-bottom:20px;">
+            <div class="mem-card-head">
+                <strong>
+                    <span class="material-symbols-outlined">description</span>
+                    MEMORY.md 长期记忆
+                </strong>
+                <div style="display:flex;gap:8px;">
+                    <button id="memoryMdEditToggle" class="mem-btn mem-btn-ghost mem-btn-sm">
+                        <span class="material-symbols-outlined" style="font-size:14px;">edit</span>
+                        编辑
+                    </button>
+                    <button id="memoryMdRefreshBtn" class="mem-btn mem-btn-ghost mem-btn-sm">
+                        <span class="material-symbols-outlined" style="font-size:14px;">refresh</span>
+                        刷新
+                    </button>
+                </div>
+            </div>
+            <div class="mem-card-body">
+                <!-- View mode -->
+                <div id="memoryMdViewMode">
+                    <div class="mem-md-preview" id="memoryMdPreview">加载中…</div>
+                </div>
 
-                // MEMORY.md Tab
-                document.getElementById('memoryMdRefreshBtn').addEventListener('click', () => this.loadMemoryMd());
-                document.getElementById('memoryMdEditToggle').addEventListener('click', () => this.toggleMemoryMdEdit());
-                document.getElementById('memoryMdSaveBtn').addEventListener('click', () => this.saveMemoryMd());
-                document.getElementById('memoryMdCancelBtn').addEventListener('click', () => this.cancelMemoryMdEdit());
-                document.getElementById('updateSectionBtn').addEventListener('click', () => this.updateMemoryMdSection());
-            }
+                <!-- Edit mode -->
+                <div id="memoryMdEditMode" style="display:none;">
+                    <textarea id="memoryMdEditor" class="mem-md-editor" placeholder="编辑 MEMORY.md 内容…"></textarea>
+                    <div style="display:flex;gap:10px;margin-top:12px;">
+                        <button id="memoryMdSaveBtn" class="mem-btn mem-btn-primary">
+                            <span class="material-symbols-outlined" style="font-size:15px;">save</span>
+                            保存
+                        </button>
+                        <button id="memoryMdCancelBtn" class="mem-btn mem-btn-ghost">取消</button>
+                    </div>
+                </div>
 
-            // ── SQLite 记忆（原有功能） ──────────────────────────────────────
+                <hr class="mem-detail-divider">
 
-            async loadStatistics() {
-                try {
-                    const response = await fetch('/api/memory/statistics');
-                    const data = await response.json();
+                <p style="font-size:13px;font-weight:700;color:var(--mem-text);margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+                    <span class="material-symbols-outlined" style="font-size:16px;color:var(--mem-accent);">puzzle_piece</span>
+                    按章节更新
+                </p>
 
-                    if (data.success) {
-                        const stats = data.statistics;
-                        let total = 0;
+                <div class="mem-section-row">
+                    <input type="text" id="sectionName" class="mem-form-group" style="margin:0;padding:10px 14px;border:1.5px solid var(--mem-border);border-radius:10px;font-size:13px;font-family:inherit;outline:none;" placeholder="章节名（如：用户偏好）">
+                    <input type="text" id="sectionContent" class="mem-form-group" style="margin:0;padding:10px 14px;border:1.5px solid var(--mem-border);border-radius:10px;font-size:13px;font-family:inherit;outline:none;" placeholder="章节内容">
+                    <button id="updateSectionBtn" class="mem-btn mem-btn-primary">
+                        <span class="material-symbols-outlined" style="font-size:15px;">add</span>
+                        更新
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                        Object.values(stats).forEach(stat => total += stat.count);
+</div>
 
-                        document.getElementById('totalMemories').textContent = total;
-                        document.getElementById('episodicCount').textContent = stats.episodic?.count || 0;
-                        document.getElementById('semanticCount').textContent = stats.semantic?.count || 0;
-                        document.getElementById('proceduralCount').textContent = stats.procedural?.count || 0;
-                    }
-                } catch (error) {
-                    console.error('加载统计信息失败:', error);
+<!-- ── Memory detail Modal ── -->
+<div class="mem-modal" id="memoryModal">
+    <div class="mem-modal-box">
+        <div class="mem-modal-head">
+            <h2>记忆详情</h2>
+            <button class="mem-close" id="memModalClose">
+                <span class="material-symbols-outlined" style="font-size:18px;">close</span>
+            </button>
+        </div>
+        <div id="memoryDetails"></div>
+    </div>
+</div>
+
+<script>
+    // ── Tab switch ──────────────────────────────────────────────────────────
+    function switchTab(id, btn) {
+        document.querySelectorAll('.mem-panel').forEach(p => p.classList.remove('is-active'));
+        document.querySelectorAll('.mem-tab-btn').forEach(b => b.classList.remove('is-active'));
+        document.getElementById('panel-' + id).classList.add('is-active');
+        btn.classList.add('is-active');
+
+        if (id === 'daily') memoryDashboard.loadDailyFiles();
+        if (id === 'memory-md') memoryDashboard.loadMemoryMd();
+    }
+
+    // ── MemoryDashboard class ───────────────────────────────────────────────
+    class MemoryDashboard {
+        constructor() {
+            this.memories = [];
+            this.init();
+        }
+
+        init() {
+            this.bindEvents();
+            this.loadStatistics();
+            this.loadMemories();
+        }
+
+        bindEvents() {
+            document.getElementById('searchBtn').addEventListener('click', () => this.searchMemories());
+            document.getElementById('searchQuery').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') this.searchMemories();
+            });
+            document.getElementById('addMemoryForm').addEventListener('submit', (e) => this.addMemory(e));
+            document.getElementById('refreshBtn').addEventListener('click', () => this.loadMemories());
+
+            document.getElementById('refreshDailyBtn').addEventListener('click', () => this.loadDailyFiles());
+            document.getElementById('addDailyNoteBtn').addEventListener('click', () => this.addDailyNote());
+            document.getElementById('newDailyNote').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') this.addDailyNote();
+            });
+
+            document.getElementById('memoryMdRefreshBtn').addEventListener('click', () => this.loadMemoryMd());
+            document.getElementById('memoryMdEditToggle').addEventListener('click', () => this.toggleMemoryMdEdit());
+            document.getElementById('memoryMdSaveBtn').addEventListener('click', () => this.saveMemoryMd());
+            document.getElementById('memoryMdCancelBtn').addEventListener('click', () => this.cancelMemoryMdEdit());
+            document.getElementById('updateSectionBtn').addEventListener('click', () => this.updateMemoryMdSection());
+
+            document.getElementById('memModalClose').addEventListener('click', () => {
+                document.getElementById('memoryModal').classList.remove('is-open');
+            });
+        }
+
+        // ── SQLite 记忆 ─────────────────────────────────────────────────────
+
+        async loadStatistics() {
+            try {
+                const response = await fetch('/api/memory/statistics');
+                const data = await response.json();
+
+                if (data.success) {
+                    const stats = data.statistics;
+                    let total = 0;
+                    Object.values(stats).forEach(stat => total += stat.count);
+
+                    document.getElementById('totalMemories').textContent = total;
+                    document.getElementById('episodicCount').textContent = stats.episodic?.count || 0;
+                    document.getElementById('semanticCount').textContent = stats.semantic?.count || 0;
+                    document.getElementById('proceduralCount').textContent = stats.procedural?.count || 0;
                 }
-            }
-
-            async searchMemories() {
-                const query = document.getElementById('searchQuery').value;
-                const memoryType = document.getElementById('memoryType').value;
-
-                if (!query.trim()) {
-                    this.loadMemories();
-                    return;
-                }
-
-                try {
-                    const response = await fetch('/api/memory/search', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            query: query,
-                            memory_type: memoryType || null,
-                            limit: 20
-                        })
-                    });
-
-                    const data = await response.json();
-                    if (data.success) {
-                        this.displayMemories(data.memories);
-                    }
-                } catch (error) {
-                    console.error('搜索记忆失败:', error);
-                }
-            }
-
-            async loadMemories() {
-                try {
-                    const response = await fetch('/api/memory/search', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            query: '',
-                            limit: 50
-                        })
-                    });
-
-                    const data = await response.json();
-                    if (data.success) {
-                        this.displayMemories(data.memories);
-                    }
-                } catch (error) {
-                    console.error('加载记忆失败:', error);
-                }
-            }
-
-            displayMemories(memories) {
-                const container = document.getElementById('memoriesContainer');
-
-                if (memories.length === 0) {
-                    container.innerHTML = '<p class="text-muted text-center">暂无记忆数据</p>';
-                    return;
-                }
-
-                container.innerHTML = memories.map(memory => {
-                    const similarityScore = memory.similarity_score ? memory.similarity_score.toFixed(3) : 'N/A';
-                    return `
-                        <div class="card memory-card memory-type-${memory.memory_type} mb-3" onclick="memoryDashboard.showMemoryDetails('${memory.id}')">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <h6 class="card-title mb-0">
-                                        <i class="fas fa-${this.getMemoryIcon(memory.memory_type)}"></i>
-                                        ${this.getMemoryTypeName(memory.memory_type)}
-                                    </h6>
-                                    <small class="text-muted">${this.formatDate(memory.created_at)}</small>
-                                </div>
-
-                                <div class="memory-content mb-2">
-                                    <p class="card-text">${memory.content}</p>
-                                </div>
-
-                                <div class="importance-bar mb-2" style="width: ${memory.importance * 100}%"></div>
-
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        ${memory.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
-                                    </div>
-                                    <small class="text-muted">
-                                        访问 ${memory.access_count} 次 | 相似度: ${similarityScore}
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            }
-
-            async showMemoryDetails(memoryId) {
-                try {
-                    const response = await fetch(`/api/memory/${memoryId}`);
-                    const data = await response.json();
-
-                    if (data.success) {
-                        const memory = data.memory;
-                        document.getElementById('memoryDetails').innerHTML = `
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <strong>ID:</strong> ${memory.id}<br>
-                                    <strong>类型:</strong> ${this.getMemoryTypeName(memory.memory_type)}<br>
-                                    <strong>重要性:</strong> ${memory.importance}<br>
-                                    <strong>访问次数:</strong> ${memory.access_count}
-                                </div>
-                                <div class="col-md-6">
-                                    <strong>创建时间:</strong> ${this.formatDate(memory.created_at)}<br>
-                                    <strong>最后访问:</strong> ${this.formatDate(memory.last_accessed)}<br>
-                                    <strong>标签:</strong> ${memory.tags.join(', ') || '无'}
-                                </div>
-                            </div>
-                            <hr>
-                            <strong>内容:</strong>
-                            <p>${memory.content}</p>
-                            <hr>
-                            <strong>上下文:</strong>
-                            <pre>${JSON.stringify(memory.context, null, 2)}</pre>
-                        `;
-
-                        new bootstrap.Modal(document.getElementById('memoryModal')).show();
-                    }
-                } catch (error) {
-                    console.error('获取记忆详情失败:', error);
-                }
-            }
-
-            async addMemory(event) {
-                event.preventDefault();
-
-                const memoryType = document.getElementById('newMemoryType').value;
-                const content = document.getElementById('newContent').value;
-                const importance = parseFloat(document.getElementById('newImportance').value);
-                const tagsStr = document.getElementById('newTags').value;
-                const tags = tagsStr ? tagsStr.split(',').map(tag => tag.trim()) : [];
-
-                try {
-                    const response = await fetch(`/api/memory/${memoryType}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            content: content,
-                            importance: importance,
-                            tags: tags,
-                            context: {
-                                source: 'manual_input',
-                                timestamp: new Date().toISOString()
-                            }
-                        })
-                    });
-
-                    const data = await response.json();
-                    if (data.success) {
-                        document.getElementById('addMemoryForm').reset();
-                        document.getElementById('newImportance').value = '0.5';
-                        this.loadMemories();
-                        this.loadStatistics();
-                        alert('记忆添加成功！');
-                    } else {
-                        alert('添加失败: ' + data.error);
-                    }
-                } catch (error) {
-                    console.error('添加记忆失败:', error);
-                    alert('添加失败: ' + error.message);
-                }
-            }
-
-            // ── 每日笔记 ────────────────────────────────────────────────────
-
-            async loadDailyFiles() {
-                try {
-                    const response = await fetch('/api/memory/daily-notes/files');
-                    const data = await response.json();
-
-                    const container = document.getElementById('dailyDateList');
-
-                    if (!data.success || data.files.length === 0) {
-                        container.innerHTML = '<p class="text-muted text-center py-3">暂无笔记</p>';
-                        return;
-                    }
-
-                    container.innerHTML = data.files.map(dateStr => `
-                        <div class="daily-note-item" onclick="memoryDashboard.loadDailyNote('${dateStr}', this)">
-                            <i class="fas fa-calendar-day me-2"></i> ${dateStr}
-                        </div>
-                    `).join('');
-
-                    // 自动加载第一个
-                    const firstItem = container.querySelector('.daily-note-item');
-                    if (firstItem) firstItem.click();
-
-                } catch (error) {
-                    console.error('加载日期列表失败:', error);
-                }
-            }
-
-            async loadDailyNote(dateStr, element) {
-                // 高亮选中
-                document.querySelectorAll('.daily-note-item').forEach(el => el.classList.remove('active'));
-                if (element) element.classList.add('active');
-
-                try {
-                    const response = await fetch(`/api/memory/daily-notes/${dateStr}`);
-                    const data = await response.json();
-
-                    document.getElementById('dailyNoteTitle').innerHTML =
-                        `<i class="fas fa-sticky-note"></i> ${dateStr} 的笔记`;
-
-                    if (data.success) {
-                        document.getElementById('dailyNoteContent').textContent = data.content;
-                    } else {
-                        document.getElementById('dailyNoteContent').innerHTML =
-                            '<p class="text-muted">该日期无笔记</p>';
-                    }
-                } catch (error) {
-                    console.error('加载笔记失败:', error);
-                }
-            }
-
-            async addDailyNote() {
-                const input = document.getElementById('newDailyNote');
-                const content = input.value.trim();
-
-                if (!content) return;
-
-                try {
-                    const response = await fetch('/api/memory/daily-notes', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ content })
-                    });
-
-                    const data = await response.json();
-                    if (data.success) {
-                        input.value = '';
-                        this.loadDailyFiles();
-                    } else {
-                        alert('添加失败: ' + data.error);
-                    }
-                } catch (error) {
-                    console.error('添加笔记失败:', error);
-                }
-            }
-
-            // ── MEMORY.md ───────────────────────────────────────────────────
-
-            async loadMemoryMd() {
-                try {
-                    const response = await fetch('/api/memory/memory-md');
-                    const data = await response.json();
-
-                    if (data.success) {
-                        document.getElementById('memoryMdPreview').textContent = data.content || '(空)';
-                        document.getElementById('memoryMdEditor').value = data.content || '';
-                    }
-                } catch (error) {
-                    console.error('加载 MEMORY.md 失败:', error);
-                }
-            }
-
-            toggleMemoryMdEdit() {
-                const viewMode = document.getElementById('memoryMdViewMode');
-                const editMode = document.getElementById('memoryMdEditMode');
-                const toggle = document.getElementById('memoryMdEditToggle');
-
-                if (editMode.style.display === 'none') {
-                    editMode.style.display = 'block';
-                    viewMode.style.display = 'none';
-                    toggle.innerHTML = '<i class="fas fa-eye"></i> 预览';
-                } else {
-                    editMode.style.display = 'none';
-                    viewMode.style.display = 'block';
-                    toggle.innerHTML = '<i class="fas fa-edit"></i> 编辑';
-                }
-            }
-
-            async saveMemoryMd() {
-                const content = document.getElementById('memoryMdEditor').value;
-
-                try {
-                    const response = await fetch('/api/memory/memory-md', {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ content })
-                    });
-
-                    const data = await response.json();
-                    if (data.success) {
-                        this.loadMemoryMd();
-                        this.cancelMemoryMdEdit();
-                        alert('MEMORY.md 已保存');
-                    } else {
-                        alert('保存失败: ' + data.error);
-                    }
-                } catch (error) {
-                    console.error('保存 MEMORY.md 失败:', error);
-                }
-            }
-
-            cancelMemoryMdEdit() {
-                document.getElementById('memoryMdEditMode').style.display = 'none';
-                document.getElementById('memoryMdViewMode').style.display = 'block';
-                document.getElementById('memoryMdEditToggle').innerHTML = '<i class="fas fa-edit"></i> 编辑';
-            }
-
-            async updateMemoryMdSection() {
-                const section = document.getElementById('sectionName').value.trim();
-                const content = document.getElementById('sectionContent').value.trim();
-
-                if (!section || !content) {
-                    alert('请输入章节名和内容');
-                    return;
-                }
-
-                try {
-                    const response = await fetch('/api/memory/memory-md/section', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ section, content })
-                    });
-
-                    const data = await response.json();
-                    if (data.success) {
-                        document.getElementById('sectionName').value = '';
-                        document.getElementById('sectionContent').value = '';
-                        this.loadMemoryMd();
-                        alert(`章节 "${section}" 已更新`);
-                    } else {
-                        alert('更新失败: ' + data.error);
-                    }
-                } catch (error) {
-                    console.error('更新章节失败:', error);
-                }
-            }
-
-            // ── 工具方法 ────────────────────────────────────────────────────
-
-            getMemoryIcon(type) {
-                const icons = {
-                    'episodic': 'calendar-alt',
-                    'semantic': 'book',
-                    'procedural': 'cogs',
-                    'working': 'memory'
-                };
-                return icons[type] || 'circle';
-            }
-
-            getMemoryTypeName(type) {
-                const names = {
-                    'episodic': '情节记忆',
-                    'semantic': '语义记忆',
-                    'procedural': '程序性记忆',
-                    'working': '工作记忆'
-                };
-                return names[type] || type;
-            }
-
-            formatDate(dateStr) {
-                return new Date(dateStr).toLocaleString('zh-CN');
+            } catch (error) {
+                console.error('加载统计信息失败:', error);
             }
         }
 
-        // 初始化
-        const memoryDashboard = new MemoryDashboard();
-    </script>
+        async searchMemories() {
+            const query = document.getElementById('searchQuery').value;
+            const memoryType = document.getElementById('memoryType').value;
+
+            if (!query.trim()) {
+                this.loadMemories();
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/memory/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        query: query,
+                        memory_type: memoryType || null,
+                        limit: 20
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    this.displayMemories(data.memories);
+                }
+            } catch (error) {
+                console.error('搜索记忆失败:', error);
+            }
+        }
+
+        async loadMemories() {
+            try {
+                const response = await fetch('/api/memory/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: '', limit: 50 })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    this.displayMemories(data.memories);
+                }
+            } catch (error) {
+                console.error('加载记忆失败:', error);
+            }
+        }
+
+        displayMemories(memories) {
+            const container = document.getElementById('memoriesContainer');
+
+            if (memories.length === 0) {
+                container.innerHTML = '<p style="text-align:center;color:var(--mem-muted);padding:32px;">暂无记忆数据</p>';
+                return;
+            }
+
+            container.innerHTML = memories.map(memory => {
+                const similarityScore = memory.similarity_score ? memory.similarity_score.toFixed(3) : 'N/A';
+                return `
+                    <div class="mem-memory-card is-${memory.memory_type}" onclick="memoryDashboard.showMemoryDetails('${memory.id}')">
+                        <div class="mem-memory-head">
+                            <span class="mem-memory-type">
+                                <span class="material-symbols-outlined" style="font-size:14px;">${this.getMemoryIcon(memory.memory_type)}</span>
+                                ${this.getMemoryTypeName(memory.memory_type)}
+                            </span>
+                            <span class="mem-memory-date">${this.formatDate(memory.created_at)}</span>
+                        </div>
+                        <div class="mem-memory-content">${memory.content}</div>
+                        <div class="mem-importance-bar" style="width:${memory.importance * 100}%"></div>
+                        <div class="mem-memory-foot">
+                            <div>${memory.tags.map(tag => `<span class="mem-tag">${tag}</span>`).join('')}</div>
+                            <span class="mem-memory-meta">访问 ${memory.access_count} 次 | 相似度: ${similarityScore}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async showMemoryDetails(memoryId) {
+            try {
+                const response = await fetch(`/api/memory/${memoryId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    const memory = data.memory;
+                    document.getElementById('memoryDetails').innerHTML = `
+                        <div class="mem-detail-grid">
+                            <div class="mem-detail-row"><strong>ID</strong><span>${memory.id}</span></div>
+                            <div class="mem-detail-row"><strong>类型</strong><span>${this.getMemoryTypeName(memory.memory_type)}</span></div>
+                            <div class="mem-detail-row"><strong>重要性</strong><span>${memory.importance}</span></div>
+                            <div class="mem-detail-row"><strong>访问次数</strong><span>${memory.access_count}</span></div>
+                            <div class="mem-detail-row"><strong>创建时间</strong><span>${this.formatDate(memory.created_at)}</span></div>
+                            <div class="mem-detail-row"><strong>最后访问</strong><span>${this.formatDate(memory.last_accessed)}</span></div>
+                            <div class="mem-detail-row"><strong>标签</strong><span>${memory.tags.join(', ') || '无'}</span></div>
+                        </div>
+                        <hr class="mem-detail-divider">
+                        <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--mem-muted);margin-bottom:8px;">内容</p>
+                        <p style="font-size:14px;line-height:1.6;margin-bottom:16px;">${memory.content}</p>
+                        <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--mem-muted);margin-bottom:8px;">上下文</p>
+                        <div class="mem-detail-pre">${JSON.stringify(memory.context, null, 2)}</div>
+                    `;
+
+                    document.getElementById('memoryModal').classList.add('is-open');
+                }
+            } catch (error) {
+                console.error('获取记忆详情失败:', error);
+            }
+        }
+
+        async addMemory(event) {
+            event.preventDefault();
+
+            const memoryType = document.getElementById('newMemoryType').value;
+            const content = document.getElementById('newContent').value;
+            const importance = parseFloat(document.getElementById('newImportance').value);
+            const tagsStr = document.getElementById('newTags').value;
+            const tags = tagsStr ? tagsStr.split(',').map(tag => tag.trim()) : [];
+
+            try {
+                const response = await fetch(`/api/memory/${memoryType}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        content: content,
+                        importance: importance,
+                        tags: tags,
+                        context: { source: 'manual_input', timestamp: new Date().toISOString() }
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('addMemoryForm').reset();
+                    document.getElementById('newImportance').value = '0.5';
+                    this.loadMemories();
+                    this.loadStatistics();
+                    alert('记忆添加成功！');
+                } else {
+                    alert('添加失败: ' + data.error);
+                }
+            } catch (error) {
+                console.error('添加记忆失败:', error);
+                alert('添加失败: ' + error.message);
+            }
+        }
+
+        // ── 每日笔记 ──────────────────────────────────────────────────────
+
+        async loadDailyFiles() {
+            try {
+                const response = await fetch('/api/memory/daily-notes/files');
+                const data = await response.json();
+
+                const container = document.getElementById('dailyDateList');
+
+                if (!data.success || data.files.length === 0) {
+                    container.innerHTML = '<p style="text-align:center;color:var(--mem-muted);padding:24px;font-size:13px;">暂无笔记</p>';
+                    return;
+                }
+
+                container.innerHTML = data.files.map(dateStr => `
+                    <div class="mem-date-item" onclick="memoryDashboard.loadDailyNote('${dateStr}', this)">
+                        <span class="material-symbols-outlined">calendar_today</span>
+                        ${dateStr}
+                    </div>
+                `).join('');
+
+                const firstItem = container.querySelector('.mem-date-item');
+                if (firstItem) firstItem.click();
+
+            } catch (error) {
+                console.error('加载日期列表失败:', error);
+            }
+        }
+
+        async loadDailyNote(dateStr, element) {
+            document.querySelectorAll('.mem-date-item').forEach(el => el.classList.remove('is-active'));
+            if (element) element.classList.add('is-active');
+
+            try {
+                const response = await fetch(`/api/memory/daily-notes/${dateStr}`);
+                const data = await response.json();
+
+                document.getElementById('dailyNoteTitle').textContent = `${dateStr} 的笔记`;
+
+                if (data.success) {
+                    document.getElementById('dailyNoteContent').textContent = data.content;
+                } else {
+                    document.getElementById('dailyNoteContent').innerHTML = '<span style="color:var(--mem-muted);">该日期无笔记</span>';
+                }
+            } catch (error) {
+                console.error('加载笔记失败:', error);
+            }
+        }
+
+        async addDailyNote() {
+            const input = document.getElementById('newDailyNote');
+            const content = input.value.trim();
+            if (!content) return;
+
+            try {
+                const response = await fetch('/api/memory/daily-notes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    input.value = '';
+                    this.loadDailyFiles();
+                } else {
+                    alert('添加失败: ' + data.error);
+                }
+            } catch (error) {
+                console.error('添加笔记失败:', error);
+            }
+        }
+
+        // ── MEMORY.md ──────────────────────────────────────────────────────
+
+        async loadMemoryMd() {
+            try {
+                const response = await fetch('/api/memory/memory-md');
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('memoryMdPreview').textContent = data.content || '(空)';
+                    document.getElementById('memoryMdEditor').value = data.content || '';
+                }
+            } catch (error) {
+                console.error('加载 MEMORY.md 失败:', error);
+            }
+        }
+
+        toggleMemoryMdEdit() {
+            const viewMode = document.getElementById('memoryMdViewMode');
+            const editMode = document.getElementById('memoryMdEditMode');
+            const toggle = document.getElementById('memoryMdEditToggle');
+
+            if (editMode.style.display === 'none') {
+                editMode.style.display = 'block';
+                viewMode.style.display = 'none';
+                toggle.innerHTML = '<span class="material-symbols-outlined" style="font-size:14px;">visibility</span> 预览';
+            } else {
+                editMode.style.display = 'none';
+                viewMode.style.display = 'block';
+                toggle.innerHTML = '<span class="material-symbols-outlined" style="font-size:14px;">edit</span> 编辑';
+            }
+        }
+
+        async saveMemoryMd() {
+            const content = document.getElementById('memoryMdEditor').value;
+
+            try {
+                const response = await fetch('/api/memory/memory-md', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    this.loadMemoryMd();
+                    this.cancelMemoryMdEdit();
+                    alert('MEMORY.md 已保存');
+                } else {
+                    alert('保存失败: ' + data.error);
+                }
+            } catch (error) {
+                console.error('保存 MEMORY.md 失败:', error);
+            }
+        }
+
+        cancelMemoryMdEdit() {
+            document.getElementById('memoryMdEditMode').style.display = 'none';
+            document.getElementById('memoryMdViewMode').style.display = 'block';
+            document.getElementById('memoryMdEditToggle').innerHTML = '<span class="material-symbols-outlined" style="font-size:14px;">edit</span> 编辑';
+        }
+
+        async updateMemoryMdSection() {
+            const section = document.getElementById('sectionName').value.trim();
+            const content = document.getElementById('sectionContent').value.trim();
+
+            if (!section || !content) {
+                alert('请输入章节名和内容');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/memory/memory-md/section', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ section, content })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('sectionName').value = '';
+                    document.getElementById('sectionContent').value = '';
+                    this.loadMemoryMd();
+                    alert(`章节 "${section}" 已更新`);
+                } else {
+                    alert('更新失败: ' + data.error);
+                }
+            } catch (error) {
+                console.error('更新章节失败:', error);
+            }
+        }
+
+        // ── 工具方法 ──────────────────────────────────────────────────────
+
+        getMemoryIcon(type) {
+            const icons = {
+                'episodic': 'event_note',
+                'semantic': 'menu_book',
+                'procedural': 'settings',
+                'working': 'memory'
+            };
+            return icons[type] || 'circle';
+        }
+
+        getMemoryTypeName(type) {
+            const names = {
+                'episodic': '情节记忆',
+                'semantic': '语义记忆',
+                'procedural': '程序性记忆',
+                'working': '工作记忆'
+            };
+            return names[type] || type;
+        }
+
+        formatDate(dateStr) {
+            return new Date(dateStr).toLocaleString('zh-CN');
+        }
+    }
+
+    const memoryDashboard = new MemoryDashboard();
+</script>
 </body>
 </html>

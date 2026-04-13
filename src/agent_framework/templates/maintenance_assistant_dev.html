@@ -11,16 +11,15 @@
   <style>
     :root{--bg:#f4f7fb;--card:#fff;--line:#dbe4f0;--text:#10233f;--muted:#5f728c;--primary:#1363df;--soft:#e9f1ff;--ok:#2563eb;--warn:#60a5fa;--accent:#c5892f;--accent-soft:rgba(197,137,47,.12);--shadow:0 12px 28px rgba(16,35,63,.08);--radius:18px}
     *{box-sizing:border-box}html{scroll-behavior:smooth}.material-symbols-outlined{font-variation-settings:"FILL" 0,"wght" 400,"GRAD" 0,"opsz" 24;user-select:none}body{margin:0;font-family:"Inter","Segoe UI","Microsoft YaHei",sans-serif;color:var(--text)}
-    .platform-sidebar{position:fixed;left:0;top:0;z-index:50;display:flex;flex-direction:column;gap:10px;width:16rem;height:100vh;padding:24px 16px;background:#f0f4f7;border-right:1px solid rgba(219,228,240,.7)}.platform-brand{display:flex;align-items:center;gap:12px;padding:0 8px 10px;text-decoration:none;color:inherit}.platform-brand-mark{display:grid;place-items:center;width:40px;height:40px;border-radius:14px;background:linear-gradient(135deg,#1363df,#5794fd);color:#fff;font-size:22px}.platform-brand-copy strong{display:block;font-family:"Manrope",sans-serif;font-size:17px;line-height:1.1}.platform-brand-copy small{display:block;margin-top:4px;color:var(--muted);font-size:11px;letter-spacing:.04em}.platform-primary-entry{display:flex;align-items:center;justify-content:center;gap:8px;margin:2px 0 8px;padding:14px 16px;border-radius:16px;background:linear-gradient(135deg,#1363df,#0f4eb3);color:#fff;text-decoration:none;font-weight:700;box-shadow:0 18px 32px rgba(19,99,223,.2)}.platform-nav{display:grid;gap:4px}.platform-nav-link,.platform-nav-utility{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;color:rgba(44,52,55,.78);text-decoration:none;font-weight:600;transition:.2s ease}.platform-nav-link:hover,.platform-nav-utility:hover{background:rgba(213,227,253,.55);color:#005cc0}.platform-nav-link.active{background:#d5e3fd;color:#005cc0;box-shadow:inset 0 0 0 1px rgba(0,92,192,.08)}.platform-sidebar-footer{margin-top:auto;padding-top:14px;border-top:1px solid rgba(172,179,183,.18);display:grid;gap:4px}.platform-user-pill{display:flex;align-items:center;gap:12px;padding:12px 14px 0}.platform-user-mark{width:32px;height:32px;border-radius:999px;background:linear-gradient(135deg,#1363df,#5794fd)}.platform-user-pill strong{display:block;font-size:12px}.platform-user-pill small{display:block;margin-top:2px;color:var(--muted);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
-    .platform-header{position:fixed;left:16rem;right:0;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:16px;height:72px;padding:0 32px;background:rgba(247,249,251,.86);backdrop-filter:blur(18px);border-bottom:1px solid rgba(219,228,240,.55)}.platform-header-title{display:flex;align-items:center;gap:12px}.platform-header-title strong{font-family:"Manrope",sans-serif;font-size:20px;font-weight:900}.platform-header-badge{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;background:#d5e3fd;color:#005cc0;font-size:12px;font-weight:700}.platform-header-tools{display:flex;align-items:center;gap:12px}.platform-header-search{position:relative}.platform-header-search .material-symbols-outlined{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--muted)}.platform-header-search input{width:300px;padding:10px 16px 10px 40px;border:1px solid rgba(219,228,240,.95);border-radius:999px;background:#f0f4f7;color:var(--text);font:inherit;outline:none}.platform-header-icon{display:grid;place-items:center;width:40px;height:40px;border-radius:999px;color:var(--muted);text-decoration:none;transition:.2s ease}.platform-header-icon:hover{background:#e9f1ff;color:#1363df}
-    .dev-page-shell{position:relative;z-index:5;min-height:100vh;width:calc(100% - 16rem);max-width:none;margin:0 0 0 16rem;padding:96px 32px 32px;display:flex;flex-direction:column;gap:20px}.dev-page-shell>*{width:100%;max-width:none}.dev-topbar{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start}.title-block{max-width:1120px}.title-block h1{margin:0;font-family:"Manrope",sans-serif;font-size:36px;line-height:1.1}.title-block p{margin:8px 0 0;color:var(--muted);max-width:1040px;line-height:1.7}.mode-badge{display:inline-flex;align-items:center;gap:8px;margin-bottom:10px;padding:6px 12px;border-radius:999px;background:var(--accent-soft);border:1px solid rgba(197,137,47,.2);color:var(--accent);font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.top-actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center}.btn{border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:12px;padding:10px 16px;cursor:pointer;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:8px;box-shadow:var(--shadow)}.btn.primary{background:var(--primary);color:#fff;border-color:var(--primary)}.mode-switch{display:inline-flex;padding:4px;border-radius:999px;background:#edf3fb;border:1px solid rgba(19,99,223,.10)}.mode-link{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:999px;font-size:13px;font-weight:800;color:var(--muted);text-decoration:none}.mode-link.active{background:linear-gradient(135deg,#c5892f,#a56e1c);color:#fff;box-shadow:0 10px 24px rgba(197,137,47,.18)}
-    .dev-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.summary-card{padding:16px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,#fff,#f7faff);box-shadow:var(--shadow);display:grid;gap:8px}.summary-card strong{font-size:15px}.summary-card p{margin:0;color:var(--muted);font-size:12px;line-height:1.7}.summary-card .meta{color:var(--primary);font-size:12px;font-weight:800}
-    .dev-layout{display:grid;grid-template-columns:minmax(360px,.95fr) minmax(0,1.35fr) minmax(280px,.82fr);gap:18px;align-items:start;width:100%;max-width:none;margin:0}.dev-config,.dev-chat,.dev-side{background:var(--card);border:1px solid rgba(219,228,240,.95);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}.dev-config{display:grid;gap:16px}.dev-head{display:grid;gap:8px}.dev-kicker{display:inline-flex;width:max-content;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;background:rgba(19,99,223,.08);border:1px solid rgba(19,99,223,.14);color:var(--primary);font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+    .platform-sidebar{display:none}
+    .platform-header{position:fixed;left:0;right:0;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:16px;height:72px;padding:0 32px;background:rgba(247,249,251,.86);backdrop-filter:blur(18px);border-bottom:1px solid rgba(219,228,240,.55)}.platform-header-title{display:flex;align-items:center;gap:12px}.platform-header-title strong{font-family:"Manrope",sans-serif;font-size:20px;font-weight:900}.platform-header-badge{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;background:#d5e3fd;color:#005cc0;font-size:12px;font-weight:700}.platform-header-tools{display:flex;align-items:center;gap:12px}.platform-header-search{position:relative}.platform-header-search .material-symbols-outlined{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--muted)}.platform-header-search input{width:300px;padding:10px 16px 10px 40px;border:1px solid rgba(219,228,240,.95);border-radius:999px;background:#f0f4f7;color:var(--text);font:inherit;outline:none}.platform-header-icon{display:grid;place-items:center;width:40px;height:40px;border-radius:999px;color:var(--muted);text-decoration:none;transition:.2s ease}.platform-header-icon:hover{background:#e9f1ff;color:#1363df}
+    .dev-page-shell{position:relative;z-index:5;min-height:100vh;width:100%;max-width:none;margin:0;padding:96px 32px 32px;display:flex;flex-direction:column;gap:20px}.dev-page-shell>*{width:100%;max-width:none}.dev-topbar{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start}.title-block{max-width:1120px}.title-block h1{margin:0;font-family:"Manrope",sans-serif;font-size:36px;line-height:1.1}.title-block p{margin:8px 0 0;color:var(--muted);max-width:1040px;line-height:1.7}.mode-badge{display:inline-flex;align-items:center;gap:8px;margin-bottom:10px;padding:6px 12px;border-radius:999px;background:var(--accent-soft);border:1px solid rgba(197,137,47,.2);color:var(--accent);font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.top-actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center}.btn{border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:12px;padding:10px 16px;cursor:pointer;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:8px;box-shadow:var(--shadow)}.btn.primary{background:var(--primary);color:#fff;border-color:var(--primary)}.mode-switch{display:inline-flex;padding:4px;border-radius:999px;background:#edf3fb;border:1px solid rgba(19,99,223,.10)}.mode-link{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:999px;font-size:13px;font-weight:800;color:var(--muted);text-decoration:none}.mode-link.active{background:linear-gradient(135deg,#c5892f,#a56e1c);color:#fff;box-shadow:0 10px 24px rgba(197,137,47,.18)}
+    .dev-layout{display:grid;grid-template-columns:minmax(360px,.95fr) minmax(0,1.35fr) minmax(280px,.82fr);gap:18px;align-items:start;width:100%;max-width:none;margin:0}.dev-config,.dev-chat,.dev-side{background:var(--card);border:1px solid rgba(219,228,240,.95);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;min-width:0}.dev-config{display:grid;gap:16px}.dev-head{display:grid;gap:8px}.dev-kicker{display:inline-flex;width:max-content;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;background:rgba(19,99,223,.08);border:1px solid rgba(19,99,223,.14);color:var(--primary);font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
     .grid2,.toggle-grid,.tool-grid,.action-row,.side-stack,.chips{display:grid;gap:12px}.grid2,.toggle-grid,.tool-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.field{display:grid;gap:8px}.field.full{grid-column:1/-1}.field label{font-size:13px;font-weight:700;color:var(--muted)}.field input,.field textarea,.field select,.composer textarea{width:100%;border:1px solid var(--line);border-radius:14px;padding:13px 14px;background:#fbfdff;color:var(--text);outline:none;font:inherit}.field textarea{min-height:90px;resize:vertical}.field select[multiple]{min-height:144px}.field small{color:var(--muted);line-height:1.6}.toggle-item{border:1px solid var(--line);border-radius:16px;padding:14px;background:#fbfdff;display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.toggle-item strong{display:block;margin-bottom:4px;font-size:14px}.toggle-item span{font-size:12px;color:var(--muted);line-height:1.6}.switch{position:relative;width:46px;height:26px;flex:0 0 auto}.switch input{opacity:0;width:0;height:0}.slider{position:absolute;inset:0;background:#d7e0ed;border-radius:999px}.slider:before{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s}.switch input:checked+.slider{background:var(--primary)}.switch input:checked+.slider:before{transform:translateX(20px)}
     .helper-box,.preview-box,.toolbox{padding:16px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,#fbfdff,#fff)}.toolcode{display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;background:#eef4ff;color:var(--primary);font-size:11px;font-weight:700}.chips{display:flex;gap:8px;flex-wrap:wrap}.hint{padding:8px 12px;border:1px solid rgba(19,99,223,.14);background:#fff;color:var(--primary);border-radius:999px;cursor:pointer;font-size:12px;font-weight:700}
-    .dev-chat{display:grid;grid-template-rows:auto auto minmax(420px,1fr) auto;gap:0}.chathead{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:flex-start;padding-bottom:16px;border-bottom:1px solid rgba(219,228,240,.8)}.pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;background:#eef4ff;color:var(--primary);font-size:12px;font-weight:800;border-radius:999px}.pill.warn{background:#fff5e8;color:var(--accent)}.statusbar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:16px 0 6px}.statuscard{padding:15px 16px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,#fbfdff,#fff)}.statuscard span{display:block;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.statuscard strong{display:block;margin-top:8px;font-size:18px;line-height:1.2}.statuscard small{display:block;margin-top:8px;color:var(--muted);line-height:1.6}.messages{padding:18px 0;display:flex;flex-direction:column;gap:14px;max-height:64vh;overflow:auto}.message{display:flex;gap:12px;align-items:flex-start}.message.user{flex-direction:row-reverse}.avatar{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#fff;flex:0 0 auto}.message.user .avatar{background:#0f766e}.message.assistant .avatar{background:var(--primary)}.bubble{max-width:min(840px,100%);padding:14px 16px;border-radius:18px;border:1px solid var(--line);background:#fff;line-height:1.75}.message.user .bubble{background:#ecfaf5;border-color:#cbeee1}.meta-line{margin-top:10px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted)}.composer{display:grid;gap:12px;padding-top:14px;border-top:1px solid rgba(219,228,240,.8)}.composer textarea{min-height:104px;resize:vertical}.composer-actions{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center}.chip{display:inline-flex;align-items:center;padding:8px 12px;border-radius:999px;background:#eef4ff;color:var(--primary);font-size:12px;font-weight:800}.chip.gold{background:#fff5e8;color:var(--accent)}.chip.green{background:#ecfaf5;color:#147a54}
+    .dev-chat{display:grid;grid-template-rows:auto auto minmax(420px,1fr) auto;gap:0}.chathead{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:flex-start;padding-bottom:16px;border-bottom:1px solid rgba(219,228,240,.8)}.pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;background:#eef4ff;color:var(--primary);font-size:12px;font-weight:800;border-radius:999px}.pill.warn{background:#fff5e8;color:var(--accent)}.statusbar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:16px 0 6px}.statuscard{padding:15px 16px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,#fbfdff,#fff)}.statuscard span{display:block;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.statuscard strong{display:block;margin-top:8px;font-size:18px;line-height:1.2}.statuscard small{display:block;margin-top:8px;color:var(--muted);line-height:1.6}.messages{padding:18px 0;display:flex;flex-direction:column;gap:14px;max-height:64vh;overflow:auto}.message{display:flex;gap:12px;align-items:flex-start}.message.user{flex-direction:row-reverse}.avatar{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#fff;flex:0 0 auto}.message.user .avatar{background:#1363df}.message.assistant .avatar{background:var(--primary)}.bubble{max-width:min(840px,100%);padding:14px 16px;border-radius:18px;border:1px solid var(--line);background:#fff;line-height:1.75}.message.user .bubble{background:#ecfaf5;border-color:#cbeee1}.meta-line{margin-top:10px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted)}.composer{display:grid;gap:12px;padding-top:14px;border-top:1px solid rgba(219,228,240,.8)}.composer textarea{min-height:104px;resize:vertical}.composer-actions{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center}.chip{display:inline-flex;align-items:center;padding:8px 12px;border-radius:999px;background:#eef4ff;color:var(--primary);font-size:12px;font-weight:800}.chip.gold{background:#fff5e8;color:var(--accent)}.chip.green{background:#ecfaf5;color:#147a54}
     .side-stack{display:grid;gap:16px}.dev-side h3{margin:0 0 12px;font-size:16px}.box{color:var(--muted);font-size:13px;line-height:1.7}.kv,.list{display:grid;gap:10px}.item{padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:#fbfdff}.item strong{display:block;margin-bottom:6px;font-size:13px;color:var(--muted)}pre{margin:0;white-space:pre-wrap;word-break:break-word;font-size:12px;line-height:1.7}
-    @media (max-width:1320px){.dev-summary,.dev-layout,.statusbar{grid-template-columns:1fr}.messages{max-height:none}}@media (max-width:1180px){.platform-sidebar{position:static;width:auto;height:auto;margin:0 14px 12px;border-right:none;border-bottom:1px solid rgba(219,228,240,.7);border-radius:0 0 24px 24px}.platform-header{position:static;left:auto;right:auto;height:auto;margin:0 14px 8px;padding:14px 18px;border:1px solid rgba(219,228,240,.55);border-radius:20px}.platform-header-tools{width:100%;justify-content:space-between;flex-wrap:wrap}.platform-header-search{flex:1 1 320px}.platform-header-search input{width:100%}.dev-page-shell{width:100%;margin-left:0;padding:16px 14px 24px}}@media (max-width:760px){.dev-page-shell{padding:14px}.dev-topbar,.grid2,.toggle-grid,.tool-grid,.composer-actions{grid-template-columns:1fr}.mode-switch{width:100%;justify-content:space-between}.top-actions{width:100%}.btn{width:100%;justify-content:center}.platform-header{margin:0 12px 8px;padding:14px}.platform-header-title{flex-wrap:wrap}.platform-sidebar{margin:0 12px 10px;padding:18px 14px}}
+    @media (max-width:1320px){.dev-layout,.statusbar{grid-template-columns:1fr}.messages{max-height:none}}@media (max-width:1180px){.platform-header{position:static;left:auto;right:auto;height:auto;margin:0 14px 8px;padding:14px 18px;border:1px solid rgba(219,228,240,.55);border-radius:20px}.platform-header-tools{width:100%;justify-content:space-between;flex-wrap:wrap}.platform-header-search{flex:1 1 320px}.platform-header-search input{width:100%}.dev-page-shell{width:100%;margin-left:0;padding:16px 14px 24px}}@media (max-width:760px){.dev-page-shell{padding:14px}.dev-topbar,.grid2,.toggle-grid,.tool-grid,.composer-actions{grid-template-columns:1fr}.mode-switch{width:100%;justify-content:space-between}.top-actions{width:100%}.btn{width:100%;justify-content:center}.platform-header{margin:0 12px 8px;padding:14px}.platform-header-title{flex-wrap:wrap}}
   </style>
   <link rel="stylesheet" href="/static/css/submodule-theme.css?v=1.0">
   <style>
@@ -34,16 +33,8 @@
       line-height: 1.7;
     }
 
-    .platform-brand-copy strong {
-      font-size: 18px;
-    }
-
-    .platform-brand-copy small,
-    .platform-user-pill small,
     .platform-header-badge,
     .mode-badge,
-    .summary-card p,
-    .summary-card .meta,
     .dev-kicker,
     .toggle-item span,
     .toolcode,
@@ -58,18 +49,6 @@
       font-size: 14px;
     }
 
-    .platform-brand-copy small,
-    .platform-user-pill small {
-      font-size: 13px;
-    }
-
-    .platform-primary-entry,
-    .platform-nav-link,
-    .platform-nav-utility {
-      font-size: 16px;
-    }
-
-    .platform-user-pill strong,
     .mode-link,
     .box,
     .field label,
@@ -77,18 +56,12 @@
       font-size: 15px;
     }
 
-    .platform-user-pill strong {
-      font-size: 14px;
-    }
-
-    .summary-card strong,
     .toggle-item strong,
     .statuscard strong,
     .dev-side h3 {
       font-size: 16px;
     }
 
-    .summary-card p,
     .toggle-item span,
     .field input,
     .field textarea,
@@ -107,41 +80,6 @@
 </head>
 <body{% if embedded %} class="is-embedded"{% endif %}>
   {% if not embedded %}
-  <aside class="platform-sidebar">
-    <a class="platform-brand" href="/">
-      <span class="platform-brand-mark material-symbols-outlined">bolt</span>
-      <span class="platform-brand-copy">
-        <strong>风起时域</strong>
-        <small>新能源 AI 平台入口</small>
-      </span>
-    </a>
-    <a class="platform-primary-entry" href="/dev/assistant">
-      <span class="material-symbols-outlined">terminal</span>
-      <span>当前开发版</span>
-    </a>
-    <nav class="platform-nav" aria-label="平台导航">
-      <a class="platform-nav-link" href="/maintenance-assistant"><span class="material-symbols-outlined">neurology</span><span>智导助手</span></a>
-      <a class="platform-nav-link" href="/modules/weather-siting/app"><span class="material-symbols-outlined">wind_power</span><span>气象选址</span></a>
-      <a class="platform-nav-link" href="/modules/power-trading/app"><span class="material-symbols-outlined">query_stats</span><span>电力交易</span></a>
-      <a class="platform-nav-link" href="/modules/smart-workorder/app"><span class="material-symbols-outlined">assignment</span><span>智能工单</span></a>
-      <a class="platform-nav-link active" href="/dev/assistant"><span class="material-symbols-outlined">code</span><span>开发版助手</span></a>
-      <a class="platform-nav-link" href="/dev"><span class="material-symbols-outlined">dashboard</span><span>开发控制台</span></a>
-    </nav>
-    <div class="platform-sidebar-footer">
-      <a class="platform-nav-utility" href="/knowledge"><span class="material-symbols-outlined">library_books</span><span>知识库</span></a>
-      <a class="platform-nav-utility" href="/plugins"><span class="material-symbols-outlined">extension</span><span>插件市场</span></a>
-      <a class="platform-nav-utility" href="/settings"><span class="material-symbols-outlined">settings</span><span>平台设置</span></a>
-      <a class="platform-nav-utility" href="/logs"><span class="material-symbols-outlined">receipt_long</span><span>日志中心</span></a>
-      <div class="platform-user-pill">
-        <span class="platform-user-mark"></span>
-        <div>
-          <strong>统一体验风格</strong>
-          <small>开发版</small>
-        </div>
-      </div>
-    </div>
-  </aside>
-
   <header class="platform-header">
     <div class="platform-header-title">
       <strong>风电运维智导助手 · 开发版</strong>
@@ -167,31 +105,23 @@
       <div class="title-block">
         <div class="mode-badge"><i class="fas fa-screwdriver-wrench"></i><span>开发版 · 可编排调试</span></div>
         <h1>风电运维智导助手 · 开发版</h1>
-        <p>保留提示词、上下文、工具策略和 Gateway 传输调试能力，同时把页面壳层、导航和对齐方式统一到平台主界面，避免再出现单独一页一套风格。</p>
+        <p>可在当前页面调整系统提示词、附加上下文、工具策略和回传方式，并实时查看诊断结果与链路信息。</p>
       </div>
       <div class="top-actions">
         <div class="mode-switch">
           <a class="mode-link" href="/maintenance-assistant"><i class="fas fa-user"></i> 用户版</a>
           <span class="mode-link active"><i class="fas fa-laptop-code"></i> 开发版</span>
         </div>
-        <a class="btn" href="/dev"><i class="fas fa-arrow-left"></i> 返回开发首页</a>
         <a class="btn" href="/maintenance-assistant"><i class="fas fa-up-right-from-square"></i> 打开用户版</a>
       </div>
     </div>
-
-    <section class="dev-summary">
-      <article class="summary-card"><div class="meta">提示词层</div><strong>系统提示可直接改写</strong><p>快速验证不同回答风格、结构模板和风险表达方式的变化。</p></article>
-      <article class="summary-card"><div class="meta">工具链</div><strong>工具集与白名单可控</strong><p>内置工具、预设工具集、排除列表和插件工具都能在当前页编排。</p></article>
-      <article class="summary-card"><div class="meta">传输层</div><strong>网关 / HTTP 双路径</strong><p>优先走 Gateway 长连接，失败后自动回退统一聊天接口。</p></article>
-      <article class="summary-card"><div class="meta">可解释性</div><strong>链路结果同屏可见</strong><p>路由、检索、因果和模型策略面板保持在右侧，便于联调观察。</p></article>
-    </section>
 
     <section class="dev-layout">
       <aside class="dev-config">
         <div class="dev-head">
           <span class="dev-kicker">开发配置面板</span>
           <h2>请求编排与诊断配置</h2>
-          <p class="box">左侧配置会和当前消息一起进入统一聊天入口，用来验证提示词、资产上下文、工具权限和链路策略的真实效果。</p>
+          <p class="box">在这里设置提示词、上下文、工具和诊断参数，发送消息时会一并带入当前请求。</p>
         </div>
         <div class="field"><label for="assistantName">助手显示名称</label><input id="assistantName" value="风电运维智导助手 · 开发版"><small>只影响当前页面显示与调试标识，不会改动线上用户版名称。</small></div>
         <div class="field"><label for="developerSystemPrompt">系统提示词</label><textarea id="developerSystemPrompt">你是开发版中的风电运维智导助手。回答时优先输出：结论摘要、根因排序、排查动作、风险提醒、是否需要升级专家支持。保持结构化、专业、可执行。</textarea></div>
@@ -242,7 +172,7 @@
           <div class="dev-head">
             <span class="dev-kicker">统一聊天调试</span>
             <h2 id="chatTitle">风电运维智导助手 · 开发版</h2>
-            <p class="box">优先走 Gateway 长连接，失败后自动回退到 HTTP 统一聊天接口。你可以直接观察配置变化如何影响本轮回复和调试链路。</p>
+            <p class="box">当前页面优先通过 Gateway 返回结果，不可用时会自动切换到 HTTP 接口。</p>
           </div>
           <div class="pill" id="gatewayStatus"><i class="fas fa-circle-nodes"></i><span id="gatewayStatusText">Gateway 状态检测中</span></div>
         </div>
@@ -268,10 +198,10 @@
       </main>
 
       <aside class="side-stack">
-        <section class="dev-side"><h3>路由信息</h3><div id="routePanel" class="box">发送问题后，这里会显示当前轮次的模式、模型和路由原因。</div></section>
-        <section class="dev-side"><h3>因果分析</h3><div id="causalPanel" class="box">启用因果推断后，这里会显示根因候选、链路和推荐动作。</div></section>
-        <section class="dev-side"><h3>检索结果</h3><div id="retrievalPanel" class="box">这里会显示命中的知识片段、记忆结果和会话摘要。</div></section>
-        <section class="dev-side"><h3>模型策略</h3><div id="modelPanel" class="box">这里会显示当前模型来源、微调偏好和 RLHF 状态。</div></section>
+        <section class="dev-side"><h3>路由信息</h3><div id="routePanel" class="box">当前请求的处理信息会显示在这里。</div></section>
+        <section class="dev-side"><h3>因果分析</h3><div id="causalPanel" class="box">分析结果会显示在这里。</div></section>
+        <section class="dev-side"><h3>检索结果</h3><div id="retrievalPanel" class="box">检索内容会显示在这里。</div></section>
+        <section class="dev-side"><h3>模型策略</h3><div id="modelPanel" class="box">当前模型信息会显示在这里。</div></section>
       </aside>
     </section>
   </div>
@@ -422,10 +352,10 @@
     }
 
     function renderEmptyPanels() {
-      routePanel.innerHTML = '<div class="box">发送问题后，这里会显示当前轮次的模式、模型和路由原因。</div>';
-      causalPanel.innerHTML = '<div class="box">启用因果推断后，这里会显示根因候选、链路和推荐动作。</div>';
-      retrievalPanel.innerHTML = '<div class="box">这里会显示命中的知识片段、记忆结果和会话摘要。</div>';
-      modelPanel.innerHTML = '<div class="box">这里会显示当前模型来源、微调偏好和 RLHF 状态。</div>';
+      routePanel.innerHTML = '<div class="box">当前请求的处理信息会显示在这里。</div>';
+      causalPanel.innerHTML = '<div class="box">分析结果会显示在这里。</div>';
+      retrievalPanel.innerHTML = '<div class="box">检索内容会显示在这里。</div>';
+      modelPanel.innerHTML = '<div class="box">当前模型信息会显示在这里。</div>';
     }
 
     function refreshStatusCards() {

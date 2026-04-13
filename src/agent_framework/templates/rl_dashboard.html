@@ -5,225 +5,292 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>强化学习实验室 - Agent Framework</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/base-theme.css">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --card-bg: #fff;
-            --text2: #475569;
-            --text3: #94a3b8;
-            --border: rgba(19,99,223,.14);
-            --primary-light: rgba(19,99,223,.10);
-            --success: #059669;
-            --danger: #dc2626;
-            --canvas-bg: #fafbff;
-            --primary: #1363df;
-            --primary-deep: #0f4eb3;
+            --rl-accent:      #ea580c;
+            --rl-accent-deep: #c2410c;
+            --rl-accent-lite: rgba(234,88,12,.10);
+            --rl-surface:     rgba(255,255,255,0.84);
+            --rl-border:      rgba(234,88,12,.13);
+            --rl-text:        #1a1a2e;
+            --rl-text2:       #475569;
+            --rl-text3:       #94a3b8;
+            --rl-success:     #059669;
+            --rl-danger:      #dc2626;
+            --rl-canvas-bg:   #fafbff;
+            /* legacy compat */
+            --primary:        #ea580c;
+            --primary-deep:   #c2410c;
+            --primary-light:  rgba(234,88,12,.10);
+            --text2:          #475569;
+            --text3:          #94a3b8;
+            --card-bg:        rgba(255,255,255,0.84);
+            --border:         rgba(234,88,12,.13);
+            --success:        #059669;
+            --danger:         #dc2626;
         }
 
-        .page-wide { max-width: 1500px; padding: 40px 20px; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        .header { text-align: center; margin-bottom: 36px; padding-top: 20px; }
-        .header h1 {
-            font-size: 36px; font-weight: 700;
-            background: linear-gradient(135deg, var(--primary-deep), var(--primary));
+        body {
+            font-family: 'Inter', 'Manrope', system-ui, sans-serif;
+            background: radial-gradient(ellipse 120% 80% at 60% 10%, #fff7ed 0%, #fed7aa 22%, #fdba74 45%, #f97316 68%, #ea580c 100%);
+            min-height: 100vh;
+            color: var(--rl-text);
+        }
+        body::before {
+            content: '';
+            position: fixed; inset: 0; pointer-events: none; z-index: 0;
+            background-image:
+                linear-gradient(rgba(234,88,12,.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(234,88,12,.06) 1px, transparent 1px);
+            background-size: 48px 48px;
+        }
+
+        .rl-shell {
+            position: relative; z-index: 1;
+            max-width: 1540px; margin: 0 auto;
+            padding: 32px 24px 60px;
+        }
+
+        /* ── Hero ── */
+        .rl-hero {
+            background: rgba(255,255,255,0.72);
+            backdrop-filter: blur(18px);
+            border: 1px solid rgba(234,88,12,.18);
+            border-radius: 20px;
+            padding: 28px 32px 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 32px rgba(234,88,12,.10);
+        }
+        .rl-hero-top { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+        .rl-hero-icon {
+            width: 48px; height: 48px; border-radius: 14px;
+            background: linear-gradient(135deg, var(--rl-accent-deep), var(--rl-accent));
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 20px; flex-shrink: 0;
+            box-shadow: 0 4px 16px rgba(234,88,12,.35);
+        }
+        .rl-hero-titles h1 {
+            font-family: 'Manrope', sans-serif;
+            font-size: 26px; font-weight: 800; letter-spacing: -.5px;
+            background: linear-gradient(135deg, var(--rl-accent-deep), var(--rl-accent));
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            margin-bottom: 8px;
         }
-        .header p { color: var(--text2); font-size: 15px; }
-        .header .algo-tags { margin-top: 12px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
-        .header .algo-tag {
-            padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
-            background: var(--primary-light); color: var(--primary-deep);
+        .rl-hero-titles p { font-size: 13px; color: var(--rl-text2); margin-top: 2px; }
+        .rl-algo-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+        .rl-algo-tag {
+            padding: 4px 14px; border-radius: 20px; font-size: 11px; font-weight: 600;
+            background: var(--rl-accent-lite); color: var(--rl-accent-deep);
+            border: 1px solid rgba(234,88,12,.18);
         }
 
-        /* ── 三栏布局 ── */
-        .layout { display: grid; grid-template-columns: 300px 1fr; gap: 20px; }
+        /* ── Layout ── */
+        .layout { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 20px; }
+        .sidebar { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+        .main-content { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 
-        /* ── 卡片 ── */
+        /* ── Card ── */
         .card {
-            background: var(--card-bg); border-radius: 16px;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow); padding: 20px;
+            background: var(--rl-surface);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--rl-border);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 24px rgba(234,88,12,.07);
         }
         .card-title {
-            font-size: 14px; font-weight: 600; color: var(--primary-deep);
+            font-size: 13px; font-weight: 700; color: var(--rl-accent-deep);
             margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+            font-family: 'Manrope', sans-serif;
         }
-        .card-title i { font-size: 15px; }
+        .card-title i { font-size: 14px; }
 
-        .sidebar { display: flex; flex-direction: column; gap: 16px; }
-
-        /* ── 表单 ── */
-        label { font-size: 12px; color: var(--text3); font-weight: 500; display: block; margin-bottom: 5px; }
+        /* ── Forms ── */
+        label { font-size: 11px; color: var(--rl-text3); font-weight: 600; display: block; margin-bottom: 4px; letter-spacing: .3px; text-transform: uppercase; }
         select, input[type=number], input[type=text] {
-            width: 100%; padding: 9px 11px;
-            border: 1px solid #e2e8f0; border-radius: 10px;
-            font-size: 13px; background: #f8fafc; color: var(--text);
-            margin-bottom: 12px; transition: border .2s;
+            width: 100%; padding: 9px 12px;
+            border: 1px solid rgba(234,88,12,.18); border-radius: 10px;
+            font-size: 13px; background: rgba(255,255,255,0.7); color: var(--rl-text);
+            margin-bottom: 12px; transition: border .2s, box-shadow .2s;
+            font-family: inherit;
         }
-        select:focus, input:focus { outline: none; border-color: var(--primary); background: #fff; }
+        select:focus, input:focus {
+            outline: none; border-color: var(--rl-accent);
+            box-shadow: 0 0 0 3px rgba(234,88,12,.12);
+            background: #fff;
+        }
 
-        /* ── 按钮 ── */
+        /* ── Buttons ── */
         .btn {
             padding: 9px 16px; border: none; border-radius: 10px;
-            font-size: 13px; font-weight: 600;
+            font-size: 13px; font-weight: 600; font-family: inherit;
             cursor: pointer; transition: all .2s;
             display: inline-flex; align-items: center; gap: 6px;
         }
-        .btn-primary   { background: linear-gradient(135deg,var(--primary-deep),var(--primary)); color:#fff; }
-        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(19,99,223,.28); }
-        .btn-secondary { background: #f1f5f9; color: var(--text2); }
-        .btn-secondary:hover { background: #e2e8f0; }
-        .btn-success   { background: linear-gradient(135deg,#10b981,#059669); color:#fff; }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--rl-accent-deep), var(--rl-accent));
+            color: #fff;
+        }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(234,88,12,.35); }
+        .btn-secondary { background: rgba(234,88,12,.08); color: var(--rl-accent-deep); border: 1px solid rgba(234,88,12,.15); }
+        .btn-secondary:hover { background: rgba(234,88,12,.14); }
+        .btn-success { background: linear-gradient(135deg, #10b981, #059669); color: #fff; }
         .btn-success:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(16,185,129,.3); }
-        .btn-danger    { background: linear-gradient(135deg,#ef4444,#dc2626); color:#fff; }
-        .btn-danger:hover { transform: translateY(-1px); }
+        .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
+        .btn-danger:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(220,38,38,.3); }
         .btn-full { width: 100%; justify-content: center; }
         .btn-sm { padding: 5px 12px; font-size: 12px; }
-        .btn:disabled { opacity: .5; cursor: not-allowed; transform: none !important; }
-
+        .btn:disabled { opacity: .45; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
         .btn-row { display: flex; gap: 8px; }
         .btn-row .btn { flex: 1; }
 
         .param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px; }
 
-        .main-content { display: flex; flex-direction: column; gap: 16px; }
-
-        /* ── 统计条 ── */
+        /* ── Stats bar ── */
         .stats-bar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
         .stat-item {
-            background: var(--card-bg); border-radius: 14px; padding: 16px;
-            border: 1px solid var(--border); text-align: center;
-            box-shadow: 0 2px 10px rgba(19,99,223,.05);
+            background: var(--rl-surface);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--rl-border);
+            border-radius: 14px; padding: 16px;
+            text-align: center;
+            box-shadow: 0 2px 12px rgba(234,88,12,.06);
+            position: relative; overflow: hidden;
         }
-        .stat-value { font-size: 24px; font-weight: 700; color: var(--primary-deep); }
-        .stat-label { font-size: 11px; color: var(--text3); margin-top: 3px; }
+        .stat-item::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, var(--rl-accent-deep), var(--rl-accent));
+        }
+        .stat-value { font-size: 22px; font-weight: 800; color: var(--rl-accent-deep); font-family: 'Manrope', sans-serif; }
+        .stat-label { font-size: 11px; color: var(--rl-text3); margin-top: 3px; }
 
         /* ── Canvas ── */
-        #curveCanvas, #compareCanvas { width: 100%; height: 240px; border-radius: 12px; display: block; }
-        #heatmapCanvas { width: 100%; height: 200px; border-radius: 12px; display: block; }
-        #mazeCanvas    { width: 100%; height: 180px; border-radius: 12px; display: block; }
-        #rewardDistCanvas { width: 100%; height: 160px; border-radius: 12px; display: block; }
+        #curveCanvas, #compareCanvas { width: 100%; height: 240px; border-radius: 10px; display: block; }
+        #heatmapCanvas { width: 100%; height: 200px; border-radius: 10px; display: block; }
+        #mazeCanvas    { width: 100%; height: 180px; border-radius: 10px; display: block; }
+        #rewardDistCanvas { width: 100%; height: 160px; border-radius: 10px; display: block; }
 
-        /* ── Episode 列表 ── */
+        /* ── Episode list ── */
         .episode-list { max-height: 260px; overflow-y: auto; }
         .episode-row {
             display: grid; grid-template-columns: 36px 1fr auto auto;
             gap: 8px; align-items: center;
             padding: 8px 10px; border-radius: 8px;
-            border-bottom: 1px solid #f1f5f9;
+            border-bottom: 1px solid rgba(234,88,12,.07);
             font-size: 12px; transition: background .15s;
         }
-        .episode-row:hover { background: #f8fafc; }
-        .ep-badge {
-            font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 600;
-        }
+        .episode-row:hover { background: rgba(234,88,12,.04); }
+        .ep-badge { font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 700; }
         .ep-done { background: #d1fae5; color: #065f46; }
         .ep-fail { background: #fee2e2; color: #991b1b; }
-        .reward-bar-wrap { background: rgba(19,99,223,.12); border-radius: 4px; height: 5px; overflow: hidden; }
-        .reward-bar { height: 100%; background: linear-gradient(90deg,var(--primary-deep),var(--primary)); border-radius: 4px; transition: width .4s; }
+        .reward-bar-wrap { background: rgba(234,88,12,.12); border-radius: 4px; height: 5px; overflow: hidden; }
+        .reward-bar { height: 100%; background: linear-gradient(90deg, var(--rl-accent-deep), var(--rl-accent)); border-radius: 4px; transition: width .4s; }
 
-        /* ── Q 表 ── */
+        /* ── Q table ── */
         .q-table-wrap { overflow: auto; max-height: 240px; }
         table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        th { background: rgba(19,99,223,.06); color: var(--primary-deep); padding: 7px 10px; text-align: left; font-weight: 600; position: sticky; top: 0; }
-        td { padding: 6px 10px; border-bottom: 1px solid #f1f5f9; }
-        tr:hover td { background: #fafbff; }
-        .q-pos { color: var(--success); font-weight: 600; }
-        .q-neg { color: var(--danger); }
+        th { background: rgba(234,88,12,.07); color: var(--rl-accent-deep); padding: 7px 10px; text-align: left; font-weight: 700; position: sticky; top: 0; }
+        td { padding: 6px 10px; border-bottom: 1px solid rgba(234,88,12,.06); }
+        tr:hover td { background: rgba(234,88,12,.03); }
+        .q-pos { color: var(--rl-success); font-weight: 600; }
+        .q-neg { color: var(--rl-danger); }
         .q-best { background: #ecfdf5 !important; font-weight: 700; }
 
-        /* ── 日志 ── */
+        /* ── Log box ── */
         .log-box {
-            background: #1e1e2e; color: #cdd6f4; border-radius: 12px;
+            background: #1a1625; color: #e2e8f0; border-radius: 12px;
             padding: 14px; font-family: 'Consolas', 'Courier New', monospace; font-size: 11px;
             max-height: 140px; overflow-y: auto; line-height: 1.8;
+            border: 1px solid rgba(234,88,12,.15);
         }
-        .log-info  { color: #89b4fa; }
-        .log-ok    { color: #a6e3a1; }
-        .log-warn  { color: #f9e2af; }
-        .log-err   { color: #f38ba8; }
+        .log-info  { color: #fb923c; }
+        .log-ok    { color: #86efac; }
+        .log-warn  { color: #fde68a; }
+        .log-err   { color: #fca5a5; }
 
-        /* ── 加载指示器 ── */
-        .spinner { display: inline-block; width: 14px; height: 14px;
-            border: 2px solid rgba(19,99,223,.2); border-top-color: var(--primary);
-            border-radius: 50%; animation: spin .7s linear infinite; }
+        /* ── Spinner ── */
+        .spinner {
+            display: inline-block; width: 14px; height: 14px;
+            border: 2px solid rgba(234,88,12,.25); border-top-color: #fff;
+            border-radius: 50%; animation: spin .7s linear infinite;
+        }
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        /* ── Algo badge ── */
         .algo-badge {
             display: inline-flex; align-items: center; gap: 4px;
             padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
-            background: var(--primary-light); color: var(--primary-deep);
+            background: var(--rl-accent-lite); color: var(--rl-accent-deep);
         }
 
-        /* ── Tab 切换 ── */
-        .tabs { display: flex; gap: 0; margin-bottom: 14px; border-bottom: 2px solid #e2e8f0; }
+        /* ── Tabs ── */
+        .tabs { display: flex; gap: 0; margin-bottom: 14px; border-bottom: 2px solid rgba(234,88,12,.12); }
         .tab {
-            padding: 8px 16px; font-size: 13px; font-weight: 500; color: var(--text3);
+            padding: 8px 16px; font-size: 13px; font-weight: 500; color: var(--rl-text3);
             cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px;
             transition: all .2s;
         }
-        .tab:hover { color: var(--text2); }
-        .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+        .tab:hover { color: var(--rl-text2); }
+        .tab.active { color: var(--rl-accent); border-bottom-color: var(--rl-accent); font-weight: 700; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* ── 进度条 ── */
-        .progress-wrap {
-            width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px;
-            overflow: hidden; margin-top: 8px;
-        }
-        .progress-bar {
-            height: 100%; border-radius: 3px;
-            background: linear-gradient(90deg, var(--primary-deep), var(--primary));
-            transition: width .3s; width: 0%;
-        }
+        /* ── Progress ── */
+        .progress-wrap { width: 100%; height: 6px; background: rgba(234,88,12,.12); border-radius: 3px; overflow: hidden; margin-top: 8px; }
+        .progress-bar { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--rl-accent-deep), var(--rl-accent)); transition: width .3s; width: 0%; }
 
-        /* ── Agent 卡片 ── */
+        /* ── Agent items ── */
         .agent-item {
-            padding: 8px 10px; border-radius: 8px; border: 1px solid #e2e8f0;
+            padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(234,88,12,.14);
             margin-bottom: 6px; cursor: pointer; transition: all .15s; font-size: 12px;
+            background: rgba(255,255,255,0.5);
         }
-        .agent-item:hover { border-color: var(--primary); background: #fafbff; }
-        .agent-item.selected { border-color: var(--primary); background: var(--primary-light); }
-        .agent-item .agent-algo { font-weight: 600; color: var(--primary); }
-        .agent-item .agent-stats { color: var(--text3); font-size: 11px; margin-top: 2px; }
+        .agent-item:hover { border-color: var(--rl-accent); background: rgba(234,88,12,.04); }
+        .agent-item.selected { border-color: var(--rl-accent); background: var(--rl-accent-lite); }
+        .agent-item .agent-algo { font-weight: 700; color: var(--rl-accent); }
+        .agent-item .agent-stats { color: var(--rl-text3); font-size: 11px; margin-top: 2px; }
 
-        /* ── 比较选择 ── */
-        .compare-check { margin-right: 6px; accent-color: var(--primary); }
+        /* ── Compare check ── */
+        .compare-check { margin-right: 6px; accent-color: var(--rl-accent); }
 
-        /* ── 两列网格 ── */
+        /* ── Grids ── */
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
 
-        /* ── 响应式 ── */
+        /* ── Responsive ── */
         @media (max-width: 1000px) {
             .layout { grid-template-columns: 1fr; }
             .stats-bar { grid-template-columns: repeat(3, 1fr); }
             .grid-2, .grid-3 { grid-template-columns: 1fr; }
         }
+        @media (max-width: 640px) {
+            .stats-bar { grid-template-columns: repeat(2, 1fr); }
+        }
     </style>
 </head>
 <body>
 
-<div class="page-wide">
-    <nav class="topbar">
-        <div class="brand">
-            <a class="back-link" href="{{ url_for('developer_home') }}">← 返回主页</a>
-            <h1><i class="fas fa-brain"></i> 强化学习实验室</h1>
-        </div>
-        <div class="topbar-actions">
-            <span class="algo-tag">Q-Learning</span>
-            <span class="algo-tag">SARSA</span>
-            <span class="algo-tag">DQN</span>
-            <span class="algo-tag">REINFORCE</span>
-            <span class="algo-tag">UCB Bandit</span>
-            <span class="algo-tag">LLM-RLHF</span>
-        </div>
-    </nav>
+<div class="rl-shell">
 
-    <div class="header">
-        <p>交互式强化学习训练、可视化与算法比较平台</p>
+    <!-- Hero -->
+    <div class="rl-hero">
+        <div class="rl-hero-top">
+            <div class="rl-hero-icon"><i class="fas fa-brain"></i></div>
+            <div class="rl-hero-titles">
+                <h1>强化学习实验室</h1>
+                <p>交互式强化学习训练、可视化与算法比较平台</p>
+            </div>
+        </div>
+        <div class="rl-algo-tags">
+            <span class="rl-algo-tag">Q-Learning</span>
+            <span class="rl-algo-tag">SARSA</span>
+            <span class="rl-algo-tag">DQN</span>
+            <span class="rl-algo-tag">REINFORCE</span>
+            <span class="rl-algo-tag">UCB Bandit</span>
+            <span class="rl-algo-tag">LLM-RLHF</span>
+        </div>
     </div>
 
     <div class="layout">
@@ -237,7 +304,7 @@
                 <select id="envSelect" onchange="onEnvChange()">
                     <option value="">加载中...</option>
                 </select>
-                <div id="envDesc" style="font-size:11px;color:var(--text3);margin-bottom:12px;min-height:28px;line-height:1.5"></div>
+                <div id="envDesc" style="font-size:11px;color:var(--rl-text3);margin-bottom:12px;min-height:28px;line-height:1.5"></div>
 
                 <label>学习算法</label>
                 <select id="algoSelect" onchange="onAlgoChange()">
@@ -248,7 +315,7 @@
                     <option value="ucb_bandit">UCB 多臂老虎机</option>
                     <option value="llm_rlhf">LLM-RLHF（人类反馈）</option>
                 </select>
-                <div id="algoDesc" style="font-size:11px;color:var(--text3);line-height:1.5;"></div>
+                <div id="algoDesc" style="font-size:11px;color:var(--rl-text3);line-height:1.5;"></div>
             </div>
 
             <!-- 超参数 -->
@@ -274,7 +341,7 @@
                 </div>
             </div>
 
-            <!-- 操作按钮 -->
+            <!-- 训练控制 -->
             <div class="card">
                 <div class="card-title"><i class="fas fa-play-circle"></i> 训练控制</div>
                 <button class="btn btn-primary btn-full" id="createAgentBtn" onclick="createAgent()">
@@ -291,7 +358,7 @@
                 </div>
                 <div id="trainProgress" style="display:none">
                     <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
-                    <div style="font-size:11px;color:var(--text3);margin-top:4px;text-align:center" id="progressText"></div>
+                    <div style="font-size:11px;color:var(--rl-text3);margin-top:4px;text-align:center" id="progressText"></div>
                 </div>
                 <div style="height:8px"></div>
                 <div class="btn-row">
@@ -313,7 +380,7 @@
                     </button>
                 </div>
                 <div id="agentList" style="max-height:200px;overflow-y:auto">
-                    <div style="color:var(--text3);font-size:12px;text-align:center;padding:16px">暂无 Agent</div>
+                    <div style="color:var(--rl-text3);font-size:12px;text-align:center;padding:16px">暂无 Agent</div>
                 </div>
             </div>
         </div>
@@ -345,7 +412,7 @@
                 </div>
             </div>
 
-            <!-- Tab 切换区域 -->
+            <!-- Tab 切换 -->
             <div class="card">
                 <div class="tabs">
                     <div class="tab active" data-tab="curve" onclick="switchTab('curve')">
@@ -363,7 +430,7 @@
                 </div>
                 <div class="tab-content" id="tab-compare">
                     <canvas id="compareCanvas"></canvas>
-                    <div id="compareInfo" style="font-size:11px;color:var(--text3);text-align:center;margin-top:8px">
+                    <div id="compareInfo" style="font-size:11px;color:var(--rl-text3);text-align:center;margin-top:8px">
                         请在左侧勾选 Agent 后点击"比较"按钮
                     </div>
                 </div>
@@ -403,7 +470,7 @@
                         </button>
                     </div>
                     <div class="episode-list" id="episodeList">
-                        <div style="color:var(--text3);font-size:12px;text-align:center;padding:16px">暂无数据</div>
+                        <div style="color:var(--rl-text3);font-size:12px;text-align:center;padding:16px">暂无数据</div>
                     </div>
                 </div>
             </div>
@@ -539,7 +606,7 @@ async function loadAgents() {
         const list = document.getElementById('agentList');
         const agents = json.data || [];
         if (!agents.length) {
-            list.innerHTML = '<div style="color:var(--text3);font-size:12px;text-align:center;padding:16px">暂无 Agent</div>';
+            list.innerHTML = '<div style="color:var(--rl-text3);font-size:12px;text-align:center;padding:16px">暂无 Agent</div>';
             return;
         }
         list.innerHTML = agents.map(ag => {
@@ -551,7 +618,7 @@ async function loadAgents() {
                   <input type="checkbox" class="compare-check" data-id="${ag.agent_id}"
                          onclick="event.stopPropagation()">
                   <span class="agent-algo">${algoName}</span>
-                  <span style="color:var(--text3);font-size:11px">${ag.agent_id.slice(0,6)}…</span>
+                  <span style="color:var(--rl-text3);font-size:11px">${ag.agent_id.slice(0,6)}…</span>
                 </div>
                 <div class="agent-stats">回合:${ag.episodes_done} | 最佳:${(ag.best_reward||0).toFixed(2)}</div>
               </div>`;
@@ -728,7 +795,6 @@ async function refreshQTable() {
                 renderQTable(json.data);
                 drawHeatmap(json.data);
             }
-            // 更新 epsilon
             if (json.data.epsilon !== undefined) {
                 document.getElementById('statEpsilon').textContent = json.data.epsilon.toFixed(3);
             }
@@ -798,21 +864,21 @@ function drawCurve() {
 
     // 填充区域
     const gradient = ctx.createLinearGradient(0, PAD.t, 0, H - PAD.b);
-    gradient.addColorStop(0, 'rgba(99,102,241,0.15)');
-    gradient.addColorStop(1, 'rgba(99,102,241,0.01)');
+    gradient.addColorStop(0, 'rgba(234,88,12,0.15)');
+    gradient.addColorStop(1, 'rgba(234,88,12,0.01)');
     ctx.fillStyle = gradient;
     ctx.beginPath(); ctx.moveTo(scaleX(0), scaleY(0));
     avg_rewards.forEach((v, i) => ctx.lineTo(scaleX(i), scaleY(v)));
     ctx.lineTo(scaleX(avg_rewards.length - 1), scaleY(0)); ctx.closePath(); ctx.fill();
 
     // 原始奖励
-    ctx.strokeStyle = 'rgba(139,92,246,0.3)'; ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(234,88,12,0.3)'; ctx.lineWidth = 1;
     ctx.beginPath();
     rewards.forEach((v, i) => { i === 0 ? ctx.moveTo(scaleX(i), scaleY(v)) : ctx.lineTo(scaleX(i), scaleY(v)); });
     ctx.stroke();
 
     // 移动均值
-    const color = ALGO_COLORS[currentAlgo] || '#6366f1';
+    const color = ALGO_COLORS[currentAlgo] || '#ea580c';
     ctx.strokeStyle = color; ctx.lineWidth = 2.5;
     ctx.shadowColor = color + '66'; ctx.shadowBlur = 8;
     ctx.beginPath();
@@ -830,7 +896,7 @@ function drawCurve() {
     for (let i = 0; i < episodes.length; i += step) ctx.fillText(episodes[i], scaleX(i) - 6, H - 6);
 
     // 图例
-    ctx.fillStyle = 'rgba(139,92,246,0.3)'; ctx.fillRect(PAD.l, 6, 16, 3);
+    ctx.fillStyle = 'rgba(234,88,12,0.3)'; ctx.fillRect(PAD.l, 6, 16, 3);
     ctx.fillStyle = color; ctx.fillRect(PAD.l + 70, 6, 16, 3);
     ctx.fillStyle = '#64748b'; ctx.font = '10px sans-serif';
     ctx.fillText('原始', PAD.l + 20, 11); ctx.fillText('移动均值', PAD.l + 90, 11);
@@ -869,8 +935,8 @@ function drawRewardDist() {
         const x  = PAD.l + i * barW;
         const y  = PAD.t + cH - h;
         const gradient = ctx.createLinearGradient(x, y, x, PAD.t + cH);
-        gradient.addColorStop(0, ALGO_COLORS[currentAlgo] || '#6366f1');
-        gradient.addColorStop(1, (ALGO_COLORS[currentAlgo] || '#6366f1') + '33');
+        gradient.addColorStop(0, ALGO_COLORS[currentAlgo] || '#ea580c');
+        gradient.addColorStop(1, (ALGO_COLORS[currentAlgo] || '#ea580c') + '33');
         ctx.fillStyle = gradient;
         ctx.fillRect(x + 1, y, barW - 2, h);
     });
@@ -881,7 +947,6 @@ function drawRewardDist() {
         const val = minR + i * binWidth;
         ctx.fillText(val.toFixed(1), PAD.l + i * barW - 8, H - 6);
     }
-    // Y 轴
     ctx.fillText(maxCount.toString(), 4, PAD.t + 8);
     ctx.fillText('0', 4, H - PAD.b);
 }
@@ -935,13 +1000,11 @@ function drawCompare() {
         avg.forEach((v, i) => { i === 0 ? ctx.moveTo(scaleX(i), scaleY(v)) : ctx.lineTo(scaleX(i), scaleY(v)); });
         ctx.stroke();
 
-        // 图例
         ctx.fillStyle = color; ctx.fillRect(PAD.l + idx * 120, legendY, 14, 3);
         ctx.fillStyle = '#64748b'; ctx.font = '10px sans-serif';
         ctx.fillText(`${ALGO_NAMES[d.algorithm]||d.algorithm} ${aid.slice(0,4)}`, PAD.l + idx * 120 + 18, legendY + 5);
     });
 
-    // 比较信息
     const info = entries.map(([aid, d]) =>
         `${ALGO_NAMES[d.algorithm]}(${aid.slice(0,4)}): 均值=${d.avg_reward.toFixed(3)}, 最佳=${d.best_reward.toFixed(2)}`
     ).join(' | ');
@@ -968,16 +1031,13 @@ function drawHeatmap(data) {
     const cellW = (W - PAD.l - PAD.r) / actions.length;
     const cellH = (H - PAD.t - PAD.b) / states.length;
 
-    // 收集所有值用于归一化
     let allVals = [];
     states.forEach(s => actions.forEach(a => allVals.push(table[s]?.[a] || 0)));
     const vMin = Math.min(...allVals), vMax = Math.max(...allVals);
     const vRange = vMax - vMin || 1;
 
-    // 绘制热力图格子
     states.forEach((s, si) => {
-        // 行标签
-        ctx.fillStyle = '#4f46e5'; ctx.font = 'bold 10px sans-serif';
+        ctx.fillStyle = '#c2410c'; ctx.font = 'bold 10px sans-serif';
         ctx.textAlign = 'right';
         const label = s.length > 10 ? s.slice(0, 9) + '…' : s;
         ctx.fillText(label, PAD.l - 6, PAD.t + si * cellH + cellH / 2 + 3);
@@ -987,7 +1047,6 @@ function drawHeatmap(data) {
             const norm = (v - vMin) / vRange;
             const x = PAD.l + ai * cellW, y = PAD.t + si * cellH;
 
-            // 颜色：红(负) -> 白(0) -> 绿(正)
             let r, g, b;
             if (norm < 0.5) {
                 const t = norm * 2;
@@ -1003,15 +1062,13 @@ function drawHeatmap(data) {
             ctx.fillStyle = `rgb(${r},${g},${b})`;
             ctx.fillRect(x + 1, y + 1, cellW - 2, cellH - 2);
 
-            // 数值
             ctx.fillStyle = norm > 0.3 && norm < 0.7 ? '#333' : '#fff';
             ctx.font = '9px sans-serif'; ctx.textAlign = 'center';
             ctx.fillText(v.toFixed(2), x + cellW / 2, y + cellH / 2 + 3);
         });
     });
 
-    // 列标签（动作）
-    ctx.fillStyle = '#4f46e5'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillStyle = '#c2410c'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
     actions.forEach((a, ai) => {
         ctx.fillText(a, PAD.l + ai * cellW + cellW / 2, PAD.t - 6);
     });
@@ -1023,7 +1080,7 @@ function drawHeatmap(data) {
 function renderEpisodeList(episodes) {
     const el = document.getElementById('episodeList');
     if (!episodes.length) {
-        el.innerHTML = '<div style="color:var(--text3);font-size:12px;text-align:center;padding:16px">暂无 Episode</div>';
+        el.innerHTML = '<div style="color:var(--rl-text3);font-size:12px;text-align:center;padding:16px">暂无 Episode</div>';
         return;
     }
     const maxR = Math.max(...episodes.map(e => Math.abs(e.total_reward)), 0.01);
@@ -1035,12 +1092,12 @@ function renderEpisodeList(episodes) {
         const color = ep.total_reward >= 0 ? '#059669' : '#dc2626';
         return `
           <div class="episode-row">
-            <span style="color:var(--primary);font-weight:600">#${i+1}</span>
+            <span style="color:var(--rl-accent);font-weight:600">#${i+1}</span>
             <div class="reward-bar-wrap" style="max-width:120px">
-              <div class="reward-bar" style="width:${pct}%;background:${ep.total_reward>=0?'linear-gradient(90deg,#6366f1,#8b5cf6)':'linear-gradient(90deg,#ef4444,#dc2626)'}"></div>
+              <div class="reward-bar" style="width:${pct}%;background:${ep.total_reward>=0?'linear-gradient(90deg,#ea580c,#f97316)':'linear-gradient(90deg,#ef4444,#dc2626)'}"></div>
             </div>
             <span style="font-weight:600;color:${color};font-size:12px">${ep.total_reward.toFixed(3)}</span>
-            <span style="color:var(--text3);font-size:11px">${ep.steps}步 ${badge}</span>
+            <span style="color:var(--rl-text3);font-size:11px">${ep.steps}步 ${badge}</span>
           </div>`;
     }).join('');
 }
@@ -1067,7 +1124,7 @@ function renderQTable(data) {
             const best = v === maxQ && v !== 0 ? ' q-best' : '';
             return `<td class="${cls}${best}">${v.toFixed(3)}</td>`;
         }).join('');
-        return `<tr><td style="font-weight:600;color:var(--primary)">${s}</td>${cells}</tr>`;
+        return `<tr><td style="font-weight:600;color:var(--rl-accent)">${s}</td>${cells}</tr>`;
     }).join('');
 
     drawMaze(table, actions);
@@ -1098,10 +1155,9 @@ function drawMaze(table, actions) {
         const entries = Object.entries(qs).sort((a,b) => b[1]-a[1]);
         const best = entries[0];
 
-        // 箭头
         if (best && i < n - 1) {
             const nx = 20 + (i+1) * gap;
-            const color = best[1] > 0 ? ALGO_COLORS[currentAlgo] || '#6366f1' : '#ef4444';
+            const color = best[1] > 0 ? ALGO_COLORS[currentAlgo] || '#ea580c' : '#ef4444';
             ctx.strokeStyle = color; ctx.lineWidth = 2;
             ctx.setLineDash([]); ctx.beginPath();
             ctx.moveTo(x + r + 4, cy); ctx.lineTo(nx - r - 4, cy); ctx.stroke();
@@ -1111,14 +1167,13 @@ function drawMaze(table, actions) {
             ctx.lineTo(nx - r - 9, cy + 4); ctx.fill();
         }
 
-        // 节点
         const isGoal = s.includes('goal'); const isTrap = s.includes('trap');
         ctx.beginPath(); ctx.arc(x, cy, r, 0, Math.PI*2);
-        ctx.fillStyle = isGoal ? '#d1fae5' : isTrap ? '#fee2e2' : '#ede9fe'; ctx.fill();
-        ctx.strokeStyle = isGoal ? '#059669' : isTrap ? '#dc2626' : (ALGO_COLORS[currentAlgo] || '#6366f1');
+        ctx.fillStyle = isGoal ? '#d1fae5' : isTrap ? '#fee2e2' : '#fff7ed'; ctx.fill();
+        ctx.strokeStyle = isGoal ? '#059669' : isTrap ? '#dc2626' : (ALGO_COLORS[currentAlgo] || '#ea580c');
         ctx.lineWidth = 2; ctx.stroke();
 
-        ctx.fillStyle = isGoal ? '#065f46' : isTrap ? '#991b1b' : '#4f46e5';
+        ctx.fillStyle = isGoal ? '#065f46' : isTrap ? '#991b1b' : '#c2410c';
         ctx.font = `bold ${Math.min(10, r * 0.45)}px sans-serif`;
         ctx.textAlign = 'center';
         const label = s.length > 8 ? s.slice(0, 7) + '…' : s;

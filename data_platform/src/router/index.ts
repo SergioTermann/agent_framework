@@ -36,7 +36,7 @@ const router = createRouter({
 // 路由守卫 - 设置页面标题
 router.beforeEach((to, from, next) => {
   if (to.meta.title) {
-    document.title = `${to.meta.title} - 风起时域科技有限公司AI故障定位系统`
+    document.title = `${to.meta.title} - 智能值守系统`
   }
   next()
 })

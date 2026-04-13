@@ -3,495 +3,1312 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>异步任务管理</title>
+    <title>异步任务中心 - Agent Framework</title>
     <link rel="stylesheet" href="/static/css/base-theme.css">
     <style>
         :root {
-            --primary: #1363df;
-            --primary-deep: #0f4eb3;
-            --primary-light: #dbeafe;
-            --primary-soft: rgba(19, 99, 223, 0.08);
-            --primary-glow: rgba(19, 99, 223, 0.28);
-            --line-strong: rgba(19, 99, 223, 0.24);
-            --line-glow: rgba(19, 99, 223, 0.42);
-            --warning: #06b6d4;
+            --at-accent: #1363df;
+            --at-accent-deep: #0f4eb3;
+            --at-accent-soft: rgba(19, 99, 223, 0.10);
+            --at-ok: #059669;
+            --at-ok-soft: rgba(5, 150, 105, 0.10);
+            --at-warn: #d97706;
+            --at-warn-soft: rgba(217, 119, 6, 0.10);
+            --at-err: #dc2626;
+            --at-err-soft: rgba(220, 38, 38, 0.10);
+            --at-info: #60a5fa;
+            --at-info-soft: rgba(20, 184, 166, 0.10);
+            --at-muted: #6f746f;
+            --at-text: #202a36;
+            --at-line: rgba(101, 120, 144, 0.16);
+            --at-surface: rgba(255, 252, 247, 0.90);
+            --at-shadow: 0 18px 42px -28px rgba(34, 44, 63, 0.16);
         }
-        /* page-specific overrides only — base-theme.css handles resets, body, topbar, btn */
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: var(--at-text);
+            background:
+                radial-gradient(circle at 8% 12%, rgba(19, 99, 223, 0.14), transparent 22%),
+                radial-gradient(circle at 88% 10%, rgba(217, 119, 6, 0.12), transparent 18%),
+                radial-gradient(circle at 76% 86%, rgba(20, 184, 166, 0.10), transparent 24%),
+                linear-gradient(180deg, #f8fbff 0%, #eef4fb 100%);
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(19, 99, 223, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(19, 99, 223, 0.03) 1px, transparent 1px);
+            background-size: 28px 28px;
+            mask-image: linear-gradient(180deg, rgba(0,0,0,0.12), transparent 60%);
+        }
+
+        .shell {
+            position: relative;
+            z-index: 1;
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 28px 32px 60px;
+        }
+
+        /* ── Hero ── */
+        .hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             gap: 20px;
-            margin-bottom: 30px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            min-width: 0;
         }
+        .hero-left h1 {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--at-accent-deep), var(--at-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero-left p { color: var(--at-muted); margin-top: 4px; font-size: 14px; }
+        .hero-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
+        /* ── Controls ── */
+        .ctrl-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 18px;
+            border-radius: 10px;
+            border: 1.5px solid var(--at-line);
+            background: var(--at-surface);
+            color: var(--at-text);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            backdrop-filter: blur(6px);
+        }
+        .ctrl-btn:hover { border-color: var(--at-accent); color: var(--at-accent); }
+        .ctrl-btn.primary {
+            background: linear-gradient(135deg, var(--at-accent-deep), var(--at-accent));
+            color: #fff;
+            border-color: transparent;
+        }
+        .ctrl-btn.primary:hover { opacity: 0.9; }
+        .ctrl-btn.danger { color: var(--at-err); }
+        .ctrl-btn.danger:hover { border-color: var(--at-err); background: var(--at-err-soft); }
+        .ctrl-btn.sm { padding: 5px 12px; font-size: 12px; border-radius: 8px; }
+
+        .refresh-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            background: var(--at-ok-soft);
+            color: var(--at-ok);
+        }
+        .refresh-badge .dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--at-ok);
+            animation: pulse 2s infinite;
+        }
+        .refresh-badge.paused { background: #f1f5f9; color: var(--at-muted); }
+        .refresh-badge.paused .dot { background: var(--at-muted); animation: none; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        /* ── Stats row ── */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 14px;
+            margin-bottom: 24px;
+        }
         .stat-card {
-            background: white;
-            padding: 25px;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            transition: transform 0.3s;
+            background: var(--at-surface);
+            border: 1px solid var(--at-line);
+            border-radius: 14px;
+            padding: 18px 20px;
+            backdrop-filter: blur(8px);
+            transition: transform 0.25s, box-shadow 0.25s;
+            position: relative;
+            overflow: hidden;
         }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .stat-card h3 {
-            color: #666;
-            font-size: 14px;
+        .stat-card:hover { transform: translateY(-3px); box-shadow: var(--at-shadow); }
+        .stat-card .sc-icon {
+            width: 34px; height: 34px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
             margin-bottom: 10px;
+        }
+        .stat-card .sc-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--at-muted);
             text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 4px;
+        }
+        .stat-card .sc-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--at-text);
+            line-height: 1;
         }
 
-        .stat-card .value {
-            font-size: 36px;
-            font-weight: bold;
-            color: var(--primary);
-        }
-
+        /* ── Panels ── */
         .panel {
-            background: white;
-            padding: 30px;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            margin-bottom: 30px;
+            background: var(--at-surface);
+            border: 1px solid var(--at-line);
+            border-radius: 16px;
+            padding: 24px;
+            backdrop-filter: blur(8px);
+            min-width: 0;
+        }
+        .panel-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .panel-head h2 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--at-text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .panel-head h2 .icon {
+            width: 28px; height: 28px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        .panel-head .badge {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
         }
 
-        .panel h2 {
-            color: var(--primary);
-            font-size: 20px;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #f0f0f0;
+        /* ── Layout ── */
+        .grid-main {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 380px;
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 18px;
+            margin-bottom: 24px;
         }
 
-        .form-group {
-            margin-bottom: 20px;
+        /* ── Create task form ── */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 14px;
         }
-
+        .form-group { margin-bottom: 14px; }
         .form-group label {
             display: block;
-            margin-bottom: 8px;
-            color: #333;
+            font-size: 12px;
             font-weight: 600;
+            color: var(--at-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 6px;
         }
-
-        .form-group select,
-        .form-group input {
+        .form-input {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
+            padding: 10px 14px;
+            border: 1.5px solid var(--at-line);
+            border-radius: 10px;
+            font-size: 13px;
+            font-family: inherit;
+            background: #fff;
+            color: var(--at-text);
+            transition: border-color 0.2s;
         }
-
-        .btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: background 0.3s;
+        .form-input:focus {
+            outline: none;
+            border-color: var(--at-accent);
+            box-shadow: 0 0 0 3px var(--at-accent-soft);
         }
-
-        .btn:hover {
-            background: var(--primary-deep);
-        }
-
-        .btn-danger {
-            background: #dc3545;
-        }
-
-        .btn-danger:hover {
-            background: #c82333;
-        }
-
-        .task-list {
-            list-style: none;
-        }
-
-        .task-item {
-            padding: 15px;
-            margin-bottom: 10px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border-left: 4px solid var(--primary);
-        }
-
-        .task-item.running {
-            border-left-color: #06b6d4;
-            background: rgba(6, 182, 212, 0.12);
-        }
-
-        .task-item.completed {
-            border-left-color: #28a745;
-            background: #d4edda;
-        }
-
-        .task-item.failed {
-            border-left-color: #dc3545;
-            background: #f8d7da;
-        }
-
-        .task-header {
+        .type-chips {
             display: flex;
-            justify-content: space-between;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .type-chip {
+            padding: 8px 16px;
+            border-radius: 10px;
+            border: 1.5px solid var(--at-line);
+            background: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--at-muted);
+        }
+        .type-chip:hover { border-color: var(--at-accent); color: var(--at-accent); }
+        .type-chip.active {
+            background: var(--at-accent-soft);
+            border-color: var(--at-accent);
+            color: var(--at-accent);
+        }
+        .priority-chips {
+            display: flex;
+            gap: 6px;
+        }
+        .pri-chip {
+            padding: 6px 14px;
+            border-radius: 8px;
+            border: 1.5px solid var(--at-line);
+            background: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--at-muted);
+        }
+        .pri-chip:hover { border-color: var(--at-accent); }
+        .pri-chip.active { border-color: var(--at-accent); color: var(--at-accent); background: var(--at-accent-soft); }
+        .pri-chip[data-pri="urgent"].active { border-color: var(--at-err); color: var(--at-err); background: var(--at-err-soft); }
+        .pri-chip[data-pri="high"].active { border-color: var(--at-warn); color: var(--at-warn); background: var(--at-warn-soft); }
+
+        /* ── Filter bar ── */
+        .filter-bar {
+            display: flex;
             align-items: center;
-            margin-bottom: 8px;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .filter-chip {
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1.5px solid var(--at-line);
+            background: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--at-muted);
+        }
+        .filter-chip:hover { border-color: var(--at-accent); }
+        .filter-chip.active {
+            background: var(--at-accent-soft);
+            border-color: var(--at-accent);
+            color: var(--at-accent);
         }
 
+        /* ── Task cards ── */
+        .task-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .task-card {
+            display: grid;
+            grid-template-columns: 6px minmax(0, 1fr) auto;
+            gap: 14px;
+            align-items: center;
+            padding: 14px 18px;
+            border-radius: 12px;
+            background: #fff;
+            border: 1px solid var(--at-line);
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .task-card:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            transform: translateX(3px);
+        }
+        .task-bar {
+            width: 4px;
+            height: 100%;
+            min-height: 36px;
+            border-radius: 4px;
+        }
+        .task-bar.pending { background: var(--at-muted); }
+        .task-bar.running { background: var(--at-info); }
+        .task-bar.completed { background: var(--at-ok); }
+        .task-bar.failed { background: var(--at-err); }
+        .task-bar.cancelled { background: var(--at-muted); opacity: 0.4; }
+        .task-body { min-width: 0; }
         .task-name {
             font-weight: 600;
-            color: #333;
+            font-size: 14px;
+            color: var(--at-text);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-
-        .task-status {
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
+        .task-name .pri-tag {
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
             text-transform: uppercase;
         }
-
-        .task-status.pending {
-            background: #e0e0e0;
-            color: #666;
-        }
-
-        .task-status.running {
-            background: #06b6d4;
-            color: white;
-        }
-
-        .task-status.completed {
-            background: #28a745;
-            color: white;
-        }
-
-        .task-status.failed {
-            background: #dc3545;
-            color: white;
-        }
-
+        .pri-tag.low { background: #f1f5f9; color: var(--at-muted); }
+        .pri-tag.normal { background: var(--at-accent-soft); color: var(--at-accent); }
+        .pri-tag.high { background: var(--at-warn-soft); color: var(--at-warn); }
+        .pri-tag.urgent { background: var(--at-err-soft); color: var(--at-err); }
         .task-meta {
             font-size: 12px;
-            color: #666;
+            color: var(--at-muted);
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .task-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        .task-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        .task-status.pending { background: #f1f5f9; color: var(--at-muted); }
+        .task-status.running { background: var(--at-info-soft); color: var(--at-info); }
+        .task-status.completed { background: var(--at-ok-soft); color: var(--at-ok); }
+        .task-status.failed { background: var(--at-err-soft); color: var(--at-err); }
+        .task-status.cancelled { background: #f1f5f9; color: #94a3b8; }
+
+        /* Progress bar in running tasks */
+        .progress-track {
+            width: 80px;
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--at-info), #22d3ee);
+            transition: width 0.5s;
         }
 
-        .task-actions {
-            margin-top: 10px;
+        /* ── Timeline chart (Canvas) ── */
+        .chart-wrap {
+            position: relative;
+            width: 100%;
+            height: 200px;
         }
+        .chart-wrap canvas { width: 100% !important; height: 100% !important; }
+        .chart-wrap .chart-empty {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 8px;
+            color: var(--at-muted);
+            font-size: 13px;
+        }
+        .chart-wrap .chart-empty .icon { font-size: 36px; opacity: 0.3; }
 
-        .task-actions button {
-            padding: 6px 12px;
+        /* ── Modal ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 900;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-box {
+            background: #fff;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.2);
+            animation: modalIn 0.25s;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .modal-desc { color: var(--at-muted); font-size: 13px; margin-bottom: 20px; }
+        .modal-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            font-size: 13px;
+        }
+        .modal-row:last-child { border-bottom: none; }
+        .modal-row .label { color: var(--at-muted); flex-shrink: 0; }
+        .modal-row .value {
+            font-weight: 600;
+            font-family: ui-monospace, "SF Mono", monospace;
+            text-align: right;
+            word-break: break-all;
+            max-width: 60%;
+        }
+        .modal-result {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 14px;
+            font-family: ui-monospace, monospace;
             font-size: 12px;
-            margin-right: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin-top: 12px;
+            border: 1px solid var(--at-line);
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
         }
 
-        .loading {
+        /* ── Toast ── */
+        .toast-wrap {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .toast {
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+            background: var(--at-text);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+            animation: toastIn 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .toast.success { background: var(--at-ok); }
+        .toast.error { background: var(--at-err); }
+        @keyframes toastIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ── Empty state ── */
+        .empty-state {
             text-align: center;
-            padding: 40px;
-            color: #666;
+            padding: 40px 20px;
+            color: var(--at-muted);
         }
+        .empty-state .icon { font-size: 42px; opacity: 0.25; margin-bottom: 12px; }
+        .empty-state p { font-size: 13px; }
 
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+        /* ── Responsive ── */
+        @media (max-width: 1100px) {
+            .stats-row { grid-template-columns: repeat(3, 1fr); }
+            .grid-main { grid-template-columns: 1fr; }
         }
-
-        .success {
-            background: #d4edda;
-            color: #155724;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+        @media (max-width: 860px) {
+            .shell { padding: 20px 16px 40px; }
+            .grid-2 { grid-template-columns: 1fr; }
+            .hero { flex-direction: column; align-items: flex-start; }
+        }
+        @media (max-width: 600px) {
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+            .hero-right { width: 100%; }
+            .ctrl-btn { flex: 1; justify-content: center; }
+            .form-row { grid-template-columns: 1fr; }
+            .task-card { grid-template-columns: 4px minmax(0, 1fr); }
+            .task-right { display: none; }
         }
     </style>
 </head>
 <body>
-    <div class="page-wide">
-        <nav class="topbar">
-            <div class="brand">
-                <a class="back-link" href="/developer">← 返回</a>
-                <h1>异步任务管理</h1>
-            </div>
-            <div class="topbar-actions">
-            </div>
-        </nav>
+    <div class="toast-wrap" id="toastWrap"></div>
 
-        <div id="message" style="display: none;"></div>
+    <!-- Task Detail Modal -->
+    <div class="modal-overlay" id="taskModal">
+        <div class="modal-box">
+            <div class="modal-title" id="modalTitle">-</div>
+            <div class="modal-desc" id="modalDesc">任务详情</div>
+            <div id="modalBody"></div>
+            <div class="modal-actions" id="modalActions">
+                <button class="ctrl-btn" onclick="closeTaskModal()">关闭</button>
+            </div>
+        </div>
+    </div>
 
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>总任务数</h3>
-                <div class="value" id="total-tasks">0</div>
+    <div class="shell">
+        <!-- Hero -->
+        <div class="hero">
+            <div class="hero-left">
+                <h1>异步任务中心</h1>
+                <p>提交 · 管理 · 监控后台任务执行状态</p>
             </div>
-            <div class="stat-card">
-                <h3>等待中</h3>
-                <div class="value" id="pending-tasks">0</div>
-            </div>
-            <div class="stat-card">
-                <h3>执行中</h3>
-                <div class="value" id="running-tasks">0</div>
-            </div>
-            <div class="stat-card">
-                <h3>已完成</h3>
-                <div class="value" id="completed-tasks">0</div>
-            </div>
-            <div class="stat-card">
-                <h3>失败</h3>
-                <div class="value" id="failed-tasks">0</div>
-            </div>
-            <div class="stat-card">
-                <h3>平均耗时</h3>
-                <div class="value" id="avg-duration">0s</div>
+            <div class="hero-right">
+                <div class="refresh-badge" id="refreshBadge">
+                    <span class="dot"></span>
+                    <span id="refreshLabel">实时监控中</span>
+                </div>
+                <button class="ctrl-btn" id="toggleRefreshBtn" onclick="toggleAutoRefresh()">暂停</button>
+                <button class="ctrl-btn primary" onclick="loadAll()">刷新</button>
+                <button class="ctrl-btn danger" onclick="confirmClearCompleted()">清理已完成</button>
             </div>
         </div>
 
-        <div class="panel">
-            <h2>提交新任务</h2>
-            <form id="submit-form">
+        <!-- Stats row -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="sc-icon" style="background:var(--at-accent-soft);">📋</div>
+                <div class="sc-label">总任务数</div>
+                <div class="sc-value" id="sTotal">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="sc-icon" style="background:#f1f5f9;">⏳</div>
+                <div class="sc-label">等待中</div>
+                <div class="sc-value" id="sPending">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="sc-icon" style="background:var(--at-info-soft);">🔄</div>
+                <div class="sc-label">执行中</div>
+                <div class="sc-value" id="sRunning">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="sc-icon" style="background:var(--at-ok-soft);">✅</div>
+                <div class="sc-label">已完成</div>
+                <div class="sc-value" id="sCompleted">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="sc-icon" style="background:var(--at-err-soft);">❌</div>
+                <div class="sc-label">失败</div>
+                <div class="sc-value" id="sFailed">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="sc-icon" style="background:var(--at-warn-soft);">⏱️</div>
+                <div class="sc-label">平均耗时</div>
+                <div class="sc-value" id="sAvgDur">-</div>
+            </div>
+        </div>
+
+        <!-- Main grid: task list + create panel -->
+        <div class="grid-main">
+            <!-- Task list -->
+            <div class="panel">
+                <div class="panel-head">
+                    <h2><span class="icon" style="background:var(--at-accent-soft);color:var(--at-accent);">📋</span> 任务列表</h2>
+                    <div class="filter-bar">
+                        <button class="filter-chip active" data-status="" onclick="setFilter(this)">全部</button>
+                        <button class="filter-chip" data-status="pending" onclick="setFilter(this)">等待中</button>
+                        <button class="filter-chip" data-status="running" onclick="setFilter(this)">执行中</button>
+                        <button class="filter-chip" data-status="completed" onclick="setFilter(this)">已完成</button>
+                        <button class="filter-chip" data-status="failed" onclick="setFilter(this)">失败</button>
+                    </div>
+                </div>
+
+                <div class="task-grid" id="taskGrid">
+                    <div class="empty-state"><div class="icon">📋</div><p>加载中...</p></div>
+                </div>
+            </div>
+
+            <!-- Create task panel -->
+            <div class="panel" style="height:fit-content;">
+                <div class="panel-head">
+                    <h2><span class="icon" style="background:var(--at-ok-soft);color:var(--at-ok);">🚀</span> 提交新任务</h2>
+                </div>
+
                 <div class="form-group">
                     <label>任务类型</label>
-                    <select id="task-type" required>
-                        <option value="data_processing">数据处理</option>
-                        <option value="report_generation">报告生成</option>
-                        <option value="model_training">模型训练</option>
-                        <option value="batch_operation">批量操作</option>
-                    </select>
+                    <div class="type-chips" id="typeChips">
+                        <div class="type-chip active" data-type="data_processing" onclick="selectType(this)">📊 数据处理</div>
+                        <div class="type-chip" data-type="report_generation" onclick="selectType(this)">📝 报告生成</div>
+                        <div class="type-chip" data-type="model_training" onclick="selectType(this)">🧠 模型训练</div>
+                        <div class="type-chip" data-type="batch_operation" onclick="selectType(this)">⚡ 批量操作</div>
+                    </div>
                 </div>
+
                 <div class="form-group">
                     <label>优先级</label>
-                    <select id="priority">
-                        <option value="low">低</option>
-                        <option value="normal" selected>普通</option>
-                        <option value="high">高</option>
-                        <option value="urgent">紧急</option>
-                    </select>
+                    <div class="priority-chips" id="priChips">
+                        <div class="pri-chip" data-pri="low" onclick="selectPri(this)">低</div>
+                        <div class="pri-chip active" data-pri="normal" onclick="selectPri(this)">普通</div>
+                        <div class="pri-chip" data-pri="high" onclick="selectPri(this)">高</div>
+                        <div class="pri-chip" data-pri="urgent" onclick="selectPri(this)">紧急</div>
+                    </div>
                 </div>
+
                 <div class="form-group">
                     <label>参数 (JSON)</label>
-                    <input type="text" id="params" placeholder='{"data_size": 1000}' value='{"data_size": 100}'>
+                    <textarea class="form-input" id="taskParams" rows="3" placeholder='{"data_size": 100}' style="resize:vertical;font-family:ui-monospace,monospace;font-size:12px;">{"data_size": 100}</textarea>
                 </div>
-                <button type="submit" class="btn">提交任务</button>
-            </form>
+
+                <button class="ctrl-btn primary" style="width:100%;justify-content:center;padding:12px;" onclick="submitTask()">
+                    提交任务
+                </button>
+
+                <!-- Quick templates -->
+                <div style="margin-top: 18px;">
+                    <label style="font-size:12px;font-weight:600;color:var(--at-muted);text-transform:uppercase;letter-spacing:0.3px;display:block;margin-bottom:8px;">快速模板</label>
+                    <div style="display:flex;flex-direction:column;gap:6px;">
+                        <div class="type-chip" style="text-align:center;font-size:12px;" onclick="loadTemplate('small_data')">小批量数据处理 (100条)</div>
+                        <div class="type-chip" style="text-align:center;font-size:12px;" onclick="loadTemplate('large_data')">大批量数据处理 (10000条)</div>
+                        <div class="type-chip" style="text-align:center;font-size:12px;" onclick="loadTemplate('report')">生成详细报告</div>
+                        <div class="type-chip" style="text-align:center;font-size:12px;" onclick="loadTemplate('training')">模型训练 (10轮)</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="panel">
-            <h2>任务列表</h2>
-            <div style="margin-bottom: 20px;">
-                <select id="status-filter" onchange="loadTasks()">
-                    <option value="">全部状态</option>
-                    <option value="pending">等待中</option>
-                    <option value="running">执行中</option>
-                    <option value="completed">已完成</option>
-                    <option value="failed">失败</option>
-                </select>
-                <button class="btn" onclick="loadTasks()" style="margin-left: 10px;">刷新</button>
-                <button class="btn btn-danger" onclick="clearCompleted()" style="margin-left: 10px;">清理已完成</button>
+        <!-- Charts row -->
+        <div class="grid-2">
+            <div class="panel">
+                <div class="panel-head">
+                    <h2><span class="icon" style="background:var(--at-accent-soft);color:var(--at-accent);">📊</span> 任务状态分布</h2>
+                </div>
+                <div class="chart-wrap" id="statusChartWrap">
+                    <canvas id="statusChart"></canvas>
+                    <div class="chart-empty" id="statusChartEmpty">
+                        <div class="icon">📊</div><p>暂无数据</p>
+                    </div>
+                </div>
             </div>
-            <ul class="task-list" id="task-list">
-                <li class="loading">加载中...</li>
-            </ul>
+            <div class="panel">
+                <div class="panel-head">
+                    <h2><span class="icon" style="background:var(--at-warn-soft);color:var(--at-warn);">⏱️</span> 任务耗时分布</h2>
+                </div>
+                <div class="chart-wrap" id="durChartWrap">
+                    <canvas id="durChart"></canvas>
+                    <div class="chart-empty" id="durChartEmpty">
+                        <div class="icon">⏱️</div><p>暂无数据</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        let autoRefresh = true;
+    /* ── State ── */
+    let autoRefresh = true;
+    let refreshTimer = null;
+    let currentFilter = '';
+    let selectedType = 'data_processing';
+    let selectedPri = 'normal';
+    let tasksData = [];
+    let statsData = null;
 
-        // 提交任务
-        document.getElementById('submit-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
+    /* ── Init ── */
+    document.addEventListener('DOMContentLoaded', () => {
+        loadAll();
+        startAutoRefresh();
+    });
 
-            const taskType = document.getElementById('task-type').value;
-            const priority = document.getElementById('priority').value;
-            const paramsStr = document.getElementById('params').value;
+    function startAutoRefresh() {
+        if (refreshTimer) clearInterval(refreshTimer);
+        refreshTimer = setInterval(() => {
+            if (autoRefresh) loadAll();
+        }, 3000);
+    }
 
+    function toggleAutoRefresh() {
+        autoRefresh = !autoRefresh;
+        const badge = document.getElementById('refreshBadge');
+        const label = document.getElementById('refreshLabel');
+        const btn = document.getElementById('toggleRefreshBtn');
+        if (autoRefresh) {
+            badge.classList.remove('paused');
+            label.textContent = '实时监控中';
+            btn.textContent = '暂停';
+        } else {
+            badge.classList.add('paused');
+            label.textContent = '已暂停';
+            btn.textContent = '恢复';
+        }
+    }
+
+    /* ── Data ── */
+    async function loadAll() {
+        await Promise.all([loadStatistics(), loadTasks()]);
+    }
+
+    async function loadStatistics() {
+        try {
+            const res = await fetch('/api/tasks/statistics');
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            statsData = await res.json();
+            renderStats(statsData);
+            renderStatusChart(statsData);
+        } catch (e) {
+            console.warn('Stats fetch failed, using demo:', e.message);
+            statsData = getDemoStats();
+            renderStats(statsData);
+            renderStatusChart(statsData);
+        }
+    }
+
+    async function loadTasks() {
+        try {
+            const url = currentFilter ? `/api/tasks/list?status=${currentFilter}` : '/api/tasks/list';
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const data = await res.json();
+            tasksData = data.tasks || [];
+            renderTaskGrid(tasksData);
+            renderDurChart(tasksData);
+        } catch (e) {
+            console.warn('Tasks fetch failed, using demo:', e.message);
+            tasksData = getDemoTasks();
+            renderTaskGrid(tasksData);
+            renderDurChart(tasksData);
+        }
+    }
+
+    /* ── Render Stats ── */
+    function renderStats(s) {
+        // Support both nested (hybrid) and flat statistics
+        const total = s.total_submitted || s.total || 0;
+        const pending = s.python?.pending ?? s.pending ?? 0;
+        const running = s.python?.running ?? s.running ?? 0;
+        const completed = s.total_completed || s.completed || 0;
+        const failed = s.total_failed || s.failed || 0;
+        const avgDur = s.python?.avg_duration ?? s.avg_duration ?? 0;
+
+        document.getElementById('sTotal').textContent = total;
+        document.getElementById('sPending').textContent = pending;
+        document.getElementById('sRunning').textContent = running;
+        document.getElementById('sCompleted').textContent = completed;
+        document.getElementById('sFailed').textContent = failed;
+        document.getElementById('sAvgDur').textContent = avgDur > 0 ? fmtDur(avgDur) : '-';
+    }
+
+    /* ── Render Task Grid ── */
+    function renderTaskGrid(tasks) {
+        const grid = document.getElementById('taskGrid');
+
+        if (!tasks || tasks.length === 0) {
+            grid.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>暂无任务</p></div>';
+            return;
+        }
+
+        grid.innerHTML = tasks.map(t => {
+            const status = t.status || 'pending';
+            const priNum = typeof t.priority === 'number' ? t.priority : priMap[t.priority] || 1;
+            const priLabel = priLabels[priNum] || 'normal';
+            const priName = priNames[priNum] || '普通';
+            const durStr = t.duration ? fmtDur(t.duration) : '-';
+            const time = t.created_at ? formatTime(t.created_at) : '-';
+            const name = t.name || t.task_type || `Task-${(t.task_id || '').slice(0, 8)}`;
+
+            let progressHtml = '';
+            if (status === 'running' && t.progress !== undefined) {
+                const pct = Math.round(t.progress * 100);
+                progressHtml = `<div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>`;
+            }
+
+            return `<div class="task-card" onclick="showTaskDetail('${esc(t.task_id)}')">
+                <div class="task-bar ${status}"></div>
+                <div class="task-body">
+                    <div class="task-name">
+                        ${esc(name)}
+                        <span class="pri-tag ${priLabel}">${priName}</span>
+                    </div>
+                    <div class="task-meta">
+                        <span>ID: ${esc((t.task_id || '').slice(0, 12))}…</span>
+                        <span>${time}</span>
+                        ${t.duration ? `<span>耗时: ${durStr}</span>` : ''}
+                        ${t.error ? `<span style="color:var(--at-err)">错误: ${esc(t.error.slice(0, 40))}</span>` : ''}
+                    </div>
+                    ${progressHtml}
+                </div>
+                <div class="task-right">
+                    <span class="task-status ${status}">${statusLabels[status] || status}</span>
+                    ${status === 'pending' ? `<button class="ctrl-btn sm danger" onclick="event.stopPropagation();cancelTask('${esc(t.task_id)}')">取消</button>` : ''}
+                    ${status === 'failed' ? `<button class="ctrl-btn sm" onclick="event.stopPropagation();retryTask('${esc(t.task_id)}', '${esc(t.task_type || '')}')">重试</button>` : ''}
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    const statusLabels = { pending: '等待中', running: '执行中', completed: '已完成', failed: '失败', cancelled: '已取消' };
+    const priMap = { low: 0, normal: 1, high: 2, urgent: 3 };
+    const priLabels = { 0: 'low', 1: 'normal', 2: 'high', 3: 'urgent' };
+    const priNames = { 0: '低', 1: '普通', 2: '高', 3: '紧急' };
+
+    /* ── Filter ── */
+    function setFilter(el) {
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+        currentFilter = el.dataset.status;
+        loadTasks();
+    }
+
+    /* ── Form controls ── */
+    function selectType(el) {
+        document.querySelectorAll('#typeChips .type-chip').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+        selectedType = el.dataset.type;
+        // Update default params based on type
+        const defaults = {
+            data_processing: '{"data_size": 100}',
+            report_generation: '{"type": "detailed"}',
+            model_training: '{"model_type": "classifier", "epochs": 10}',
+            batch_operation: '{"operation": "transform", "items": 50}'
+        };
+        document.getElementById('taskParams').value = defaults[selectedType] || '{}';
+    }
+
+    function selectPri(el) {
+        document.querySelectorAll('#priChips .pri-chip').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+        selectedPri = el.dataset.pri;
+    }
+
+    function loadTemplate(name) {
+        const templates = {
+            small_data: { type: 'data_processing', pri: 'normal', params: '{"data_size": 100, "delay": 0.5}' },
+            large_data: { type: 'data_processing', pri: 'high', params: '{"data_size": 10000, "delay": 2}' },
+            report: { type: 'report_generation', pri: 'normal', params: '{"type": "detailed"}' },
+            training: { type: 'model_training', pri: 'urgent', params: '{"model_type": "classifier", "epochs": 10}' }
+        };
+        const t = templates[name];
+        if (!t) return;
+
+        document.querySelectorAll('#typeChips .type-chip').forEach(c => {
+            c.classList.toggle('active', c.dataset.type === t.type);
+        });
+        selectedType = t.type;
+
+        document.querySelectorAll('#priChips .pri-chip').forEach(c => {
+            c.classList.toggle('active', c.dataset.pri === t.pri);
+        });
+        selectedPri = t.pri;
+
+        document.getElementById('taskParams').value = t.params;
+        toast('模板已加载', 'success');
+    }
+
+    /* ── Submit task ── */
+    async function submitTask() {
+        const paramsStr = document.getElementById('taskParams').value;
+        let params = {};
+        try {
+            params = JSON.parse(paramsStr);
+        } catch (e) {
+            toast('参数格式错误，请输入有效 JSON', 'error');
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/tasks/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    task_type: selectedType,
+                    priority: selectedPri,
+                    params: params
+                })
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                toast('任务已提交: ' + (data.task_id || '').slice(0, 12) + '…', 'success');
+                loadAll();
+            } else {
+                toast('提交失败: ' + (data.error || '未知错误'), 'error');
+            }
+        } catch (e) {
+            toast('提交失败: ' + e.message, 'error');
+        }
+    }
+
+    /* ── Task actions ── */
+    async function cancelTask(taskId) {
+        if (!confirm('确定要取消这个任务吗？')) return;
+        try {
+            const res = await fetch(`/api/tasks/${taskId}/cancel`, { method: 'POST' });
+            if (res.ok) {
+                toast('任务已取消', 'success');
+                loadAll();
+            } else {
+                toast('取消失败', 'error');
+            }
+        } catch (e) {
+            toast('取消失败: ' + e.message, 'error');
+        }
+    }
+
+    async function retryTask(taskId, taskType) {
+        // Re-submit with same type
+        try {
+            const origRes = await fetch(`/api/tasks/${taskId}`);
             let params = {};
-            try {
-                params = JSON.parse(paramsStr);
-            } catch (e) {
-                showMessage('参数格式错误，请输入有效的 JSON', 'error');
-                return;
+            if (origRes.ok) {
+                const orig = await origRes.json();
+                params = orig.metadata || {};
             }
-
-            try {
-                const response = await fetch('/api/tasks/submit', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        task_type: taskType,
-                        priority: priority,
-                        params: params
-                    })
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    showMessage(`任务已提交: ${data.task_id}`, 'success');
-                    loadTasks();
-                    loadStatistics();
-                } else {
-                    showMessage(`提交失败: ${data.error}`, 'error');
-                }
-            } catch (error) {
-                showMessage(`提交失败: ${error.message}`, 'error');
+            const res = await fetch('/api/tasks/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ task_type: taskType || 'data_processing', priority: 'normal', params })
+            });
+            if (res.ok) {
+                toast('任务已重新提交', 'success');
+                loadAll();
             }
+        } catch (e) {
+            toast('重试失败: ' + e.message, 'error');
+        }
+    }
+
+    function confirmClearCompleted() {
+        if (!confirm('确定要清理所有已完成的任务吗？')) return;
+        fetch('/api/tasks/clear', { method: 'POST' })
+            .then(r => {
+                if (r.ok) { toast('已清理完成任务', 'success'); loadAll(); }
+                else toast('清理失败', 'error');
+            })
+            .catch(e => toast('清理失败: ' + e.message, 'error'));
+    }
+
+    /* ── Task detail modal ── */
+    async function showTaskDetail(taskId) {
+        document.getElementById('modalTitle').textContent = '任务详情';
+        document.getElementById('modalDesc').textContent = '加载中...';
+        document.getElementById('modalBody').innerHTML = '';
+        document.getElementById('taskModal').classList.add('open');
+
+        try {
+            const res = await fetch(`/api/tasks/${taskId}`);
+            if (!res.ok) throw new Error('获取失败');
+            const task = await res.json();
+            renderTaskModal(task);
+        } catch (e) {
+            // Try to find in local data
+            const local = tasksData.find(t => t.task_id === taskId);
+            if (local) {
+                renderTaskModal(local);
+            } else {
+                document.getElementById('modalDesc').textContent = '无法获取任务详情';
+            }
+        }
+    }
+
+    function renderTaskModal(task) {
+        const status = task.status || 'pending';
+        const name = task.name || task.task_type || `Task-${(task.task_id || '').slice(0, 8)}`;
+        document.getElementById('modalTitle').textContent = name;
+        document.getElementById('modalDesc').textContent = '任务 ' + (task.task_id || '');
+
+        let html = `
+            <div class="modal-row"><span class="label">任务 ID</span><span class="value">${esc(task.task_id || '-')}</span></div>
+            <div class="modal-row"><span class="label">状态</span><span class="value"><span class="task-status ${status}">${statusLabels[status] || status}</span></span></div>
+            <div class="modal-row"><span class="label">优先级</span><span class="value">${priNames[task.priority] || task.priority || '-'}</span></div>
+            <div class="modal-row"><span class="label">创建时间</span><span class="value">${task.created_at ? formatTime(task.created_at) : '-'}</span></div>
+            ${task.started_at ? `<div class="modal-row"><span class="label">开始时间</span><span class="value">${formatTime(task.started_at)}</span></div>` : ''}
+            ${task.completed_at ? `<div class="modal-row"><span class="label">完成时间</span><span class="value">${formatTime(task.completed_at)}</span></div>` : ''}
+            ${task.duration ? `<div class="modal-row"><span class="label">耗时</span><span class="value">${fmtDur(task.duration)}</span></div>` : ''}
+            ${task.backend ? `<div class="modal-row"><span class="label">后端</span><span class="value">${esc(task.backend)}</span></div>` : ''}
+            ${task.error ? `<div class="modal-row"><span class="label">错误</span><span class="value" style="color:var(--at-err)">${esc(task.error)}</span></div>` : ''}
+        `;
+
+        if (task.result) {
+            html += `<div style="margin-top:14px;"><label style="font-size:12px;font-weight:600;color:var(--at-muted);text-transform:uppercase;">执行结果</label>
+                <div class="modal-result">${esc(JSON.stringify(task.result, null, 2))}</div></div>`;
+        }
+
+        document.getElementById('modalBody').innerHTML = html;
+
+        // Actions
+        const actions = document.getElementById('modalActions');
+        let actionsHtml = '<button class="ctrl-btn" onclick="closeTaskModal()">关闭</button>';
+        if (status === 'pending') {
+            actionsHtml = `<button class="ctrl-btn danger" onclick="cancelTask('${esc(task.task_id)}');closeTaskModal();">取消任务</button>` + actionsHtml;
+        }
+        actions.innerHTML = actionsHtml;
+    }
+
+    function closeTaskModal() {
+        document.getElementById('taskModal').classList.remove('open');
+    }
+
+    /* ── Status Distribution Chart (Donut) ── */
+    function renderStatusChart(stats) {
+        const canvas = document.getElementById('statusChart');
+        const empty = document.getElementById('statusChartEmpty');
+
+        const pending = stats.python?.pending ?? stats.pending ?? 0;
+        const running = stats.python?.running ?? stats.running ?? 0;
+        const completed = stats.total_completed ?? stats.completed ?? 0;
+        const failed = stats.total_failed ?? stats.failed ?? 0;
+        const total = pending + running + completed + failed;
+
+        if (total === 0) { empty.style.display = 'flex'; return; }
+        empty.style.display = 'none';
+
+        const ctx = canvas.getContext('2d');
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.parentElement.getBoundingClientRect();
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr);
+        const W = rect.width, H = rect.height;
+        ctx.clearRect(0, 0, W, H);
+
+        const cx = W * 0.35, cy = H / 2;
+        const R = Math.min(cx, cy) - 10;
+        const r = R * 0.6;
+
+        const segments = [
+            { label: '等待中', value: pending, color: '#94a3b8' },
+            { label: '执行中', value: running, color: '#0891b2' },
+            { label: '已完成', value: completed, color: '#059669' },
+            { label: '失败', value: failed, color: '#dc2626' }
+        ].filter(s => s.value > 0);
+
+        let angle = -Math.PI / 2;
+        segments.forEach(seg => {
+            const sweep = (seg.value / total) * Math.PI * 2;
+            ctx.beginPath();
+            ctx.arc(cx, cy, R, angle, angle + sweep);
+            ctx.arc(cx, cy, r, angle + sweep, angle, true);
+            ctx.closePath();
+            ctx.fillStyle = seg.color;
+            ctx.fill();
+            angle += sweep;
         });
 
-        // 加载统计信息
-        async function loadStatistics() {
-            try {
-                const response = await fetch('/api/tasks/statistics');
-                const stats = await response.json();
+        // Center text
+        ctx.fillStyle = '#10233f';
+        ctx.font = 'bold 24px -apple-system, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(total, cx, cy - 6);
+        ctx.font = '11px -apple-system, sans-serif';
+        ctx.fillStyle = '#64748b';
+        ctx.fillText('总任务', cx, cy + 14);
 
-                document.getElementById('total-tasks').textContent = stats.total;
-                document.getElementById('pending-tasks').textContent = stats.pending;
-                document.getElementById('running-tasks').textContent = stats.running;
-                document.getElementById('completed-tasks').textContent = stats.completed;
-                document.getElementById('failed-tasks').textContent = stats.failed;
-                document.getElementById('avg-duration').textContent = stats.avg_duration.toFixed(2) + 's';
-            } catch (error) {
-                console.error('加载统计失败:', error);
-            }
+        // Legend
+        const legendX = W * 0.65;
+        let legendY = H * 0.2;
+        segments.forEach(seg => {
+            ctx.fillStyle = seg.color;
+            ctx.fillRect(legendX, legendY, 12, 12);
+            ctx.fillStyle = '#10233f';
+            ctx.font = '13px -apple-system, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(`${seg.label}: ${seg.value}`, legendX + 18, legendY + 10);
+            legendY += 28;
+        });
+    }
+
+    /* ── Duration Distribution Chart (Histogram) ── */
+    function renderDurChart(tasks) {
+        const canvas = document.getElementById('durChart');
+        const empty = document.getElementById('durChartEmpty');
+
+        const completed = tasks.filter(t => t.status === 'completed' && t.duration > 0);
+        if (completed.length === 0) { empty.style.display = 'flex'; return; }
+        empty.style.display = 'none';
+
+        // Build histogram buckets
+        const maxDur = Math.max(...completed.map(t => t.duration));
+        const bucketCount = Math.min(8, completed.length);
+        const bucketSize = Math.ceil(maxDur / bucketCount * 10) / 10 || 1;
+        const buckets = Array(bucketCount).fill(0);
+        completed.forEach(t => {
+            const idx = Math.min(Math.floor(t.duration / bucketSize), bucketCount - 1);
+            buckets[idx]++;
+        });
+
+        const ctx = canvas.getContext('2d');
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.parentElement.getBoundingClientRect();
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr);
+        const W = rect.width, H = rect.height;
+        ctx.clearRect(0, 0, W, H);
+
+        const padL = 50, padR = 20, padT = 20, padB = 40;
+        const chartW = W - padL - padR;
+        const chartH = H - padT - padB;
+        const maxCount = Math.max(...buckets);
+        const barW = chartW / bucketCount * 0.7;
+        const gap = chartW / bucketCount;
+
+        // Grid
+        ctx.strokeStyle = 'rgba(0,0,0,0.06)';
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '11px -apple-system, sans-serif';
+        ctx.textAlign = 'right';
+        for (let i = 0; i <= 4; i++) {
+            const y = padT + (chartH / 4) * i;
+            const val = maxCount * (1 - i / 4);
+            ctx.beginPath();
+            ctx.moveTo(padL, y);
+            ctx.lineTo(W - padR, y);
+            ctx.stroke();
+            ctx.fillText(Math.round(val), padL - 6, y + 4);
         }
 
-        // 加载任务列表
-        async function loadTasks() {
-            const statusFilter = document.getElementById('status-filter').value;
-            const url = statusFilter ? `/api/tasks/list?status=${statusFilter}` : '/api/tasks/list';
+        // Bars
+        buckets.forEach((count, i) => {
+            const x = padL + gap * i + (gap - barW) / 2;
+            const h = maxCount > 0 ? (count / maxCount) * chartH : 0;
+            const y = padT + chartH - h;
 
-            try {
-                const response = await fetch(url);
-                const data = await response.json();
+            const grad = ctx.createLinearGradient(x, y, x, padT + chartH);
+            grad.addColorStop(0, '#d97706');
+            grad.addColorStop(1, '#fbbf24');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            roundRect(ctx, x, y, barW, h, 3);
+            ctx.fill();
 
-                const taskList = document.getElementById('task-list');
-                taskList.innerHTML = '';
+            // X label
+            ctx.fillStyle = '#64748b';
+            ctx.font = '10px -apple-system, sans-serif';
+            ctx.textAlign = 'center';
+            const label = fmtDur(bucketSize * i) + '-' + fmtDur(bucketSize * (i + 1));
+            ctx.fillText(label, x + barW / 2, padT + chartH + 16);
 
-                if (data.tasks.length === 0) {
-                    taskList.innerHTML = '<li class="loading">暂无任务</li>';
-                    return;
-                }
-
-                data.tasks.forEach(task => {
-                    const li = document.createElement('li');
-                    li.className = `task-item ${task.status}`;
-                    li.innerHTML = `
-                        <div class="task-header">
-                            <span class="task-name">${task.name}</span>
-                            <span class="task-status ${task.status}">${task.status}</span>
-                        </div>
-                        <div class="task-meta">
-                            ID: ${task.task_id}<br>
-                            创建时间: ${task.created_at}<br>
-                            ${task.duration ? `耗时: ${task.duration.toFixed(2)}秒` : ''}
-                            ${task.error ? `<br>错误: ${task.error}` : ''}
-                        </div>
-                        <div class="task-actions">
-                            <button class="btn" onclick="viewTaskResult('${task.task_id}')">查看结果</button>
-                            ${task.status === 'pending' ? `<button class="btn btn-danger" onclick="cancelTask('${task.task_id}')">取消</button>` : ''}
-                        </div>
-                    `;
-                    taskList.appendChild(li);
-                });
-            } catch (error) {
-                console.error('加载任务失败:', error);
+            // Count label
+            if (count > 0) {
+                ctx.fillStyle = '#d97706';
+                ctx.font = 'bold 11px -apple-system, sans-serif';
+                ctx.fillText(count, x + barW / 2, y - 6);
             }
-        }
+        });
+    }
 
-        // 查看任务结果
-        async function viewTaskResult(taskId) {
-            try {
-                const response = await fetch(`/api/tasks/${taskId}/result`);
-                const data = await response.json();
+    function roundRect(ctx, x, y, w, h, r) {
+        if (h < r * 2) r = h / 2;
+        if (h <= 0) return;
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h);
+        ctx.lineTo(x, y + h);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+    }
 
-                if (response.ok) {
-                    alert(`任务结果:\n${JSON.stringify(data.result, null, 2)}`);
-                } else {
-                    alert(`无法获取结果: ${data.error}`);
-                }
-            } catch (error) {
-                alert(`获取结果失败: ${error.message}`);
-            }
-        }
+    /* ── Toast ── */
+    function toast(msg, type) {
+        const wrap = document.getElementById('toastWrap');
+        const el = document.createElement('div');
+        el.className = 'toast ' + (type || '');
+        el.textContent = msg;
+        wrap.appendChild(el);
+        setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 2500);
+    }
 
-        // 取消任务
-        async function cancelTask(taskId) {
-            if (!confirm('确定要取消这个任务吗？')) return;
+    /* ── Utils ── */
+    function fmtDur(s) {
+        if (s === undefined || s === null || s === 0) return '-';
+        if (s < 0.001) return (s * 1e6).toFixed(0) + 'μs';
+        if (s < 1) return (s * 1000).toFixed(0) + 'ms';
+        if (s < 60) return s.toFixed(1) + 's';
+        return Math.floor(s / 60) + 'm' + Math.round(s % 60) + 's';
+    }
 
-            try {
-                const response = await fetch(`/api/tasks/${taskId}/cancel`, {
-                    method: 'POST'
-                });
+    function formatTime(ts) {
+        try {
+            const d = new Date(ts);
+            return d.toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        } catch { return ts; }
+    }
 
-                const data = await response.json();
+    function esc(s) {
+        if (!s) return '';
+        const d = document.createElement('div');
+        d.textContent = s;
+        return d.innerHTML;
+    }
 
-                if (response.ok) {
-                    showMessage('任务已取消', 'success');
-                    loadTasks();
-                    loadStatistics();
-                } else {
-                    showMessage(`取消失败: ${data.error}`, 'error');
-                }
-            } catch (error) {
-                showMessage(`取消失败: ${error.message}`, 'error');
-            }
-        }
+    /* ── Demo data ── */
+    function getDemoStats() {
+        return {
+            total_submitted: 47,
+            total_completed: 38,
+            total_failed: 3,
+            python: { pending: 2, running: 4, completed: 38, failed: 3, avg_duration: 3.45 }
+        };
+    }
 
-        // 清理已完成任务
-        async function clearCompleted() {
-            if (!confirm('确定要清理所有已完成的任务吗？')) return;
+    function getDemoTasks() {
+        const now = Date.now();
+        return [
+            { task_id: 'demo-001-abc-def-12345678', name: '大批量数据处理', task_type: 'data_processing', status: 'running', priority: 2, created_at: new Date(now - 120000).toISOString(), progress: 0.65 },
+            { task_id: 'demo-002-abc-def-12345678', name: '月度报告生成', task_type: 'report_generation', status: 'running', priority: 3, created_at: new Date(now - 90000).toISOString(), progress: 0.3 },
+            { task_id: 'demo-003-abc-def-12345678', name: '分类器训练', task_type: 'model_training', status: 'pending', priority: 1, created_at: new Date(now - 60000).toISOString() },
+            { task_id: 'demo-004-abc-def-12345678', name: '用户数据清洗', task_type: 'data_processing', status: 'completed', priority: 1, created_at: new Date(now - 300000).toISOString(), duration: 4.23, result: { processed: 1500, errors: 2 } },
+            { task_id: 'demo-005-abc-def-12345678', name: '异常检测模型训练', task_type: 'model_training', status: 'completed', priority: 2, created_at: new Date(now - 600000).toISOString(), duration: 12.8, result: { accuracy: 0.94 } },
+            { task_id: 'demo-006-abc-def-12345678', name: '批量导入操作', task_type: 'batch_operation', status: 'failed', priority: 1, created_at: new Date(now - 900000).toISOString(), duration: 1.2, error: 'Connection timeout after 30s' },
+            { task_id: 'demo-007-abc-def-12345678', name: '日志聚合分析', task_type: 'data_processing', status: 'completed', priority: 0, created_at: new Date(now - 1200000).toISOString(), duration: 2.1 },
+            { task_id: 'demo-008-abc-def-12345678', name: '摘要报告', task_type: 'report_generation', status: 'completed', priority: 1, created_at: new Date(now - 1500000).toISOString(), duration: 6.7 },
+            { task_id: 'demo-009-abc-def-12345678', name: '特征工程', task_type: 'data_processing', status: 'completed', priority: 2, created_at: new Date(now - 1800000).toISOString(), duration: 8.4 },
+            { task_id: 'demo-010-abc-def-12345678', name: '回归模型训练', task_type: 'model_training', status: 'completed', priority: 1, created_at: new Date(now - 2400000).toISOString(), duration: 15.3 }
+        ];
+    }
 
-            try {
-                const response = await fetch('/api/tasks/clear', {
-                    method: 'POST'
-                });
+    /* ── Resize charts ── */
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            if (statsData) renderStatusChart(statsData);
+            if (tasksData) renderDurChart(tasksData);
+        }, 200);
+    });
 
-                const data = await response.json();
-
-                if (response.ok) {
-                    showMessage(data.message, 'success');
-                    loadTasks();
-                    loadStatistics();
-                } else {
-                    showMessage('清理失败', 'error');
-                }
-            } catch (error) {
-                showMessage(`清理失败: ${error.message}`, 'error');
-            }
-        }
-
-        // 显示消息
-        function showMessage(text, type) {
-            const messageDiv = document.getElementById('message');
-            messageDiv.textContent = text;
-            messageDiv.className = type;
-            messageDiv.style.display = 'block';
-
-            setTimeout(() => {
-                messageDiv.style.display = 'none';
-            }, 5000);
-        }
-
-        // 初始加载
-        loadStatistics();
-        loadTasks();
-
-        // 自动刷新
-        setInterval(() => {
-            if (autoRefresh) {
-                loadStatistics();
-                loadTasks();
-            }
-        }, 3000);
+    /* ── Close modal on overlay click ── */
+    document.getElementById('taskModal').addEventListener('click', function(e) {
+        if (e.target === this) closeTaskModal();
+    });
     </script>
 </body>
 </html>

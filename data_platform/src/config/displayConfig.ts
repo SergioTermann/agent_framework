@@ -7,12 +7,12 @@
 export const SYSTEM_INFO = {
   // 公司名称
   companyName: {
-    cn: '风起时域科技有限公司AI故障定位系统',
+    cn: '智能值守系统',
     en: 'CAUSYRA AI Fault Location System',
   },
 
   // 页面标题
-  pageTitle: '天津风起时域科技有限公司AI故障定位系统',
+  pageTitle: '智能值守系统',
 
   // 公司Logo路径
   logoPath: '/images/icon-logo.jpg',

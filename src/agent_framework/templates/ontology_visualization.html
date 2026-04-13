@@ -3,478 +3,1406 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>本体论因果推理可视化 - Palantir Ontology</title>
+    <title>本体论因果工作台 - Agent Framework</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="/static/css/base-theme.css">
+    <link rel="stylesheet" href="/static/css/submodule-theme.css?v=1.0">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --ont-accent: #1363df;
+            --ont-accent-deep: #0b5c56;
+            --ont-azure: #0f62fe;
+            --ont-amber: #b45309;
+            --ont-rose: #be123c;
+            --ont-bg: #edf6f5;
+            --ont-text: #10233f;
+            --ont-muted: #5f728c;
+            --ont-border: rgba(148, 163, 184, 0.20);
+            --ont-surface: rgba(255, 255, 255, 0.95);
+            --ont-shadow: 0 18px 42px rgba(15, 23, 42, 0.10);
+            --ont-radius: 24px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
             min-height: 100vh;
-            padding: 20px;
-            overflow-x: hidden;
+            font-family: var(--font-body, "Segoe UI", sans-serif);
+            color: var(--ont-text);
+            background:
+                radial-gradient(circle at 10% 10%, rgba(19, 99, 223, 0.12), transparent 20%),
+                radial-gradient(circle at 88% 8%, rgba(15, 98, 254, 0.10), transparent 18%),
+                linear-gradient(180deg, #f8fcfc 0%, var(--ont-bg) 100%);
         }
-        .container { max-width: 1900px; margin: 0 auto; animation: fadeIn 0.6s ease-in; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-        .header {
-            background: rgba(255, 255, 255, 0.98);
-            padding: 35px;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            margin-bottom: 30px;
-            backdrop-filter: blur(10px);
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(19, 99, 223, 0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(19, 99, 223, 0.025) 1px, transparent 1px);
+            background-size: 28px 28px;
+            mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.18), transparent 66%);
         }
-        .header h1 {
-            font-size: 2.8em;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 12px;
-            font-weight: 700;
+
+        .shell {
+            position: relative;
+            z-index: 1;
+            max-width: 1760px;
+            margin: 0 auto;
+            padding: 24px;
+            display: grid;
+            gap: 18px;
         }
-        .header p { color: #666; font-size: 1.15em; line-height: 1.6; }
-        .controls {
-            background: rgba(255, 255, 255, 0.98);
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            margin-bottom: 25px;
+
+        .panel {
+            border: 1px solid var(--ont-border);
+            border-radius: var(--ont-radius);
+            background: var(--ont-surface);
+            box-shadow: var(--ont-shadow);
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(360px, 0.8fr);
+            gap: 18px;
+        }
+
+        .hero-main,
+        .hero-side {
+            padding: 26px 28px;
+            display: grid;
+            gap: 18px;
+        }
+
+        .hero-main {
+            background:
+                radial-gradient(circle at 92% 12%, rgba(19, 99, 223, 0.14), transparent 22%),
+                linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(244, 250, 250, 0.94));
+        }
+
+        .hero-pill,
+        .badge,
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            width: fit-content;
+            min-height: 30px;
+            padding: 0 12px;
+            border-radius: 999px;
+            background: rgba(19, 99, 223, 0.08);
+            color: var(--ont-accent);
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .chip.is-azure {
+            background: rgba(15, 98, 254, 0.08);
+            color: var(--ont-azure);
+        }
+
+        .chip.is-amber {
+            background: rgba(180, 83, 9, 0.12);
+            color: var(--ont-amber);
+        }
+
+        .chip.is-rose {
+            background: rgba(190, 18, 60, 0.10);
+            color: var(--ont-rose);
+        }
+
+        h1, h2, h3, h4, p {
+            margin: 0;
+        }
+
+        .hero-main h1 {
+            font-size: clamp(34px, 4vw, 48px);
+            line-height: 1.04;
+            letter-spacing: -0.04em;
+        }
+
+        .hero-copy,
+        .section-copy,
+        .card-copy,
+        .small-copy {
+            color: var(--ont-muted);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .hero-actions,
+        .toolbar-row,
+        .field-row,
+        .metric-grid,
+        .mini-grid,
+        .type-legend,
+        .chip-row {
             display: flex;
-            gap: 20px;
+            gap: 10px;
             flex-wrap: wrap;
             align-items: center;
-            backdrop-filter: blur(10px);
         }
-        .control-group { display: flex; align-items: center; gap: 12px; }
-        .control-group label { font-weight: 600; color: #333; font-size: 14px; }
-        select, input, button {
-            padding: 12px 18px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            font-family: inherit;
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 14px;
         }
-        select:focus, input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+
+        .metric-card {
+            padding: 16px;
+            border-radius: 18px;
+            border: 1px solid var(--ont-border);
+            background: linear-gradient(180deg, #ffffff, #f8fbfb);
+            display: grid;
+            gap: 8px;
         }
-        select:hover, input:hover { border-color: #667eea; }
-        button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
+
+        .metric-value {
+            font-size: 28px;
+            font-weight: 900;
+            line-height: 1;
+            letter-spacing: -0.05em;
+        }
+
+        .metric-label {
+            color: var(--ont-muted);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .controls {
+            padding: 18px 20px;
+            display: grid;
+            gap: 14px;
+        }
+
+        .toolbar-row {
+            justify-content: space-between;
+        }
+
+        .toolbar-left,
+        .toolbar-right {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn,
+        .input,
+        .select {
+            min-height: 42px;
+            border-radius: 14px;
+            font: inherit;
+            font-size: 13px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 0 16px;
+            border: 1px solid rgba(19, 99, 223, 0.14);
+            background: rgba(255, 255, 255, 0.94);
+            color: var(--ont-text);
+            font-weight: 700;
             cursor: pointer;
-            font-weight: 600;
-            position: relative;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            border-color: rgba(19, 99, 223, 0.24);
+            box-shadow: 0 12px 24px rgba(19, 99, 223, 0.08);
+        }
+
+        .btn-primary {
+            border-color: transparent;
+            color: #ffffff;
+            background: linear-gradient(135deg, var(--ont-accent-deep), var(--ont-accent));
+        }
+
+        .btn-ghost {
+            background: rgba(19, 99, 223, 0.05);
+        }
+
+        .input,
+        .select {
+            border: 1px solid rgba(148, 163, 184, 0.24);
+            background: #ffffff;
+            color: var(--ont-text);
+            padding: 0 14px;
+        }
+
+        .input:focus,
+        .select:focus {
+            outline: none;
+            border-color: rgba(19, 99, 223, 0.30);
+            box-shadow: 0 0 0 3px rgba(19, 99, 223, 0.08);
+        }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: 320px minmax(0, 1fr) 380px;
+            gap: 18px;
+            align-items: start;
+        }
+
+        .rail,
+        .side {
+            display: grid;
+            gap: 18px;
+            align-content: start;
+            position: sticky;
+            top: 20px;
+            min-width: 0;
+        }
+
+        .center {
+            display: grid;
+            gap: 18px;
+            min-width: 0;
+        }
+
+        .section {
+            padding: 18px;
+            display: grid;
+            gap: 14px;
+        }
+
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .section-head h2,
+        .section-head h3 {
+            font-size: 17px;
+            line-height: 1.25;
+        }
+
+        .list,
+        .scenario-list,
+        .detail-list,
+        .chain-list,
+        .impact-list,
+        .path-list,
+        .type-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .type-card,
+        .scenario-card,
+        .detail-card,
+        .chain-card,
+        .impact-card,
+        .path-card {
+            padding: 14px;
+            border-radius: 18px;
+            border: 1px solid rgba(148, 163, 184, 0.20);
+            background: linear-gradient(180deg, #ffffff, #f8fbfb);
+        }
+
+        .scenario-card,
+        .type-card {
+            cursor: pointer;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .scenario-card:hover,
+        .type-card:hover {
+            transform: translateY(-1px);
+            border-color: rgba(19, 99, 223, 0.24);
+            box-shadow: 0 12px 24px rgba(19, 99, 223, 0.08);
+        }
+
+        .scenario-card.is-active,
+        .type-card.is-active {
+            border-color: rgba(19, 99, 223, 0.28);
+            box-shadow: 0 0 0 3px rgba(19, 99, 223, 0.08);
+        }
+
+        .card-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 800;
+            line-height: 1.45;
+        }
+
+        .graph-shell {
             overflow: hidden;
         }
-        button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.2);
-            transition: left 0.3s ease;
-        }
-        button:hover::before { left: 100%; }
-        button:hover { box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4); }
-        button:active { transform: translateY(0); }
-        button:disabled { opacity: 0.6; cursor: not-allowed; }
-        .visualization-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(550px, 1fr));
-            gap: 25px;
-            margin-bottom: 25px;
-        }
-        .viz-card {
-            background: rgba(255, 255, 255, 0.98);
-            border-radius: 18px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(10px);
-        }
-        .viz-card h3 {
-            font-size: 1.5em;
-            color: #333;
-            margin-bottom: 20px;
+
+        .graph-toolbar {
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--ont-border);
             display: flex;
+            justify-content: space-between;
+            gap: 12px;
             align-items: center;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(245, 250, 250, 0.92));
+        }
+
+        .graph-container {
+            position: relative;
+            min-height: 720px;
+            background:
+                linear-gradient(90deg, rgba(19, 99, 223, 0.04) 1px, transparent 1px),
+                linear-gradient(rgba(19, 99, 223, 0.04) 1px, transparent 1px),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(244, 249, 249, 0.94));
+            background-size: 32px 32px, 32px 32px, auto;
+            overflow: hidden;
+        }
+
+        .graph-empty {
+            position: absolute;
+            inset: 50% auto auto 50%;
+            transform: translate(-50%, -50%);
+            width: min(440px, calc(100% - 40px));
+            padding: 24px;
+            border-radius: 24px;
+            border: 1px dashed rgba(19, 99, 223, 0.20);
+            background: rgba(255, 255, 255, 0.88);
+            text-align: center;
+        }
+
+        .graph-empty strong {
+            display: block;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .graph-empty p {
+            color: var(--ont-muted);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .graph-svg {
+            width: 100%;
+            height: 720px;
+            display: block;
+        }
+
+        .graph-status {
+            position: absolute;
+            right: 16px;
+            bottom: 16px;
+            padding: 10px 12px;
+            border-radius: 14px;
+            background: rgba(15, 23, 42, 0.84);
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 700;
+            pointer-events: none;
+        }
+
+        .insight-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .table-like {
+            display: grid;
             gap: 10px;
         }
-        .viz-card h3::before {
-            content: '';
-            width: 4px;
-            height: 24px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 2px;
-        }
-        #graph-container {
-            width: 100%;
-            height: 600px;
-            border-radius: 12px;
-            background: #f8f9fa;
-            overflow: hidden;
-        }
-        .stats-grid {
+
+        .kv {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 25px;
+            gap: 8px;
         }
-        .stat-card {
-            background: rgba(255, 255, 255, 0.98);
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            text-align: center;
-            backdrop-filter: blur(10px);
-            animation: slideUp 0.6s ease-out;
+
+        .kv-item {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: flex-start;
+            padding: 10px 12px;
+            border-radius: 14px;
+            background: rgba(19, 99, 223, 0.04);
+            border: 1px solid rgba(19, 99, 223, 0.08);
         }
-        .stat-card .number {
-            font-size: 2.5em;
-            font-weight: 700;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 8px;
-        }
-        .stat-card .label {
-            color: #666;
-            font-size: 0.95em;
-            font-weight: 500;
-        }
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #999;
-        }
-        .empty-state .icon {
-            font-size: 4em;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-        .empty-state h3 {
-            font-size: 1.5em;
-            margin-bottom: 10px;
-            color: #666;
-        }
-        .empty-state p {
-            font-size: 1em;
-            color: #999;
-        }
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
-        .loading::after {
-            content: '...';
-            animation: dots 1.5s steps(4, end) infinite;
-        }
-        @keyframes dots {
-            0%, 20% { content: '.'; }
-            40% { content: '..'; }
-            60%, 100% { content: '...'; }
-        }
-        .node circle {
-            cursor: pointer;
-            stroke-width: 2px;
-        }
-        .node text {
+
+        .kv-item span:first-child {
+            color: var(--ont-muted);
             font-size: 12px;
+            font-weight: 700;
+        }
+
+        .kv-item span:last-child {
+            font-size: 12px;
+            font-weight: 700;
+            text-align: right;
+            word-break: break-word;
+        }
+
+        .detail-empty {
+            padding: 16px;
+            border-radius: 16px;
+            border: 1px dashed rgba(148, 163, 184, 0.28);
+            background: rgba(19, 99, 223, 0.04);
+            color: var(--ont-muted);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .route-form {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .route-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .node-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        .tooltip {
+            position: fixed;
+            z-index: 120;
+            max-width: 320px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            background: rgba(15, 23, 42, 0.92);
+            color: #ffffff;
+            font-size: 12px;
+            line-height: 1.7;
+            box-shadow: 0 18px 36px rgba(15, 23, 42, 0.24);
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.18s ease, transform 0.18s ease;
+        }
+
+        .tooltip.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .node circle {
+            stroke: rgba(255, 255, 255, 0.96);
+            stroke-width: 2px;
+            cursor: pointer;
+        }
+
+        .node.is-selected circle {
+            stroke: var(--ont-accent-deep);
+            stroke-width: 4px;
+        }
+
+        .node text {
+            font-size: 11px;
+            font-weight: 700;
             pointer-events: none;
             text-anchor: middle;
+            fill: #10233f;
         }
+
         .link {
-            stroke-opacity: 0.6;
+            stroke-opacity: 0.58;
         }
+
+        .link.is-highlight {
+            stroke-opacity: 0.96;
+            stroke-width: 3.5px;
+        }
+
         .link-label {
             font-size: 10px;
-            fill: #666;
+            fill: #52637c;
             pointer-events: none;
+            paint-order: stroke;
+            stroke: rgba(255, 255, 255, 0.88);
+            stroke-width: 4px;
+            stroke-linejoin: round;
+        }
+
+        @media (max-width: 1480px) {
+            .workspace {
+                grid-template-columns: 300px minmax(0, 1fr);
+            }
+
+            .side {
+                position: static;
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 1180px) {
+            .hero,
+            .workspace,
+            .insight-grid,
+            .route-form,
+            .metric-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .rail,
+            .side {
+                position: static;
+            }
+        }
+
+        @media (max-width: 860px) {
+            .shell {
+                padding: 14px;
+            }
+
+            .hero-main,
+            .hero-side,
+            .controls,
+            .section {
+                padding: 18px;
+            }
+
+            .toolbar-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .graph-container,
+            .graph-svg {
+                min-height: 560px;
+                height: 560px;
+            }
         }
     </style>
-    <link rel="stylesheet" href="/static/css/submodule-theme.css?v=1.0">
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>本体论因果推理可视化</h1>
-            <p>基于 Palantir Ontology 的因果推理系统 - 可视化对象、关系和因果链路</p>
-        </div>
-
-        <div class="controls">
-            <div class="control-group">
-                <button onclick="loadGraph()">刷新图谱</button>
-                <button onclick="createDemoData()">简单示例</button>
-                <button onclick="createComplexDemoData()">复杂示例</button>
-                <button onclick="clearData()">清空数据</button>
+    <div class="shell">
+        <section class="hero">
+            <div class="hero-main panel">
+                <span class="hero-pill">Ontology Causal Workbench</span>
+                <div>
+                    <h1>本体论因果工作台</h1>
+                    <p class="hero-copy">把对象类型、关系强度、局部邻域、路径探索和关键链路放进同一页，不再只是一个静态力导图。现在可以先看风险结构，再下钻到具体对象和因果传播路径。</p>
+                </div>
+                <div class="hero-actions">
+                    <button class="btn btn-primary" type="button" onclick="refreshWorkspace()">
+                        刷新图谱
+                    </button>
+                    <button class="btn" type="button" onclick="createDemoData()">
+                        简单示例
+                    </button>
+                    <button class="btn" type="button" onclick="createComplexDemoData()">
+                        复杂示例
+                    </button>
+                    <button class="btn btn-ghost" type="button" onclick="clearData()">
+                        清空数据
+                    </button>
+                </div>
+                <div class="metric-grid" id="metricGrid"></div>
             </div>
-        </div>
-
-        <div class="stats-grid" id="stats-grid">
-            <div class="stat-card">
-                <div class="number" id="stat-objects">0</div>
-                <div class="label">对象数量</div>
-            </div>
-            <div class="stat-card">
-                <div class="number" id="stat-links">0</div>
-                <div class="label">关系数量</div>
-            </div>
-            <div class="stat-card">
-                <div class="number" id="stat-object-types">0</div>
-                <div class="label">对象类型</div>
-            </div>
-            <div class="stat-card">
-                <div class="number" id="stat-link-types">0</div>
-                <div class="label">关系类型</div>
-            </div>
-        </div>
-
-        <div class="visualization-grid">
-            <div class="viz-card">
-                <h3>本体论图谱</h3>
-                <div id="graph-container">
-                    <div class="empty-state">
-                        <div class="icon">📊</div>
-                        <h3>暂无数据</h3>
-                        <p>Click "Simple Demo" or "Complex Demo" to get started.</p>
+            <div class="hero-side panel">
+                <div class="section-head">
+                    <div>
+                        <h2>当前聚焦</h2>
+                        <p class="section-copy">这里会根据筛选条件和选中对象，动态显示当前图谱的结构判断。</p>
+                    </div>
+                    <span class="badge" id="focusBadge">全量图谱</span>
+                </div>
+                <div class="detail-card">
+                    <div class="card-head">
+                        <div>
+                            <div class="card-title">图谱摘要</div>
+                            <div class="card-copy" id="summaryCopy">还没有加载本体图谱。</div>
+                        </div>
                     </div>
                 </div>
+                <div class="detail-card">
+                    <div class="card-head">
+                        <div>
+                            <div class="card-title">关键观察</div>
+                            <div class="card-copy">根据当前结构自动提炼最值得先看的节点和链路。</div>
+                        </div>
+                    </div>
+                    <div class="impact-list" id="topObservations"></div>
+                </div>
             </div>
-        </div>
+        </section>
+
+        <section class="panel controls">
+            <div class="toolbar-row">
+                <div class="toolbar-left">
+                    <input class="input" id="searchInput" placeholder="搜索对象名、类型、属性值" oninput="handleFilterChange()" style="min-width: 260px;">
+                    <select class="select" id="typeFilter" onchange="handleFilterChange()"></select>
+                    <select class="select" id="strengthFilter" onchange="handleFilterChange()">
+                        <option value="all">全部置信度</option>
+                        <option value="high">高置信度 ≥ 0.85</option>
+                        <option value="medium">中高置信度 ≥ 0.70</option>
+                        <option value="low">低置信度也显示</option>
+                    </select>
+                    <select class="select" id="lensFilter" onchange="handleFilterChange()">
+                        <option value="all">全量视角</option>
+                        <option value="causal">因果视角</option>
+                        <option value="dependency">依赖视角</option>
+                        <option value="mitigation">缓解视角</option>
+                    </select>
+                </div>
+                <div class="toolbar-right">
+                    <span class="chip is-azure" id="filterSummary">0 个对象 · 0 条关系</span>
+                    <button class="btn btn-ghost" type="button" onclick="resetViewport()">重置视图</button>
+                    <button class="btn btn-ghost" type="button" onclick="focusCriticalNodes()">聚焦关键节点</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="workspace">
+            <aside class="rail">
+                <section class="panel section">
+                    <div class="section-head">
+                        <div>
+                            <h2>对象类型</h2>
+                            <p class="section-copy">直接按类型聚焦，适合快速切到事件、服务、指标或处理动作层。</p>
+                        </div>
+                    </div>
+                    <div class="type-list" id="typeList"></div>
+                </section>
+
+                <section class="panel section">
+                    <div class="section-head">
+                        <div>
+                            <h2>场景视角</h2>
+                            <p class="section-copy">不是简单筛选，而是针对不同分析任务切换一组关注面。</p>
+                        </div>
+                    </div>
+                    <div class="scenario-list" id="scenarioList"></div>
+                </section>
+
+                <section class="panel section">
+                    <div class="section-head">
+                        <div>
+                            <h2>强关系清单</h2>
+                            <p class="section-copy">优先看高置信度和高强度关系，快速锁定传播主链。</p>
+                        </div>
+                    </div>
+                    <div class="chain-list" id="strongLinkList"></div>
+                </section>
+            </aside>
+
+            <main class="center">
+                <section class="panel graph-shell">
+                    <div class="graph-toolbar">
+                        <div>
+                            <h2>本体论图谱</h2>
+                            <p class="section-copy">点击节点看详情，拖动画布移动视角，滚轮缩放，路径探索会与这里联动高亮。</p>
+                        </div>
+                        <div class="chip-row">
+                            <span class="chip" id="zoomState">缩放 100%</span>
+                            <span class="chip is-azure" id="selectionState">未选中对象</span>
+                        </div>
+                    </div>
+                    <div class="graph-container" id="graphContainer">
+                        <div class="graph-empty" id="graphEmpty">
+                            <strong>还没有本体图谱数据</strong>
+                            <p>先点上面的“简单示例”或“复杂示例”，页面会自动加载对象、关系和局部因果结构。</p>
+                        </div>
+                        <div class="graph-status" id="graphStatus">等待加载</div>
+                    </div>
+                </section>
+
+                <section class="insight-grid">
+                    <section class="panel section">
+                        <div class="section-head">
+                            <div>
+                                <h3>路径探索</h3>
+                                <p class="section-copy">从任意起点到终点找传播路径，用来验证根因链和影响面。</p>
+                            </div>
+                        </div>
+                        <div class="route-form">
+                            <select class="select" id="routeStart"></select>
+                            <select class="select" id="routeEnd"></select>
+                        </div>
+                        <div class="route-actions">
+                            <button class="btn btn-primary" type="button" onclick="findRoute()">查找路径</button>
+                            <button class="btn" type="button" onclick="useSelectedAsRouteStart()">选中节点设为起点</button>
+                            <button class="btn" type="button" onclick="useSelectedAsRouteEnd()">选中节点设为终点</button>
+                        </div>
+                        <div class="path-list" id="pathList"></div>
+                    </section>
+
+                    <section class="panel section">
+                        <div class="section-head">
+                            <div>
+                                <h3>结构透视</h3>
+                                <p class="section-copy">把当前图谱按传播中心、风险事件和缓解动作拆成可读清单。</p>
+                            </div>
+                        </div>
+                        <div class="detail-list" id="structureInsights"></div>
+                    </section>
+                </section>
+            </main>
+
+            <aside class="side">
+                <section class="panel section">
+                    <div class="section-head">
+                        <div>
+                            <h2>对象详情</h2>
+                            <p class="section-copy">点击图谱中的节点，这里会展开属性、上下游关系和邻域分析。</p>
+                        </div>
+                    </div>
+                    <div id="selectedNodeDetail"></div>
+                </section>
+
+                <section class="panel section">
+                    <div class="section-head">
+                        <div>
+                            <h2>局部影响</h2>
+                            <p class="section-copy">基于选中对象和当前筛选结果，给出一跳、两跳的主要传播对象。</p>
+                        </div>
+                    </div>
+                    <div class="impact-list" id="impactList"></div>
+                </section>
+
+                <section class="panel section">
+                    <div class="section-head">
+                        <div>
+                            <h2>类型分布</h2>
+                            <p class="section-copy">不是总数表，而是当前可视范围里的对象组成。</p>
+                        </div>
+                    </div>
+                    <div class="detail-list" id="distributionList"></div>
+                </section>
+            </aside>
+        </section>
     </div>
 
-    <script>
-        let graphData = { nodes: [], links: [] };
-        let simulation = null;
-        const HAS_D3 = typeof window.d3 !== 'undefined';
+    <div class="tooltip" id="tooltip"></div>
 
-        function renderDependencyNotice(container, message) {
-            if (!container) return;
-            container.innerHTML = `
-                <div class="empty-state">
-                    <div class="icon">⚠️</div>
-                    <h3>依赖不可用</h3>
-                    <p>${message}</p>
-                </div>
-            `;
+    <script>
+        const HAS_D3 = typeof window.d3 !== "undefined";
+
+        const scenarioPresets = [
+            {
+                id: "all",
+                name: "全量拓扑",
+                description: "保留所有类型和关系，用来查看系统整体结构。",
+                apply() {
+                    state.filters.type = "all";
+                    state.filters.lens = "all";
+                    state.filters.search = "";
+                    state.filters.strength = "all";
+                }
+            },
+            {
+                id: "incident_lane",
+                name: "故障传播链",
+                description: "优先看事件、服务、指标和因果关系，聚焦根因与传播。",
+                apply() {
+                    state.filters.type = "all";
+                    state.filters.lens = "causal";
+                    state.filters.search = "";
+                    state.filters.strength = "medium";
+                }
+            },
+            {
+                id: "dependency_mesh",
+                name: "依赖网格",
+                description: "聚焦服务和数据库依赖，看关键枢纽和级联风险。",
+                apply() {
+                    state.filters.type = "all";
+                    state.filters.lens = "dependency";
+                    state.filters.search = "";
+                    state.filters.strength = "all";
+                }
+            },
+            {
+                id: "mitigation_map",
+                name: "缓解动作地图",
+                description: "突出处理动作与被缓解对象，适合排查处置覆盖面。",
+                apply() {
+                    state.filters.type = "all";
+                    state.filters.lens = "mitigation";
+                    state.filters.search = "";
+                    state.filters.strength = "all";
+                }
+            }
+        ];
+
+        const state = {
+            rawNodes: [],
+            rawLinks: [],
+            filteredNodes: [],
+            filteredLinks: [],
+            objectTypes: {},
+            linkTypes: {},
+            selectedNodeId: "",
+            selectedScenario: "all",
+            filters: {
+                search: "",
+                type: "all",
+                strength: "all",
+                lens: "all",
+            },
+            graph: {
+                svg: null,
+                group: null,
+                simulation: null,
+                zoom: null,
+                transform: null,
+            },
+            highlightedRouteEdgeIds: new Set(),
+        };
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            renderScenarioList();
+            bindTooltip();
+            await refreshWorkspace();
+        });
+
+        async function refreshWorkspace() {
+            await Promise.all([loadTypes(), loadGraph()]);
+        }
+
+        async function loadTypes() {
+            try {
+                const response = await fetch("/api/ontology/types");
+                const data = await response.json();
+                state.objectTypes = data.object_types || {};
+                state.linkTypes = data.link_types || {};
+                renderTypeFilter();
+                renderTypeList();
+            } catch (error) {
+                console.error("加载类型失败:", error);
+            }
         }
 
         async function loadGraph() {
             try {
-                const response = await fetch('/api/ontology/graph');
+                const response = await fetch("/api/ontology/graph");
                 const data = await response.json();
-                
-                graphData = {
-                    nodes: data.nodes || [],
-                    links: data.links || []
-                };
-
-                updateStats(data.stats || {});
-                renderGraph();
+                state.rawNodes = Array.isArray(data.nodes) ? data.nodes : [];
+                state.rawLinks = Array.isArray(data.links) ? data.links : [];
+                if (state.selectedNodeId && !state.rawNodes.some((node) => node.id === state.selectedNodeId)) {
+                    state.selectedNodeId = "";
+                }
+                applyCurrentFilters();
             } catch (error) {
-                console.error('加载图谱失败:', error);
-                showError('加载图谱失败');
+                console.error("加载图谱失败:", error);
+                showGraphMessage("加载失败", "图谱数据读取失败，请稍后重试。");
             }
         }
 
         async function createDemoData() {
-            try {
-                const response = await fetch('/api/ontology/demo', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                if (response.ok) {
-                    await loadGraph();
-                } else {
-                    showError('创建演示数据失败');
-                }
-            } catch (error) {
-                console.error('创建演示数据失败:', error);
-                showError('创建演示数据失败');
-            }
+            await callDemo("/api/ontology/demo");
         }
 
         async function createComplexDemoData() {
+            await callDemo("/api/ontology/demo/complex");
+        }
+
+        async function callDemo(url) {
             try {
-                const response = await fetch('/api/ontology/demo/complex', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" }
                 });
-                
-                if (response.ok) {
-                    const result = await response.json();
-                    console.log('Complex demo created:', result);
-                    await loadGraph();
-                } else {
-                    showError('Failed to create complex demo data');
-                }
+                if (!response.ok) throw new Error("示例创建失败");
+                await refreshWorkspace();
             } catch (error) {
-                console.error('Failed to create complex demo data:', error);
-                showError('Failed to create complex demo data');
+                console.error("创建示例失败:", error);
+                window.alert("创建示例失败");
             }
         }
 
         async function clearData() {
-            if (!confirm('确定要清空所有数据吗？')) return;
-            
+            if (!window.confirm("确定要清空当前所有对象与关系吗？")) return;
             try {
-                const response = await fetch('/api/ontology/objects', {
-                    method: 'GET'
-                });
-                const objects = await response.json();
-                
-                for (const obj of objects.objects) {
-                    await fetch(`/api/ontology/objects/${obj.id}`, {
-                        method: 'DELETE'
-                    });
+                const objectsResponse = await fetch("/api/ontology/objects");
+                const objectsData = await objectsResponse.json();
+                const objects = Array.isArray(objectsData.objects) ? objectsData.objects : [];
+                for (const objectItem of objects) {
+                    await fetch(`/api/ontology/objects/${objectItem.id}`, { method: "DELETE" });
                 }
-                
-                await loadGraph();
+                state.selectedNodeId = "";
+                state.highlightedRouteEdgeIds = new Set();
+                await refreshWorkspace();
             } catch (error) {
-                console.error('清空数据失败:', error);
-                showError('清空数据失败');
+                console.error("清空数据失败:", error);
+                window.alert("清空数据失败");
             }
         }
 
-        function updateStats(stats) {
-            document.getElementById('stat-objects').textContent = stats.total_objects || 0;
-            document.getElementById('stat-links').textContent = stats.total_links || 0;
-            document.getElementById('stat-object-types').textContent = stats.object_types || 0;
-            document.getElementById('stat-link-types').textContent = stats.link_types || 0;
+        function applyScenario(scenarioId) {
+            const scenario = scenarioPresets.find((item) => item.id === scenarioId);
+            if (!scenario) return;
+            state.selectedScenario = scenarioId;
+            scenario.apply();
+            syncControlValues();
+            applyCurrentFilters();
+        }
+
+        function handleFilterChange() {
+            state.filters.search = document.getElementById("searchInput")?.value.trim() || "";
+            state.filters.type = document.getElementById("typeFilter")?.value || "all";
+            state.filters.strength = document.getElementById("strengthFilter")?.value || "all";
+            state.filters.lens = document.getElementById("lensFilter")?.value || "all";
+            state.selectedScenario = "all";
+            renderScenarioList();
+            applyCurrentFilters();
+        }
+
+        function applyCurrentFilters() {
+            state.highlightedRouteEdgeIds = new Set();
+            const allowedNodes = new Map();
+            state.rawNodes.forEach((node) => {
+                if (matchNode(node)) allowedNodes.set(node.id, normalizeNode(node));
+            });
+
+            let nextLinks = state.rawLinks
+                .map((link) => normalizeLink(link))
+                .filter((link) => allowedNodes.has(link.source) && allowedNodes.has(link.target))
+                .filter((link) => matchLink(link));
+
+            if (state.filters.lens !== "all") {
+                const linkedIds = new Set();
+                nextLinks.forEach((link) => {
+                    linkedIds.add(link.source);
+                    linkedIds.add(link.target);
+                });
+                state.filteredNodes = Array.from(allowedNodes.values()).filter((node) => linkedIds.has(node.id));
+            } else {
+                state.filteredNodes = Array.from(allowedNodes.values());
+            }
+
+            const visibleNodeIds = new Set(state.filteredNodes.map((node) => node.id));
+            state.filteredLinks = nextLinks.filter((link) => visibleNodeIds.has(link.source) && visibleNodeIds.has(link.target));
+
+            if (state.selectedNodeId && !visibleNodeIds.has(state.selectedNodeId)) {
+                state.selectedNodeId = "";
+            }
+
+            updateSummaryPanels();
+            renderGraph();
+            renderRouteSelectors();
+            renderTypeList();
+        }
+
+        function normalizeNode(node) {
+            const properties = node.properties && typeof node.properties === "object" ? node.properties : {};
+            return {
+                ...node,
+                label: node.label || properties.name || node.id,
+                properties,
+            };
+        }
+
+        function normalizeLink(link) {
+            const strengthLabel = String(link.strength || "").toLowerCase();
+            return {
+                ...link,
+                confidence: Number(link.confidence || 0),
+                color: strengthLabel.includes("必然") || strengthLabel.includes("deterministic")
+                    ? "#be123c"
+                    : strengthLabel.includes("强")
+                        ? "#0f62fe"
+                        : strengthLabel.includes("可能") || strengthLabel.includes("moderate")
+                            ? "#1363df"
+                            : strengthLabel.includes("弱")
+                                ? "#b45309"
+                                : "#64748b"
+            };
+        }
+
+        function matchNode(node) {
+            if (state.filters.type !== "all" && node.type !== state.filters.type) return false;
+            if (!state.filters.search) return true;
+            const haystack = `${node.label} ${node.type} ${JSON.stringify(node.properties || {})}`.toLowerCase();
+            return haystack.includes(state.filters.search.toLowerCase());
+        }
+
+        function matchLink(link) {
+            if (state.filters.strength === "high" && link.confidence < 0.85) return false;
+            if (state.filters.strength === "medium" && link.confidence < 0.70) return false;
+            if (state.filters.lens === "causal") {
+                return /(causes|trigger|导致|触发)/i.test(`${link.type} ${link.label}`);
+            }
+            if (state.filters.lens === "dependency") {
+                return /(depends_on|依赖)/i.test(`${link.type} ${link.label}`);
+            }
+            if (state.filters.lens === "mitigation") {
+                return /(mitigates|缓解)/i.test(`${link.type} ${link.label}`);
+            }
+            return true;
+        }
+
+        function updateSummaryPanels() {
+            const analysis = analyzeGraph(state.filteredNodes, state.filteredLinks);
+            const metrics = [
+                { label: "对象数量", value: analysis.nodeCount },
+                { label: "关系数量", value: analysis.linkCount },
+                { label: "对象类型", value: analysis.visibleTypeCount },
+                { label: "关系类型", value: analysis.visibleLinkTypeCount },
+                { label: "关键枢纽", value: analysis.criticalCount },
+                { label: "风险事件", value: analysis.incidentCount },
+            ];
+            document.getElementById("metricGrid").innerHTML = metrics.map((metric) => `
+                <div class="metric-card">
+                    <div class="metric-label">${escapeHtml(metric.label)}</div>
+                    <div class="metric-value">${escapeHtml(String(metric.value))}</div>
+                    <div class="small-copy">${escapeHtml(metric.label === "关键枢纽" ? "高连接度或高传播度节点" : metric.label === "风险事件" ? "当前视图中类型为 incident 的对象" : "当前筛选视图内统计")}</div>
+                </div>
+            `).join("");
+
+            document.getElementById("filterSummary").textContent = `${analysis.nodeCount} 个对象 · ${analysis.linkCount} 条关系`;
+            document.getElementById("focusBadge").textContent = getFocusLabel();
+            document.getElementById("summaryCopy").textContent = buildSummaryText(analysis);
+            document.getElementById("topObservations").innerHTML = buildTopObservations(analysis).map((item) => `
+                <div class="impact-card">
+                    <div class="card-title">${escapeHtml(item.title)}</div>
+                    <div class="card-copy">${escapeHtml(item.copy)}</div>
+                </div>
+            `).join("");
+            document.getElementById("structureInsights").innerHTML = buildStructureInsights(analysis).map((item) => `
+                <div class="detail-card">
+                    <div class="card-title">${escapeHtml(item.title)}</div>
+                    <div class="card-copy">${escapeHtml(item.copy)}</div>
+                </div>
+            `).join("");
+            document.getElementById("distributionList").innerHTML = buildDistributionCards(analysis).join("");
+            document.getElementById("strongLinkList").innerHTML = buildStrongLinkCards().join("");
+            document.getElementById("graphStatus").textContent = analysis.nodeCount
+                ? `当前可见 ${analysis.nodeCount} 个对象 / ${analysis.linkCount} 条关系`
+                : "当前筛选下没有可视数据";
+            renderSelectedNodePanel();
+        }
+
+        function analyzeGraph(nodes, links) {
+            const typeCounts = {};
+            const linkTypeCounts = {};
+            const degrees = {};
+            const outgoing = {};
+            const incoming = {};
+
+            nodes.forEach((node) => {
+                typeCounts[node.type] = (typeCounts[node.type] || 0) + 1;
+                degrees[node.id] = 0;
+                outgoing[node.id] = [];
+                incoming[node.id] = [];
+            });
+
+            links.forEach((link) => {
+                linkTypeCounts[link.type] = (linkTypeCounts[link.type] || 0) + 1;
+                if (degrees[link.source] !== undefined) degrees[link.source] += 1;
+                if (degrees[link.target] !== undefined) degrees[link.target] += 1;
+                if (outgoing[link.source]) outgoing[link.source].push(link);
+                if (incoming[link.target]) incoming[link.target].push(link);
+            });
+
+            const rankedNodes = nodes
+                .map((node) => ({
+                    node,
+                    degree: degrees[node.id] || 0,
+                    outgoing: outgoing[node.id]?.length || 0,
+                    incoming: incoming[node.id]?.length || 0,
+                }))
+                .sort((a, b) => b.degree - a.degree);
+
+            return {
+                nodeCount: nodes.length,
+                linkCount: links.length,
+                visibleTypeCount: Object.keys(typeCounts).length,
+                visibleLinkTypeCount: Object.keys(linkTypeCounts).length,
+                typeCounts,
+                linkTypeCounts,
+                rankedNodes,
+                criticalCount: rankedNodes.filter((item) => item.degree >= 3).length,
+                incidentCount: typeCounts.incident || 0,
+                averageConfidence: links.length ? (links.reduce((sum, link) => sum + Number(link.confidence || 0), 0) / links.length) : 0,
+                outgoing,
+                incoming,
+            };
+        }
+
+        function buildSummaryText(analysis) {
+            if (!analysis.nodeCount) {
+                return "当前筛选条件下没有对象，建议先加载示例或放宽过滤条件。";
+            }
+            const topNode = analysis.rankedNodes[0];
+            const avgConfidence = analysis.averageConfidence ? analysis.averageConfidence.toFixed(2) : "0.00";
+            return `当前可见 ${analysis.nodeCount} 个对象、${analysis.linkCount} 条关系，平均置信度 ${avgConfidence}。${topNode ? `连接度最高的是 ${topNode.node.label}` : "当前还没有关键枢纽。"}。`;
+        }
+
+        function buildTopObservations(analysis) {
+            if (!analysis.nodeCount) {
+                return [{ title: "暂无观察", copy: "先创建示例图谱，再从这里看关键传播和风险结构。" }];
+            }
+            const topNode = analysis.rankedNodes[0];
+            const topIncident = analysis.rankedNodes.find((item) => item.node.type === "incident");
+            const topAction = analysis.rankedNodes.find((item) => item.node.type === "action");
+            return [
+                {
+                    title: topNode ? `枢纽节点：${topNode.node.label}` : "当前没有明显枢纽",
+                    copy: topNode ? `该节点当前连接 ${topNode.degree} 条关系，通常是传播中心或关键依赖点。` : "继续加载复杂示例可看到更多跨层级关系。"
+                },
+                {
+                    title: topIncident ? `风险事件：${topIncident.node.label}` : "当前没有事件型对象",
+                    copy: topIncident ? `这是当前视图里最值得优先查看的事件型对象之一，入边 ${topIncident.incoming}，出边 ${topIncident.outgoing}。` : "可以切到复杂示例查看 incident 类型的传播链。"
+                },
+                {
+                    title: topAction ? `缓解动作：${topAction.node.label}` : "当前没有动作型对象",
+                    copy: topAction ? `动作节点已进入当前视图，适合进一步查看它缓解了哪些事件或指标。` : "切换到缓解视角时，这里会突出 action 类型节点。"
+                }
+            ];
+        }
+
+        function buildStructureInsights(analysis) {
+            const insights = [];
+            if (!analysis.nodeCount) {
+                return [{ title: "结构为空", copy: "先加载简单或复杂示例，本区会显示关键链路和结构判断。" }];
+            }
+            if ((analysis.typeCounts.service || 0) > 0 && (analysis.typeCounts.database || 0) > 0) {
+                insights.push({ title: "服务-数据库层已经形成依赖网", copy: "适合从服务故障倒查到数据库和指标层。"});
+            }
+            if ((analysis.typeCounts.metric || 0) > 0 && (analysis.typeCounts.incident || 0) > 0) {
+                insights.push({ title: "指标与事件已经联通", copy: "可直接从指标异常追到事件，再继续看服务影响。" });
+            }
+            if ((analysis.typeCounts.action || 0) > 0) {
+                insights.push({ title: "图谱已包含处置动作", copy: "可以用来观察缓解路径是否覆盖主要故障事件。" });
+            }
+            if (!insights.length) {
+                insights.push({ title: "当前结构较轻", copy: "对象和关系类型还不够多，建议切换复杂示例或放宽筛选。"});
+            }
+            return insights.slice(0, 4);
+        }
+
+        function buildDistributionCards(analysis) {
+            const entries = Object.entries(analysis.typeCounts).sort((a, b) => b[1] - a[1]);
+            if (!entries.length) {
+                return ['<div class="detail-empty">当前没有对象类型分布。</div>'];
+            }
+            return entries.map(([type, count]) => {
+                const meta = state.objectTypes[type] || {};
+                return `
+                    <div class="detail-card">
+                        <div class="card-head">
+                            <div>
+                                <div class="card-title">${escapeHtml(meta.name || type)}</div>
+                                <div class="card-copy">${escapeHtml(meta.description || "当前视图中的对象组成")}</div>
+                            </div>
+                            <span class="chip">${escapeHtml(String(count))}</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function buildStrongLinkCards() {
+            const strongest = [...state.filteredLinks]
+                .sort((a, b) => Number(b.confidence || 0) - Number(a.confidence || 0))
+                .slice(0, 6);
+            if (!strongest.length) {
+                return ['<div class="detail-empty">当前没有可展示的强关系。</div>'];
+            }
+            return strongest.map((link) => {
+                const source = getNodeById(link.source);
+                const target = getNodeById(link.target);
+                return `
+                    <div class="chain-card">
+                        <div class="card-head">
+                            <div>
+                                <div class="card-title">${escapeHtml(source?.label || link.source)} → ${escapeHtml(target?.label || link.target)}</div>
+                                <div class="card-copy">${escapeHtml(link.label || link.type)} · 置信度 ${escapeHtml(Number(link.confidence || 0).toFixed(2))}</div>
+                            </div>
+                            <span class="chip is-azure">${escapeHtml(link.strength || "未知")}</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderTypeFilter() {
+            const select = document.getElementById("typeFilter");
+            if (!select) return;
+            const options = [{ id: "all", name: "全部对象类型" }, ...Object.values(state.objectTypes)];
+            select.innerHTML = options.map((item) => `
+                <option value="${escapeHtml(item.id)}">${escapeHtml(item.name)}</option>
+            `).join("");
+            select.value = state.filters.type || "all";
+            syncControlValues();
+        }
+
+        function renderTypeList() {
+            const container = document.getElementById("typeList");
+            if (!container) return;
+            const counts = {};
+            state.filteredNodes.forEach((node) => {
+                counts[node.type] = (counts[node.type] || 0) + 1;
+            });
+            const items = Object.values(state.objectTypes);
+            if (!items.length) {
+                container.innerHTML = '<div class="detail-empty">当前还没有对象类型注册。</div>';
+                return;
+            }
+            container.innerHTML = items.map((typeItem) => `
+                <div class="type-card ${state.filters.type === typeItem.id ? "is-active" : ""}" onclick="applyTypeFocus('${typeItem.id}')">
+                    <div class="card-head">
+                        <div>
+                            <div class="card-title"><span class="node-dot" style="background:${escapeHtml(typeItem.color || "#1363df")}"></span>${escapeHtml(typeItem.name)}</div>
+                            <div class="card-copy">${escapeHtml(typeItem.description || "本体对象类型")}</div>
+                        </div>
+                        <span class="chip">${escapeHtml(String(counts[typeItem.id] || 0))}</span>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        function renderScenarioList() {
+            const container = document.getElementById("scenarioList");
+            container.innerHTML = scenarioPresets.map((scenario) => `
+                <div class="scenario-card ${state.selectedScenario === scenario.id ? "is-active" : ""}" onclick="applyScenario('${scenario.id}')">
+                    <div class="card-head">
+                        <div>
+                            <div class="card-title">${escapeHtml(scenario.name)}</div>
+                            <div class="card-copy">${escapeHtml(scenario.description)}</div>
+                        </div>
+                        <span class="chip is-azure">${escapeHtml(scenario.id === "all" ? "FULL" : "FOCUS")}</span>
+                    </div>
+                </div>
+            `).join("");
         }
 
         function renderGraph() {
-            const container = document.getElementById('graph-container');
+            const container = document.getElementById("graphContainer");
+            const empty = document.getElementById("graphEmpty");
+            container.querySelectorAll("svg").forEach((svg) => svg.remove());
 
             if (!HAS_D3) {
-                renderDependencyNotice(container, 'D3.js 加载失败，当前环境无法渲染关系图。');
+                showGraphMessage("依赖不可用", "D3.js 加载失败，当前环境无法渲染本体关系图。");
                 return;
             }
-            
-            if (graphData.nodes.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="icon">📊</div>
-                        <h3>暂无数据</h3>
-                        <p>点击"简单示例"、"复杂示例"或"风力发电"按钮开始体验</p>
-                    </div>
-                `;
+            if (!state.filteredNodes.length) {
+                showGraphMessage("当前没有可视数据", "调整筛选条件，或者先创建简单示例/复杂示例。");
                 return;
             }
 
-            container.innerHTML = '';
-            
+            empty.style.display = "none";
+
             const width = container.clientWidth;
-            const height = 600;
+            const height = 720;
+            const svg = d3.select(container)
+                .append("svg")
+                .attr("class", "graph-svg")
+                .attr("width", width)
+                .attr("height", height);
 
-            const svg = d3.select('#graph-container')
-                .append('svg')
-                .attr('width', width)
-                .attr('height', height);
-
-            const g = svg.append('g');
+            const group = svg.append("g");
+            const markerDefs = svg.append("defs");
+            markerDefs.append("marker")
+                .attr("id", "arrow")
+                .attr("viewBox", "0 -5 10 10")
+                .attr("refX", 24)
+                .attr("refY", 0)
+                .attr("markerWidth", 7)
+                .attr("markerHeight", 7)
+                .attr("orient", "auto")
+                .append("path")
+                .attr("d", "M0,-5L10,0L0,5")
+                .attr("fill", "#94a3b8");
 
             const zoom = d3.zoom()
-                .scaleExtent([0.1, 4])
-                .on('zoom', (event) => {
-                    g.attr('transform', event.transform);
+                .scaleExtent([0.25, 4])
+                .on("zoom", (event) => {
+                    state.graph.transform = event.transform;
+                    group.attr("transform", event.transform);
+                    document.getElementById("zoomState").textContent = `缩放 ${Math.round(event.transform.k * 100)}%`;
                 });
-
             svg.call(zoom);
 
-            simulation = d3.forceSimulation(graphData.nodes)
-                .force('link', d3.forceLink(graphData.links).id(d => d.id).distance(150))
-                .force('charge', d3.forceManyBody().strength(-500))
-                .force('center', d3.forceCenter(width / 2, height / 2))
-                .force('collision', d3.forceCollide().radius(50));
+            const degrees = computeDegreeMap(state.filteredNodes, state.filteredLinks);
+            const simulation = d3.forceSimulation(state.filteredNodes.map((node) => ({ ...node })))
+                .force("link", d3.forceLink(state.filteredLinks.map((link) => ({ ...link }))).id((d) => d.id).distance(140))
+                .force("charge", d3.forceManyBody().strength(-420))
+                .force("center", d3.forceCenter(width / 2, height / 2))
+                .force("collision", d3.forceCollide().radius((node) => 24 + Math.min(degrees[node.id] || 0, 4) * 4));
 
-            const link = g.append('g')
-                .selectAll('line')
-                .data(graphData.links)
+            const link = group.append("g")
+                .selectAll("line")
+                .data(simulation.force("link").links())
                 .enter()
-                .append('line')
-                .attr('class', 'link')
-                .attr('stroke', '#999')
-                .attr('stroke-width', d => Math.sqrt(d.confidence || 1) * 2);
+                .append("line")
+                .attr("class", (d) => `link ${state.highlightedRouteEdgeIds.has(d.id) ? "is-highlight" : ""}`)
+                .attr("stroke", (d) => d.color || "#94a3b8")
+                .attr("stroke-width", (d) => 1.4 + (Number(d.confidence || 0) * 2.2))
+                .attr("marker-end", "url(#arrow)");
 
-            const linkLabels = g.append('g')
-                .selectAll('text')
-                .data(graphData.links)
+            const linkLabel = group.append("g")
+                .selectAll("text")
+                .data(simulation.force("link").links())
                 .enter()
-                .append('text')
-                .attr('class', 'link-label')
-                .text(d => d.label || '');
+                .append("text")
+                .attr("class", "link-label")
+                .text((d) => d.label || d.type || "");
 
-            const node = g.append('g')
-                .selectAll('.node')
-                .data(graphData.nodes)
+            const node = group.append("g")
+                .selectAll("g")
+                .data(simulation.nodes())
                 .enter()
-                .append('g')
-                .attr('class', 'node')
+                .append("g")
+                .attr("class", (d) => `node ${state.selectedNodeId === d.id ? "is-selected" : ""}`)
                 .call(d3.drag()
-                    .on('start', dragstarted)
-                    .on('drag', dragged)
-                    .on('end', dragended));
+                    .on("start", dragStarted)
+                    .on("drag", dragged)
+                    .on("end", dragEnded));
 
-            node.append('circle')
-                .attr('r', 25)
-                .attr('fill', d => d.color || '#3498db')
-                .attr('stroke', '#fff')
-                .on('mouseover', function(event, d) {
-                    d3.select(this)
-                        .transition()
-                        .duration(200)
-                        .attr('r', 30);
-                    
-                    showTooltip(event, d);
-                })
-                .on('mouseout', function() {
-                    d3.select(this)
-                        .transition()
-                        .duration(200)
-                        .attr('r', 25);
-                    
-                    hideTooltip();
-                });
+            node.append("circle")
+                .attr("r", (d) => 18 + Math.min(degrees[d.id] || 0, 5) * 2.5)
+                .attr("fill", (d) => d.color || "#1363df")
+                .on("click", (_event, d) => selectNode(d.id))
+                .on("mouseover", (event, d) => showTooltip(event, d))
+                .on("mousemove", (event) => moveTooltip(event))
+                .on("mouseout", () => hideTooltip());
 
-            node.append('text')
-                .attr('dy', 35)
-                .text(d => d.label || d.id)
-                .attr('fill', '#333')
-                .attr('font-size', '12px')
-                .attr('text-anchor', 'middle');
+            node.append("text")
+                .attr("dy", 34)
+                .text((d) => truncate(d.label, 18));
 
-            simulation.on('tick', () => {
+            simulation.on("tick", () => {
                 link
-                    .attr('x1', d => d.source.x)
-                    .attr('y1', d => d.source.y)
-                    .attr('x2', d => d.target.x)
-                    .attr('y2', d => d.target.y);
+                    .attr("x1", (d) => d.source.x)
+                    .attr("y1", (d) => d.source.y)
+                    .attr("x2", (d) => d.target.x)
+                    .attr("y2", (d) => d.target.y);
 
-                linkLabels
-                    .attr('x', d => (d.source.x + d.target.x) / 2)
-                    .attr('y', d => (d.source.y + d.target.y) / 2);
+                linkLabel
+                    .attr("x", (d) => (d.source.x + d.target.x) / 2)
+                    .attr("y", (d) => (d.source.y + d.target.y) / 2);
 
-                node
-                    .attr('transform', d => `translate(${d.x},${d.y})`);
+                node.attr("transform", (d) => `translate(${d.x},${d.y})`);
             });
 
-            function dragstarted(event, d) {
+            state.graph = { svg, group, simulation, zoom, transform: d3.zoomIdentity };
+
+            function dragStarted(event, d) {
                 if (!event.active) simulation.alphaTarget(0.3).restart();
                 d.fx = d.x;
                 d.fy = d.y;
@@ -485,57 +1413,320 @@
                 d.fy = event.y;
             }
 
-            function dragended(event, d) {
+            function dragEnded(event, d) {
                 if (!event.active) simulation.alphaTarget(0);
                 d.fx = null;
                 d.fy = null;
             }
         }
 
-        function showTooltip(event, data) {
-            const tooltip = d3.select('body')
-                .append('div')
-                .attr('class', 'tooltip')
-                .style('position', 'absolute')
-                .style('padding', '10px')
-                .style('background', 'rgba(0, 0, 0, 0.8)')
-                .style('color', '#fff')
-                .style('border-radius', '5px')
-                .style('font-size', '12px')
-                .style('pointer-events', 'none')
-                .style('opacity', 0);
+        function showGraphMessage(title, message) {
+            const empty = document.getElementById("graphEmpty");
+            empty.style.display = "block";
+            empty.innerHTML = `<strong>${escapeHtml(title)}</strong><p>${escapeHtml(message)}</p>`;
+        }
 
-            let content = `<strong>${data.label || data.id}</strong><br>`;
-            content += `类型: ${data.type}<br>`;
-            if (data.properties) {
-                for (const [key, value] of Object.entries(data.properties)) {
-                    content += `${key}: ${value}<br>`;
-                }
+        function computeDegreeMap(nodes, links) {
+            const degree = {};
+            nodes.forEach((node) => {
+                degree[node.id] = 0;
+            });
+            links.forEach((link) => {
+                degree[link.source] = (degree[link.source] || 0) + 1;
+                degree[link.target] = (degree[link.target] || 0) + 1;
+            });
+            return degree;
+        }
+
+        function selectNode(nodeId) {
+            state.selectedNodeId = nodeId;
+            document.getElementById("selectionState").textContent = `已选 ${getNodeById(nodeId)?.label || nodeId}`;
+            renderSelectedNodePanel();
+            renderGraph();
+        }
+
+        function renderSelectedNodePanel() {
+            const node = getNodeById(state.selectedNodeId);
+            const detail = document.getElementById("selectedNodeDetail");
+            const impact = document.getElementById("impactList");
+
+            if (!node) {
+                detail.innerHTML = '<div class="detail-empty">还没有选中对象。点击图谱中的任意节点，这里会显示属性、上下游关系和局部邻域。</div>';
+                impact.innerHTML = '<div class="detail-empty">选择一个对象后，这里会显示一跳、两跳的局部影响。</div>';
+                document.getElementById("selectionState").textContent = "未选中对象";
+                return;
             }
 
-            tooltip.html(content)
-                .style('left', (event.pageX + 10) + 'px')
-                .style('top', (event.pageY - 10) + 'px')
-                .transition()
-                .duration(200)
-                .style('opacity', 1);
+            const incoming = state.filteredLinks.filter((link) => link.target === node.id);
+            const outgoing = state.filteredLinks.filter((link) => link.source === node.id);
+            const neighborhood = computeNeighborhood(node.id, 2);
+            const typeMeta = state.objectTypes[node.type] || {};
+
+            detail.innerHTML = `
+                <div class="detail-card">
+                    <div class="card-head">
+                        <div>
+                            <div class="card-title">${escapeHtml(node.label)}</div>
+                            <div class="card-copy">${escapeHtml(typeMeta.name || node.type)} · ${escapeHtml(typeMeta.description || "本体对象")}</div>
+                        </div>
+                        <span class="chip">${escapeHtml(String(incoming.length + outgoing.length))} 连接</span>
+                    </div>
+                </div>
+                <div class="kv">
+                    ${Object.entries(node.properties || {}).map(([key, value]) => `
+                        <div class="kv-item">
+                            <span>${escapeHtml(key)}</span>
+                            <span>${escapeHtml(formatValue(value))}</span>
+                        </div>
+                    `).join("") || '<div class="detail-empty">当前对象没有附加属性。</div>'}
+                </div>
+                <div class="detail-card">
+                    <div class="card-title">上游关系</div>
+                    <div class="card-copy">${incoming.length ? incoming.map((link) => `${getNodeById(link.source)?.label || link.source} → ${link.label || link.type}`).join("；") : "当前没有上游对象。"}</div>
+                </div>
+                <div class="detail-card">
+                    <div class="card-title">下游关系</div>
+                    <div class="card-copy">${outgoing.length ? outgoing.map((link) => `${link.label || link.type} → ${getNodeById(link.target)?.label || link.target}`).join("；") : "当前没有下游对象。"}</div>
+                </div>
+            `;
+
+            impact.innerHTML = [
+                {
+                    title: "直接影响",
+                    copy: outgoing.length ? outgoing.map((link) => `${getNodeById(link.target)?.label || link.target}（${Number(link.confidence || 0).toFixed(2)}）`).join("、") : "当前没有直接下游对象。"
+                },
+                {
+                    title: "直接来源",
+                    copy: incoming.length ? incoming.map((link) => `${getNodeById(link.source)?.label || link.source}（${Number(link.confidence || 0).toFixed(2)}）`).join("、") : "当前没有直接上游对象。"
+                },
+                {
+                    title: "两跳邻域",
+                    copy: neighborhood.length ? neighborhood.map((item) => item.label).join("、") : "当前两跳内没有更多对象。"
+                }
+            ].map((item) => `
+                <div class="impact-card">
+                    <div class="card-title">${escapeHtml(item.title)}</div>
+                    <div class="card-copy">${escapeHtml(item.copy)}</div>
+                </div>
+            `).join("");
+        }
+
+        function computeNeighborhood(startId, maxDepth) {
+            const visited = new Set([startId]);
+            const queue = [{ id: startId, depth: 0 }];
+            const result = [];
+            while (queue.length) {
+                const current = queue.shift();
+                if (current.depth >= maxDepth) continue;
+                state.filteredLinks.forEach((link) => {
+                    const nextId = link.source === current.id ? link.target : link.target === current.id ? link.source : "";
+                    if (!nextId || visited.has(nextId)) return;
+                    visited.add(nextId);
+                    const node = getNodeById(nextId);
+                    if (node) result.push(node);
+                    queue.push({ id: nextId, depth: current.depth + 1 });
+                });
+            }
+            return result.slice(0, 12);
+        }
+
+        function renderRouteSelectors() {
+            const nodes = [...state.filteredNodes].sort((a, b) => a.label.localeCompare(b.label, "zh-CN"));
+            const start = document.getElementById("routeStart");
+            const end = document.getElementById("routeEnd");
+            const options = ['<option value="">选择对象</option>', ...nodes.map((node) => `<option value="${escapeHtml(node.id)}">${escapeHtml(node.label)}</option>`)].join("");
+            start.innerHTML = options;
+            end.innerHTML = options;
+            if (state.selectedNodeId && nodes.some((node) => node.id === state.selectedNodeId)) {
+                if (!start.value) start.value = state.selectedNodeId;
+            }
+        }
+
+        function findRoute() {
+            const startId = document.getElementById("routeStart").value;
+            const endId = document.getElementById("routeEnd").value;
+            const container = document.getElementById("pathList");
+            state.highlightedRouteEdgeIds = new Set();
+
+            if (!startId || !endId) {
+                container.innerHTML = '<div class="detail-empty">先选择起点和终点对象。</div>';
+                renderGraph();
+                return;
+            }
+
+            const route = bfsRoute(startId, endId);
+            if (!route) {
+                container.innerHTML = '<div class="detail-empty">当前筛选视图内没有找到从起点到终点的有向路径。</div>';
+                renderGraph();
+                return;
+            }
+
+            route.edges.forEach((edge) => state.highlightedRouteEdgeIds.add(edge.id));
+            renderGraph();
+
+            container.innerHTML = `
+                <div class="path-card">
+                    <div class="card-head">
+                        <div>
+                            <div class="card-title">${escapeHtml(route.nodes.map((node) => node.label).join(" → "))}</div>
+                            <div class="card-copy">路径长度 ${route.edges.length} · 平均置信度 ${escapeHtml(route.avgConfidence.toFixed(2))}</div>
+                        </div>
+                        <span class="chip is-azure">PATH</span>
+                    </div>
+                </div>
+                ${route.edges.map((edge) => `
+                    <div class="path-card">
+                        <div class="card-title">${escapeHtml(getNodeById(edge.source)?.label || edge.source)} → ${escapeHtml(getNodeById(edge.target)?.label || edge.target)}</div>
+                        <div class="card-copy">${escapeHtml(edge.label || edge.type)} · ${escapeHtml(edge.strength || "未知")} · 置信度 ${escapeHtml(Number(edge.confidence || 0).toFixed(2))}</div>
+                    </div>
+                `).join("")}
+            `;
+        }
+
+        function bfsRoute(startId, endId) {
+            const queue = [{ nodeId: startId, pathNodes: [startId], pathEdges: [] }];
+            const visited = new Set([startId]);
+            while (queue.length) {
+                const current = queue.shift();
+                if (current.nodeId === endId) {
+                    const edges = current.pathEdges;
+                    const nodes = current.pathNodes.map((id) => getNodeById(id)).filter(Boolean);
+                    const avgConfidence = edges.length
+                        ? edges.reduce((sum, edge) => sum + Number(edge.confidence || 0), 0) / edges.length
+                        : 0;
+                    return { nodes, edges, avgConfidence };
+                }
+                state.filteredLinks
+                    .filter((link) => link.source === current.nodeId)
+                    .forEach((link) => {
+                        if (visited.has(link.target)) return;
+                        visited.add(link.target);
+                        queue.push({
+                            nodeId: link.target,
+                            pathNodes: [...current.pathNodes, link.target],
+                            pathEdges: [...current.pathEdges, link],
+                        });
+                    });
+            }
+            return null;
+        }
+
+        function useSelectedAsRouteStart() {
+            if (!state.selectedNodeId) return;
+            document.getElementById("routeStart").value = state.selectedNodeId;
+        }
+
+        function useSelectedAsRouteEnd() {
+            if (!state.selectedNodeId) return;
+            document.getElementById("routeEnd").value = state.selectedNodeId;
+        }
+
+        function applyTypeFocus(typeId) {
+            state.filters.type = state.filters.type === typeId ? "all" : typeId;
+            state.selectedScenario = "all";
+            syncControlValues();
+            renderScenarioList();
+            applyCurrentFilters();
+        }
+
+        function resetViewport() {
+            if (!state.graph.svg || !state.graph.zoom) return;
+            state.graph.svg.transition().duration(350).call(state.graph.zoom.transform, d3.zoomIdentity);
+        }
+
+        function focusCriticalNodes() {
+            if (!state.graph.svg || !state.graph.simulation) return;
+            const analysis = analyzeGraph(state.filteredNodes, state.filteredLinks);
+            const simulationNodes = state.graph.simulation.nodes() || [];
+            const targets = analysis.rankedNodes
+                .slice(0, 6)
+                .map((item) => simulationNodes.find((node) => node.id === item.node.id))
+                .filter(Boolean);
+            if (!targets.length) return;
+            const avgX = targets.reduce((sum, node) => sum + (node.x || 0), 0) / targets.length;
+            const avgY = targets.reduce((sum, node) => sum + (node.y || 0), 0) / targets.length;
+            const transform = d3.zoomIdentity.translate(240 - avgX * 0.95, 220 - avgY * 0.95).scale(0.95);
+            state.graph.svg.transition().duration(350).call(state.graph.zoom.transform, transform);
+        }
+
+        function getFocusLabel() {
+            const scenario = scenarioPresets.find((item) => item.id === state.selectedScenario);
+            if (state.selectedNodeId) {
+                return getNodeById(state.selectedNodeId)?.label || "对象详情";
+            }
+            return scenario ? scenario.name : "自定义筛选";
+        }
+
+        function getNodeById(nodeId) {
+            return state.filteredNodes.find((node) => node.id === nodeId) || state.rawNodes.find((node) => node.id === nodeId);
+        }
+
+        function syncControlValues() {
+            const search = document.getElementById("searchInput");
+            const type = document.getElementById("typeFilter");
+            const strength = document.getElementById("strengthFilter");
+            const lens = document.getElementById("lensFilter");
+            if (search) search.value = state.filters.search;
+            if (type) type.value = state.filters.type;
+            if (strength) strength.value = state.filters.strength;
+            if (lens) lens.value = state.filters.lens;
+        }
+
+        function bindTooltip() {
+            const tooltip = document.getElementById("tooltip");
+            if (!tooltip) return;
+        }
+
+        function showTooltip(event, node) {
+            const tooltip = document.getElementById("tooltip");
+            const preview = Object.entries(node.properties || {}).slice(0, 4).map(([key, value]) => `${key}: ${formatValue(value)}`).join("<br>");
+            tooltip.innerHTML = `<strong>${escapeHtml(node.label)}</strong><br>${escapeHtml(node.type)}${preview ? `<br>${preview}` : ""}`;
+            tooltip.classList.add("is-visible");
+            moveTooltip(event);
+        }
+
+        function moveTooltip(event) {
+            const tooltip = document.getElementById("tooltip");
+            tooltip.style.left = `${event.clientX + 14}px`;
+            tooltip.style.top = `${event.clientY + 14}px`;
         }
 
         function hideTooltip() {
-            d3.selectAll('.tooltip').remove();
+            document.getElementById("tooltip").classList.remove("is-visible");
         }
 
-        function showError(message) {
-            alert(message);
+        function truncate(text, maxLength) {
+            const value = String(text || "");
+            return value.length > maxLength ? `${value.slice(0, maxLength - 1)}…` : value;
         }
 
-        window.addEventListener('resize', () => {
-            if (graphData.nodes.length > 0) {
-                renderGraph();
-            }
-        });
+        function formatValue(value) {
+            if (typeof value === "number") return Number.isInteger(value) ? String(value) : value.toFixed(2);
+            if (typeof value === "object" && value !== null) return JSON.stringify(value);
+            return String(value ?? "");
+        }
 
-        loadGraph();
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+        }
+
+        window.refreshWorkspace = refreshWorkspace;
+        window.createDemoData = createDemoData;
+        window.createComplexDemoData = createComplexDemoData;
+        window.clearData = clearData;
+        window.handleFilterChange = handleFilterChange;
+        window.applyScenario = applyScenario;
+        window.applyTypeFocus = applyTypeFocus;
+        window.findRoute = findRoute;
+        window.useSelectedAsRouteStart = useSelectedAsRouteStart;
+        window.useSelectedAsRouteEnd = useSelectedAsRouteEnd;
+        window.resetViewport = resetViewport;
+        window.focusCriticalNodes = focusCriticalNodes;
     </script>
 </body>
 </html>

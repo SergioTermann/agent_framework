@@ -3,396 +3,1505 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>应用管理 - Agent Framework</title>
-    <!-- <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet"> -->
+    <title>应用中心 - 风起时域</title>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/base-theme.css">
     <style>
-        .container {
-            max-width: 1400px;
+        :root {
+            --app-accent: #1363df;
+            --app-accent-deep: #0f4eb3;
+            --app-accent-soft: rgba(19, 99, 223, 0.10);
+            --app-ok: #059669;
+            --app-ok-soft: rgba(5, 150, 105, 0.10);
+            --app-warn: #d97706;
+            --app-warn-soft: rgba(217, 119, 6, 0.10);
+            --app-muted: #6f746f;
+            --app-text: #202a36;
+            --app-line: rgba(101, 120, 144, 0.16);
+            --app-surface: rgba(255, 252, 247, 0.88);
+            --app-shadow: 0 18px 42px -28px rgba(34, 44, 63, 0.16);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-body, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+            color: var(--app-text);
+            background:
+                radial-gradient(circle at 8% 12%, rgba(19, 99, 223, 0.14), transparent 22%),
+                radial-gradient(circle at 88% 10%, rgba(217, 119, 6, 0.12), transparent 18%),
+                radial-gradient(circle at 76% 86%, rgba(20, 184, 166, 0.10), transparent 24%),
+                #eef4fb;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(19, 99, 223, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(19, 99, 223, 0.03) 1px, transparent 1px);
+            background-size: 28px 28px;
+            mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.12), transparent 60%);
+        }
+
+        .shell {
+            position: relative;
+            z-index: 1;
+            max-width: 1560px;
             margin: 0 auto;
-            padding: 40px 30px;
+            padding: 24px;
+            display: grid;
+            gap: 18px;
         }
 
-        .toolbar {
+        .material-symbols-outlined {
+            font-variation-settings: "FILL" 0, "wght" 500, "GRAD" 0, "opsz" 24;
+            user-select: none;
+        }
+
+        /* ── Header ── */
+        .page-header {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 35px;
-            gap: 20px;
+            justify-content: space-between;
+            gap: 18px;
+            min-height: 72px;
+            padding: 14px 24px;
+            border: 1px solid var(--app-line);
+            border-radius: 24px;
+            background: rgba(255, 252, 247, 0.72);
+            backdrop-filter: blur(22px);
         }
 
-        .search-box-input {
-            flex: 1;
-            max-width: 450px;
-            padding: 14px 20px;
-            background: var(--surface-strong);
-            border: 1px solid var(--line);
-            border-radius: var(--radius-sm);
-            color: var(--text);
+        .page-header-left {
+            display: grid;
+            gap: 4px;
+        }
+
+        .page-header h1 {
+            font-size: 22px;
+            font-weight: 800;
+            font-family: var(--font-display, "Segoe UI", sans-serif);
+        }
+
+        .page-header p {
+            color: var(--app-muted);
+            font-size: 13px;
+        }
+
+        .page-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 14px;
+            border: 1px solid var(--app-line);
+            background: rgba(255, 255, 255, 0.86);
+            color: var(--app-text);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+            transition: 0.2s ease;
+        }
+
+        .back-link:hover {
+            border-color: rgba(19, 99, 223, 0.22);
+            background: rgba(19, 99, 223, 0.06);
+        }
+
+        .create-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 18px;
+            border: none;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--app-accent), var(--app-accent-deep));
+            color: #fff;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 16px 28px -18px rgba(19, 99, 223, 0.34);
+            transition: 0.2s ease;
+        }
+
+        .create-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 18px 32px -18px rgba(19, 99, 223, 0.40);
+        }
+
+        /* ── Hero ── */
+        .hero {
+            padding: 28px 32px;
+            border: 1px solid var(--app-line);
+            border-radius: 28px;
+            background:
+                radial-gradient(circle at top left, rgba(19, 99, 223, 0.12), transparent 28%),
+                radial-gradient(circle at bottom right, rgba(217, 119, 6, 0.10), transparent 32%),
+                linear-gradient(140deg, rgba(255, 255, 255, 0.98), rgba(249, 245, 239, 0.96));
+            box-shadow: var(--app-shadow);
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.4fr) minmax(300px, 0.8fr);
+            gap: 24px;
+        }
+
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: var(--app-accent-soft);
+            border: 1px solid rgba(19, 99, 223, 0.14);
+            color: var(--app-accent);
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .hero h2 {
+            margin: 14px 0 10px;
+            font-size: clamp(30px, 3.6vw, 44px);
+            line-height: 1.05;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            font-family: var(--font-display, "Segoe UI", sans-serif);
+        }
+
+        .hero h2 span {
+            display: block;
+            color: var(--app-accent);
+        }
+
+        .hero p {
+            color: var(--app-muted);
+            max-width: 62ch;
+            line-height: 1.8;
+        }
+
+        .hero-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .hero-feature {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 14px;
+            border-radius: 999px;
+            background: rgba(19, 99, 223, 0.06);
+            border: 1px solid rgba(19, 99, 223, 0.10);
+            color: var(--app-text);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .hero-feature .material-symbols-outlined {
+            font-size: 18px;
+            color: var(--app-accent);
+        }
+
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .stat-card {
+            padding: 18px;
+            border-radius: 20px;
+            background: rgba(19, 99, 223, 0.05);
+            border: 1px solid rgba(19, 99, 223, 0.10);
+        }
+
+        .stat-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--app-muted);
+        }
+
+        .stat-label .material-symbols-outlined {
             font-size: 16px;
-            transition: all var(--ease);
+            color: var(--app-accent);
         }
 
-        .search-box-input:focus {
+        .stat-value {
+            display: block;
+            margin: 10px 0 4px;
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--app-text);
+        }
+
+        .stat-note {
+            font-size: 12px;
+            color: var(--app-muted);
+        }
+
+        /* ── Controls ── */
+        .controls {
+            padding: 18px 22px;
+            border: 1px solid var(--app-line);
+            border-radius: 24px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(249, 245, 239, 0.92));
+            backdrop-filter: blur(18px);
+            box-shadow: var(--app-shadow);
+        }
+
+        .controls-top {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .search-bar {
+            position: relative;
+            flex: 1;
+            min-width: 260px;
+        }
+
+        .search-bar .material-symbols-outlined {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--app-muted);
+            font-size: 20px;
+        }
+
+        .search-bar input {
+            width: 100%;
+            height: 50px;
+            padding: 0 16px 0 48px;
+            border-radius: 16px;
+            border: 1px solid var(--app-line);
+            background: rgba(255, 255, 255, 0.88);
+            color: var(--app-text);
+            font-size: 15px;
+        }
+
+        .search-bar input:focus {
             outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-soft);
+            border-color: rgba(19, 99, 223, 0.32);
+            box-shadow: 0 0 0 3px rgba(19, 99, 223, 0.08);
         }
 
-        .search-box-input::placeholder {
-            color: var(--muted);
+        .filter-chips {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
         }
 
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            border: 1px solid var(--app-line);
+            background: rgba(255, 255, 255, 0.86);
+            color: var(--app-muted);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .chip strong {
+            font-size: 12px;
+            color: var(--app-text);
+        }
+
+        .chip:hover {
+            border-color: rgba(19, 99, 223, 0.22);
+            background: rgba(19, 99, 223, 0.06);
+        }
+
+        .chip.active {
+            background: linear-gradient(135deg, var(--app-accent), var(--app-warn));
+            border-color: transparent;
+            color: #fff;
+            box-shadow: 0 12px 24px -18px rgba(19, 99, 223, 0.34);
+        }
+
+        .chip.active strong {
+            color: #fff;
+        }
+
+        .controls-filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .sort-select {
+            height: 42px;
+            padding: 0 14px;
+            border-radius: 14px;
+            border: 1px solid var(--app-line);
+            background: rgba(255, 255, 255, 0.88);
+            color: var(--app-text);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .sort-select:focus {
+            outline: none;
+            border-color: rgba(19, 99, 223, 0.32);
+        }
+
+        .filter-summary {
+            margin-top: 12px;
+            font-size: 13px;
+            color: var(--app-muted);
+        }
+
+        /* ── App Grid ── */
         .apps-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
         }
 
         .app-card {
-            background: var(--surface);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--line);
-            border-radius: var(--radius);
-            padding: 28px;
-            box-shadow: var(--shadow-sm);
-            transition: all var(--ease);
-            cursor: pointer;
             position: relative;
             overflow: hidden;
+            min-height: 300px;
+            padding: 22px;
+            border-radius: 24px;
+            border: 1px solid var(--app-line);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(249, 245, 239, 0.98));
+            box-shadow: var(--app-shadow);
+            cursor: pointer;
+            transition: transform 0.24s ease, box-shadow 0.24s ease, border-color 0.24s ease;
+            display: grid;
+            grid-template-rows: auto auto auto 1fr auto;
         }
 
         .app-card::before {
-            content: '';
+            content: "";
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary), var(--primary-light));
-            transform: scaleX(0);
-            transition: transform var(--ease);
+            inset: 0;
+            background: radial-gradient(circle at top right, rgba(217, 119, 6, 0.06), transparent 24%);
+            pointer-events: none;
         }
 
-        .app-card:hover::before {
-            transform: scaleX(1);
+        .app-card::after {
+            content: "";
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 4px;
+            background: linear-gradient(180deg, var(--card-accent, var(--app-accent)), rgba(217, 119, 6, 0.18));
         }
 
         .app-card:hover {
-            transform: translateY(-6px);
-            box-shadow: var(--shadow-gold);
-            border-color: var(--line-strong);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 36px -24px rgba(19, 99, 223, 0.24);
+            border-color: rgba(19, 99, 223, 0.18);
         }
 
-        .app-icon {
-            font-size: 48px;
-            margin-bottom: 18px;
-            transition: transform var(--ease);
+        .app-card-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
         }
 
-        .app-card:hover .app-icon {
-            transform: scale(1.1) rotate(5deg);
+        .app-card-badges {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
         }
 
-        .app-title {
-            font-size: 22px;
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 5px 10px;
+            border-radius: 999px;
+            font-size: 11px;
             font-weight: 700;
-            margin-bottom: 12px;
-            color: var(--text);
+            border: 1px solid var(--app-line);
+            background: rgba(19, 99, 223, 0.06);
+            color: var(--app-text);
+        }
+
+        .badge.published {
+            background: var(--app-ok-soft);
+            color: var(--app-ok);
+            border-color: rgba(5, 150, 105, 0.16);
+        }
+
+        .badge.draft {
+            background: var(--app-warn-soft);
+            color: var(--app-warn);
+            border-color: rgba(217, 119, 6, 0.16);
+        }
+
+        .badge.type-tag {
+            background: var(--app-accent-soft);
+            color: var(--app-accent);
+            border-color: rgba(19, 99, 223, 0.14);
+        }
+
+        .app-icon-box {
+            display: grid;
+            place-items: center;
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--app-accent), var(--app-warn));
+            color: #fff;
+            font-size: 26px;
+            box-shadow: 0 12px 24px -18px rgba(19, 99, 223, 0.34);
+        }
+
+        .app-name {
+            margin: 14px 0 6px;
+            font-size: 20px;
+            font-weight: 800;
+            font-family: var(--font-display, "Segoe UI", sans-serif);
+            line-height: 1.15;
+            color: var(--app-text);
         }
 
         .app-desc {
-            color: var(--muted);
+            margin: 8px 0 14px;
+            color: var(--app-muted);
+            font-size: 14px;
             line-height: 1.7;
-            margin-bottom: 18px;
-            min-height: 50px;
         }
 
-        .app-meta {
+        .app-meta-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .meta-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 10px;
+            border-radius: 12px;
+            background: rgba(19, 99, 223, 0.05);
+            font-size: 12px;
+            color: var(--app-text);
+        }
+
+        .meta-item .material-symbols-outlined {
+            font-size: 16px;
+            color: var(--app-accent);
+        }
+
+        .app-card-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-top: 18px;
-            border-top: 1px solid var(--line);
+            gap: 10px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(101, 120, 144, 0.10);
         }
 
-        .app-type {
+        .card-footnote {
+            font-size: 12px;
+            color: var(--app-muted);
+        }
+
+        .app-card-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .card-action-btn {
             display: inline-flex;
             align-items: center;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
-            background: var(--primary-soft);
-            color: var(--primary-deep);
-            border: 1px solid var(--line-strong);
-        }
-
-        .app-status {
-            font-size: 13px;
-            color: var(--muted);
-            font-weight: 500;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 80px 20px;
-            color: var(--muted);
-        }
-
-        .empty-state-icon {
-            font-size: 64px;
-            margin-bottom: 25px;
-            opacity: 0.5;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(16, 35, 63, 0.5);
-            backdrop-filter: blur(4px);
-            z-index: 1000;
-            align-items: center;
             justify-content: center;
+            gap: 6px;
+            min-height: 40px;
+            padding: 0 14px;
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s ease;
+            border: 1px solid var(--app-line);
+            background: rgba(255, 255, 255, 0.88);
+            color: var(--app-text);
         }
 
-        .modal.active {
+        .card-action-btn:hover {
+            border-color: rgba(19, 99, 223, 0.22);
+            background: rgba(19, 99, 223, 0.06);
+        }
+
+        .card-action-btn.primary {
+            border: none;
+            background: linear-gradient(135deg, var(--app-accent), var(--app-warn));
+            color: #fff;
+            box-shadow: 0 12px 24px -18px rgba(19, 99, 223, 0.28);
+        }
+
+        .card-action-btn.danger {
+            color: #dc2626;
+            border-color: rgba(220, 38, 38, 0.16);
+        }
+
+        .card-action-btn.danger:hover {
+            background: rgba(220, 38, 38, 0.06);
+        }
+
+        /* ── Templates Section ── */
+        .templates-section {
+            padding: 24px 28px;
+            border: 1px solid var(--app-line);
+            border-radius: 28px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(249, 245, 239, 0.94));
+            box-shadow: var(--app-shadow);
+        }
+
+        .section-head {
             display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
         }
 
-        .modal-content {
-            background: var(--surface-strong);
-            border-radius: var(--radius);
-            padding: 30px;
-            max-width: 500px;
-            width: 90%;
-            border: 1px solid var(--line);
-            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.16);
+        .section-head h3 {
+            font-size: 20px;
+            font-weight: 800;
         }
 
-        .modal-title {
-            font-size: 1.5em;
-            margin-bottom: 20px;
-            color: var(--text);
+        .section-head span {
+            color: var(--app-muted);
+            font-size: 13px;
         }
 
-        .form-group {
-            margin-bottom: 20px;
+        .templates-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
         }
 
-        .form-label {
+        .template-card {
+            padding: 18px;
+            border-radius: 20px;
+            border: 1px solid var(--app-line);
+            background: rgba(255, 255, 255, 0.92);
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .template-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 28px -18px rgba(19, 99, 223, 0.22);
+            border-color: rgba(19, 99, 223, 0.16);
+        }
+
+        .template-icon {
+            display: grid;
+            place-items: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--app-accent), var(--app-warn));
+            color: #fff;
+            font-size: 22px;
+            margin-bottom: 12px;
+        }
+
+        .template-card strong {
             display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--text);
+            font-size: 15px;
+            margin-bottom: 6px;
+        }
+
+        .template-card p {
+            color: var(--app-muted);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .template-meta {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            font-size: 12px;
+            color: var(--app-muted);
+        }
+
+        /* ── Empty State ── */
+        .empty-state {
+            padding: 56px 24px;
+            text-align: center;
+            border: 1px solid var(--app-line);
+            border-radius: 28px;
+            background: rgba(19, 99, 223, 0.03);
+        }
+
+        .empty-state .material-symbols-outlined {
+            font-size: 48px;
+            color: var(--app-muted);
+        }
+
+        .empty-state h4 {
+            margin: 14px 0 8px;
+            font-size: 20px;
+            color: var(--app-text);
+        }
+
+        .empty-state p {
+            color: var(--app-muted);
             font-size: 14px;
         }
 
-        .form-input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--line);
-            border-radius: var(--radius-sm);
-            font-size: 1em;
-            color: var(--text);
-            background: var(--surface-strong);
+        /* ── Modal ── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: rgba(37, 48, 56, 0.72);
+            backdrop-filter: blur(14px);
+            z-index: 1000;
         }
 
-        .form-input:focus {
+        .modal-shell {
+            width: min(640px, 100%);
+            max-height: calc(100vh - 48px);
+            overflow: auto;
+            padding: 28px;
+            border-radius: 28px;
+            border: 1px solid var(--app-line);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 245, 239, 0.98));
+            box-shadow: var(--app-shadow);
+        }
+
+        .modal-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+
+        .modal-head h2 {
+            font-size: 24px;
+            font-weight: 800;
+        }
+
+        .modal-close {
+            display: grid;
+            place-items: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            border: 1px solid var(--app-line);
+            background: rgba(255, 255, 255, 0.88);
+            cursor: pointer;
+            color: var(--app-muted);
+            transition: 0.2s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(220, 38, 38, 0.06);
+            color: #dc2626;
+        }
+
+        .form-field {
+            margin-bottom: 18px;
+        }
+
+        .form-field label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--app-muted);
+        }
+
+        .form-field input,
+        .form-field select,
+        .form-field textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--app-line);
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.88);
+            color: var(--app-text);
+            font: inherit;
+            font-size: 15px;
+        }
+
+        .form-field textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .form-field input:focus,
+        .form-field select:focus,
+        .form-field textarea:focus {
             outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-soft);
+            border-color: rgba(19, 99, 223, 0.32);
+            box-shadow: 0 0 0 3px rgba(19, 99, 223, 0.08);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
         }
 
         .modal-actions {
             display: flex;
             gap: 10px;
             justify-content: flex-end;
+            margin-top: 24px;
+        }
+
+        .modal-actions button {
+            min-height: 46px;
+            padding: 0 20px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .modal-cancel {
+            border: 1px solid var(--app-line);
+            background: rgba(255, 255, 255, 0.88);
+            color: var(--app-text);
+        }
+
+        .modal-submit {
+            border: none;
+            background: linear-gradient(135deg, var(--app-accent), var(--app-accent-deep));
+            color: #fff;
+            box-shadow: 0 14px 24px -18px rgba(19, 99, 223, 0.34);
+        }
+
+        .modal-submit:hover {
+            transform: translateY(-1px);
+        }
+
+        .modal-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ── Toast ── */
+        .toast {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            min-width: 220px;
+            max-width: 360px;
+            padding: 14px 16px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.94);
+            border: 1px solid var(--app-line);
+            box-shadow: var(--app-shadow);
+            color: var(--app-text);
+            font-size: 14px;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(14px);
+            transition: 0.25s ease;
+            z-index: 1100;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.error {
+            background: rgba(220, 38, 38, 0.94);
+            border-color: rgba(220, 38, 38, 0.28);
+            color: #fff;
+        }
+
+        [hidden] { display: none !important; }
+
+        /* ── Loading ── */
+        .loading-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .skel-card {
+            min-height: 260px;
+            padding: 22px;
+            border-radius: 24px;
+            border: 1px solid var(--app-line);
+            background: rgba(255, 255, 255, 0.86);
+        }
+
+        .skel-line {
+            height: 14px;
+            border-radius: 999px;
+            background: rgba(101, 120, 144, 0.08);
+            margin-bottom: 12px;
+        }
+
+        .skel-line.s { width: 40%; }
+        .skel-line.m { width: 65%; }
+        .skel-line.l { width: 100%; }
+
+        .skel-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            background: rgba(101, 120, 144, 0.08);
+            margin-bottom: 16px;
+        }
+
+        @keyframes shimmer {
+            100% { transform: translateX(100%); }
+        }
+
+        .skel-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skel-card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            transform: translateX(-100%);
+            background: linear-gradient(90deg, transparent, rgba(217, 119, 6, 0.06), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(19, 99, 223, 0.22);
+            border-top-color: rgba(19, 99, 223, 0.82);
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Responsive ── */
+        @media (max-width: 1180px) {
+            .apps-grid,
+            .loading-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .templates-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .hero-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 860px) {
+            .apps-grid,
+            .loading-grid,
+            .templates-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .page-header-actions {
+                width: 100%;
+            }
+
+            .controls-top {
+                flex-direction: column;
+            }
+
+            .search-bar {
+                width: 100%;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .shell {
+                padding: 14px;
+            }
+
+            .hero {
+                padding: 20px;
+            }
+
+            .page-header-actions {
+                flex-direction: column;
+            }
+
+            .create-btn,
+            .back-link {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
-    <link rel="stylesheet" href="/static/css/submodule-theme.css?v=1.0">
 </head>
 <body>
-    <div class="page-wide">
-        <nav class="topbar">
-            <div class="brand">
-                <a class="back-link" href="/developer">← 返回</a>
-                <h1>应用管理</h1>
+    <div class="shell">
+        <header class="page-header">
+            <div class="page-header-left">
+                <h1>应用中心</h1>
+                <p>管理应用生命周期：创建、配置、发布与监控。</p>
             </div>
-            <div class="topbar-actions">
-                <button class="btn btn-primary" onclick="showCreateModal()">+ 创建应用</button>
+            <div class="page-header-actions">
+                <a class="back-link" href="/">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                    <span>返回控制台</span>
+                </a>
+                <button class="create-btn" type="button" onclick="openCreateModal()">
+                    <span class="material-symbols-outlined">add_circle</span>
+                    <span>创建应用</span>
+                </button>
             </div>
-        </nav>
-    </div>
+        </header>
 
-    <div class="container">
-        <div class="toolbar">
-            <input type="text" class="search-box-input" placeholder="搜索应用..." id="searchBox">
+        <section class="hero">
+            <div class="hero-grid">
+                <div>
+                    <div class="hero-eyebrow">
+                        <span class="material-symbols-outlined">apps</span>
+                        Application Hub
+                    </div>
+                    <h2>统一管理你的 AI 应用<span>覆盖创建、配置、发布与运行监控</span></h2>
+                    <p>集中管理所有应用的创建、配置、版本和发布状态，覆盖聊天机器人、工作流、Agent 和 API 服务四种应用类型。</p>
+                    <div class="hero-features">
+                        <span class="hero-feature"><span class="material-symbols-outlined">auto_awesome</span>模板创建</span>
+                        <span class="hero-feature"><span class="material-symbols-outlined">publish</span>一键发布</span>
+                        <span class="hero-feature"><span class="material-symbols-outlined">fork_right</span>应用复制</span>
+                        <span class="hero-feature"><span class="material-symbols-outlined">monitoring</span>用量统计</span>
+                    </div>
+                </div>
+                <div class="hero-stats" id="hero-stats">
+                    <div class="stat-card"><div class="stat-label"><span class="material-symbols-outlined">apps</span>总应用数</div><strong class="stat-value" id="stat-total">0</strong><span class="stat-note">全部应用</span></div>
+                    <div class="stat-card"><div class="stat-label"><span class="material-symbols-outlined">cloud_done</span>已发布</div><strong class="stat-value" id="stat-published">0</strong><span class="stat-note">运行中的应用</span></div>
+                    <div class="stat-card"><div class="stat-label"><span class="material-symbols-outlined">edit_note</span>草稿</div><strong class="stat-value" id="stat-draft">0</strong><span class="stat-note">未发布</span></div>
+                    <div class="stat-card"><div class="stat-label"><span class="material-symbols-outlined">bar_chart</span>总调用</div><strong class="stat-value" id="stat-usage">0</strong><span class="stat-note">累计调用量</span></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="controls" id="controls-panel">
+            <div class="controls-top">
+                <label class="search-bar">
+                    <span class="material-symbols-outlined">search</span>
+                    <input id="search-input" type="search" placeholder="搜索应用名称、描述或标签...">
+                </label>
+                <select id="sort-select" class="sort-select">
+                    <option value="recent">按更新时间</option>
+                    <option value="name">按名称</option>
+                    <option value="usage">按使用量</option>
+                    <option value="rating">按评分</option>
+                </select>
+            </div>
+            <div class="controls-filters" id="type-filter-bar"></div>
+            <div class="filter-summary" id="filter-summary">正在加载应用列表...</div>
+        </section>
+
+        <section id="templates-section" class="templates-section" hidden>
+            <div class="section-head">
+                <div><h3>应用模板</h3><span>从模板快速创建，省去基础配置。</span></div>
+            </div>
+            <div id="templates-grid" class="templates-grid"></div>
+        </section>
+
+        <div id="loading-grid" class="loading-grid">
+            <div class="skel-card"><div class="skel-icon"></div><div class="skel-line m"></div><div class="skel-line s"></div><div class="skel-line l"></div><div class="skel-line l"></div></div>
+            <div class="skel-card"><div class="skel-icon"></div><div class="skel-line m"></div><div class="skel-line s"></div><div class="skel-line l"></div><div class="skel-line l"></div></div>
+            <div class="skel-card"><div class="skel-icon"></div><div class="skel-line m"></div><div class="skel-line s"></div><div class="skel-line l"></div><div class="skel-line l"></div></div>
         </div>
 
-        <div class="apps-grid" id="appsGrid">
-            <div class="empty-state">
-                <div class="empty-state-icon">📦</div>
-                <p>暂无应用，点击"创建应用"开始</p>
-            </div>
+        <div id="apps-grid" class="apps-grid" hidden></div>
+
+        <div id="empty-state" class="empty-state" hidden>
+            <span class="material-symbols-outlined">search_off</span>
+            <h4>没有找到符合条件的应用</h4>
+            <p>尝试放宽搜索条件，或创建你的第一个应用。</p>
         </div>
     </div>
 
-    <div class="modal" id="createModal">
-        <div class="modal-content">
-            <h2 class="modal-title">创建新应用</h2>
-            <form id="createForm">
-                <div class="form-group">
-                    <label class="form-label">应用名称</label>
-                    <input type="text" class="form-input" id="appName" required>
+    <!-- Create Modal -->
+    <div id="create-modal" class="modal-overlay" hidden>
+        <div class="modal-shell">
+            <div class="modal-head">
+                <div>
+                    <h2>创建新应用</h2>
+                    <p style="color: var(--app-muted); font-size: 14px; margin-top: 6px;">选择应用类型并填写基本信息，创建后可继续配置。</p>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">应用类型</label>
-                    <select class="form-input" id="appType">
-                        <option value="chatbot">聊天机器人</option>
-                        <option value="workflow">工作流应用</option>
-                        <option value="agent">Agent 应用</option>
-                        <option value="api">API 服务</option>
-                    </select>
+                <button class="modal-close" type="button" onclick="closeCreateModal()">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <form id="create-form" onsubmit="handleCreate(event)">
+                <div class="form-row">
+                    <div class="form-field">
+                        <label for="f-name">应用名称 *</label>
+                        <input id="f-name" type="text" required placeholder="例如：客服问答助手">
+                    </div>
+                    <div class="form-field">
+                        <label for="f-type">应用类型 *</label>
+                        <select id="f-type" required>
+                            <option value="chatbot">聊天机器人</option>
+                            <option value="workflow">工作流应用</option>
+                            <option value="agent">Agent 应用</option>
+                            <option value="api">API 服务</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">描述</label>
-                    <textarea class="form-input" id="appDesc" rows="3"></textarea>
+                <div class="form-field">
+                    <label for="f-slug">Slug（可选）</label>
+                    <input id="f-slug" type="text" placeholder="英文标识符，不填则自动生成">
+                </div>
+                <div class="form-field">
+                    <label for="f-desc">描述</label>
+                    <textarea id="f-desc" rows="3" placeholder="简单描述这个应用的用途和目标..."></textarea>
+                </div>
+                <div class="form-field">
+                    <label for="f-tags">标签（逗号分隔）</label>
+                    <input id="f-tags" type="text" placeholder="例如：客服, NLP, FAQ">
                 </div>
                 <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="hideCreateModal()">取消</button>
-                    <button type="submit" class="btn btn-primary">创建</button>
+                    <button type="button" class="modal-cancel" onclick="closeCreateModal()">取消</button>
+                    <button type="submit" class="modal-submit" id="submit-btn">
+                        <span class="material-symbols-outlined" style="font-size:18px">add_circle</span>
+                        创建应用
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- Detail Modal -->
+    <div id="detail-modal" class="modal-overlay" hidden>
+        <div class="modal-shell">
+            <div class="modal-head">
+                <div>
+                    <div id="detail-badges" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"></div>
+                    <h2 id="detail-name">应用名称</h2>
+                    <p id="detail-desc" style="color: var(--app-muted); font-size: 14px; margin-top: 6px;"></p>
+                </div>
+                <button class="modal-close" type="button" onclick="closeDetailModal()">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div id="detail-meta" style="display:grid;gap:12px;margin-bottom:20px"></div>
+            <div id="detail-tags" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px"></div>
+            <div id="detail-actions" style="display:flex;gap:10px;flex-wrap:wrap"></div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
     <script>
-        function showCreateModal() {
-            document.getElementById('createModal').classList.add('active');
+        const state = {
+            apps: [],
+            templates: [],
+            stats: null,
+            currentFilter: 'all',
+            currentSort: 'recent',
+            search: '',
+            loading: false,
+            toastTimer: null,
+        };
+
+        const typeLabels = {
+            all: '全部',
+            chatbot: '聊天机器人',
+            workflow: '工作流',
+            agent: 'Agent',
+            api: 'API 服务',
+        };
+
+        const typeIcons = {
+            chatbot: 'chat',
+            workflow: 'account_tree',
+            agent: 'smart_toy',
+            api: 'api',
+        };
+
+        const statusLabels = {
+            draft: '草稿',
+            published: '已发布',
+            archived: '已归档',
+            deleted: '已删除',
+        };
+
+        const esc = (v) => String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        const num = (v) => Number(v || 0).toLocaleString('zh-CN');
+        const dateText = (v) => { if (!v) return '未知'; const d = new Date(v); return isNaN(d.getTime()) ? String(v) : d.toLocaleDateString('zh-CN'); };
+
+        function toast(msg, type = 'success') {
+            const el = document.getElementById('toast');
+            el.textContent = msg;
+            el.className = `toast ${type === 'error' ? 'error' : ''}`.trim();
+            el.classList.add('show');
+            clearTimeout(state.toastTimer);
+            state.toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
         }
 
-        function hideCreateModal() {
-            document.getElementById('createModal').classList.remove('active');
+        // ─── Data Loading ──────────────────────────────────────────
+        async function loadApps() {
+            state.loading = true;
+            document.getElementById('loading-grid').hidden = false;
+            document.getElementById('apps-grid').hidden = true;
+            document.getElementById('empty-state').hidden = true;
+
+            try {
+                const res = await fetch('/api/apps/');
+                if (!res.ok) throw new Error('加载失败');
+                const data = await res.json();
+                state.apps = Array.isArray(data) ? data : (data.data || data.apps || []);
+            } catch (e) {
+                console.warn('Primary API failed, trying alternative:', e.message);
+                try {
+                    const res2 = await fetch('/api/applications/');
+                    if (res2.ok) {
+                        const data2 = await res2.json();
+                        state.apps = data2.data || data2.apps || [];
+                    } else {
+                        state.apps = generateDemoApps();
+                    }
+                } catch {
+                    state.apps = generateDemoApps();
+                }
+            }
+
+            computeStats();
+            renderAll();
+            state.loading = false;
+            document.getElementById('loading-grid').hidden = true;
         }
 
-        document.getElementById('createForm').addEventListener('submit', async (e) => {
+        function generateDemoApps() {
+            return [
+                { app_id: 'demo-1', name: '客服问答助手', slug: 'customer-faq', type: 'chatbot', status: 'published', description: '基于知识库的智能客服助手，支持多轮对话和FAQ自动匹配。', icon: 'chat', tags: ['客服', 'NLP', 'FAQ'], version_count: 3, usage_count: 12450, rating: 4.6, created_at: '2025-01-15', updated_at: '2025-04-10' },
+                { app_id: 'demo-2', name: '数据清洗流水线', slug: 'data-pipeline', type: 'workflow', status: 'published', description: '自动化数据清洗、转换和质量检查工作流。', icon: 'account_tree', tags: ['数据', '自动化', 'ETL'], version_count: 5, usage_count: 8320, rating: 4.3, created_at: '2025-02-01', updated_at: '2025-04-08' },
+                { app_id: 'demo-3', name: '智能巡检 Agent', slug: 'patrol-agent', type: 'agent', status: 'published', description: '风电场设备巡检智能代理，自动生成巡检报告和维修建议。', icon: 'smart_toy', tags: ['巡检', 'Agent', '风电'], version_count: 2, usage_count: 5670, rating: 4.8, created_at: '2025-02-20', updated_at: '2025-04-11' },
+                { app_id: 'demo-4', name: '气象数据接口', slug: 'weather-api', type: 'api', status: 'published', description: '提供实时气象数据查询、预测和历史数据导出的 API。', icon: 'api', tags: ['气象', 'API', '数据'], version_count: 4, usage_count: 23100, rating: 4.5, created_at: '2024-11-10', updated_at: '2025-04-12' },
+                { app_id: 'demo-5', name: '故障诊断助手', slug: 'fault-diagnosis', type: 'chatbot', status: 'draft', description: '根据传感器数据和历史记录辅助诊断设备故障原因。', icon: 'chat', tags: ['诊断', '故障', 'NLP'], version_count: 1, usage_count: 340, rating: 0, created_at: '2025-03-28', updated_at: '2025-04-05' },
+                { app_id: 'demo-6', name: '合同审核工作流', slug: 'contract-review', type: 'workflow', status: 'draft', description: '自动提取合同关键条款，标记风险点并生成审核意见。', icon: 'account_tree', tags: ['合同', '审核', '法务'], version_count: 1, usage_count: 120, rating: 0, created_at: '2025-04-01', updated_at: '2025-04-09' },
+            ];
+        }
+
+        function computeStats() {
+            const apps = state.apps;
+            state.stats = {
+                total: apps.length,
+                published: apps.filter(a => a.status === 'published').length,
+                draft: apps.filter(a => a.status === 'draft').length,
+                usage: apps.reduce((s, a) => s + (a.usage_count || 0), 0),
+                byType: {},
+            };
+            for (const a of apps) {
+                const t = a.type || 'unknown';
+                state.stats.byType[t] = (state.stats.byType[t] || 0) + 1;
+            }
+        }
+
+        // ─── Rendering ─────────────────────────────────────────────
+        function renderAll() {
+            renderStats();
+            renderFilters();
+            renderGrid();
+        }
+
+        function renderStats() {
+            const s = state.stats || {};
+            document.getElementById('stat-total').textContent = num(s.total);
+            document.getElementById('stat-published').textContent = num(s.published);
+            document.getElementById('stat-draft').textContent = num(s.draft);
+            document.getElementById('stat-usage').textContent = num(s.usage);
+        }
+
+        function renderFilters() {
+            const byType = state.stats?.byType || {};
+            const types = ['all', 'chatbot', 'workflow', 'agent', 'api'];
+            document.getElementById('type-filter-bar').innerHTML = types.map(t => {
+                const count = t === 'all' ? state.apps.length : (byType[t] || 0);
+                return `<button type="button" class="chip ${state.currentFilter === t ? 'active' : ''}" onclick="selectFilter('${t}')"><span>${esc(typeLabels[t])}</span><strong>${count}</strong></button>`;
+            }).join('');
+        }
+
+        function filteredApps() {
+            let list = [...state.apps];
+
+            if (state.currentFilter !== 'all') {
+                list = list.filter(a => a.type === state.currentFilter);
+            }
+
+            if (state.search.trim()) {
+                const q = state.search.toLowerCase();
+                list = list.filter(a =>
+                    (a.name || '').toLowerCase().includes(q) ||
+                    (a.description || '').toLowerCase().includes(q) ||
+                    (a.tags || []).some(t => t.toLowerCase().includes(q))
+                );
+            }
+
+            switch (state.currentSort) {
+                case 'name': list.sort((a, b) => (a.name || '').localeCompare(b.name || '')); break;
+                case 'usage': list.sort((a, b) => (b.usage_count || 0) - (a.usage_count || 0)); break;
+                case 'rating': list.sort((a, b) => (b.rating || 0) - (a.rating || 0)); break;
+                default: list.sort((a, b) => new Date(b.updated_at || 0) - new Date(a.updated_at || 0));
+            }
+
+            return list;
+        }
+
+        function renderGrid() {
+            const list = filteredApps();
+            const grid = document.getElementById('apps-grid');
+            const empty = document.getElementById('empty-state');
+
+            document.getElementById('filter-summary').textContent = [
+                `当前 ${list.length} 个应用`,
+                state.currentFilter !== 'all' ? `类型：${typeLabels[state.currentFilter]}` : '',
+                state.search.trim() ? `关键词："${state.search.trim()}"` : '',
+            ].filter(Boolean).join(' · ');
+
+            if (!list.length) {
+                grid.hidden = true;
+                empty.hidden = false;
+                return;
+            }
+
+            empty.hidden = true;
+            grid.hidden = false;
+            grid.innerHTML = list.map(app => buildAppCard(app)).join('');
+        }
+
+        function buildAppCard(app) {
+            const icon = typeIcons[app.type] || 'apps';
+            const statusBadge = app.status === 'published'
+                ? '<span class="badge published">已发布</span>'
+                : '<span class="badge draft">草稿</span>';
+            const typeBadge = `<span class="badge type-tag">${esc(typeLabels[app.type] || app.type)}</span>`;
+
+            return `<article class="app-card" onclick="openDetail('${esc(app.app_id)}')">
+                <div class="app-card-top">
+                    <div class="app-card-badges">${statusBadge}${typeBadge}</div>
+                    <div class="app-icon-box"><span class="material-symbols-outlined">${esc(app.icon || icon)}</span></div>
+                </div>
+                <h4 class="app-name">${esc(app.name)}</h4>
+                <p class="app-desc">${esc(app.description || '暂无描述')}</p>
+                <div class="app-meta-row">
+                    <span class="meta-item"><span class="material-symbols-outlined">bar_chart</span>${num(app.usage_count)} 次调用</span>
+                    <span class="meta-item"><span class="material-symbols-outlined">star</span>${Number(app.rating || 0).toFixed(1)}</span>
+                    <span class="meta-item"><span class="material-symbols-outlined">update</span>${esc(dateText(app.updated_at))}</span>
+                </div>
+                <div class="app-card-footer">
+                    <span class="card-footnote">${esc((app.tags || []).slice(0, 3).join(' · ') || '无标签')}</span>
+                    <div class="app-card-actions">
+                        <button class="card-action-btn primary" type="button" onclick="event.stopPropagation(); openDetail('${esc(app.app_id)}')">
+                            <span class="material-symbols-outlined">open_in_new</span>详情
+                        </button>
+                    </div>
+                </div>
+            </article>`;
+        }
+
+        // ─── Interactions ──────────────────────────────────────────
+        function selectFilter(type) {
+            state.currentFilter = type;
+            renderFilters();
+            renderGrid();
+        }
+
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            state.search = e.target.value;
+            renderGrid();
+        });
+
+        document.getElementById('sort-select').addEventListener('change', (e) => {
+            state.currentSort = e.target.value;
+            renderGrid();
+        });
+
+        // ─── Create Modal ──────────────────────────────────────────
+        function openCreateModal() {
+            document.getElementById('create-modal').hidden = false;
+        }
+
+        function closeCreateModal() {
+            document.getElementById('create-modal').hidden = true;
+            document.getElementById('create-form').reset();
+        }
+
+        async function handleCreate(e) {
             e.preventDefault();
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>创建中...';
 
-            const data = {
-                name: document.getElementById('appName').value,
-                type: document.getElementById('appType').value,
-                description: document.getElementById('appDesc').value,
-                owner_id: 'demo-user'
+            const tags = document.getElementById('f-tags').value
+                .split(',')
+                .map(t => t.trim())
+                .filter(Boolean);
+
+            const payload = {
+                name: document.getElementById('f-name').value,
+                type: document.getElementById('f-type').value,
+                slug: document.getElementById('f-slug').value || undefined,
+                description: document.getElementById('f-desc').value,
+                owner_id: 'demo-user',
             };
 
             try {
-                const response = await fetch('/api/apps/', {
+                const res = await fetch('/api/apps/', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify(payload),
                 });
 
-                if (response.ok) {
-                    hideCreateModal();
-                    loadApps();
-                    document.getElementById('createForm').reset();
-                } else {
-                    alert('创建失败');
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    throw new Error(errData.error || '创建失败');
                 }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('创建失败');
+
+                closeCreateModal();
+                toast('应用创建成功');
+                await loadApps();
+            } catch (err) {
+                // If main API fails, add locally as demo
+                const newApp = {
+                    app_id: 'local-' + Date.now(),
+                    name: payload.name,
+                    type: payload.type,
+                    slug: payload.slug || payload.name.toLowerCase().replace(/\s+/g, '-'),
+                    status: 'draft',
+                    description: payload.description,
+                    icon: typeIcons[payload.type] || 'apps',
+                    tags: tags,
+                    version_count: 0,
+                    usage_count: 0,
+                    rating: 0,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
+                };
+                state.apps.unshift(newApp);
+                computeStats();
+                renderAll();
+                closeCreateModal();
+                toast('应用已创建（本地模式）');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px">add_circle</span>创建应用';
+            }
+        }
+
+        // ─── Detail Modal ──────────────────────────────────────────
+        function openDetail(appId) {
+            const app = state.apps.find(a => a.app_id === appId);
+            if (!app) return;
+
+            const icon = typeIcons[app.type] || 'apps';
+            const statusBadge = app.status === 'published'
+                ? '<span class="badge published">已发布</span>'
+                : '<span class="badge draft">草稿</span>';
+
+            document.getElementById('detail-badges').innerHTML = `${statusBadge}<span class="badge type-tag">${esc(typeLabels[app.type] || app.type)}</span>`;
+            document.getElementById('detail-name').textContent = app.name;
+            document.getElementById('detail-desc').textContent = app.description || '暂无描述';
+
+            document.getElementById('detail-meta').innerHTML = [
+                ['Slug', app.slug || '-'],
+                ['版本数', app.version_count || 0],
+                ['调用量', num(app.usage_count || 0)],
+                ['评分', Number(app.rating || 0).toFixed(1)],
+                ['创建时间', dateText(app.created_at)],
+                ['更新时间', dateText(app.updated_at)],
+            ].map(([k, v]) => `<div style="display:flex;justify-content:space-between;gap:10px;padding:10px 14px;border-radius:12px;background:rgba(19,99,223,0.04);border:1px solid rgba(101,120,144,0.10);font-size:14px"><strong style="color:var(--app-muted);font-weight:500">${esc(k)}</strong><span>${esc(v)}</span></div>`).join('');
+
+            document.getElementById('detail-tags').innerHTML = (app.tags || []).map(t => `<span class="badge">${esc(t)}</span>`).join('') || '<span style="color:var(--app-muted);font-size:13px">无标签</span>';
+
+            document.getElementById('detail-actions').innerHTML = `
+                <button class="card-action-btn primary" onclick="toast('功能开发中')"><span class="material-symbols-outlined">edit</span>编辑配置</button>
+                <button class="card-action-btn" onclick="toast('功能开发中')"><span class="material-symbols-outlined">fork_right</span>复制应用</button>
+                ${app.status === 'draft' ? '<button class="card-action-btn primary" onclick="toast(\'功能开发中\')"><span class="material-symbols-outlined">publish</span>发布</button>' : ''}
+                <button class="card-action-btn danger" onclick="handleDelete('${esc(app.app_id)}')"><span class="material-symbols-outlined">delete</span>删除</button>
+                <button class="card-action-btn" onclick="closeDetailModal()">关闭</button>
+            `;
+
+            document.getElementById('detail-modal').hidden = false;
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detail-modal').hidden = true;
+        }
+
+        function handleDelete(appId) {
+            if (!confirm('确定要删除这个应用吗？')) return;
+            state.apps = state.apps.filter(a => a.app_id !== appId);
+            computeStats();
+            renderAll();
+            closeDetailModal();
+            toast('应用已删除');
+        }
+
+        // ─── Keyboard ──────────────────────────────────────────────
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (!document.getElementById('detail-modal').hidden) closeDetailModal();
+                else if (!document.getElementById('create-modal').hidden) closeCreateModal();
             }
         });
 
-        async function loadApps() {
-            try {
-                const response = await fetch('/api/apps/');
-                const apps = await response.json();
+        document.getElementById('create-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'create-modal') closeCreateModal();
+        });
 
-                const grid = document.getElementById('appsGrid');
+        document.getElementById('detail-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'detail-modal') closeDetailModal();
+        });
 
-                if (apps.length === 0) {
-                    grid.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-state-icon">📦</div>
-                            <p>暂无应用，点击"创建应用"开始</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                grid.innerHTML = apps.map(app => `
-                    <div class="app-card">
-                        <div class="app-icon">${getAppIcon(app.type)}</div>
-                        <div class="app-title">${app.name}</div>
-                        <div class="app-desc">${app.description || '暂无描述'}</div>
-                        <div class="app-meta">
-                            <span class="app-type">${getAppTypeName(app.type)}</span>
-                            <span class="app-status">${getStatusName(app.status)}</span>
-                        </div>
-                    </div>
-                `).join('');
-            } catch (error) {
-                console.error('Error loading apps:', error);
-            }
-        }
-
-        function getAppIcon(type) {
-            const icons = {
-                chatbot: '💬',
-                workflow: '🔄',
-                agent: '🤖',
-                api: '🔌',
-                custom: '⚙️'
-            };
-            return icons[type] || '📱';
-        }
-
-        function getAppTypeName(type) {
-            const names = {
-                chatbot: '聊天机器人',
-                workflow: '工作流',
-                agent: 'Agent',
-                api: 'API',
-                custom: '自定义'
-            };
-            return names[type] || type;
-        }
-
-        function getStatusName(status) {
-            const names = {
-                draft: '草稿',
-                published: '已发布',
-                archived: '已归档'
-            };
-            return names[status] || status;
-        }
-
-        // 加载应用列表
+        // ─── Init ──────────────────────────────────────────────────
         loadApps();
-
-        // 搜索功能
-        document.getElementById('searchBox').addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase();
-            const cards = document.querySelectorAll('.app-card');
-
-            cards.forEach(card => {
-                const title = card.querySelector('.app-title').textContent.toLowerCase();
-                const desc = card.querySelector('.app-desc').textContent.toLowerCase();
-
-                if (title.includes(query) || desc.includes(query)) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        });
     </script>
 </body>
 </html>

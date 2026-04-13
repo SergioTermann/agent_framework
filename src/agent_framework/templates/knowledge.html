@@ -3,437 +3,613 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>知识库 - Agent Framework</title>
+    <title>知识库工作台 - Agent Framework</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/base-theme.css">
     <style>
         :root {
-            --theme-accent: #1363df;
-            --theme-accent-deep: #0f4eb3;
-            --theme-accent-soft: rgba(19, 99, 223, 0.10);
-            --theme-accent-line: rgba(19, 99, 223, 0.22);
-            --theme-accent-shadow: rgba(19, 99, 223, 0.22);
+            --kb-accent: #1363df;
+            --kb-accent-deep: #0f4eb3;
+            --kb-cyan: #60a5fa;
+            --kb-emerald: #1363df;
+            --kb-amber: #b45309;
+            --kb-rose: #be123c;
+            --kb-violet: #475569;
+            --kb-bg: #eef4fb;
+            --kb-surface: rgba(255, 252, 247, 0.94);
+            --kb-border: rgba(101, 120, 144, 0.16);
+            --kb-text: #202a36;
+            --kb-muted: #6f746f;
+            --kb-shadow: 0 18px 42px -28px rgba(34, 44, 63, 0.16);
+            --kb-radius: 24px;
         }
 
-        .container {
-            max-width: 1400px;
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: var(--font-body, "Segoe UI", sans-serif);
+            color: var(--kb-text);
+            background:
+                radial-gradient(circle at 8% 10%, rgba(19, 99, 223, 0.14), transparent 18%),
+                radial-gradient(circle at 88% 8%, rgba(217, 119, 6, 0.10), transparent 18%),
+                radial-gradient(circle at 76% 86%, rgba(20, 184, 166, 0.10), transparent 24%),
+                linear-gradient(180deg, #f8fbff 0%, var(--kb-bg) 100%);
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(19, 99, 223, 0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(19, 99, 223, 0.025) 1px, transparent 1px);
+            background-size: 28px 28px;
+            mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.16), transparent 64%);
+        }
+
+        .shell {
+            position: relative;
+            z-index: 1;
+            max-width: 1760px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 24px;
+            display: grid;
+            gap: 18px;
         }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
+        body.is-embedded {
+            min-height: 100%;
+        }
+
+        body.is-embedded::before {
+            display: none;
+        }
+
+        body.is-embedded .shell {
+            max-width: none;
+            min-height: 100vh;
+            margin: 0;
+            padding: 12px;
+            gap: 12px;
+        }
+
+        .panel {
+            border: 1px solid var(--kb-border);
+            border-radius: var(--kb-radius);
+            background: var(--kb-surface);
+            box-shadow: var(--kb-shadow);
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(360px, 0.8fr);
+            gap: 18px;
+        }
+
+        .hero-main,
+        .hero-side {
+            padding: 28px;
+            display: grid;
+            gap: 18px;
+        }
+
+        .hero-main {
+            background:
+                radial-gradient(circle at 92% 12%, rgba(19, 99, 223, 0.14), transparent 22%),
+                linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(249, 245, 239, 0.94));
+        }
+
+        .hero-pill,
+        .badge,
+        .chip {
+            display: inline-flex;
             align-items: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: #ffffff;
-            border-radius: 12px;
-            border: 1px solid rgba(15, 23, 42, 0.15);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            gap: 8px;
+            width: fit-content;
+            min-height: 30px;
+            padding: 0 12px;
+            border-radius: 999px;
+            background: rgba(19, 99, 223, 0.08);
+            color: var(--kb-accent);
+            font-size: 12px;
+            font-weight: 800;
         }
 
-        .header-copy {
+        .chip.is-success {
+            background: rgba(19, 99, 223, 0.10);
+            color: var(--kb-emerald);
+        }
+
+        .chip.is-warn {
+            background: rgba(180, 83, 9, 0.12);
+            color: var(--kb-amber);
+        }
+
+        .chip.is-danger {
+            background: rgba(190, 18, 60, 0.10);
+            color: var(--kb-rose);
+        }
+
+        h1, h2, h3, h4, p {
+            margin: 0;
+        }
+
+        .hero-main h1 {
+            font-size: clamp(34px, 4vw, 48px);
+            line-height: 1.03;
+            letter-spacing: -0.05em;
+        }
+
+        .hero-copy,
+        .section-copy,
+        .card-copy,
+        .small-copy,
+        .helper-copy {
+            color: var(--kb-muted);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .hero-actions,
+        .toolbar-row,
+        .toolbar-left,
+        .toolbar-right,
+        .chip-row,
+        .metric-grid,
+        .stats-grid,
+        .form-grid,
+        .list-grid {
             display: flex;
-            flex-direction: column;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .metric-card {
+            padding: 16px;
+            border-radius: 18px;
+            border: 1px solid var(--kb-border);
+            background: linear-gradient(180deg, #ffffff, #f8fbff);
+            display: grid;
             gap: 8px;
         }
 
-        .header h1 {
+        .metric-value {
             font-size: 28px;
-            background: linear-gradient(135deg, var(--theme-accent-deep), var(--theme-accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+            line-height: 1;
+            letter-spacing: -0.04em;
         }
 
-        .header p {
-            max-width: 640px;
-            font-size: 14px;
-            line-height: 1.7;
-            color: #64748b;
-        }
-
-        .stats {
-            display: flex;
-            gap: 30px;
-        }
-
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 24px;
-            font-weight: 700;
-            color: #0f172a;
-        }
-
-        .stat-label {
+        .metric-label {
+            color: var(--kb-muted);
             font-size: 12px;
-            color: #64748b;
-            margin-top: 4px;
+            font-weight: 700;
         }
 
-        .main-content {
+        .toolbar {
+            padding: 18px 20px;
             display: grid;
-            grid-template-columns: 350px 1fr;
-            gap: 20px;
+            gap: 14px;
         }
 
-        .sidebar {
-            background: #ffffff;
-            border-radius: 12px;
-            border: 1px solid rgba(15, 23, 42, 0.15);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            padding: 20px;
-            height: fit-content;
-        }
-
-        .sidebar-header {
-            display: flex;
+        .toolbar-row {
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
         }
 
-        .sidebar-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #0f172a;
+        .input,
+        .select,
+        .textarea,
+        .btn {
+            font: inherit;
+            font-size: 13px;
+            border-radius: 14px;
+        }
+
+        .input,
+        .select,
+        .textarea {
+            width: 100%;
+            min-height: 42px;
+            padding: 12px 14px;
+            border: 1px solid rgba(148, 163, 184, 0.24);
+            background: #ffffff;
+            color: var(--kb-text);
+        }
+
+        .input:focus,
+        .select:focus,
+        .textarea:focus {
+            outline: none;
+            border-color: rgba(19, 99, 223, 0.30);
+            box-shadow: 0 0 0 3px rgba(19, 99, 223, 0.08);
+        }
+
+        .textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .textarea.code {
+            min-height: 150px;
+            font-family: var(--font-code, "SFMono-Regular", Consolas, monospace);
+            background: #0f172a;
+            color: #dbeafe;
+            line-height: 1.7;
         }
 
         .btn {
-            padding: 8px 16px;
-            background: #f8fafc;
-            border: 1px solid rgba(15, 23, 42, 0.2);
-            border-radius: 8px;
-            color: #0f172a;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.3s;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
+            gap: 8px;
+            min-height: 42px;
+            padding: 0 16px;
+            border: 1px solid rgba(19, 99, 223, 0.14);
+            background: rgba(255, 255, 255, 0.94);
+            color: var(--kb-text);
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
         }
 
         .btn:hover {
-            background: #f9fafc;
-            border-color: var(--theme-accent);
-            transform: translateY(-2px);
+            transform: translateY(-1px);
+            border-color: rgba(19, 99, 223, 0.24);
+            box-shadow: 0 12px 24px -18px rgba(19, 99, 223, 0.20);
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--theme-accent-deep), var(--theme-accent));
-            border: none;
+            border-color: transparent;
             color: #ffffff;
-            box-shadow: 0 2px 8px var(--theme-accent-shadow);
+            background: linear-gradient(135deg, var(--kb-accent-deep), var(--kb-accent));
         }
 
-        .btn-primary:hover {
-            box-shadow: 0 4px 12px rgba(19, 99, 223, 0.28);
+        .btn-ghost {
+            background: rgba(19, 99, 223, 0.05);
         }
 
         .btn-danger {
-            background: #fef2f2;
-            border-color: #dc2626;
-            color: #b91c1c;
+            background: rgba(190, 18, 60, 0.06);
+            border-color: rgba(190, 18, 60, 0.18);
+            color: var(--kb-rose);
         }
 
-        .btn-danger:hover {
-            background: #fee2e2;
-            border-color: #b91c1c;
+        .workspace {
+            display: grid;
+            grid-template-columns: 320px minmax(0, 1fr) 400px;
+            gap: 18px;
+            align-items: start;
         }
 
-        .kb-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        .rail {
+            display: grid;
+            gap: 18px;
+            align-content: start;
+            position: sticky;
+            top: 20px;
+            max-height: 100vh;
+            overflow-y: auto;
         }
 
-        .kb-item {
-            padding: 15px;
-            background: #f8fafc;
-            border: 1px solid rgba(15, 23, 42, 0.15);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
+        .side {
+            display: grid;
+            gap: 18px;
+            align-content: start;
+            min-width: 0;
         }
 
-        .kb-item:hover {
-            background: #f9fafc;
-            border-color: var(--theme-accent);
+        .center {
+            display: grid;
+            gap: 18px;
+            min-width: 0;
         }
 
-        .kb-item.active {
-            background: var(--theme-accent-soft);
-            border-color: var(--theme-accent);
+        .section {
+            padding: 18px;
+            display: grid;
+            gap: 14px;
         }
 
-        .kb-name {
-            font-weight: 600;
-            margin-bottom: 5px;
-            color: #0f172a;
-        }
-
-        .kb-info {
-            font-size: 12px;
-            color: #64748b;
-        }
-
-        .content-area {
-            background: #ffffff;
-            border-radius: 12px;
-            border: 1px solid rgba(15, 23, 42, 0.15);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            padding: 20px;
-        }
-
-        .content-header {
+        .section-head {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(15, 23, 42, 0.1);
+            gap: 12px;
+            align-items: flex-start;
         }
 
-        .content-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: #0f172a;
+        .section-head h2,
+        .section-head h3 {
+            font-size: 17px;
+            line-height: 1.25;
         }
 
-        .upload-area {
-            border: 2px dashed var(--theme-accent-line);
-            border-radius: 12px;
-            padding: 40px;
-            text-align: center;
-            margin-bottom: 20px;
-            transition: all 0.3s;
+        .kb-list,
+        .scenario-list,
+        .doc-grid,
+        .result-list,
+        .detail-list,
+        .history-list,
+        .insight-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .kb-card,
+        .scenario-card,
+        .doc-card,
+        .result-card,
+        .detail-card,
+        .history-card,
+        .insight-card {
+            padding: 14px;
+            border-radius: 18px;
+            border: 1px solid rgba(148, 163, 184, 0.20);
+            background: linear-gradient(180deg, #ffffff, #f8fbff);
+        }
+
+        .kb-card,
+        .scenario-card,
+        .doc-card {
             cursor: pointer;
-            background: #f8fafc;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
-        .upload-area:hover {
-            border-color: var(--theme-accent);
+        .kb-card:hover,
+        .scenario-card:hover,
+        .doc-card:hover {
+            transform: translateY(-1px);
+            border-color: rgba(19, 99, 223, 0.24);
+            box-shadow: 0 12px 24px -18px rgba(19, 99, 223, 0.20);
+        }
+
+        .kb-card.is-active,
+        .scenario-card.is-active,
+        .doc-card.is-active {
+            border-color: rgba(19, 99, 223, 0.28);
+            box-shadow: 0 0 0 3px rgba(19, 99, 223, 0.08);
+        }
+
+        .result-card.is-active {
+            border-color: rgba(19, 99, 223, 0.28);
+            box-shadow: 0 0 0 3px rgba(19, 99, 223, 0.08);
+        }
+
+        .card-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 800;
+            line-height: 1.5;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .mini-stat {
+            padding: 14px;
+            border-radius: 16px;
+            background: rgba(19, 99, 223, 0.05);
+            border: 1px solid rgba(19, 99, 223, 0.08);
+            display: grid;
+            gap: 6px;
+        }
+
+        .mini-stat strong {
+            font-size: 22px;
+            line-height: 1;
+            letter-spacing: -0.04em;
+        }
+
+        .upload-shell {
+            padding: 18px;
+            border: 2px dashed rgba(19, 99, 223, 0.18);
+            border-radius: 20px;
             background: rgba(19, 99, 223, 0.04);
+            display: grid;
+            gap: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
         }
 
-        .upload-area.dragover {
-            border-color: var(--theme-accent-deep);
-            background: var(--theme-accent-soft);
+        .upload-shell:hover,
+        .upload-shell.dragover {
+            border-color: var(--kb-accent);
+            background: rgba(19, 99, 223, 0.08);
+            transform: translateY(-1px);
         }
 
         .upload-icon {
-            font-size: 48px;
-            color: var(--theme-accent);
-            margin-bottom: 15px;
-        }
-
-        .upload-text {
-            font-size: 16px;
-            margin-bottom: 10px;
-            color: #0f172a;
-        }
-
-        .upload-hint {
-            font-size: 12px;
-            color: #64748b;
+            font-size: 40px;
+            color: var(--kb-accent);
         }
 
         .file-input {
             display: none;
         }
 
-        .doc-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 15px;
-        }
-
-        .doc-item {
-            background: #f8fafc;
-            border: 1px solid rgba(15, 23, 42, 0.15);
-            border-radius: 8px;
-            padding: 15px;
-            transition: all 0.3s;
-        }
-
-        .doc-item:hover {
-            background: #f9fafc;
-            border-color: var(--theme-accent);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
-
-        .doc-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 10px;
-        }
-
-        .doc-icon {
-            font-size: 32px;
-            color: var(--theme-accent);
-        }
-
-        .doc-actions {
-            display: flex;
-            gap: 5px;
-        }
-
-        .icon-btn {
-            background: none;
-            border: none;
-            color: #64748b;
-            cursor: pointer;
-            padding: 5px;
-            transition: all 0.3s;
-        }
-
-        .icon-btn:hover {
-            color: var(--theme-accent);
-        }
-
-        .doc-name {
-            font-weight: 600;
-            margin-bottom: 5px;
-            word-break: break-word;
-            color: #0f172a;
-        }
-
-        .doc-info {
-            font-size: 12px;
-            color: #64748b;
-        }
-
-        .settings-panel {
-            margin-bottom: 20px;
-            padding: 16px;
-            background: #f8fafc;
-            border: 1px solid rgba(15, 23, 42, 0.12);
-            border-radius: 12px;
-        }
-
-        .settings-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .settings-grid {
+        .config-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 12px;
         }
 
-        .settings-subtitle {
-            margin: 18px 0 10px;
-            font-size: 13px;
-            font-weight: 700;
-            color: #334155;
+        .config-block {
+            padding: 14px;
+            border-radius: 16px;
+            background: rgba(19, 99, 223, 0.04);
+            border: 1px solid rgba(19, 99, 223, 0.08);
+            display: grid;
+            gap: 12px;
         }
 
-        .checkbox-inline {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            min-height: 42px;
-            padding: 10px 12px;
-            border: 1px solid rgba(15, 23, 42, 0.12);
-            border-radius: 10px;
-            background: #fff;
-            color: #334155;
+        .compare-shell {
+            display: grid;
+            gap: 12px;
+            padding-top: 4px;
         }
 
-        .settings-actions {
+        .compare-grid,
+        .compare-matrix,
+        .chunk-list,
+        .compare-results {
+            display: grid;
+            gap: 12px;
+        }
+
+        .compare-grid {
+            grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+        }
+
+        .compare-matrix {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .config-actions,
+        .modal-actions {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
-            margin-top: 14px;
+            align-items: center;
         }
 
-        .settings-hint {
+        .result-meta,
+        .doc-meta,
+        .kb-meta {
+            color: var(--kb-muted);
             font-size: 12px;
-            color: #64748b;
-            margin-top: 10px;
+            line-height: 1.7;
         }
 
-        .status-text {
-            margin-top: 10px;
-            font-size: 12px;
-            color: #64748b;
-        }
-
-        .search-section {
-            margin-top: 30px;
-            padding-top: 30px;
-            border-top: 1px solid rgba(15, 23, 42, 0.1);
-        }
-
-        .search-box {
+        .result-score-row {
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .search-input {
-            flex: 1;
-            padding: 12px;
-            background: #ffffff;
-            border: 1px solid rgba(15, 23, 42, 0.2);
-            border-radius: 8px;
-            color: #0f172a;
-            font-size: 14px;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: var(--theme-accent);
-            box-shadow: 0 0 0 3px rgba(19, 99, 223, 0.12);
-        }
-
-        .search-input::placeholder {
-            color: #64748b;
-        }
-
-        .search-results {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .result-item {
-            background: #f8fafc;
-            border: 1px solid rgba(15, 23, 42, 0.15);
-            border-radius: 8px;
-            padding: 15px;
-        }
-
-        .result-content {
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
             margin-bottom: 10px;
-            line-height: 1.6;
-            color: #0f172a;
         }
 
-        .result-meta {
-            font-size: 12px;
-            color: #7f8c8d;
+        .result-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .score-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 26px;
+            padding: 0 10px;
+            border-radius: 999px;
+            background: rgba(19, 99, 223, 0.06);
+            color: var(--kb-accent);
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .compare-metric,
+        .chunk-card {
+            padding: 12px;
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            background: rgba(255, 255, 255, 0.88);
+        }
+
+        .compare-metric {
+            display: grid;
+            gap: 8px;
+        }
+
+        .compare-metric strong {
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: -0.04em;
+        }
+
+        .delta-positive {
+            color: var(--kb-emerald);
+        }
+
+        .delta-negative {
+            color: var(--kb-rose);
+        }
+
+        .delta-neutral {
+            color: var(--kb-muted);
+        }
+
+        .chunk-card {
+            display: grid;
+            gap: 10px;
+        }
+
+        .chunk-card.is-hit {
+            border-color: rgba(19, 99, 223, 0.22);
+            background: rgba(19, 99, 223, 0.06);
+        }
+
+        .chunk-card.is-context {
+            border-color: rgba(180, 83, 9, 0.22);
+            background: rgba(180, 83, 9, 0.06);
+        }
+
+        .chunk-meta {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+            color: var(--kb-muted);
+            font-size: 11px;
+            line-height: 1.7;
+        }
+
+        .empty-card {
+            padding: 18px;
+            border-radius: 18px;
+            border: 1px dashed rgba(148, 163, 184, 0.30);
+            background: rgba(19, 99, 223, 0.04);
+            color: var(--kb-muted);
+            font-size: 13px;
+            line-height: 1.8;
         }
 
         .modal {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.5);
+            inset: 0;
             z-index: 2000;
             align-items: center;
             justify-content: center;
+            background: rgba(15, 23, 42, 0.42);
+            backdrop-filter: blur(8px);
+            padding: 24px;
         }
 
         .modal.active {
@@ -441,283 +617,623 @@
         }
 
         .modal-content {
-            background: #ffffff;
-            border: 1px solid rgba(15, 23, 42, 0.12);
-            border-radius: 12px;
-            padding: 30px;
-            max-width: 500px;
-            width: 90%;
-            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+            width: min(560px, calc(100vw - 48px));
+            padding: 28px;
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.98);
+            border: 1px solid var(--kb-border);
+            box-shadow: 0 28px 64px rgba(15, 23, 42, 0.24);
+            display: grid;
+            gap: 16px;
         }
 
         .modal-header {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: #0f172a;
+            font-size: 22px;
+            font-weight: 800;
+            line-height: 1.2;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            display: grid;
+            gap: 8px;
         }
 
         .form-label {
-            display: block;
-            font-size: 14px;
-            margin-bottom: 8px;
-            color: #475569;
-            font-weight: 600;
+            color: var(--kb-muted);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
         }
 
-        .form-input {
-            width: 100%;
-            padding: 10px;
-            background: #ffffff;
-            border: 1px solid rgba(15, 23, 42, 0.18);
-            border-radius: 8px;
-            color: #0f172a;
-            font-size: 14px;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        @media (max-width: 1500px) {
+            .workspace {
+                grid-template-columns: 300px minmax(0, 1fr);
+            }
+
+            .side {
+                grid-column: 1 / -1;
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
         }
 
-        .form-input:focus {
-            outline: none;
-            border-color: var(--theme-accent);
-            box-shadow: 0 0 0 3px rgba(19, 99, 223, 0.12);
-        }
+        @media (max-width: 1180px) {
+            .hero,
+            .workspace,
+            .metric-grid,
+            .stats-grid,
+            .config-grid,
+            .compare-grid,
+            .compare-matrix {
+                grid-template-columns: 1fr;
+            }
 
-        .form-input::placeholder {
-            color: #94a3b8;
-        }
+            .rail {
+                position: static;
+                max-height: none;
+                overflow-y: visible;
+            }
 
-        .form-textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #7f8c8d;
-        }
-
-        .empty-icon {
-            font-size: 64px;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #7f8c8d;
-        }
-
-        @media (max-width: 900px) {
-            .settings-grid {
+            .side {
                 grid-template-columns: 1fr;
             }
         }
 
-        .back-link {
-            color: var(--theme-accent) !important;
+        @media (max-width: 860px) {
+            .shell {
+                padding: 14px;
+            }
+
+            .hero-main,
+            .hero-side,
+            .toolbar,
+            .section {
+                padding: 18px;
+            }
+
+            .toolbar-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        /* ═══════ Pipeline debugger ═══════ */
+        .pipeline-stages .detail-card {
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        .pipeline-stages .detail-card:hover {
+            border-color: rgba(19, 99, 223, 0.20);
+        }
+
+        /* ═══════ Knowledge Graph canvas ═══════ */
+        canvas {
+            image-rendering: auto;
+        }
+
+        /* ═══════ Federated results ═══════ */
+        .federated-kb-item {
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        .federated-kb-item:hover {
+            border-color: rgba(19, 99, 223, 0.24);
+            background: rgba(19, 99, 223, 0.04);
+        }
+
+        /* ═══════ Annotation colors ═══════ */
+        .annotation-note { border-left-color: var(--kb-accent); }
+        .annotation-issue { border-left-color: var(--kb-rose); }
+        .annotation-question { border-left-color: var(--kb-amber); }
+        .annotation-highlight { border-left-color: var(--kb-emerald); }
+        .annotation-qa_pair { border-left-color: var(--kb-violet); }
+
+        /* ═══════ Quality grade ring ═══════ */
+        @keyframes gradeReveal {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        #qualityReportPanel > div:first-child {
+            animation: gradeReveal 0.4s ease;
+        }
+
+        /* ═══════ Heatmap blocks ═══════ */
+        #heatmapPanel [title] {
+            transition: transform 0.15s ease, opacity 0.15s ease;
+        }
+
+        #heatmapPanel [title]:hover {
+            transform: scale(1.8);
+            z-index: 2;
+            opacity: 1 !important;
         }
     </style>
 </head>
-<body>
-    <div class="page-wide">
-        <nav class="topbar">
-            <div class="brand">
-                <a class="back-link" href="{{ url_for('developer_home') }}">← 返回主页</a>
-                <h1><i class="fas fa-database"></i> 知识库</h1>
-            </div>
-            <div class="topbar-actions">
-            </div>
-        </nav>
-
-    <div class="container">
-        <div class="header">
-            <div class="header-copy">
-                <h1>把知识页从“存文档”升级成“可调可控的检索底座”</h1>
-                <p>这里不只是上传资料，而是把文档、分块、召回、重排和搜索结果放进同一个工作台，方便你判断这套知识到底能不能支撑当前 Agent 任务。</p>
-            </div>
-            <div class="stats">
-                <div class="stat-item">
-                    <div class="stat-value" id="kbCount">0</div>
-                    <div class="stat-label">知识目录</div>
+<body{% if embedded %} class="is-embedded"{% endif %}>
+    <div class="shell">
+        <section class="hero">
+            <div class="hero-main panel">
+                <span class="hero-pill"><i class="fas fa-layer-group"></i><span>Knowledge Workbench</span></span>
+                <div>
+                    <h1>知识库工作台</h1>
+                    <p class="hero-copy">把知识目录、资料资产、向量配置、召回诊断和检索验证收进同一页。这里不只是上传文档，而是直接判断这套知识底座能不能支撑 Agent 的真实问答。</p>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="docCount">0</div>
-                    <div class="stat-label">已入库文档</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="chunkCount">0</div>
-                    <div class="stat-label">可检索片段</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="main-content">
-            <!-- 左侧边栏 -->
-            <div class="sidebar">
-                <div class="sidebar-header">
-                    <div class="sidebar-title">我的知识目录</div>
-                    <button class="btn btn-primary" onclick="showCreateKBModal()">
+                <div class="hero-actions">
+                    <button class="btn btn-primary" type="button" onclick="showCreateKBModal()">
                         <i class="fas fa-plus"></i> 新建知识库
                     </button>
+                    <button class="btn" type="button" onclick="showFederatedSearchModal()">
+                        <i class="fas fa-diagram-project"></i> 联邦搜索
+                    </button>
+                    <button class="btn" type="button" onclick="loadServingEndpoints()">
+                        <i class="fas fa-rotate"></i> 刷新端点
+                    </button>
+                    <button class="btn btn-ghost" type="button" onclick="refreshWorkbench()">
+                        <i class="fas fa-arrows-rotate"></i> 刷新工作台
+                    </button>
                 </div>
-                <div class="kb-list" id="kbList">
-                    <div class="loading">加载中...</div>
+                <div class="metric-grid" id="globalMetricGrid"></div>
+            </div>
+            <div class="hero-side panel">
+                <div class="section-head">
+                    <div>
+                        <h2>当前焦点</h2>
+                        <p class="section-copy">右侧摘要会随着当前知识库、当前文档和最近一次检索结果联动变化。</p>
+                    </div>
+                    <span class="badge" id="focusBadge">未选择知识库</span>
+                </div>
+                <div class="detail-card">
+                    <div class="card-title" id="heroSummaryTitle">知识底座还没选中</div>
+                    <div class="card-copy" id="heroSummaryCopy">先从左边选择一套知识库，页面会自动切换到更完整的资料、参数和检索视图。</div>
+                </div>
+                <div class="insight-list" id="heroInsights"></div>
+            </div>
+        </section>
+
+        <section class="panel toolbar">
+            <div class="toolbar-row">
+                <div class="toolbar-left">
+                    <input class="input" id="kbFilterInput" placeholder="筛选知识库名称、描述" oninput="handleKBFilterChange()" style="min-width: 260px;">
+                    <input class="input" id="quickSearchInput" placeholder="直接输入要验证的业务问题，右侧会带入检索实验台" onkeydown="handleQuickSearchKeydown(event)" style="min-width: 360px;">
+                </div>
+                <div class="toolbar-right">
+                    <span class="chip" id="selectionSummaryChip">0 个目录</span>
+                    <span class="chip is-success" id="retrievalSummaryChip">等待检索</span>
                 </div>
             </div>
+        </section>
 
-            <!-- 右侧内容区 -->
-            <div class="content-area">
-                <div id="emptyState" class="empty-state">
-                    <div class="empty-icon"><i class="fas fa-folder-open"></i></div>
-                    <p>先选一个知识库，把文档、参数和检索结果收进同一个工作台。</p>
-                </div>
-
-                <div id="kbContent" style="display: none;">
-                    <div class="content-header">
-                        <div class="content-title" id="kbTitle">知识库名称</div>
+        <section class="workspace">
+            <aside class="rail">
+                <section class="panel section">
+                    <div class="section-head">
                         <div>
-                            <button class="btn btn-danger" onclick="deleteCurrentKB()">
+                            <h2>知识目录</h2>
+                            <p class="section-copy">不是普通列表，而是按业务知识资产来选择和切换。</p>
+                        </div>
+                    </div>
+                    <div class="kb-list" id="kbList"></div>
+                </section>
+
+                <section class="panel section">
+                    <div class="section-head">
+                        <div>
+                            <h2>检索场景</h2>
+                            <p class="section-copy">点一个预设就会把查询、Top-K 和调试视角切到对应场景。</p>
+                        </div>
+                    </div>
+                    <div class="scenario-list" id="scenarioList"></div>
+                </section>
+
+                <section class="panel section">
+                    <div class="section-head">
+                        <div>
+                            <h2>最近检索</h2>
+                            <p class="section-copy">保留本页内的查询历史，方便横向比对召回效果。</p>
+                        </div>
+                    </div>
+                    <div class="history-list" id="searchHistoryList"></div>
+                </section>
+            </aside>
+
+            <main class="center">
+                <section class="panel section">
+                    <div class="section-head">
+                        <div>
+                            <h2>知识库总览</h2>
+                            <p class="section-copy">选中知识库后，这里会显示资料结构、入库状态和资料资产概况。</p>
+                        </div>
+                        <div class="chip-row">
+                            <span class="chip" id="currentKBChip">未选择</span>
+                            <button class="btn btn-danger" type="button" onclick="deleteCurrentKB()">
                                 <i class="fas fa-trash"></i> 删除当前知识库
                             </button>
                         </div>
                     </div>
-
-                    <div class="settings-panel">
-                        <div class="settings-header">
-                            <strong>让这套知识真正可用的检索设置</strong>
-                            <button class="btn" onclick="loadServingEndpoints()">
-                                <i class="fas fa-rotate"></i> 刷新端点
-                            </button>
-                        </div>
-                        <div class="settings-grid">
-                            <div>
-                                <label class="form-label">向量模型端点</label>
-                                <select id="embeddingEndpointSelect" class="form-input"></select>
-                            </div>
-                            <div>
-                                <label class="form-label">重排模型端点</label>
-                                <select id="rerankEndpointSelect" class="form-input"></select>
-                            </div>
-                        </div>
-                        <div class="settings-subtitle">高级检索参数</div>
-                        <div class="settings-grid">
-                            <div>
-                                <label class="form-label">分块大小</label>
-                                <input id="ragChunkSizeInput" class="form-input" type="number" min="100" max="4000" step="50">
-                            </div>
-                            <div>
-                                <label class="form-label">分块重叠</label>
-                                <input id="ragChunkOverlapInput" class="form-input" type="number" min="0" max="1000" step="10">
-                            </div>
-                            <div>
-                                <label class="form-label">默认返回条数 Top-K</label>
-                                <input id="ragSearchTopKInput" class="form-input" type="number" min="1" max="20" step="1">
-                            </div>
-                            <div>
-                                <label class="form-label">候选召回数</label>
-                                <input id="ragCandidateTopKInput" class="form-input" type="number" min="8" max="100" step="1">
-                            </div>
-                            <div>
-                                <label class="form-label">结果阈值</label>
-                                <input id="ragScoreThresholdInput" class="form-input" type="number" min="0" max="1" step="0.01">
-                            </div>
-                            <div>
-                                <label class="form-label">MMR 多样性系数</label>
-                                <input id="ragMmrLambdaInput" class="form-input" type="number" min="0" max="1" step="0.01">
-                            </div>
-                            <div>
-                                <label class="form-label">相邻扩展块数</label>
-                                <input id="ragWindowSizeInput" class="form-input" type="number" min="0" max="4" step="1">
-                            </div>
-                            <div>
-                                <label class="form-label">上下文最大字符数</label>
-                                <input id="ragWindowCharsInput" class="form-input" type="number" min="200" max="6000" step="100">
-                            </div>
-                            <div>
-                                <label class="form-label">章节上下文最大字符数</label>
-                                <input id="ragSectionCharsInput" class="form-input" type="number" min="400" max="8000" step="100">
-                            </div>
-                            <div>
-                                <label class="form-label">查询扩展</label>
-                                <label class="checkbox-inline">
-                                    <input id="ragQueryExpansionInput" type="checkbox">
-                                    <span>启用同义词 / 领域词扩展</span>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="settings-actions">
-                            <button class="btn btn-primary" onclick="saveKBSettings()">
-                                <i class="fas fa-floppy-disk"></i> 保存检索设置
-                            </button>
-                            <button class="btn" onclick="rebuildKBEmbeddings()">
-                                <i class="fas fa-arrows-rotate"></i> 重新生成向量
-                            </button>
-                        </div>
-                        <div class="settings-hint">
-                            重点不是把文档放进来，而是把分块、召回、阈值、MMR、多段上下文和查询扩展调到适合当前业务问题。
-                        </div>
-                        <div class="status-text" id="kbSettingsStatus"></div>
+                    <div class="stats-grid" id="kbMetricGrid"></div>
+                    <div class="detail-card">
+                        <div class="card-title">知识说明</div>
+                        <div class="card-copy" id="kbDescriptionText">当前还没有知识库描述。</div>
                     </div>
+                </section>
 
-                    <!-- 上传区域 -->
-                    <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
-                        <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
-                        <div class="upload-text">把资料拖进来，先把知识底座搭起来</div>
-                        <div class="upload-hint">支持 PDF、Word、Markdown、TXT，上传后会进入分块与检索流程</div>
-                        <input type="file" id="fileInput" class="file-input" accept=".pdf,.docx,.doc,.md,.txt" onchange="uploadFile(event)">
+                <section class="panel section">
+                    <div class="section-head">
+                        <div>
+                            <h2>资料资产</h2>
+                            <p class="section-copy">文档卡片、上传区和当前文档预览放在一起，减少来回切页。</p>
+                        </div>
                     </div>
+                    <label class="upload-shell" id="uploadArea" for="fileInput">
+                        <div class="upload-icon"><i class="fas fa-cloud-arrow-up"></i></div>
+                        <div class="card-title">把资料拖进来，直接进入这套知识底座</div>
+                        <div class="card-copy">支持 PDF、Word、Markdown、TXT。上传后会自动解析、分块并进入检索。</div>
+                    </label>
+                    <input type="file" id="fileInput" class="file-input" accept=".pdf,.docx,.doc,.md,.markdown,.txt" onchange="uploadFile(event)">
+                    <div class="doc-grid" id="docList"></div>
+                </section>
 
-                    <!-- 文档列表 -->
-                    <div class="doc-list" id="docList"></div>
+                <section class="panel section">
+                    <div class="section-head">
+                        <div>
+                            <h2>检索实验台</h2>
+                            <p class="section-copy">把查询、召回参数、结果和打分拆开放在一起，方便真实验证这套知识是否可用。</p>
+                        </div>
+                    </div>
+                    <div class="config-grid">
+                        <div class="config-block">
+                            <div class="card-title">模型与索引设置</div>
+                            <div class="form-grid" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;">
+                                <div class="form-group">
+                                    <label class="form-label">向量模型端点</label>
+                                    <select id="embeddingEndpointSelect" class="select"></select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">重排模型端点</label>
+                                    <select id="rerankEndpointSelect" class="select"></select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Chunk Size</label>
+                                    <input id="ragChunkSizeInput" class="input" type="number" min="100" max="4000" step="50">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Chunk Overlap</label>
+                                    <input id="ragChunkOverlapInput" class="input" type="number" min="0" max="1000" step="10">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Top-K</label>
+                                    <input id="ragSearchTopKInput" class="input" type="number" min="1" max="20" step="1">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">候选召回</label>
+                                    <input id="ragCandidateTopKInput" class="input" type="number" min="8" max="100" step="1">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">结果阈值</label>
+                                    <input id="ragScoreThresholdInput" class="input" type="number" min="0" max="1" step="0.01">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">MMR Lambda</label>
+                                    <input id="ragMmrLambdaInput" class="input" type="number" min="0" max="1" step="0.01">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">窗口块数</label>
+                                    <input id="ragWindowSizeInput" class="input" type="number" min="0" max="4" step="1">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">上下文字符数</label>
+                                    <input id="ragWindowCharsInput" class="input" type="number" min="200" max="6000" step="100">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">章节上下文字符数</label>
+                                    <input id="ragSectionCharsInput" class="input" type="number" min="400" max="8000" step="100">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">查询扩展</label>
+                                    <label class="chip is-success" style="min-height:42px;padding:0 14px;">
+                                        <input id="ragQueryExpansionInput" type="checkbox" style="accent-color:var(--kb-accent);">
+                                        <span>启用同义词 / 领域词扩展</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="config-actions">
+                                <button class="btn btn-primary" type="button" onclick="saveKBSettings()">
+                                    <i class="fas fa-floppy-disk"></i> 保存设置
+                                </button>
+                                <button class="btn" type="button" onclick="rebuildKBEmbeddings()">
+                                    <i class="fas fa-arrows-rotate"></i> 重新生成向量
+                                </button>
+                            </div>
+                            <div class="helper-copy" id="kbSettingsStatus">等待选择知识库。</div>
+                        </div>
 
-                    <!-- 搜索区域 -->
-                    <div class="search-section">
-                        <h3 style="margin-bottom: 15px;">检索验证</h3>
-                        <div class="search-box">
-                            <input type="text" class="search-input" id="searchInput" placeholder="输入一个真实业务问题，看看这套知识能不能答上来">
-                            <button class="btn btn-primary" onclick="searchKnowledge()">
-                                <i class="fas fa-search"></i> 开始检索
+                        <div class="config-block">
+                            <div class="card-title">查询与结果摘要</div>
+                            <div class="form-group">
+                                <label class="form-label">业务问题</label>
+                                <textarea class="textarea" id="searchInput" placeholder="输入真实业务问题，比如：并网失败场景下，值守动作最晚要在几分钟内完成？"></textarea>
+                            </div>
+                            <div class="config-actions">
+                                <button class="btn btn-primary" type="button" onclick="searchKnowledge()">
+                                    <i class="fas fa-magnifying-glass"></i> 开始检索
+                                </button>
+                                <button class="btn btn-ghost" type="button" onclick="reuseLastQuery()">
+                                    <i class="fas fa-history"></i> 重用上次查询
+                                </button>
+                            </div>
+                            <div class="stats-grid" id="searchMetricGrid"></div>
+                        </div>
+                    </div>
+                    <div class="result-list" id="searchResults"></div>
+                    <div class="compare-shell">
+                        <div class="section-head">
+                            <div>
+                                <h3>对比实验</h3>
+                                <p class="section-copy">用同一个业务问题同时跑当前参数和实验参数，快速判断召回覆盖、平均得分和文档重叠变化。</p>
+                            </div>
+                            <span class="chip is-warn" id="compareStatusChip">等待对比</span>
+                        </div>
+                        <div class="compare-grid">
+                            <div class="config-block">
+                                <div class="card-title">实验参数</div>
+                                <div class="form-grid" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;">
+                                    <div class="form-group">
+                                        <label class="form-label">实验 Top-K</label>
+                                        <input id="compareTopKInput" class="input" type="number" min="1" max="20" step="1" oninput="captureCompareDraft()">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">实验候选召回</label>
+                                        <input id="compareCandidateTopKInput" class="input" type="number" min="8" max="100" step="1" oninput="captureCompareDraft()">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">实验阈值</label>
+                                        <input id="compareThresholdInput" class="input" type="number" min="0" max="1" step="0.01" oninput="captureCompareDraft()">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">实验 MMR</label>
+                                        <input id="compareMmrInput" class="input" type="number" min="0" max="1" step="0.01" oninput="captureCompareDraft()">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">实验窗口块数</label>
+                                        <input id="compareWindowSizeInput" class="input" type="number" min="0" max="4" step="1" oninput="captureCompareDraft()">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">实验章节字符数</label>
+                                        <input id="compareSectionCharsInput" class="input" type="number" min="400" max="8000" step="100" oninput="captureCompareDraft()">
+                                    </div>
+                                    <div class="form-group" style="grid-column:1 / -1;">
+                                        <label class="form-label">实验查询扩展</label>
+                                        <label class="chip is-success" style="min-height:42px;padding:0 14px;">
+                                            <input id="compareQueryExpansionInput" type="checkbox" style="accent-color:var(--kb-accent);" onchange="captureCompareDraft()">
+                                            <span>启用实验扩展词和领域词补全</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="config-actions">
+                                    <button class="btn btn-primary" type="button" onclick="runSearchComparison()">
+                                        <i class="fas fa-vials"></i> 运行对比
+                                    </button>
+                                    <button class="btn" type="button" onclick="syncCompareDraftFromMain()">
+                                        <i class="fas fa-arrows-rotate"></i> 与当前参数对齐
+                                    </button>
+                                    <button class="btn btn-ghost" type="button" onclick="applyExperimentToMain()">
+                                        <i class="fas fa-wand-magic-sparkles"></i> 应用实验参数
+                                    </button>
+                                </div>
+                                <div class="helper-copy" id="compareStatusText">还没有运行实验。先输入问题，再比较不同召回参数。</div>
+                            </div>
+
+                            <div class="config-block">
+                                <div class="card-title">实验结论</div>
+                                <div class="compare-results" id="compareResults"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ═══════ 管线调试器 ═══════ -->
+                <section class="panel section">
+                    <div class="section-head">
+                        <div>
+                            <h2>检索管线调试</h2>
+                            <p class="section-copy">分阶段追踪查询分析 → 扩展 → 检索 → 重排 → 多样性过滤的完整管线，定位召回瓶颈。</p>
+                        </div>
+                        <div class="chip-row">
+                            <button class="btn btn-primary" type="button" onclick="runPipelineDebug()">
+                                <i class="fas fa-bug"></i> 运行管线调试
+                            </button>
+                            <button class="btn btn-ghost" type="button" onclick="loadTraceHistory()">
+                                <i class="fas fa-clock-rotate-left"></i> 追踪历史
                             </button>
                         </div>
-                        <div class="search-results" id="searchResults"></div>
                     </div>
-                </div>
-            </div>
-        </div>
+                    <div id="pipelineDebugPanel">
+                        <div class="empty-card">输入查询后运行管线调试，这里会展示检索管线每个阶段的耗时、输入输出和瓶颈分析。</div>
+                    </div>
+                    <div id="traceHistoryPanel"></div>
+                </section>
+
+                <!-- ═══════ 知识图谱 ═══════ -->
+                <section class="panel section">
+                    <div class="section-head">
+                        <div>
+                            <h2>知识图谱</h2>
+                            <p class="section-copy">从知识库全部文档中抽取实体和共现关系，构建可视化知识网络，帮助判断资料覆盖面和知识空洞。</p>
+                        </div>
+                        <button class="btn btn-primary" type="button" onclick="loadKnowledgeGraph()">
+                            <i class="fas fa-share-nodes"></i> 生成图谱
+                        </button>
+                    </div>
+                    <div id="knowledgeGraphPanel">
+                        <div class="empty-card">选择知识库后点击"生成图谱"，这里会出现实体关系网络和高频实体排行。</div>
+                    </div>
+                </section>
+
+                <!-- ═══════ 质量评估 ═══════ -->
+                <section class="panel section">
+                    <div class="section-head">
+                        <div>
+                            <h2>知识库质量评估</h2>
+                            <p class="section-copy">自动评估向量覆盖率、重复率、分块质量和标注密度，给出综合质量等级和改进建议。</p>
+                        </div>
+                        <button class="btn btn-primary" type="button" onclick="runQualityReport()">
+                            <i class="fas fa-clipboard-check"></i> 运行评估
+                        </button>
+                    </div>
+                    <div id="qualityReportPanel">
+                        <div class="empty-card">选择知识库后点击"运行评估"，这里会展示知识库健康度报告，包含多维度评分和优化建议。</div>
+                    </div>
+                </section>
+            </main>
+
+            <aside class="side">
+                <section class="panel section">
+                    <div class="section-head">
+                        <div>
+                            <h2>资料详情</h2>
+                            <p class="section-copy">点文档卡片后，这里会显示文档元信息、内容预览和分块视角。</p>
+                        </div>
+                    </div>
+                    <div id="docDetailPanel"></div>
+                </section>
+
+                <section class="panel section">
+                    <div class="section-head">
+                        <div>
+                            <h2>检索诊断</h2>
+                            <p class="section-copy">把命中文档分布、得分质量和上下文合并情况集中展示。</p>
+                        </div>
+                    </div>
+                    <div class="detail-list" id="retrievalDiagnosticList"></div>
+                </section>
+
+                <section class="panel section">
+                    <div class="section-head">
+                        <div>
+                            <h2>配置透视</h2>
+                            <p class="section-copy">把当前向量、重排、分块和上下文配置收成一眼可读的摘要。</p>
+                        </div>
+                    </div>
+                    <div class="detail-list" id="settingsInsightList"></div>
+                </section>
+
+                <!-- ═══════ 分块浏览器 ═══════ -->
+                <section class="panel section">
+                    <div class="section-head">
+                        <div>
+                            <h2>分块浏览器</h2>
+                            <p class="section-copy">查看文档的完整分块序列，命中的分块会高亮标记，方便定位召回区间。</p>
+                        </div>
+                        <button class="btn btn-ghost" type="button" onclick="loadChunkBrowser()">
+                            <i class="fas fa-cubes"></i> 加载分块
+                        </button>
+                    </div>
+                    <div id="chunkBrowserPanel">
+                        <div class="empty-card">选择文档后点击"加载分块"，这里会展示完整的分块序列和向量就绪状态。</div>
+                    </div>
+                </section>
+
+                <!-- ═══════ 检索热力图 ═══════ -->
+                <section class="panel section">
+                    <div class="section-head">
+                        <div>
+                            <h2>检索热力图</h2>
+                            <p class="section-copy">对文档每个分块的命中强度做可视化，一眼看出哪些区间是检索热区。</p>
+                        </div>
+                        <button class="btn btn-ghost" type="button" onclick="loadRetrievalHeatmap()">
+                            <i class="fas fa-fire"></i> 生成热力图
+                        </button>
+                    </div>
+                    <div id="heatmapPanel">
+                        <div class="empty-card">输入查询并选择文档后，这里会按分块序列呈现命中热度分布。</div>
+                    </div>
+                </section>
+
+                <!-- ═══════ 文档标注 ═══════ -->
+                <section class="panel section">
+                    <div class="section-head">
+                        <div>
+                            <h2>文档标注</h2>
+                            <p class="section-copy">为文档添加笔记、问题、重点、问答对等标注，辅助知识管理和质量审计。</p>
+                        </div>
+                        <button class="btn btn-ghost" type="button" onclick="loadAnnotations()">
+                            <i class="fas fa-tags"></i> 加载标注
+                        </button>
+                    </div>
+                    <div id="annotationPanel">
+                        <div class="empty-card">选择文档后点击"加载标注"，可以对文档和分块进行标注、提问和知识标记。</div>
+                    </div>
+                </section>
+            </aside>
+        </section>
     </div>
 
-    <!-- 创建知识库模态框 -->
+    <!-- ═══════ 新建知识库 Modal ═══════ -->
     <div class="modal" id="createKBModal">
         <div class="modal-content">
             <div class="modal-header">新建知识库</div>
             <div class="form-group">
                 <label class="form-label">知识库名称</label>
-                <input type="text" class="form-input" id="kbName" placeholder="给这套知识起一个业务上看得懂的名字">
+                <input type="text" class="input" id="kbName" placeholder="例如：运维制度库">
             </div>
             <div class="form-group">
                 <label class="form-label">描述</label>
-                <textarea class="form-input form-textarea" id="kbDescription" placeholder="写清这套知识要服务什么场景、什么问题，后面筛选和维护会更清楚"></textarea>
+                <textarea class="textarea" id="kbDescription" placeholder="描述这套知识服务的业务场景、资料范围和维护边界。"></textarea>
             </div>
             <div class="modal-actions">
-                <button class="btn" onclick="closeCreateKBModal()">取消</button>
-                <button class="btn btn-primary" onclick="createKB()">创建知识库</button>
+                <button class="btn" type="button" onclick="closeCreateKBModal()">取消</button>
+                <button class="btn btn-primary" type="button" onclick="createKB()">创建知识库</button>
             </div>
         </div>
     </div>
 
-    </div> <!-- page-wide -->
+    <!-- ═══════ 联邦搜索 Modal ═══════ -->
+    <div class="modal" id="federatedSearchModal">
+        <div class="modal-content" style="width:min(860px,calc(100vw - 48px));">
+            <div class="modal-header">
+                <i class="fas fa-diagram-project" style="color:var(--kb-accent);"></i> 跨知识库联邦搜索
+            </div>
+            <p class="section-copy">同时搜索多个知识库，按分数或轮询策略合并结果，检测跨库覆盖重叠。</p>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div class="form-group">
+                    <label class="form-label">查询问题</label>
+                    <textarea class="textarea" id="federatedQueryInput" placeholder="输入要跨库验证的业务问题…" style="min-height:80px;"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">搜索策略</label>
+                    <select id="federatedMergeStrategy" class="select">
+                        <option value="score">按分数排序合并</option>
+                        <option value="rrf">RRF (Reciprocal Rank Fusion)</option>
+                        <option value="round_robin">轮询交叉 (Round Robin)</option>
+                    </select>
+                    <div style="margin-top:8px;">
+                        <label class="form-label">Top-K</label>
+                        <input id="federatedTopK" class="input" type="number" min="1" max="50" value="10">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">选择知识库</label>
+                <div id="federatedKBList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;max-height:200px;overflow-y:auto;"></div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn" type="button" onclick="closeFederatedSearchModal()">关闭</button>
+                <button class="btn btn-primary" type="button" onclick="runFederatedSearch()">
+                    <i class="fas fa-magnifying-glass"></i> 开始联邦搜索
+                </button>
+                <span class="chip is-warn" id="federatedStatusChip">等待搜索</span>
+            </div>
+
+            <div id="federatedResults" style="max-height:400px;overflow-y:auto;">
+                <div class="empty-card">选择知识库并输入查询后，这里会展示跨库合并结果、各库耗时和覆盖交叉矩阵。</div>
+            </div>
+        </div>
+    </div>
 
     <script src="/static/js/knowledge.js"></script>
 </body>

@@ -1751,6 +1751,7 @@ class KnowledgeBaseManager:
         *,
         embedding_endpoint_id: str = "",
         rerank_endpoint_id: str = "",
+        rag_settings: Optional[Dict[str, Any]] = None,
     ) -> List[Dict[str, Any]]:
         """Search knowledge base with hybrid lexical + vector retrieval."""
         query = (query or '').strip()
@@ -1758,21 +1759,28 @@ class KnowledgeBaseManager:
             return []
 
         kb = self.get_knowledge_base(kb_id)
-        rag_settings = self._get_rag_settings(kb)
-        try:
-            top_k = max(1, int(top_k or rag_settings["search_top_k"]))
-        except (TypeError, ValueError):
-            top_k = int(rag_settings["search_top_k"])
-
-        cached_results = self._get_cached_query_results(
-            kb_id,
-            query,
-            top_k,
-            embedding_endpoint_id=embedding_endpoint_id,
-            rerank_endpoint_id=rerank_endpoint_id,
+        effective_rag_settings = (
+            self._sanitize_rag_settings(rag_settings or {})
+            if rag_settings is not None
+            else self._get_rag_settings(kb)
         )
-        if cached_results is not None:
-            return cached_results
+        try:
+            top_k = max(1, int(top_k or effective_rag_settings["search_top_k"]))
+        except (TypeError, ValueError):
+            top_k = int(effective_rag_settings["search_top_k"])
+
+        use_cache = rag_settings is None
+
+        if use_cache:
+            cached_results = self._get_cached_query_results(
+                kb_id,
+                query,
+                top_k,
+                embedding_endpoint_id=embedding_endpoint_id,
+                rerank_endpoint_id=rerank_endpoint_id,
+            )
+            if cached_results is not None:
+                return cached_results
 
         query_embedding = None
         try:
@@ -1789,7 +1797,7 @@ class KnowledgeBaseManager:
             vector_results = self.vector_store.search(
                 kb_id,
                 query,
-                top_k=max(int(rag_settings["candidate_top_k"]), top_k),
+                top_k=max(int(effective_rag_settings["candidate_top_k"]), top_k),
                 query_embedding=query_embedding,
             )
         except Exception:
@@ -1800,17 +1808,18 @@ class KnowledgeBaseManager:
             query,
             top_k,
             vector_results,
-            rag_settings=rag_settings,
+            rag_settings=effective_rag_settings,
             rerank_endpoint_id=rerank_endpoint_id,
         )
-        self._cache_query_results(
-            kb_id,
-            query,
-            top_k,
-            results,
-            embedding_endpoint_id=embedding_endpoint_id,
-            rerank_endpoint_id=rerank_endpoint_id,
-        )
+        if use_cache:
+            self._cache_query_results(
+                kb_id,
+                query,
+                top_k,
+                results,
+                embedding_endpoint_id=embedding_endpoint_id,
+                rerank_endpoint_id=rerank_endpoint_id,
+            )
         return self._clone_search_results(results)
 
     def _save_knowledge_base(self, kb: KnowledgeBase):

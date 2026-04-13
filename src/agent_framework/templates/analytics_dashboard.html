@@ -4,131 +4,224 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>数据分析面板 - Agent Framework</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@300..700,0..1&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js?v=20260410" crossorigin="anonymous"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --ad-accent:      #1363df;
+            --ad-accent-deep: #0f4eb3;
+            --ad-accent-soft: rgba(19, 99, 223, 0.10);
+            --ad-bg:          #eef4fb;
+            --ad-surface:     rgba(255, 252, 247, 0.84);
+            --ad-border:      rgba(101, 120, 144, 0.14);
+            --ad-text:        #202a36;
+            --ad-muted:       #6f746f;
+            --ad-shadow:      0 18px 42px -28px rgba(34, 44, 63, 0.16);
+            --ad-shadow-md:   0 34px 80px -34px rgba(34, 44, 63, 0.18);
+            --ad-radius:      20px;
+            --ad-radius-sm:   12px;
+            --ad-success:     #10b981;
+            --ad-warning:     #d97706;
+            --ad-danger:      #ef4444;
         }
 
-        :root {
-            --primary: #1363df;
-            --primary-dark: #0f4eb3;
-            --success: #10b981;
-            --warning: #06b6d4;
-            --danger: #ef4444;
-            --info: #60a5fa;
-            --bg: linear-gradient(135deg, #eef5ff 0%, #f7fbff 52%, #edf4fb 100%);
-            --card-bg: rgba(255, 255, 255, 0.8);
-            --text: #0f4eb3;
-            --text-secondary: rgba(15, 78, 179, 0.72);
-            --border: rgba(19, 99, 223, 0.18);
-        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { min-height: 100%; }
 
         body {
-            font-family: 'PingFang SC', 'Microsoft YaHei UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg);
-            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            background-color: var(--ad-bg);
+            background-image:
+                radial-gradient(circle at 12% 16%, rgba(19, 99, 223, 0.16), transparent 34%),
+                radial-gradient(circle at 84% 70%, rgba(217, 119, 6, 0.12), transparent 30%),
+                radial-gradient(circle at 50% 96%, rgba(19, 99, 223, 0.07), transparent 26%);
+            color: var(--ad-text);
+            min-height: 100vh;
         }
 
-        .container {
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(19, 99, 223,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(19, 99, 223,0.03) 1px, transparent 1px);
+            background-size: 28px 28px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .ad-shell {
+            position: relative;
+            z-index: 1;
             max-width: 1600px;
             margin: 0 auto;
-            padding: 24px;
+            padding: 32px 28px 80px;
         }
 
-        /* 头部 */
-        .header {
-            background: white;
-            padding: 24px;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            margin-bottom: 24px;
+        /* ── Topbar ── */
+        .ad-topbar {
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
         }
 
-        .header h1 {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--text);
-        }
-
-        .header-actions {
+        .ad-brand {
             display: flex;
-            gap: 12px;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
         }
 
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
+        .ad-brand-mark {
+            width: 38px; height: 38px;
+            background: var(--ad-accent);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff;
+            flex-shrink: 0;
         }
 
-        .btn-primary {
-            background: var(--primary);
-            color: white;
+        .ad-brand-copy strong {
+            display: block;
+            font-family: 'Manrope', sans-serif;
+            font-size: 15px;
+            color: var(--ad-text);
         }
 
-        .btn-primary:hover {
-            background: var(--primary-dark);
-        }
+        .ad-brand-copy small { font-size: 12px; color: var(--ad-muted); }
 
-        .btn-outline {
-            background: white;
-            color: var(--text);
-            border: 1px solid var(--border);
-        }
-
-        .btn-outline:hover {
-            background: var(--bg);
-        }
-
-        /* 时间范围选择器 */
-        .time-range-selector {
+        .ad-topbar-right {
             display: flex;
-            gap: 8px;
-            background: white;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* ── Time range selector ── */
+        .ad-time-range {
+            display: flex;
+            gap: 3px;
+            background: var(--ad-surface);
+            border: 1px solid var(--ad-border);
+            border-radius: var(--ad-radius-sm);
             padding: 4px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
+            backdrop-filter: blur(8px);
         }
 
         .time-range-btn {
-            padding: 8px 16px;
+            padding: 7px 14px;
             border: none;
             background: transparent;
-            border-radius: 6px;
+            border-radius: 9px;
             cursor: pointer;
-            font-size: 14px;
-            color: var(--text-secondary);
-            transition: all 0.2s;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: inherit;
+            color: var(--ad-muted);
+            transition: background 0.15s, color 0.15s;
         }
 
         .time-range-btn.active {
-            background: var(--primary);
-            color: white;
+            background: var(--ad-accent);
+            color: #fff;
         }
 
-        /* 统计卡片 */
+        .time-range-btn:not(.active):hover {
+            background: var(--ad-accent-soft);
+            color: var(--ad-accent);
+        }
+
+        /* ── Refresh btn ── */
+        .ad-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 18px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+            transition: background 0.18s, transform 0.12s;
+        }
+
+        .ad-btn:active { transform: scale(0.97); }
+
+        .ad-btn-ghost {
+            background: var(--ad-surface);
+            color: var(--ad-text);
+            border: 1px solid var(--ad-border);
+            backdrop-filter: blur(8px);
+        }
+
+        .ad-btn-ghost:hover { background: rgba(255,255,255,0.95); }
+
+        /* ── Hero heading ── */
+        .ad-hero {
+            background: var(--ad-surface);
+            border: 1px solid var(--ad-border);
+            border-radius: var(--ad-radius);
+            box-shadow: var(--ad-shadow-md);
+            backdrop-filter: blur(12px);
+            padding: 28px 32px;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .ad-hero-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 11px;
+            background: var(--ad-accent-soft);
+            border: 1px solid var(--ad-border);
+            border-radius: 99px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--ad-accent);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .ad-hero h1 {
+            font-family: 'Manrope', sans-serif;
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .ad-hero p {
+            font-size: 13px;
+            color: var(--ad-muted);
+        }
+
+        /* ── Stats grid ── */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
             margin-bottom: 24px;
         }
 
         .stat-card {
-            background: white;
-            padding: 24px;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            background: var(--ad-surface);
+            border: 1px solid var(--ad-border);
+            border-radius: var(--ad-radius);
+            padding: 22px 24px;
+            box-shadow: var(--ad-shadow);
+            backdrop-filter: blur(10px);
             position: relative;
             overflow: hidden;
         }
@@ -136,71 +229,70 @@
         .stat-card::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-            background: var(--accent);
+            top: 0; left: 0;
+            width: 4px; height: 100%;
         }
 
-        .stat-card.primary::before { background: var(--primary); }
-        .stat-card.success::before { background: var(--success); }
-        .stat-card.warning::before { background: var(--warning); }
-        .stat-card.danger::before { background: var(--danger); }
+        .stat-card.primary::before { background: var(--ad-accent); }
+        .stat-card.success::before { background: var(--ad-success); }
+        .stat-card.warning::before { background: var(--ad-warning); }
+        .stat-card.danger::before  { background: var(--ad-danger); }
 
         .stat-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 16px;
+            margin-bottom: 4px;
         }
 
         .stat-title {
-            font-size: 14px;
-            color: var(--text-secondary);
-            font-weight: 500;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--ad-muted);
+            margin-bottom: 6px;
         }
 
         .stat-icon {
-            width: 48px;
-            height: 48px;
+            width: 42px; height: 42px;
             border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            opacity: 0.9;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
         }
 
-        .stat-card.primary .stat-icon { background: rgba(99, 102, 241, 0.1); color: var(--primary); }
-        .stat-card.success .stat-icon { background: rgba(16, 185, 129, 0.1); color: var(--success); }
-        .stat-card.warning .stat-icon { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
-        .stat-card.danger .stat-icon { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+        .stat-card.primary .stat-icon { background: var(--ad-accent-soft); }
+        .stat-card.success .stat-icon { background: rgba(16,185,129,0.10); }
+        .stat-card.warning .stat-icon { background: rgba(217,119,6,0.10); }
+        .stat-card.danger .stat-icon  { background: rgba(239,68,68,0.10); }
 
         .stat-value {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: 700;
-            color: var(--text);
-            margin-bottom: 8px;
+            font-family: 'Manrope', sans-serif;
+            margin-bottom: 6px;
+            color: var(--ad-text);
         }
 
         .stat-change {
             display: flex;
             align-items: center;
-            gap: 6px;
-            font-size: 13px;
-            font-weight: 500;
+            gap: 4px;
+            font-size: 12px;
+            font-weight: 600;
         }
 
-        .stat-change.positive {
-            color: var(--success);
+        .stat-change.positive { color: var(--ad-success); }
+        .stat-change.negative { color: var(--ad-danger); }
+
+        .stat-change-vs {
+            font-size: 11px;
+            color: var(--ad-muted);
+            font-weight: 400;
         }
 
-        .stat-change.negative {
-            color: var(--danger);
-        }
-
-        /* 图表容器 */
+        /* ── Charts grid ── */
         .charts-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -209,736 +301,598 @@
         }
 
         .chart-card {
-            background: white;
+            background: var(--ad-surface);
+            border: 1px solid var(--ad-border);
+            border-radius: var(--ad-radius);
             padding: 24px;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            box-shadow: var(--ad-shadow);
+            backdrop-filter: blur(10px);
         }
 
-        .chart-card.full-width {
-            grid-column: 1 / -1;
-        }
+        .chart-card.full-width { grid-column: 1 / -1; }
 
         .chart-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
         .chart-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--text);
+            font-family: 'Manrope', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
         }
 
         .chart-subtitle {
-            font-size: 13px;
-            color: var(--text-secondary);
-            margin-top: 4px;
+            font-size: 12px;
+            color: var(--ad-muted);
+            margin-top: 3px;
         }
 
         .chart-container {
             width: 100%;
-            height: 350px;
+            height: 320px;
         }
 
-        /* 表格 */
+        .chart-card.full-width .chart-container { height: 280px; }
+
+        /* ── Table card ── */
         .table-card {
-            background: white;
+            background: var(--ad-surface);
+            border: 1px solid var(--ad-border);
+            border-radius: var(--ad-radius);
             padding: 24px;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            box-shadow: var(--ad-shadow);
+            backdrop-filter: blur(10px);
         }
 
-        .table-wrapper {
-            overflow-x: auto;
-        }
+        .table-wrapper { overflow-x: auto; }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+        table { width: 100%; border-collapse: collapse; }
 
-        thead {
-            background: var(--bg);
-        }
+        thead { background: var(--ad-accent-soft); }
 
         th {
             padding: 12px 16px;
             text-align: left;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-secondary);
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--ad-accent-deep);
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
         td {
-            padding: 16px;
-            border-bottom: 1px solid var(--border);
-            font-size: 14px;
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--ad-border);
+            font-size: 13px;
         }
 
-        tbody tr:hover {
-            background: var(--bg);
-        }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background: var(--ad-accent-soft); }
 
         .badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-weight: 600;
         }
 
-        .badge.success {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-        }
+        .badge.success { background: rgba(16,185,129,0.10); color: var(--ad-success); }
+        .badge.warning { background: rgba(217,119,6,0.10);  color: var(--ad-warning); }
+        .badge.danger  { background: rgba(239,68,68,0.10);  color: var(--ad-danger); }
 
-        .badge.warning {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--warning);
-        }
-
-        .badge.danger {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--danger);
-        }
-
-        /* 加载状态 */
+        /* ── Loading spinner ── */
         .loading {
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 300px;
-            color: var(--text-secondary);
+            height: 280px;
+            gap: 12px;
+            color: var(--ad-muted);
         }
 
         .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid var(--border);
-            border-top-color: var(--primary);
+            width: 32px; height: 32px;
+            border: 3px solid var(--ad-border);
+            border-top-color: var(--ad-accent);
             border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+            animation: ad-spin 0.8s linear infinite;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        @keyframes ad-spin { to { transform: rotate(360deg); } }
+
+        /* ── Responsive ── */
+        @media (max-width: 1280px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
         }
 
-        /* 响应式 */
-        @media (max-width: 1200px) {
-            .charts-grid {
-                grid-template-columns: 1fr;
-            }
+        @media (max-width: 1100px) {
+            .charts-grid { grid-template-columns: 1fr; }
         }
 
-        @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .header {
-                flex-direction: column;
-                gap: 16px;
-                align-items: flex-start;
-            }
+        @media (max-width: 700px) {
+            .ad-shell { padding: 20px 16px 60px; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .ad-hero { flex-direction: column; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- 头部 -->
-        <div class="header">
-            <div>
-                <h1>📊 数据分析面板</h1>
-                <p style="color: var(--text-secondary); margin-top: 8px;">实时监控系统运行状态和性能指标</p>
+<div class="ad-shell">
+
+    <!-- ── Topbar ── -->
+    <header class="ad-topbar">
+        <a class="ad-brand" href="/">
+            <div class="ad-brand-mark">
+                <span class="material-symbols-outlined" style="font-size:20px;color:#fff;">bar_chart</span>
             </div>
-            <div class="header-actions">
-                <div class="time-range-selector">
-                    <button class="time-range-btn" data-range="1h">1小时</button>
-                    <button class="time-range-btn" data-range="6h">6小时</button>
-                    <button class="time-range-btn active" data-range="24h">24小时</button>
-                    <button class="time-range-btn" data-range="7d">7天</button>
-                    <button class="time-range-btn" data-range="30d">30天</button>
-                </div>
-                <button class="btn btn-outline" onclick="refreshData()">🔄 刷新</button>
-                <button class="btn btn-primary" onclick="window.location.href='{{ url_for('developer_home') }}'">← 返回首页</button>
+            <div class="ad-brand-copy">
+                <strong>风起时域</strong>
+                <small>新能源 AI 平台</small>
             </div>
+        </a>
+        <div class="ad-topbar-right">
+            <div class="ad-time-range">
+                <button class="time-range-btn" data-range="1h">1小时</button>
+                <button class="time-range-btn" data-range="6h">6小时</button>
+                <button class="time-range-btn active" data-range="24h">24小时</button>
+                <button class="time-range-btn" data-range="7d">7天</button>
+                <button class="time-range-btn" data-range="30d">30天</button>
+            </div>
+            <button class="ad-btn ad-btn-ghost" onclick="refreshData()">
+                <span class="material-symbols-outlined" style="font-size:16px;">refresh</span>
+                刷新
+            </button>
         </div>
+    </header>
 
-        <!-- 统计卡片 -->
-        <div class="stats-grid">
-            <div class="stat-card primary">
-                <div class="stat-header">
-                    <div>
-                        <div class="stat-title">总对话数</div>
-                        <div class="stat-value" id="total-conversations">0</div>
-                        <div class="stat-change positive">
-                            <span>↑ <span id="conversations-change">0%</span></span>
-                            <span style="color: var(--text-secondary);">vs 上期</span>
-                        </div>
-                    </div>
-                    <div class="stat-icon">💬</div>
-                </div>
+    <!-- ── Hero ── -->
+    <div class="ad-hero">
+        <div>
+            <div class="ad-hero-pill">
+                <span class="material-symbols-outlined" style="font-size:12px;">insights</span>
+                实时监控
             </div>
-
-            <div class="stat-card success">
-                <div class="stat-header">
-                    <div>
-                        <div class="stat-title">活跃用户</div>
-                        <div class="stat-value" id="active-users">0</div>
-                        <div class="stat-change positive">
-                            <span>↑ <span id="users-change">0%</span></span>
-                            <span style="color: var(--text-secondary);">vs 上期</span>
-                        </div>
-                    </div>
-                    <div class="stat-icon">👥</div>
-                </div>
-            </div>
-
-            <div class="stat-card warning">
-                <div class="stat-header">
-                    <div>
-                        <div class="stat-title">Token 消耗</div>
-                        <div class="stat-value" id="total-tokens">0</div>
-                        <div class="stat-change positive">
-                            <span>↑ <span id="tokens-change">0%</span></span>
-                            <span style="color: var(--text-secondary);">vs 上期</span>
-                        </div>
-                    </div>
-                    <div class="stat-icon">🎯</div>
-                </div>
-            </div>
-
-            <div class="stat-card danger">
-                <div class="stat-header">
-                    <div>
-                        <div class="stat-title">总成本</div>
-                        <div class="stat-value">$<span id="total-cost">0.00</span></div>
-                        <div class="stat-change positive">
-                            <span>↑ <span id="cost-change">0%</span></span>
-                            <span style="color: var(--text-secondary);">vs 上期</span>
-                        </div>
-                    </div>
-                    <div class="stat-icon">💰</div>
-                </div>
-            </div>
+            <h1>数据分析面板</h1>
+            <p>实时监控系统运行状态与性能指标，掌握 Agent 使用趋势</p>
         </div>
+    </div>
 
-        <!-- 图表 -->
-        <div class="charts-grid">
-            <!-- 对话趋势 -->
-            <div class="chart-card full-width">
-                <div class="chart-header">
-                    <div>
-                        <div class="chart-title">对话趋势</div>
-                        <div class="chart-subtitle">过去时间段内的对话数量变化</div>
-                    </div>
-                </div>
-                <div id="conversation-trend-chart" class="chart-container"></div>
-            </div>
-
-            <!-- Agent 使用分布 -->
-            <div class="chart-card">
-                <div class="chart-header">
-                    <div>
-                        <div class="chart-title">Agent 使用分布</div>
-                        <div class="chart-subtitle">各类型 Agent 调用占比</div>
-                    </div>
-                </div>
-                <div id="agent-distribution-chart" class="chart-container"></div>
-            </div>
-
-            <!-- Token 消耗趋势 -->
-            <div class="chart-card">
-                <div class="chart-header">
-                    <div>
-                        <div class="chart-title">Token 消耗趋势</div>
-                        <div class="chart-subtitle">输入/输出 Token 使用情况</div>
-                    </div>
-                </div>
-                <div id="token-usage-chart" class="chart-container"></div>
-            </div>
-
-            <!-- 工作流执行统计 -->
-            <div class="chart-card">
-                <div class="chart-header">
-                    <div>
-                        <div class="chart-title">工作流执行统计</div>
-                        <div class="chart-subtitle">成功率和平均耗时</div>
-                    </div>
-                </div>
-                <div id="workflow-stats-chart" class="chart-container"></div>
-            </div>
-
-            <!-- 响应时间分布 -->
-            <div class="chart-card">
-                <div class="chart-header">
-                    <div>
-                        <div class="chart-title">响应时间分布</div>
-                        <div class="chart-subtitle">请求响应时间直方图</div>
-                    </div>
-                </div>
-                <div id="response-time-chart" class="chart-container"></div>
-            </div>
-        </div>
-
-        <!-- 热门工作流表格 -->
-        <div class="table-card">
-            <div class="chart-header">
+    <!-- ── Stats grid ── -->
+    <div class="stats-grid">
+        <div class="stat-card primary">
+            <div class="stat-header">
                 <div>
-                    <div class="chart-title">热门工作流</div>
-                    <div class="chart-subtitle">使用次数最多的工作流</div>
+                    <div class="stat-title">总对话数</div>
+                    <div class="stat-value" id="total-conversations">0</div>
+                    <div class="stat-change positive">
+                        ↑ <span id="conversations-change">0%</span>
+                        <span class="stat-change-vs">vs 上期</span>
+                    </div>
+                </div>
+                <div class="stat-icon">
+                    <span class="material-symbols-outlined" style="color:var(--ad-accent);font-size:22px;">chat</span>
                 </div>
             </div>
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>工作流名称</th>
-                            <th>调用次数</th>
-                            <th>成功率</th>
-                            <th>平均耗时</th>
-                            <th>最后执行</th>
-                            <th>状态</th>
-                        </tr>
-                    </thead>
-                    <tbody id="workflow-table-body">
-                        <tr>
-                            <td colspan="6" class="loading">
-                                <div class="spinner"></div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+        </div>
+
+        <div class="stat-card success">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-title">活跃用户</div>
+                    <div class="stat-value" id="active-users">0</div>
+                    <div class="stat-change positive">
+                        ↑ <span id="users-change">0%</span>
+                        <span class="stat-change-vs">vs 上期</span>
+                    </div>
+                </div>
+                <div class="stat-icon">
+                    <span class="material-symbols-outlined" style="color:var(--ad-success);font-size:22px;">group</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card warning">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-title">Token 消耗</div>
+                    <div class="stat-value" id="total-tokens">0</div>
+                    <div class="stat-change positive">
+                        ↑ <span id="tokens-change">0%</span>
+                        <span class="stat-change-vs">vs 上期</span>
+                    </div>
+                </div>
+                <div class="stat-icon">
+                    <span class="material-symbols-outlined" style="color:var(--ad-warning);font-size:22px;">token</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card danger">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-title">总成本</div>
+                    <div class="stat-value">$<span id="total-cost">0.00</span></div>
+                    <div class="stat-change positive">
+                        ↑ <span id="cost-change">0%</span>
+                        <span class="stat-change-vs">vs 上期</span>
+                    </div>
+                </div>
+                <div class="stat-icon">
+                    <span class="material-symbols-outlined" style="color:var(--ad-danger);font-size:22px;">payments</span>
+                </div>
             </div>
         </div>
     </div>
 
-    <script>
-        let currentTimeRange = '24h';
-        let charts = {};
-        let HAS_ECHARTS = typeof window.echarts !== 'undefined';
-        const ECHARTS_SOURCES = [
-            'https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js?v=20260410',
-            'https://unpkg.com/echarts@5.4.3/dist/echarts.min.js?v=20260410',
-            'https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js?v=20260410'
-        ];
+    <!-- ── Charts ── -->
+    <div class="charts-grid">
+        <!-- 对话趋势 -->
+        <div class="chart-card full-width">
+            <div class="chart-header">
+                <div>
+                    <div class="chart-title">对话趋势</div>
+                    <div class="chart-subtitle">过去时间段内的对话数量变化</div>
+                </div>
+            </div>
+            <div id="conversation-trend-chart" class="chart-container"></div>
+        </div>
 
-        function loadScript(src) {
-            return new Promise((resolve, reject) => {
-                const script = document.createElement('script');
-                script.src = src;
-                script.async = true;
-                script.crossOrigin = 'anonymous';
-                script.onload = () => resolve(true);
-                script.onerror = () => reject(new Error(`Failed to load ${src}`));
-                document.head.appendChild(script);
-            });
+        <!-- Agent 使用分布 -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <div>
+                    <div class="chart-title">Agent 使用分布</div>
+                    <div class="chart-subtitle">各类型 Agent 调用占比</div>
+                </div>
+            </div>
+            <div id="agent-distribution-chart" class="chart-container"></div>
+        </div>
+
+        <!-- Token 消耗趋势 -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <div>
+                    <div class="chart-title">Token 消耗趋势</div>
+                    <div class="chart-subtitle">输入/输出 Token 使用情况</div>
+                </div>
+            </div>
+            <div id="token-usage-chart" class="chart-container"></div>
+        </div>
+
+        <!-- 工作流执行统计 -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <div>
+                    <div class="chart-title">工作流执行统计</div>
+                    <div class="chart-subtitle">成功率和平均耗时</div>
+                </div>
+            </div>
+            <div id="workflow-stats-chart" class="chart-container"></div>
+        </div>
+
+        <!-- 响应时间分布 -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <div>
+                    <div class="chart-title">响应时间分布</div>
+                    <div class="chart-subtitle">请求响应时间直方图</div>
+                </div>
+            </div>
+            <div id="response-time-chart" class="chart-container"></div>
+        </div>
+    </div>
+
+    <!-- ── Table ── -->
+    <div class="table-card">
+        <div class="chart-header">
+            <div>
+                <div class="chart-title">热门工作流</div>
+                <div class="chart-subtitle">使用次数最多的工作流</div>
+            </div>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>工作流名称</th>
+                        <th>调用次数</th>
+                        <th>成功率</th>
+                        <th>平均耗时</th>
+                        <th>最后执行</th>
+                        <th>状态</th>
+                    </tr>
+                </thead>
+                <tbody id="workflow-table-body">
+                    <tr>
+                        <td colspan="6">
+                            <div class="loading">
+                                <div class="spinner"></div>
+                                <span>加载中…</span>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let currentTimeRange = '24h';
+    let charts = {};
+    let HAS_ECHARTS = typeof window.echarts !== 'undefined';
+    const ECHARTS_SOURCES = [
+        'https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js?v=20260410',
+        'https://unpkg.com/echarts@5.4.3/dist/echarts.min.js?v=20260410',
+        'https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js?v=20260410'
+    ];
+
+    function loadScript(src) {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.async = true;
+            script.crossOrigin = 'anonymous';
+            script.onload = () => resolve(true);
+            script.onerror = () => reject(new Error(`Failed to load ${src}`));
+            document.head.appendChild(script);
+        });
+    }
+
+    async function ensureEcharts() {
+        if (window.echarts) {
+            HAS_ECHARTS = true;
+            return true;
         }
-
-        async function ensureEcharts() {
-            if (window.echarts) {
-                HAS_ECHARTS = true;
-                return true;
-            }
-            if (window.__analyticsEchartsLoader) {
-                HAS_ECHARTS = await window.__analyticsEchartsLoader;
-                return HAS_ECHARTS;
-            }
-            window.__analyticsEchartsLoader = (async () => {
-                for (const src of ECHARTS_SOURCES) {
-                    try {
-                        await loadScript(src);
-                        if (window.echarts) {
-                            return true;
-                        }
-                    } catch (_error) {
-                        // Try the next CDN mirror.
-                    }
-                }
-                return false;
-            })();
+        if (window.__analyticsEchartsLoader) {
             HAS_ECHARTS = await window.__analyticsEchartsLoader;
             return HAS_ECHARTS;
         }
+        window.__analyticsEchartsLoader = (async () => {
+            for (const src of ECHARTS_SOURCES) {
+                try {
+                    await loadScript(src);
+                    if (window.echarts) return true;
+                } catch (_error) {}
+            }
+            return false;
+        })();
+        HAS_ECHARTS = await window.__analyticsEchartsLoader;
+        return HAS_ECHARTS;
+    }
 
-        function renderChartNotice(containerId, message) {
-            const container = document.getElementById(containerId);
-            if (!container) return;
-            container.innerHTML = `
-                <div style="height:100%;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;color:var(--text-secondary);line-height:1.8;">
-                    <div>
-                        <div style="font-size:28px;margin-bottom:8px;">⚠️</div>
-                        <div>${message}</div>
-                    </div>
+    function renderChartNotice(containerId, message) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = `
+            <div style="height:100%;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;color:var(--ad-muted);line-height:1.8;">
+                <div>
+                    <span class="material-symbols-outlined" style="font-size:32px;display:block;margin-bottom:8px;">warning</span>
+                    <div>${message}</div>
                 </div>
-            `;
-        }
+            </div>
+        `;
+    }
 
-        // 初始化
-        document.addEventListener('DOMContentLoaded', async function() {
-            await ensureEcharts();
-            initCharts();
-            loadData();
+    document.addEventListener('DOMContentLoaded', async function() {
+        await ensureEcharts();
+        initCharts();
+        loadData();
 
-            // 时间范围切换
-            document.querySelectorAll('.time-range-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.time-range-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    currentTimeRange = this.dataset.range;
-                    loadData();
-                });
+        document.querySelectorAll('.time-range-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.time-range-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentTimeRange = this.dataset.range;
+                loadData();
             });
-
-            // 自动刷新（每30秒）
-            setInterval(loadData, 30000);
         });
 
-        // 初始化图表
-        function initCharts() {
-            if (!HAS_ECHARTS) {
-                [
-                    'conversation-trend-chart',
-                    'agent-distribution-chart',
-                    'token-usage-chart',
-                    'workflow-stats-chart',
-                    'response-time-chart'
-                ].forEach(id => renderChartNotice(id, 'ECharts 未能加载，图表已切换为占位提示。'));
-                return;
-            }
+        setInterval(loadData, 30000);
+    });
 
-            charts.conversationTrend = echarts.init(document.getElementById('conversation-trend-chart'));
-            charts.agentDistribution = echarts.init(document.getElementById('agent-distribution-chart'));
-            charts.tokenUsage = echarts.init(document.getElementById('token-usage-chart'));
-            charts.workflowStats = echarts.init(document.getElementById('workflow-stats-chart'));
-            charts.responseTime = echarts.init(document.getElementById('response-time-chart'));
-
-            // 响应式
-            window.addEventListener('resize', function() {
-                Object.values(charts).forEach(chart => chart.resize());
-            });
+    function initCharts() {
+        if (!HAS_ECHARTS) {
+            [
+                'conversation-trend-chart',
+                'agent-distribution-chart',
+                'token-usage-chart',
+                'workflow-stats-chart',
+                'response-time-chart'
+            ].forEach(id => renderChartNotice(id, 'ECharts 未能加载，图表已切换为占位提示。'));
+            return;
         }
 
-        // 加载数据
-        async function loadData() {
-            try {
-                const response = await fetch(`/api/monitoring/dashboard?time_range=${currentTimeRange}`);
-                const result = await response.json();
+        charts.conversationTrend = echarts.init(document.getElementById('conversation-trend-chart'));
+        charts.agentDistribution = echarts.init(document.getElementById('agent-distribution-chart'));
+        charts.tokenUsage = echarts.init(document.getElementById('token-usage-chart'));
+        charts.workflowStats = echarts.init(document.getElementById('workflow-stats-chart'));
+        charts.responseTime = echarts.init(document.getElementById('response-time-chart'));
 
-                if (result.success) {
-                    updateStats(result.data);
-                    updateCharts(result.data);
-                    updateTable(result.data);
-                } else {
-                    console.error('加载数据失败:', result.error);
+        window.addEventListener('resize', function() {
+            Object.values(charts).forEach(chart => chart.resize());
+        });
+    }
+
+    async function loadData() {
+        try {
+            const response = await fetch(`/api/monitoring/dashboard?time_range=${currentTimeRange}`);
+            const result = await response.json();
+
+            if (result.success) {
+                updateStats(result.data);
+                updateCharts(result.data);
+                updateTable(result.data);
+            } else {
+                console.error('加载数据失败:', result.error);
+            }
+        } catch (error) {
+            console.error('加载数据异常:', error);
+        }
+    }
+
+    function updateStats(data) {
+        document.getElementById('total-conversations').textContent = formatNumber(data.total_conversations || 0);
+        document.getElementById('active-users').textContent = formatNumber(data.active_users || 0);
+        document.getElementById('total-tokens').textContent = formatNumber(data.total_tokens || 0);
+        document.getElementById('total-cost').textContent = (data.total_cost || 0).toFixed(2);
+
+        document.getElementById('conversations-change').textContent = (data.conversations_change || 0).toFixed(1) + '%';
+        document.getElementById('users-change').textContent = (data.users_change || 0).toFixed(1) + '%';
+        document.getElementById('tokens-change').textContent = (data.tokens_change || 0).toFixed(1) + '%';
+        document.getElementById('cost-change').textContent = (data.cost_change || 0).toFixed(1) + '%';
+    }
+
+    function updateCharts(data) {
+        if (!HAS_ECHARTS) return;
+
+        charts.conversationTrend.setOption({
+            tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
+            legend: { data: ['对话数', '用户数'] },
+            grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+            xAxis: { type: 'category', boundaryGap: false, data: data.time_labels || [] },
+            yAxis: { type: 'value' },
+            series: [
+                {
+                    name: '对话数', type: 'line', smooth: true,
+                    areaStyle: { color: 'rgba(19,99,223,0.08)' },
+                    itemStyle: { color: '#1363df' },
+                    data: data.conversation_series || []
+                },
+                {
+                    name: '用户数', type: 'line', smooth: true,
+                    areaStyle: { color: 'rgba(16,185,129,0.08)' },
+                    itemStyle: { color: '#10b981' },
+                    data: data.user_series || []
                 }
-            } catch (error) {
-                console.error('加载数据异常:', error);
-            }
-        }
+            ]
+        });
 
-        // 更新统计卡片
-        function updateStats(data) {
-            document.getElementById('total-conversations').textContent = formatNumber(data.total_conversations || 0);
-            document.getElementById('active-users').textContent = formatNumber(data.active_users || 0);
-            document.getElementById('total-tokens').textContent = formatNumber(data.total_tokens || 0);
-            document.getElementById('total-cost').textContent = (data.total_cost || 0).toFixed(2);
-
-            document.getElementById('conversations-change').textContent = (data.conversations_change || 0).toFixed(1) + '%';
-            document.getElementById('users-change').textContent = (data.users_change || 0).toFixed(1) + '%';
-            document.getElementById('tokens-change').textContent = (data.tokens_change || 0).toFixed(1) + '%';
-            document.getElementById('cost-change').textContent = (data.cost_change || 0).toFixed(1) + '%';
-        }
-
-        // 更新图表
-        function updateCharts(data) {
-            if (!HAS_ECHARTS) return;
-            // 对话趋势图
-            charts.conversationTrend.setOption({
-                tooltip: {
-                    trigger: 'axis',
-                    axisPointer: { type: 'cross' }
-                },
-                legend: {
-                    data: ['对话数', '用户数']
-                },
-                grid: {
-                    left: '3%',
-                    right: '4%',
-                    bottom: '3%',
-                    containLabel: true
-                },
-                xAxis: {
-                    type: 'category',
-                    boundaryGap: false,
-                    data: data.time_labels || []
-                },
-                yAxis: {
-                    type: 'value'
-                },
-                series: [
-                    {
-                        name: '对话数',
-                        type: 'line',
-                        smooth: true,
-                        areaStyle: {
-                            color: 'rgba(99, 102, 241, 0.1)'
-                        },
-                        itemStyle: {
-                            color: '#6366f1'
-                        },
-                        data: data.conversation_series || []
-                    },
-                    {
-                        name: '用户数',
-                        type: 'line',
-                        smooth: true,
-                        areaStyle: {
-                            color: 'rgba(16, 185, 129, 0.1)'
-                        },
-                        itemStyle: {
-                            color: '#10b981'
-                        },
-                        data: data.user_series || []
-                    }
+        charts.agentDistribution.setOption({
+            tooltip: { trigger: 'item', formatter: '{a} <br/>{b}: {c} ({d}%)' },
+            legend: { orient: 'vertical', right: 10, top: 'center' },
+            series: [{
+                name: 'Agent类型', type: 'pie', radius: ['40%', '70%'],
+                avoidLabelOverlap: false,
+                itemStyle: { borderRadius: 10, borderColor: '#fff', borderWidth: 2 },
+                label: { show: false, position: 'center' },
+                emphasis: { label: { show: true, fontSize: 18, fontWeight: 'bold' } },
+                labelLine: { show: false },
+                data: data.agent_distribution || [
+                    { value: 335, name: '通用Agent' },
+                    { value: 234, name: '代码Agent' },
+                    { value: 154, name: '因果推理' },
+                    { value: 135, name: '数据分析' }
                 ]
-            });
+            }]
+        });
 
-            // Agent 分布饼图
-            charts.agentDistribution.setOption({
-                tooltip: {
-                    trigger: 'item',
-                    formatter: '{a} <br/>{b}: {c} ({d}%)'
+        charts.tokenUsage.setOption({
+            tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+            legend: { data: ['输入Token', '输出Token'] },
+            grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+            xAxis: { type: 'category', data: data.time_labels || [] },
+            yAxis: { type: 'value' },
+            series: [
+                {
+                    name: '输入Token', type: 'bar', stack: 'total',
+                    itemStyle: { color: '#1363df' },
+                    data: data.input_tokens_series || []
                 },
-                legend: {
-                    orient: 'vertical',
-                    right: 10,
-                    top: 'center'
-                },
-                series: [
-                    {
-                        name: 'Agent类型',
-                        type: 'pie',
-                        radius: ['40%', '70%'],
-                        avoidLabelOverlap: false,
-                        itemStyle: {
-                            borderRadius: 10,
-                            borderColor: '#fff',
-                            borderWidth: 2
-                        },
-                        label: {
-                            show: false,
-                            position: 'center'
-                        },
-                        emphasis: {
-                            label: {
-                                show: true,
-                                fontSize: 20,
-                                fontWeight: 'bold'
-                            }
-                        },
-                        labelLine: {
-                            show: false
-                        },
-                        data: data.agent_distribution || [
-                            { value: 335, name: '通用Agent' },
-                            { value: 234, name: '代码Agent' },
-                            { value: 154, name: '因果推理' },
-                            { value: 135, name: '数据分析' }
-                        ]
-                    }
-                ]
-            });
+                {
+                    name: '输出Token', type: 'bar', stack: 'total',
+                    itemStyle: { color: '#d97706' },
+                    data: data.output_tokens_series || []
+                }
+            ]
+        });
 
-            // Token 使用趋势
-            charts.tokenUsage.setOption({
-                tooltip: {
-                    trigger: 'axis',
-                    axisPointer: { type: 'shadow' }
+        charts.workflowStats.setOption({
+            tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
+            legend: { data: ['成功率', '平均耗时(s)'] },
+            grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+            xAxis: { type: 'category', data: data.workflow_names || [] },
+            yAxis: [
+                { type: 'value', name: '成功率(%)', min: 0, max: 100 },
+                { type: 'value', name: '耗时(s)' }
+            ],
+            series: [
+                {
+                    name: '成功率', type: 'bar',
+                    itemStyle: { color: '#10b981' },
+                    data: data.workflow_success_rates || []
                 },
-                legend: {
-                    data: ['输入Token', '输出Token']
-                },
-                grid: {
-                    left: '3%',
-                    right: '4%',
-                    bottom: '3%',
-                    containLabel: true
-                },
-                xAxis: {
-                    type: 'category',
-                    data: data.time_labels || []
-                },
-                yAxis: {
-                    type: 'value'
-                },
-                series: [
-                    {
-                        name: '输入Token',
-                        type: 'bar',
-                        stack: 'total',
-                        itemStyle: {
-                            color: '#6366f1'
-                        },
-                        data: data.input_tokens_series || []
-                    },
-                    {
-                        name: '输出Token',
-                        type: 'bar',
-                        stack: 'total',
-                        itemStyle: {
-                            color: '#8b5cf6'
-                        },
-                        data: data.output_tokens_series || []
-                    }
-                ]
-            });
+                {
+                    name: '平均耗时(s)', type: 'line', yAxisIndex: 1,
+                    itemStyle: { color: '#1363df' },
+                    data: data.workflow_durations || []
+                }
+            ]
+        });
 
-            // 工作流统计
-            charts.workflowStats.setOption({
-                tooltip: {
-                    trigger: 'axis',
-                    axisPointer: { type: 'cross' }
-                },
-                legend: {
-                    data: ['成功率', '平均耗时(s)']
-                },
-                grid: {
-                    left: '3%',
-                    right: '4%',
-                    bottom: '3%',
-                    containLabel: true
-                },
-                xAxis: {
-                    type: 'category',
-                    data: data.workflow_names || []
-                },
-                yAxis: [
-                    {
-                        type: 'value',
-                        name: '成功率(%)',
-                        min: 0,
-                        max: 100
-                    },
-                    {
-                        type: 'value',
-                        name: '耗时(s)'
-                    }
-                ],
-                series: [
-                    {
-                        name: '成功率',
-                        type: 'bar',
-                        itemStyle: {
-                            color: '#10b981'
-                        },
-                        data: data.workflow_success_rates || []
-                    },
-                    {
-                        name: '平均耗时(s)',
-                        type: 'line',
-                        yAxisIndex: 1,
-                        itemStyle: {
-                            color: '#1363df'
-                        },
-                        data: data.workflow_durations || []
-                    }
-                ]
-            });
+        charts.responseTime.setOption({
+            tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+            grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+            xAxis: { type: 'category', data: ['<1s', '1-2s', '2-5s', '5-10s', '>10s'] },
+            yAxis: { type: 'value' },
+            series: [{
+                name: '请求数', type: 'bar',
+                itemStyle: { color: '#3b82f6' },
+                data: data.response_time_distribution || [450, 320, 180, 50, 20]
+            }]
+        });
+    }
 
-            // 响应时间分布
-            charts.responseTime.setOption({
-                tooltip: {
-                    trigger: 'axis',
-                    axisPointer: { type: 'shadow' }
-                },
-                grid: {
-                    left: '3%',
-                    right: '4%',
-                    bottom: '3%',
-                    containLabel: true
-                },
-                xAxis: {
-                    type: 'category',
-                    data: ['<1s', '1-2s', '2-5s', '5-10s', '>10s']
-                },
-                yAxis: {
-                    type: 'value'
-                },
-                series: [
-                    {
-                        name: '请求数',
-                        type: 'bar',
-                        itemStyle: {
-                            color: '#3b82f6'
-                        },
-                        data: data.response_time_distribution || [450, 320, 180, 50, 20]
-                    }
-                ]
-            });
+    function updateTable(data) {
+        const tbody = document.getElementById('workflow-table-body');
+        const workflows = data.top_workflows || [];
+
+        if (workflows.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--ad-muted);padding:32px;">暂无数据</td></tr>';
+            return;
         }
 
-        // 更新表格
-        function updateTable(data) {
-            const tbody = document.getElementById('workflow-table-body');
-            const workflows = data.top_workflows || [];
+        tbody.innerHTML = workflows.map(wf => `
+            <tr>
+                <td><strong>${wf.name}</strong></td>
+                <td>${formatNumber(wf.count)}</td>
+                <td>
+                    <span class="badge ${wf.success_rate >= 95 ? 'success' : wf.success_rate >= 80 ? 'warning' : 'danger'}">
+                        ${wf.success_rate.toFixed(1)}%
+                    </span>
+                </td>
+                <td>${wf.avg_duration.toFixed(2)}s</td>
+                <td>${formatTime(wf.last_executed)}</td>
+                <td><span class="badge success">运行中</span></td>
+            </tr>
+        `).join('');
+    }
 
-            if (workflows.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-secondary);">暂无数据</td></tr>';
-                return;
-            }
+    function refreshData() { loadData(); }
 
-            tbody.innerHTML = workflows.map(wf => `
-                <tr>
-                    <td><strong>${wf.name}</strong></td>
-                    <td>${formatNumber(wf.count)}</td>
-                    <td>
-                        <span class="badge ${wf.success_rate >= 95 ? 'success' : wf.success_rate >= 80 ? 'warning' : 'danger'}">
-                            ${wf.success_rate.toFixed(1)}%
-                        </span>
-                    </td>
-                    <td>${wf.avg_duration.toFixed(2)}s</td>
-                    <td>${formatTime(wf.last_executed)}</td>
-                    <td>
-                        <span class="badge success">运行中</span>
-                    </td>
-                </tr>
-            `).join('');
-        }
+    function formatNumber(num) {
+        if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+        if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+        return num.toString();
+    }
 
-        // 刷新数据
-        function refreshData() {
-            loadData();
-        }
-
-        // 格式化数字
-        function formatNumber(num) {
-            if (num >= 1000000) {
-                return (num / 1000000).toFixed(1) + 'M';
-            } else if (num >= 1000) {
-                return (num / 1000).toFixed(1) + 'K';
-            }
-            return num.toString();
-        }
-
-        // 格式化时间
-        function formatTime(timestamp) {
-            if (!timestamp) return '-';
-            const date = new Date(timestamp);
-            const now = new Date();
-            const diff = now - date;
-
-            if (diff < 60000) return '刚刚';
-            if (diff < 3600000) return Math.floor(diff / 60000) + '分钟前';
-            if (diff < 86400000) return Math.floor(diff / 3600000) + '小时前';
-            return Math.floor(diff / 86400000) + '天前';
-        }
-    </script>
+    function formatTime(timestamp) {
+        if (!timestamp) return '-';
+        const date = new Date(timestamp);
+        const now = new Date();
+        const diff = now - date;
+        if (diff < 60000) return '刚刚';
+        if (diff < 3600000) return Math.floor(diff / 60000) + '分钟前';
+        if (diff < 86400000) return Math.floor(diff / 3600000) + '小时前';
+        return Math.floor(diff / 86400000) + '天前';
+    }
+</script>
 </body>
 </html>

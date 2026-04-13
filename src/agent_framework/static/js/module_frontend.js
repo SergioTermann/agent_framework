@@ -4,13 +4,15 @@ function bindModuleFrontend() {
     const primaryInput = document.getElementById("module-primary-input");
     const suggestionCards = Array.from(document.querySelectorAll("[data-action]"));
     const scenePills = Array.from(document.querySelectorAll("[data-scene]"));
+    const filterPills = Array.from(document.querySelectorAll(".module-filter-pill"));
 
     if (!form || !resultBox) {
         return;
     }
 
-    const moduleName = form.dataset.moduleName || "Current module";
-    const resultTitle = form.dataset.resultTitle || `${moduleName} brief`;
+    const moduleName = form.dataset.moduleName || "当前模块";
+    const moduleSlug = form.dataset.moduleSlug || "";
+    const resultTitle = form.dataset.resultTitle || `${moduleName}摘要`;
     const draftKey = `module_frontend_draft_${moduleName}`;
 
     const focusPrimaryInput = () => {
@@ -54,13 +56,24 @@ function bindModuleFrontend() {
 
     suggestionCards.forEach((card) => {
         card.addEventListener("click", () => {
+            suggestionCards.forEach((item) => item.classList.remove("is-selected"));
+            card.classList.add("is-selected");
             appendToPrimaryInput(card.dataset.action || "");
         });
     });
 
     scenePills.forEach((pill) => {
         pill.addEventListener("click", () => {
-            appendToPrimaryInput(`Scene: ${pill.dataset.scene || ""}`);
+            scenePills.forEach((item) => item.classList.remove("is-selected"));
+            pill.classList.add("is-selected");
+            appendToPrimaryInput(`场景：${pill.dataset.scene || ""}`);
+        });
+    });
+
+    filterPills.forEach((pill) => {
+        pill.addEventListener("click", () => {
+            filterPills.forEach((item) => item.classList.remove("is-active", "is-selected"));
+            pill.classList.add("is-active", "is-selected");
         });
     });
 
@@ -117,21 +130,25 @@ function bindModuleFrontend() {
                 value: String(value).trim(),
             }))
             .filter((item) => item.value);
+        const entryMap = Object.fromEntries(entries.map((item) => [item.key, item.value]));
 
-        const highlighted = entries.slice(0, 3);
-        const summary = highlighted.length
-            ? highlighted.map((item) => `${item.key}: ${item.value}`).join(" | ")
-            : "No structured input yet. Add a task, target, or operating context first.";
+        const selectedAction = document.querySelector(".module-suggestion-card.is-selected strong")?.textContent?.trim();
+        const selectedScene = document.querySelector(".module-scene-pill.is-selected")?.textContent?.trim();
+        const summaryLines = buildModuleSummary({
+            moduleSlug,
+            moduleName,
+            entryMap,
+            selectedAction,
+            selectedScene,
+        });
 
         resultBox.innerHTML = `
             <div class="module-panel-head">
-                <small>Output Brief</small>
+                <small>输出摘要</small>
                 <strong>${resultTitle}</strong>
             </div>
             <ul class="module-result-list">
-                <li>${moduleName} intake captured: ${summary}</li>
-                <li>The current screen is now aligned to the new visual shell and can continue into a real workflow or API handoff.</li>
-                <li>Next step: confirm the main objective, then route this brief into the downstream module action.</li>
+                ${summaryLines.map((line) => `<li>${line}</li>`).join("")}
             </ul>
         `;
 
@@ -142,34 +159,73 @@ function bindModuleFrontend() {
         }
     });
 
-    // Power Trading Module Enhancements
     if (moduleName === "电力交易") {
         enhancePowerTradingModule();
     }
 }
 
-function enhancePowerTradingModule() {
-    // Add real-time price update simulation
-    const metricCards = document.querySelectorAll('.module-metric-card');
-    metricCards.forEach(card => {
-        card.setAttribute('data-module', 'power-trading');
-    });
+function buildModuleSummary({ moduleSlug, moduleName, entryMap, selectedAction, selectedScene }) {
+    const valueOf = (key, fallback) => entryMap[key] || fallback;
+    const actionText = selectedAction ? `已选快捷动作：${selectedAction}` : "未选择快捷动作";
+    const sceneText = selectedScene ? `场景标签：${selectedScene}` : "未附加场景标签";
 
-    // Add hover effects to action cards
-    const actionCards = document.querySelectorAll('.module-action-card');
-    actionCards.forEach(card => {
-        card.setAttribute('data-module', 'power-trading');
-    });
+    const builders = {
+        "weather-siting": () => ([
+            `${moduleName}已收敛本轮项目边界：${valueOf("project", "项目名称待补")} / ${valueOf("region", "区域范围待补")} / ${valueOf("capacity", "容量与机型边界待补")}。`,
+            `本轮比选目标为：${valueOf("goal", "比选目标待补")}。${actionText}，${sceneText}。`,
+            "建议下一步先完成硬约束筛除和接入复筛，再输出优选、备选与踏勘清单。",
+        ]),
+        "smart-workorder": () => ([
+            `${moduleName}已完成受理骨架：站点 ${valueOf("site", "待补")}，设备 ${valueOf("asset", "待补")}，等级 ${valueOf("severity", "待补")}。`,
+            `故障与处置背景：${valueOf("issue", "待补充故障现象、影响范围和临时措施")}。${actionText}，${sceneText}。`,
+            "建议下一步先锁定责任班组和备件命中，再把执行留痕与验收回执拉进同一闭环。",
+        ]),
+        "power-trading": () => ([
+            `${moduleName}已锁定交易窗口：${valueOf("period", "交易时段待补")} / ${valueOf("market", "目标市场待补")} / ${valueOf("portfolio", "组合仓位待补")}。`,
+            `当前风险边界：${valueOf("capacity", "风险边界待补")}；策略目标：${valueOf("goal", "策略目标待补")}。${actionText}，${sceneText}。`,
+            "建议下一步同步生成主策略和备用策略，并把偏差敞口、止损线和盘后复盘口径一起带出。",
+        ]),
+        "smart-office": () => ([
+            `${moduleName}已收口场景信息：${valueOf("topic", "办公场景待补")} / ${valueOf("subject", "会议或项目主题待补")} / ${valueOf("team", "协同部门待补")}。`,
+            `本轮处理目标：${valueOf("goal", "请补充纪要口径、任务拆解和知识沉淀目标")}。${actionText}，${sceneText}。`,
+            "建议下一步先确认 owner、deadline 和待确认项，再决定哪些内容进入纪要、任务和知识三条链路。",
+        ]),
+    };
 
-    // Add data attributes to board section
-    const boardSection = document.querySelector('.module-board-section');
-    if (boardSection) {
-        boardSection.setAttribute('data-module', 'power-trading');
+    if (builders[moduleSlug]) {
+        return builders[moduleSlug]();
     }
 
-    // Simulate real-time price updates (demo only)
-    const priceElement = document.querySelector('.module-metric-card strong');
-    if (priceElement && priceElement.textContent.includes('428')) {
+    const highlighted = Object.entries(entryMap).slice(0, 3);
+    const summary = highlighted.length
+        ? highlighted.map(([key, value]) => `${key}: ${value}`).join(" | ")
+        : "当前还没有有效输入，建议先补任务对象、目标和业务背景。";
+
+    return [
+        `${moduleName} 已受理本轮输入：${summary}`,
+        `${actionText}，${sceneText}。`,
+        "建议下一步确认主目标、风险边界和责任节点，再继续流转到下游业务动作。",
+    ];
+}
+
+function enhancePowerTradingModule() {
+    const metricCards = document.querySelectorAll(".module-metric-card");
+    metricCards.forEach((card) => {
+        card.setAttribute("data-module", "power-trading");
+    });
+
+    const actionCards = document.querySelectorAll(".module-suggestion-card");
+    actionCards.forEach((card) => {
+        card.setAttribute("data-module", "power-trading");
+    });
+
+    const boardSection = document.querySelector(".module-board-section");
+    if (boardSection) {
+        boardSection.setAttribute("data-module", "power-trading");
+    }
+
+    const priceElement = document.querySelector(".module-metric-card strong");
+    if (priceElement && priceElement.textContent.includes("428")) {
         let basePrice = 428.5;
         setInterval(() => {
             const fluctuation = (Math.random() - 0.5) * 2;
@@ -178,15 +234,14 @@ function enhancePowerTradingModule() {
         }, 5000);
     }
 
-    // Add trend indicators animation
-    const trendCells = document.querySelectorAll('td:nth-child(3)');
-    trendCells.forEach(cell => {
-        if (cell.textContent.includes('↗')) {
-            cell.style.color = '#22a06b';
-            cell.style.fontWeight = '600';
-        } else if (cell.textContent.includes('↘')) {
-            cell.style.color = '#dc2626';
-            cell.style.fontWeight = '600';
+    const trendCells = document.querySelectorAll("td:nth-child(3)");
+    trendCells.forEach((cell) => {
+        if (cell.textContent.includes("↗")) {
+            cell.style.color = "#22a06b";
+            cell.style.fontWeight = "600";
+        } else if (cell.textContent.includes("↘")) {
+            cell.style.color = "#dc2626";
+            cell.style.fontWeight = "600";
         }
     });
 }

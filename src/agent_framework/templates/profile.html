@@ -10,12 +10,12 @@
         :root {
             --primary: #1363df;
             --primary-deep: #0f4eb3;
-            --primary-light: #dbeafe;
+            --primary-light: #d97706;
             --primary-soft: rgba(19, 99, 223, 0.08);
-            --primary-glow: rgba(19, 99, 223, 0.28);
-            --line-strong: rgba(19, 99, 223, 0.24);
-            --line-glow: rgba(19, 99, 223, 0.42);
-            --shadow-gold: 0 20px 48px rgba(19, 99, 223, 0.22), 0 0 60px rgba(19, 99, 223, 0.12);
+            --primary-glow: rgba(19, 99, 223, 0.20);
+            --line-strong: rgba(19, 99, 223, 0.20);
+            --line-glow: rgba(19, 99, 223, 0.30);
+            --shadow-gold: 0 18px 36px -20px rgba(19, 99, 223, 0.28);
         }
 
         .container {
@@ -26,7 +26,7 @@
 
         .profile-grid {
             display: grid;
-            grid-template-columns: 300px 1fr;
+            grid-template-columns: 300px minmax(0, 1fr);
             gap: 30px;
         }
 
@@ -79,7 +79,7 @@
         }
 
         .avatar-upload label:hover {
-            background: rgba(19, 99, 223, 0.16);
+            background: rgba(19, 99, 223, 0.14);
         }
 
         .user-info {
@@ -345,7 +345,6 @@
     <div class="page-wide" style="max-width: 1200px;">
         <nav class="topbar">
             <div class="brand">
-                <a class="back-link" href="/developer">← 返回</a>
                 <h1>个人中心</h1>
             </div>
             <div class="topbar-actions">

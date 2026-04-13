@@ -11,24 +11,41 @@
             --theme-accent: #1363df;
             --theme-accent-deep: #0f4eb3;
             --theme-accent-soft: rgba(19, 99, 223, 0.10);
+            --theme-border: rgba(101, 120, 144, 0.14);
+            --theme-text: #202a36;
+            --theme-muted: #525b62;
+            --theme-surface: rgba(255, 252, 247, 0.84);
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: 'Inter', 'Segoe UI', 'PingFang SC', sans-serif;
+            color: var(--theme-text);
+            background:
+                radial-gradient(circle at 8% 10%, rgba(19, 99, 223, 0.14), transparent 22%),
+                radial-gradient(circle at 88% 12%, rgba(217, 119, 6, 0.12), transparent 20%),
+                radial-gradient(circle at 76% 86%, rgba(20, 184, 166, 0.10), transparent 24%),
+                #eef4fb;
         }
 
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 28px 24px 56px;
         }
 
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: #ffffff;
-            border-radius: 12px;
-            border: 1px solid rgba(15, 23, 42, 0.15);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            margin-bottom: 24px;
+            padding: 24px 26px;
+            background: var(--theme-surface);
+            border-radius: 22px;
+            border: 1px solid var(--theme-border);
+            box-shadow: 0 18px 42px -28px rgba(34, 44, 63, 0.16);
+            backdrop-filter: blur(16px);
         }
 
         .header h1 {
@@ -43,7 +60,7 @@
             background: linear-gradient(135deg, var(--theme-accent), var(--theme-accent-deep));
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 16px;
             cursor: pointer;
             font-weight: 600;
         }
@@ -54,11 +71,12 @@
         }
 
         .experiment-card {
-            background: white;
-            border-radius: 12px;
-            border: 1px solid rgba(15, 23, 42, 0.15);
+            background: var(--theme-surface);
+            border-radius: 22px;
+            border: 1px solid var(--theme-border);
             padding: 24px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 18px 42px -28px rgba(34, 44, 63, 0.16);
+            backdrop-filter: blur(16px);
         }
 
         .experiment-header {
@@ -71,7 +89,7 @@
         .experiment-title {
             font-size: 20px;
             font-weight: 700;
-            color: #0f172a;
+            color: var(--theme-text);
             margin-bottom: 8px;
         }
 
@@ -88,8 +106,8 @@
         }
 
         .status-completed {
-            background: #dbeafe;
-            color: #2563eb;
+            background: rgba(19, 99, 223,.10);
+            color: var(--theme-accent);
         }
 
         .status-draft {
@@ -105,10 +123,10 @@
         }
 
         .variant-card {
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
+            border: 1px solid var(--theme-border);
+            border-radius: 18px;
             padding: 16px;
-            background: #f8fafc;
+            background: rgba(255,255,255,0.72);
         }
 
         .variant-header {
@@ -120,7 +138,7 @@
 
         .variant-name {
             font-weight: 600;
-            color: #0f172a;
+            color: var(--theme-text);
         }
 
         .variant-badge {
@@ -136,7 +154,7 @@
             display: flex;
             justify-content: space-between;
             padding: 8px 0;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid rgba(101, 120, 144,.12);
         }
 
         .metric-row:last-child {
@@ -144,13 +162,13 @@
         }
 
         .metric-label {
-            color: #64748b;
+            color: var(--theme-muted);
             font-size: 13px;
         }
 
         .metric-value {
             font-weight: 600;
-            color: #0f172a;
+            color: var(--theme-text);
         }
 
         .winner-badge {
@@ -173,15 +191,15 @@
 
         .btn-secondary {
             padding: 8px 16px;
-            border: 1px solid #e2e8f0;
-            background: white;
-            border-radius: 6px;
+            border: 1px solid var(--theme-border);
+            background: rgba(255,255,255,0.72);
+            border-radius: 14px;
             cursor: pointer;
             font-size: 14px;
         }
 
         .btn-secondary:hover {
-            background: #f8fafc;
+            background: rgba(255,255,255,0.96);
             border-color: var(--theme-accent);
         }
 
@@ -193,11 +211,12 @@
         }
 
         .stat-card {
-            background: white;
-            border-radius: 12px;
-            border: 1px solid rgba(15, 23, 42, 0.15);
+            background: var(--theme-surface);
+            border-radius: 22px;
+            border: 1px solid var(--theme-border);
             padding: 20px;
             text-align: center;
+            box-shadow: 0 18px 42px -28px rgba(34, 44, 63, 0.16);
         }
 
         .stat-value {
@@ -208,7 +227,7 @@
         }
 
         .stat-label {
-            color: #64748b;
+            color: var(--theme-muted);
             font-size: 14px;
         }
     </style>

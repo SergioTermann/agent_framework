@@ -10,64 +10,84 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@300..700,0..1&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/module_workspace.css') }}">
 </head>
-<body>
+<body data-module="{{ module.slug }}"{% if embedded %} class="is-embedded"{% endif %}>
     <div class="workspace-app-shell">
-        <aside class="workspace-sidebar">
-            <div class="workspace-brand">
-                <a class="workspace-brand-home" href="/">
-                    <span class="workspace-brand-mark material-symbols-outlined">bolt</span>
-                    <span class="workspace-brand-copy">
-                        <strong>风起时域</strong>
-                        <small>新能源 AI 平台入口</small>
-                    </span>
-                </a>
-            </div>
-
-            <a class="workspace-entry-btn" href="{{ module.primary_href }}">
-                <span class="material-symbols-outlined">play_circle</span>
-                <span>{{ module.primary_label }}</span>
-            </a>
-
-            <div class="workspace-module-card">
-                <span class="workspace-kicker">模块 {{ module.index }}</span>
-                <strong>{{ module.name }}</strong>
-                <p>{{ module.tagline }}</p>
-            </div>
-
-            <div class="workspace-sidebar-block">
-                <span class="workspace-kicker">典型场景</span>
-                <div class="workspace-scene-list">
-                    {% for scene in module.scenes %}
-                    <span>{{ scene }}</span>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <div class="workspace-sidebar-footer">
-                <a class="workspace-utility-link" href="{{ module.secondary_href }}">
-                    <span class="material-symbols-outlined">insights</span>
-                    <span>{{ module.secondary_label }}</span>
-                </a>
-                <a class="workspace-utility-link" href="/modules/{{ module.slug }}/app">
-                    <span class="material-symbols-outlined">arrow_forward</span>
-                    <span>打开前端页面</span>
-                </a>
-            </div>
-        </aside>
-
-        <div class="workspace-main-shell">
+        <div class="workspace-main-shell"{% if embedded %} style="margin-left: 0; width: 100%;"{% endif %}>
+            {% if not embedded %}
             <header class="workspace-topbar">
                 <div class="workspace-topbar-copy">
-                    <small>{{ module.status }}</small>
+                    <small>模块 {{ module.index }}</small>
                     <strong>{{ module.name }}</strong>
                 </div>
-                <div class="workspace-topbar-actions">
-                    <a class="workspace-topbar-btn is-ghost" href="/">返回平台首页</a>
+                <div class="workspace-topbar-tools">
+                    <label class="workspace-search">
+                        <span class="material-symbols-outlined">search</span>
+                        <input type="text" value="{{ module.tagline }}" readonly aria-label="当前模块摘要">
+                    </label>
                     <a class="workspace-topbar-btn" href="/modules/{{ module.slug }}/app">进入模块前端</a>
                 </div>
             </header>
+            {% endif %}
 
-            <main class="workspace-canvas">
+            <!-- 关键指标带 -->
+            <div class="workspace-kpi-strip">
+                {% if module.workspace_kpis %}
+                {% for item in module.workspace_kpis %}
+                <div class="workspace-kpi-item">
+                    <span class="material-symbols-outlined">{{ item.icon }}</span>
+                    <div>
+                        <strong>{{ item.value }}</strong>
+                        <small>{{ item.label }}</small>
+                    </div>
+                </div>
+                {% if not loop.last %}
+                <div class="workspace-kpi-divider"></div>
+                {% endif %}
+                {% endfor %}
+                {% else %}
+                <div class="workspace-kpi-item">
+                    <span class="material-symbols-outlined">check_circle</span>
+                    <div>
+                        <strong>98.4%</strong>
+                        <small>系统可用率</small>
+                    </div>
+                </div>
+                <div class="workspace-kpi-divider"></div>
+                <div class="workspace-kpi-item">
+                    <span class="material-symbols-outlined">bolt</span>
+                    <div>
+                        <strong>238ms</strong>
+                        <small>平均响应</small>
+                    </div>
+                </div>
+                <div class="workspace-kpi-divider"></div>
+                <div class="workspace-kpi-item">
+                    <span class="material-symbols-outlined">trending_up</span>
+                    <div>
+                        <strong>+12.3%</strong>
+                        <small>本周效率提升</small>
+                    </div>
+                </div>
+                <div class="workspace-kpi-divider"></div>
+                <div class="workspace-kpi-item">
+                    <span class="material-symbols-outlined">task_alt</span>
+                    <div>
+                        <strong>{{ module.status }}</strong>
+                        <small>当前状态</small>
+                    </div>
+                </div>
+                <div class="workspace-kpi-divider"></div>
+                <div class="workspace-kpi-item">
+                    <span class="material-symbols-outlined">schedule</span>
+                    <div>
+                        <strong>实时</strong>
+                        <small>数据更新</small>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <main class="workspace-canvas" style="padding-bottom: 60px;">
                 <section class="workspace-hero">
                     <div class="workspace-hero-head">
                         <span class="workspace-pill">
@@ -80,11 +100,62 @@
                     <p>{{ module.description }}</p>
                     <div class="workspace-hero-actions">
                         <a class="workspace-primary-btn" href="{{ module.primary_href }}">{{ module.primary_label }}</a>
-                        <a class="workspace-secondary-btn" href="{{ module.secondary_href }}">{{ module.secondary_label }}</a>
+                        <a class="workspace-secondary-btn" href="/modules/{{ module.slug }}/app">
+                            <span class="material-symbols-outlined" style="font-size:18px;">open_in_new</span>
+                            进入前台
+                        </a>
                     </div>
                 </section>
 
+                <!-- 快捷指令条 -->
+                <div class="workspace-command-strip">
+                    <span class="workspace-command-label">
+                        <span class="material-symbols-outlined">terminal</span>
+                        快捷指令
+                    </span>
+                    {% for scene in module.scenes %}
+                    <button class="workspace-command-chip" type="button">
+                        <span class="material-symbols-outlined">flash_on</span>
+                        {{ scene }}
+                    </button>
+                    {% endfor %}
+                </div>
+
+                {% if module.operating_sections %}
+                <section class="workspace-operating-section">
+                    <div class="workspace-section-head">
+                        <small>{{ module.operating_kicker or "业务主线" }}</small>
+                        <strong>{{ module.operating_title or (module.name ~ "核心结构") }}</strong>
+                    </div>
+                    <div class="workspace-operating-grid">
+                        {% for item in module.operating_sections %}
+                        <article class="workspace-operating-card">
+                            <span class="workspace-kicker">{{ item.label }}</span>
+                            <strong>{{ item.title }}</strong>
+                            <p>{{ item.desc }}</p>
+                            {% if item.bullets %}
+                            <ul class="workspace-operating-list">
+                                {% for bullet in item.bullets %}
+                                <li>{{ bullet }}</li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                        </article>
+                        {% endfor %}
+                    </div>
+                </section>
+                {% endif %}
+
                 <section class="workspace-overview-grid">
+                    {% if module.overview_cards %}
+                    {% for card in module.overview_cards %}
+                    <article class="workspace-overview-card">
+                        <span class="workspace-kicker">{{ card.kicker }}</span>
+                        <strong>{{ card.title }}</strong>
+                        <p>{{ card.desc }}</p>
+                    </article>
+                    {% endfor %}
+                    {% else %}
                     <article class="workspace-overview-card">
                         <span class="workspace-kicker">当前重点</span>
                         <strong>围绕当前业务快速进入主要流程</strong>
@@ -93,19 +164,25 @@
                     <article class="workspace-overview-card">
                         <span class="workspace-kicker">推荐操作</span>
                         <strong>优先使用主操作入口</strong>
-                        <p>建议先处理当前模块的高频任务，再根据需要进入分析、日志或监控等辅助页面。</p>
+                        <p>建议先把当前模块的主流程跑通，再在同页完成复核、补充与结果确认，不再额外分叉到上层页面。</p>
                     </article>
                     <article class="workspace-overview-card">
-                        <span class="workspace-kicker">辅助入口</span>
-                        <strong>按需查看分析与状态页面</strong>
-                        <p>如果需要补充判断，可以继续进入当前模块关联的分析页、状态页或日志页。</p>
+                        <span class="workspace-kicker">协同方式</span>
+                        <strong>同一工作面内完成判断与执行</strong>
+                        <p>把分析、执行和复核尽量压到当前模块里完成，减少来回跳转造成的层级感。</p>
                     </article>
+                    <article class="workspace-overview-card">
+                        <span class="workspace-kicker">AI 协同</span>
+                        <strong>智能建议随时可用</strong>
+                        <p>基于历史操作和当前上下文，AI 会持续给出针对本模块的优化建议和异常预警。</p>
+                    </article>
+                    {% endif %}
                 </section>
 
                 <section class="workspace-capability-section">
                     <div class="workspace-section-head">
                         <small>能力栈</small>
-                        <strong>这个工作台应承载的能力</strong>
+                        <strong>{{ module.capability_title or "这个工作台应承载的能力" }}</strong>
                     </div>
                     <div class="workspace-capability-grid">
                         {% for capability in module.capabilities %}
@@ -120,25 +197,105 @@
 
                 <section class="workspace-board-section">
                     <div class="workspace-section-head">
-                        <small>工作看板</small>
-                        <strong>{{ module.name }} 业务通道</strong>
+                        <small>{{ module.board_kicker or "工作看板" }}</small>
+                        <strong>{{ module.board_title or (module.name ~ "业务通道") }}</strong>
                     </div>
                     <div class="workspace-board-grid">
+                        {% if module.board_cards %}
+                        {% for card in module.board_cards %}
+                        <article class="workspace-board-card">
+                            <span class="workspace-kicker">{{ card.kicker }}</span>
+                            <strong>{{ card.title }}</strong>
+                            <p>{{ card.desc }}</p>
+                        </article>
+                        {% endfor %}
+                        {% else %}
                         <article class="workspace-board-card">
                             <span class="workspace-kicker">主流程</span>
                             <strong>{{ module.primary_label }}</strong>
                             <p>优先承接最高频的业务动作，让用户从第一次点击开始就能看懂主线入口。</p>
                         </article>
                         <article class="workspace-board-card">
-                            <span class="workspace-kicker">辅助流程</span>
-                            <strong>{{ module.secondary_label }}</strong>
-                            <p>保留分析、复核或监控的辅助入口，但不要稀释主操作按钮的优先级。</p>
+                            <span class="workspace-kicker">执行原则</span>
+                            <strong>主线优先，判断同页闭环</strong>
+                            <p>把补充判断、复核和状态确认放在当前模块里解决，避免再拆出额外入口。</p>
                         </article>
                         <article class="workspace-board-card">
                             <span class="workspace-kicker">模块状态</span>
                             <strong>{{ module.status }}</strong>
                             <p>清楚展示模块成熟度，让用户知道自己进入的是稳定流程还是仍在演进中的工作台。</p>
                         </article>
+                        {% endif %}
+                    </div>
+                </section>
+
+                <!-- 时间线 -->
+                <section class="workspace-timeline-section">
+                    <div class="workspace-section-head">
+                        <small>{{ module.timeline_kicker or "操作历史" }}</small>
+                        <strong>{{ module.timeline_title or "近期活动时间线" }}</strong>
+                    </div>
+                    <div class="workspace-timeline">
+                        {% if module.timeline_steps %}
+                        {% for item in module.timeline_steps %}
+                        <div class="workspace-timeline-item">
+                            <div class="workspace-tl-dot is-{{ item.tone or 'primary' }}"></div>
+                            <div class="workspace-tl-line{% if loop.last %} is-last{% endif %}"></div>
+                            <div class="workspace-tl-body">
+                                <div class="workspace-tl-head">
+                                    <strong>{{ item.title }}</strong>
+                                    <span class="workspace-tl-time">{{ item.time }}</span>
+                                </div>
+                                <p>{{ item.desc }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <div class="workspace-timeline-item">
+                            <div class="workspace-tl-dot is-success"></div>
+                            <div class="workspace-tl-line"></div>
+                            <div class="workspace-tl-body">
+                                <div class="workspace-tl-head">
+                                    <strong>{{ module.primary_label }}任务完成</strong>
+                                    <span class="workspace-tl-time">2 分钟前</span>
+                                </div>
+                                <p>系统自动完成批量处理，输出结果已同步至报表中心。</p>
+                            </div>
+                        </div>
+                        <div class="workspace-timeline-item">
+                            <div class="workspace-tl-dot is-primary"></div>
+                            <div class="workspace-tl-line"></div>
+                            <div class="workspace-tl-body">
+                                <div class="workspace-tl-head">
+                                    <strong>AI 推理引擎更新</strong>
+                                    <span class="workspace-tl-time">18 分钟前</span>
+                                </div>
+                                <p>模型权重版本切换至 v2.4.1，预测精度提升约 3.2%。</p>
+                            </div>
+                        </div>
+                        <div class="workspace-timeline-item">
+                            <div class="workspace-tl-dot is-warn"></div>
+                            <div class="workspace-tl-line"></div>
+                            <div class="workspace-tl-body">
+                                <div class="workspace-tl-head">
+                                    <strong>数据接入延迟预警</strong>
+                                    <span class="workspace-tl-time">41 分钟前</span>
+                                </div>
+                                <p>外部数据源响应超时，已自动切换至缓存数据，建议检查接口状态。</p>
+                            </div>
+                        </div>
+                        <div class="workspace-timeline-item">
+                            <div class="workspace-tl-dot is-success"></div>
+                            <div class="workspace-tl-line is-last"></div>
+                            <div class="workspace-tl-body">
+                                <div class="workspace-tl-head">
+                                    <strong>{{ module.name }} 模块初始化</strong>
+                                    <span class="workspace-tl-time">今天 08:00</span>
+                                </div>
+                                <p>模块配置加载完成，所有能力组件已就绪，可正常使用。</p>
+                            </div>
+                        </div>
+                        {% endif %}
                     </div>
                 </section>
             </main>

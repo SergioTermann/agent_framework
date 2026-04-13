@@ -5,243 +5,477 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SFT-RLHF 训练流水线 - Agent Framework</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
-            --grad-start: #1363df;
-            --grad-end: #06b6d4;
-            --card-bg: rgba(255,255,255,.98);
-            --text: #1a1a2e;
-            --text2: #555;
-            --text3: #999;
-            --border: rgba(255,255,255,.6);
+            --pd-accent:      #1363df;
+            --pd-accent-deep: #0f4eb3;
+            --pd-accent-soft: rgba(19, 99, 223, 0.10);
+            --pd-bg:          #eef4fb;
+            --pd-surface:     rgba(255, 252, 247, 0.86);
+            --pd-border:      rgba(101, 120, 144, 0.14);
+            --pd-text:        #202a36;
+            --pd-muted:       #525b62;
+            --pd-shadow:      0 18px 42px -28px rgba(34, 44, 63, 0.16);
+            --pd-shadow-md:   0 34px 80px -34px rgba(34, 44, 63, 0.18);
+            --pd-radius:      22px;
+            --pd-success:     #1f8f63;
+            --pd-success-light: rgba(16,185,129,.10);
+            --pd-danger:      #ef4444;
+            --pd-danger-light: rgba(239,68,68,.08);
+            --pd-warning:     #d97706;
+            --pd-warning-light: rgba(217,119,6,.10);
+            /* legacy compat names used in dynamic JS HTML */
+            --grad-start: #0f4eb3;
+            --grad-end: #60a5fa;
+            --card-bg: rgba(255,255,255,.97);
+            --text: #202a36;
+            --text2: #525b62;
+            --text3: #6f746f;
             --primary: #1363df;
             --primary-dark: #0f4eb3;
-            --success: #10b981;
-            --success-light: rgba(16,185,129,.1);
+            --success: #1f8f63;
+            --success-light: rgba(16,185,129,.10);
             --danger: #ef4444;
             --danger-light: rgba(239,68,68,.08);
-            --warning: #06b6d4;
-            --warning-light: rgba(6,182,212,.1);
-            --shadow: 0 10px 30px rgba(0,0,0,.2);
-            --shadow-sm: 0 4px 15px rgba(0,0,0,.08);
-            --glass: rgba(255,255,255,.95);
-            --radius: 18px;
+            --warning: #d97706;
+            --warning-light: rgba(217,119,6,.10);
+            --shadow: 0 34px 80px -34px rgba(34, 44, 63, 0.18);
+            --shadow-sm: 0 18px 42px -28px rgba(34, 44, 63, 0.16);
+            --radius: 22px;
         }
+
+        html { min-height: 100%; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, var(--grad-start) 0%, var(--grad-end) 100%);
-            color: var(--text);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--pd-bg);
+            background-image:
+                radial-gradient(circle at 8% 10%, rgba(19, 99, 223, 0.14), transparent 22%),
+                radial-gradient(circle at 88% 12%, rgba(217, 119, 6, 0.12), transparent 20%),
+                radial-gradient(circle at 76% 86%, rgba(20, 184, 166, 0.10), transparent 24%);
+            color: var(--pd-text);
             min-height: 100vh;
-            padding: 20px;
+            padding: 32px 24px 80px;
         }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        .container { max-width: 1200px; margin: 0 auto; animation: fadeIn .6s ease-out; }
-
-        .back-btn {
-            position: fixed; top: 20px; left: 20px; z-index: 200;
-            padding: 12px 22px; background: var(--glass);
-            border: 1px solid var(--border); border-radius: 14px;
-            color: var(--text); text-decoration: none;
-            font-weight: 600; font-size: 14px;
-            box-shadow: var(--shadow-sm); backdrop-filter: blur(12px);
-            transition: all .25s;
-            display: flex; align-items: center; gap: 8px;
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(79,70,229,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(19, 99, 223,0.03) 1px, transparent 1px);
+            background-size: 28px 28px;
+            pointer-events: none;
+            z-index: 0;
         }
-        .back-btn:hover { box-shadow: var(--shadow); background: #fff; }
 
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ── Header ── */
         .header {
-            background: var(--card-bg); padding: 40px;
-            border-radius: 22px; box-shadow: var(--shadow);
-            margin-bottom: 28px; text-align: center;
-            position: relative; overflow: hidden;
+            background: var(--pd-surface);
+            padding: 36px 40px;
+            border-radius: 22px;
+            box-shadow: var(--pd-shadow-md);
+            margin-bottom: 24px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--pd-border);
+            backdrop-filter: blur(12px);
+            animation: fadeIn .5s ease-out;
         }
+
         .header::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
-            background: linear-gradient(90deg, var(--grad-start), var(--grad-end), #e040fb, var(--grad-start));
-            background-size: 300% 100%; animation: shimmer 4s linear infinite;
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--pd-accent), var(--pd-warning), var(--grad-end), var(--pd-accent));
+            background-size: 300% 100%;
+            animation: shimmer 4s linear infinite;
         }
+
         @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
         .header h1 {
-            font-size: 2.4em; font-weight: 800;
-            background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            font-family: 'Manrope', sans-serif;
+            font-size: 2.2em;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--pd-accent-deep), var(--pd-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 10px;
         }
-        .header p { color: var(--text2); font-size: 16px; }
 
+        .header p { color: var(--text2); font-size: 15px; }
+
+        /* ── Cards ── */
         .card {
-            background: var(--card-bg); border-radius: var(--radius);
-            padding: 28px; box-shadow: var(--shadow-sm);
+            background: var(--pd-surface);
+            border: 1px solid var(--pd-border);
+            border-radius: var(--pd-radius);
+            padding: 24px;
+            box-shadow: var(--pd-shadow);
             margin-bottom: 20px;
+            backdrop-filter: blur(10px);
         }
+
         .card-title {
-            font-size: 18px; font-weight: 700; margin-bottom: 18px;
-            display: flex; align-items: center; gap: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--pd-text);
         }
-        .card-title i { color: var(--primary); }
+
+        .card-title i { color: var(--pd-accent); }
 
         /* ── Pipeline Progress ── */
         .pipeline-progress {
-            display: flex; align-items: center; justify-content: center;
-            gap: 0; margin: 30px 0; flex-wrap: wrap;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            margin: 28px 0;
+            flex-wrap: wrap;
         }
+
         .stage-node {
-            display: flex; flex-direction: column; align-items: center;
-            cursor: pointer; position: relative; padding: 8px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+            padding: 8px 16px;
         }
+
         .stage-circle {
-            width: 52px; height: 52px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 20px; font-weight: 700;
-            background: #e5e7eb; color: #9ca3af;
-            transition: all .3s; border: 3px solid transparent;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
+            background: #e5e7eb;
+            color: #9ca3af;
+            transition: all .3s;
+            border: 3px solid transparent;
         }
+
         .stage-node.active .stage-circle {
-            background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
-            color: #fff; border-color: rgba(102,126,234,.3);
-            box-shadow: 0 0 20px rgba(102,126,234,.3);
+            background: linear-gradient(135deg, var(--pd-accent-deep), var(--pd-accent));
+            color: #fff;
+            border-color: rgba(19, 99, 223,.18);
+            box-shadow: 0 18px 35px -18px rgba(27, 42, 57, 0.24);
         }
+
         .stage-node.completed .stage-circle {
-            background: var(--success); color: #fff;
+            background: var(--pd-success);
+            color: #fff;
         }
+
         .stage-label {
-            margin-top: 8px; font-size: 13px; font-weight: 600;
-            color: var(--text3); white-space: nowrap;
+            margin-top: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text3);
+            white-space: nowrap;
         }
-        .stage-node.active .stage-label { color: var(--primary); }
-        .stage-node.completed .stage-label { color: var(--success); }
+
+        .stage-node.active .stage-label { color: var(--pd-accent); }
+        .stage-node.completed .stage-label { color: var(--pd-success); }
 
         .stage-connector {
-            width: 50px; height: 3px; background: #e5e7eb;
+            width: 48px;
+            height: 3px;
+            background: #e5e7eb;
             margin-bottom: 28px;
+            border-radius: 2px;
         }
-        .stage-connector.done { background: var(--success); }
 
-        /* ── Stage Detail Card ── */
+        .stage-connector.done { background: var(--pd-success); }
+
+        /* ── Stage Detail ── */
         .stage-detail {
-            border: 2px solid rgba(102,126,234,.15);
-            border-radius: var(--radius);
+            border: 1.5px solid var(--pd-border);
+            border-radius: var(--pd-radius);
         }
+
         .stage-detail .status-badge {
-            display: inline-flex; align-items: center; gap: 6px;
-            padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
         }
-        .status-pending { background: #f3f4f6; color: #6b7280; }
-        .status-active { background: rgba(102,126,234,.1); color: var(--primary); }
-        .status-completed { background: var(--success-light); color: var(--success); }
+
+        .status-pending  { background: #f3f4f6; color: #6b7280; }
+        .status-active   { background: var(--pd-accent-soft); color: var(--pd-accent); }
+        .status-completed { background: var(--pd-success-light); color: var(--pd-success); }
 
         /* ── Buttons ── */
         .btn {
-            padding: 12px 24px; border: none; border-radius: 12px;
-            font-size: 14px; font-weight: 600; cursor: pointer;
-            transition: all .2s; display: inline-flex; align-items: center; gap: 8px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all .2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
-        .btn-primary { background: linear-gradient(135deg, var(--grad-start), var(--grad-end)); color: #fff; }
-        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(102,126,234,.3); }
-        .btn-success { background: var(--success); color: #fff; }
-        .btn-danger { background: var(--danger); color: #fff; }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--pd-accent-deep), var(--pd-accent));
+            color: #fff;
+        }
+
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 18px 35px -18px rgba(27, 42, 57, 0.24); }
+
+        .btn-success {
+            background: var(--pd-success);
+            color: #fff;
+        }
+
+        .btn-success:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(16,185,129,.28); }
+
+        .btn-danger {
+            background: var(--pd-danger);
+            color: #fff;
+        }
+
         .btn-outline {
-            background: transparent; border: 2px solid var(--primary);
-            color: var(--primary);
+            background: transparent;
+            border: 1.5px solid var(--pd-accent);
+            color: var(--pd-accent);
         }
-        .btn-outline:hover { background: rgba(102,126,234,.05); }
-        .btn-sm { padding: 8px 16px; font-size: 13px; }
-        .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+        .btn-outline:hover { background: var(--pd-accent-soft); }
+
+        .btn-sm { padding: 7px 14px; font-size: 12px; }
         .btn-block { width: 100%; justify-content: center; }
+        .btn:disabled { opacity: .5; cursor: not-allowed; }
 
         /* ── Form ── */
         .form-row { margin-bottom: 16px; }
-        .form-row label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px; }
-        .form-row input, .form-row select {
-            width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb;
-            border-radius: 12px; font-size: 14px; transition: border .2s;
+        .form-row label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px; color: var(--pd-text); }
+
+        .form-row input,
+        .form-row select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid var(--pd-border);
+            border-radius: 10px;
+            font-size: 13px;
+            font-family: inherit;
+            background: rgba(255,255,255,0.8);
+            color: var(--pd-text);
+            transition: border .18s;
+            outline: none;
         }
-        .form-row input:focus, .form-row select:focus { border-color: var(--primary); outline: none; }
+
+        .form-row input:focus,
+        .form-row select:focus {
+            border-color: var(--pd-accent);
+            background: #fff;
+        }
+
         .form-row-inline { display: flex; gap: 16px; }
         .form-row-inline .form-row { flex: 1; }
 
         /* ── Endpoint Table ── */
-        .endpoint-table { width: 100%; border-collapse: collapse; }
-        .endpoint-table th, .endpoint-table td {
-            padding: 12px 16px; text-align: left; border-bottom: 1px solid #f0f0f0;
-            font-size: 14px;
+        .endpoint-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+        .endpoint-table th,
+        .endpoint-table td {
+            padding: 11px 14px;
+            text-align: left;
+            border-bottom: 1px solid rgba(79,70,229,0.08);
         }
-        .endpoint-table th { font-weight: 600; color: var(--text2); background: #fafafa; }
+
+        .endpoint-table th {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--pd-muted);
+            background: var(--pd-accent-soft);
+        }
+
         .endpoint-badge {
-            padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-weight: 600;
         }
-        .badge-running { background: var(--success-light); color: var(--success); }
-        .badge-stopped { background: #f3f4f6; color: #6b7280; }
-        .badge-starting { background: var(--warning-light); color: var(--warning); }
-        .badge-error { background: var(--danger-light); color: var(--danger); }
+
+        .badge-running  { background: var(--pd-success-light); color: var(--pd-success); }
+        .badge-stopped  { background: #f3f4f6; color: #6b7280; }
+        .badge-starting { background: var(--pd-warning-light); color: var(--pd-warning); }
+        .badge-error    { background: var(--pd-danger-light); color: var(--pd-danger); }
 
         .empty-state {
-            text-align: center; padding: 40px; color: var(--text3);
+            text-align: center;
+            padding: 40px;
+            color: var(--text3);
         }
-        .empty-state i { font-size: 40px; margin-bottom: 12px; display: block; }
+
+        .empty-state i {
+            font-size: 36px;
+            margin-bottom: 12px;
+            display: block;
+            color: var(--pd-muted);
+        }
 
         /* ── Toast ── */
         .toast {
-            position: fixed; bottom: 30px; right: 30px;
-            padding: 16px 24px; border-radius: 14px;
-            background: var(--card-bg); box-shadow: var(--shadow);
-            font-weight: 600; z-index: 9999;
-            transform: translateY(100px); opacity: 0;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 14px 22px;
+            border-radius: 14px;
+            background: var(--pd-text);
+            color: #fff;
+            box-shadow: var(--pd-shadow-md);
+            font-weight: 600;
+            font-size: 13px;
+            z-index: 9999;
+            transform: translateY(100px);
+            opacity: 0;
             transition: all .3s;
         }
+
         .toast.show { transform: translateY(0); opacity: 1; }
 
         /* ── Modal ── */
         .modal-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,.5); z-index: 1000;
-            display: none; align-items: center; justify-content: center;
+            position: fixed;
+            inset: 0;
+            background: rgba(26, 24, 56, 0.55);
+            backdrop-filter: blur(6px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
         }
+
         .modal-overlay.active { display: flex; }
+
         .modal {
-            background: var(--card-bg); border-radius: var(--radius);
-            padding: 32px; width: 500px; max-width: 90vw;
-            box-shadow: var(--shadow);
+            background: #fff;
+            border-radius: var(--pd-radius);
+            padding: 32px;
+            width: 500px;
+            max-width: 90vw;
+            max-height: 88vh;
+            overflow-y: auto;
+            box-shadow: var(--pd-shadow-md);
         }
-        .modal h3 { margin-bottom: 20px; font-size: 20px; }
-        .modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
+
+        .modal h3 {
+            font-family: 'Manrope', sans-serif;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
 
         .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         @media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
 
         .subtle-text { color: var(--text3); font-size: 12px; line-height: 1.6; }
         .hidden { display: none !important; }
-        .endpoint-meta { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+
+        .endpoint-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+
         .meta-pill {
-            display:inline-flex; align-items:center; gap:6px;
-            padding:4px 8px; border-radius:999px; font-size:12px;
-            background:#f4f6fb; color:var(--text2);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 9px;
+            border-radius: 99px;
+            font-size: 11px;
+            background: var(--pd-accent-soft);
+            color: var(--pd-muted);
         }
-        .model-grid { display:grid; gap:12px; max-height:420px; overflow:auto; }
+
+        .model-grid { display: grid; gap: 12px; max-height: 420px; overflow: auto; }
+
         .model-card {
-            border:1px solid #e5e7eb; border-radius:14px; padding:14px;
-            background:linear-gradient(180deg,#fff,#fafbff);
+            border: 1px solid var(--pd-border);
+            border-radius: 14px;
+            padding: 14px;
+            background: linear-gradient(180deg, #fff, #fafbff);
         }
-        .model-card-head { display:flex; align-items:center; gap:10px; justify-content:space-between; }
-        .model-card-name { font-weight:700; }
+
+        .model-card-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: space-between;
+        }
+
+        .model-card-name { font-weight: 700; font-size: 14px; }
+
         .model-card pre {
-            white-space:pre-wrap; word-break:break-word; margin-top:8px;
-            font-size:12px; color:var(--text2); background:#f9fafb; padding:10px; border-radius:10px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--text2);
+            background: #f9fafb;
+            padding: 10px;
+            border-radius: 10px;
         }
+
         .section-hint {
-            margin-top:10px; padding:10px 12px; border-radius:12px;
-            background:rgba(102,126,234,.08); color:var(--text2); font-size:13px;
+            margin-top: 10px;
+            padding: 10px 14px;
+            border-radius: 12px;
+            background: var(--pd-accent-soft);
+            color: var(--text2);
+            font-size: 13px;
+        }
+
+        @media (max-width: 640px) {
+            body { padding: 20px 16px 60px; }
+            .header { padding: 24px 20px; }
+            .header h1 { font-size: 1.6em; }
+            .form-row-inline { flex-direction: column; }
         }
     </style>
 </head>
 <body>
-    <a href="{{ url_for('developer_home') }}" class="back-btn"><i class="fas fa-arrow-left"></i> 返回首页</a>
-
     <div class="container">
         <!-- Header -->
         <div class="header">
@@ -313,7 +547,7 @@
     <!-- Create Pipeline Modal -->
     <div class="modal-overlay" id="createModal">
         <div class="modal">
-            <h3><i class="fas fa-plus-circle" style="color:var(--primary);"></i> Create Pipeline</h3>
+            <h3><i class="fas fa-plus-circle" style="color:var(--pd-accent);"></i> Create Pipeline</h3>
             <div class="form-row">
                 <label>Pipeline Name</label>
                 <input type="text" id="newPipelineName" placeholder="Example: Qwen2.5-7B Support Tuning">
@@ -336,7 +570,7 @@
     <!-- Register Endpoint Modal -->
     <div class="modal-overlay" id="registerModal">
         <div class="modal" style="width:720px;max-width:95vw;">
-            <h3><i class="fas fa-server" style="color:var(--primary);"></i> Register External Endpoint</h3>
+            <h3><i class="fas fa-server" style="color:var(--pd-accent);"></i> Register External Endpoint</h3>
             <div class="form-row-inline">
                 <div class="form-row">
                     <label>Backend</label>
@@ -401,7 +635,7 @@
     <!-- Start Local Serving Modal -->
     <div class="modal-overlay" id="startVllmModal">
         <div class="modal" style="width:760px;max-width:96vw;">
-            <h3><i class="fas fa-rocket" style="color:var(--primary);"></i> Start Local vLLM / Xinference</h3>
+            <h3><i class="fas fa-rocket" style="color:var(--pd-accent);"></i> Start Local vLLM / Xinference</h3>
             <div class="form-row-inline">
                 <div class="form-row">
                     <label>Backend</label>
@@ -512,7 +746,7 @@
     <!-- Models Modal -->
     <div class="modal-overlay" id="modelsModal">
         <div class="modal" style="width:760px;max-width:96vw;">
-            <h3><i class="fas fa-layer-group" style="color:var(--primary);"></i> Available Models</h3>
+            <h3><i class="fas fa-layer-group" style="color:var(--pd-accent);"></i> Available Models</h3>
             <div id="modelsModalTitle" class="subtle-text" style="margin-bottom:14px;"></div>
             <div id="modelsBody" class="model-grid">
                 <div class="empty-state" style="padding:20px;">No models loaded</div>
@@ -617,16 +851,16 @@ function renderPipelineList() {
         const stage = STAGES[p.current_stage] || STAGES[0];
         const pct = Math.round((p.current_stage / STAGES.length) * 100);
         return `
-            <div style="display:flex;align-items:center;padding:16px;border-bottom:1px solid #f0f0f0;cursor:pointer;"
+            <div style="display:flex;align-items:center;padding:16px;border-bottom:1px solid rgba(79,70,229,0.08);cursor:pointer;"
                  onclick="openPipeline('${p.id}')">
                 <div style="flex:1;">
-                    <div style="font-weight:700;font-size:16px;">${p.name}</div>
-                    <div style="color:var(--text3);font-size:13px;margin-top:4px;">
+                    <div style="font-weight:700;font-size:15px;">${p.name}</div>
+                    <div style="color:var(--text3);font-size:12px;margin-top:4px;">
                         Current stage: ${stage.name} &middot; Progress ${pct}%
                     </div>
                 </div>
                 <div style="width:200px;height:6px;background:#e5e7eb;border-radius:3px;margin:0 20px;">
-                    <div style="width:${pct}%;height:100%;background:linear-gradient(90deg,var(--grad-start),var(--grad-end));border-radius:3px;transition:width .3s;"></div>
+                    <div style="width:${pct}%;height:100%;background:linear-gradient(90deg,var(--pd-accent-deep),var(--pd-accent));border-radius:3px;transition:width .3s;"></div>
                 </div>
                 <i class="fas fa-chevron-right" style="color:var(--text3);"></i>
             </div>`;
@@ -702,12 +936,12 @@ function renderStageDetail(idx) {
     document.getElementById('stageDetail').innerHTML = `
         <div style="padding:28px;">
             <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
-                <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--grad-start),var(--grad-end));display:flex;align-items:center;justify-content:center;">
+                <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--pd-accent-deep),var(--pd-accent));display:flex;align-items:center;justify-content:center;">
                     <i class="fas ${s.icon}" style="color:#fff;font-size:20px;"></i>
                 </div>
                 <div>
-                    <h2 style="font-size:22px;">${s.name}</h2>
-                    <p style="color:var(--text2);font-size:14px;">${s.desc}</p>
+                    <h2 style="font-size:20px;font-weight:700;">${s.name}</h2>
+                    <p style="color:var(--text2);font-size:13px;">${s.desc}</p>
                 </div>
                 <span class="status-badge ${statusCls}" style="margin-left:auto;">${statusText}</span>
             </div>
@@ -719,7 +953,7 @@ function getStageActions(key) {
     switch (key) {
         case 'sft':
             return `
-                <p style="color:var(--text2);margin-bottom:16px;">Start an SFT task or pick an already-finished fine-tuned model.</p>
+                <p style="color:var(--text2);margin-bottom:16px;font-size:13px;">Start an SFT task or pick an already-finished fine-tuned model.</p>
                 <div class="form-row-inline">
                     <button class="btn btn-primary" onclick="window.open('/finetune','_blank')">
                         <i class="fas fa-graduation-cap"></i> Open Fine-tuning Page
@@ -735,7 +969,7 @@ function getStageActions(key) {
 
         case 'serving':
             return `
-                <p style="color:var(--text2);margin-bottom:16px;">Start local vLLM / Xinference or register external chat, embedding, and rerank endpoints.</p>
+                <p style="color:var(--text2);margin-bottom:16px;font-size:13px;">Start local vLLM / Xinference or register external chat, embedding, and rerank endpoints.</p>
                 <div class="form-row-inline">
                     <button class="btn btn-primary" onclick="showStartVllmModal()">
                         <i class="fas fa-play"></i> Start Local Service
@@ -750,7 +984,7 @@ function getStageActions(key) {
 
         case 'preference':
             return `
-                <p style="color:var(--text2);margin-bottom:16px;">Go to the RLHF panel for A/B comparison and preference labeling.</p>
+                <p style="color:var(--text2);margin-bottom:16px;font-size:13px;">Go to the RLHF panel for A/B comparison and preference labeling.</p>
                 <div class="form-row-inline">
                     <button class="btn btn-primary" onclick="window.open('/llm-rl','_blank')">
                         <i class="fas fa-hand-pointer"></i> Open RLHF Panel
@@ -762,7 +996,7 @@ function getStageActions(key) {
 
         case 'reward':
             return `
-                <p style="color:var(--text2);margin-bottom:16px;">Train a Bradley-Terry reward model from preference data.</p>
+                <p style="color:var(--text2);margin-bottom:16px;font-size:13px;">Train a Bradley-Terry reward model from preference data.</p>
                 <div class="form-row-inline">
                     <button class="btn btn-primary" onclick="trainRewardModel()">
                         <i class="fas fa-brain"></i> Train Reward Model
@@ -775,7 +1009,7 @@ function getStageActions(key) {
 
         case 'dpo':
             return `
-                <p style="color:var(--text2);margin-bottom:16px;">Export the DPO dataset and then launch DPO fine-tuning.</p>
+                <p style="color:var(--text2);margin-bottom:16px;font-size:13px;">Export the DPO dataset and then launch DPO fine-tuning.</p>
                 <div class="form-row-inline">
                     <button class="btn btn-outline" onclick="exportDpoDataset()">
                         <i class="fas fa-file-export"></i> Export DPO Dataset
@@ -826,14 +1060,14 @@ async function loadCompletedModels() {
     const models = data.models || [];
     const el = document.getElementById('completedModels');
     if (!models.length) {
-        el.innerHTML = '<p style="color:var(--text3);">No finished fine-tuned model found</p>';
+        el.innerHTML = '<p style="color:var(--text3);font-size:13px;">No finished fine-tuned model found</p>';
         return;
     }
     el.innerHTML = models.map(m => `
-        <div style="display:flex;align-items:center;padding:12px;border:1px solid #e5e7eb;border-radius:12px;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;padding:12px;border:1px solid var(--pd-border);border-radius:12px;margin-bottom:8px;background:rgba(255,255,255,0.7);">
             <div style="flex:1;">
-                <div style="font-weight:600;">${m.task_name || m.task_id}</div>
-                <div style="font-size:13px;color:var(--text3);">${m.base_model} &middot; ${m.train_method} &middot; ${m.model_path}</div>
+                <div style="font-weight:600;font-size:14px;">${m.task_name || m.task_id}</div>
+                <div style="font-size:12px;color:var(--text3);">${m.base_model} &middot; ${m.train_method} &middot; ${m.model_path}</div>
             </div>
             <button class="btn btn-sm btn-outline" onclick='selectModel(${JSON.stringify(m.task_id || '')}, ${JSON.stringify(m.model_path || '')})'>Select</button>
         </div>
@@ -852,24 +1086,24 @@ async function selectModel(taskId, modelPath) {
 
 async function trainRewardModel() {
     const el = document.getElementById('rewardResult');
-    el.innerHTML = '<p style="color:var(--primary);"><i class="fas fa-spinner fa-spin"></i> Training...</p>';
+    el.innerHTML = '<p style="color:var(--pd-accent);font-size:13px;"><i class="fas fa-spinner fa-spin"></i> Training...</p>';
     const r = await api('/api/llm-rl/reward-model/train', { method: 'POST', body: {} });
     if (r.success) {
         const d = r.data;
-        el.innerHTML = `<p style="color:var(--success);"><i class="fas fa-check-circle"></i> Training complete. Accuracy: ${(d.accuracy * 100).toFixed(1)}%, Samples: ${d.samples}</p>`;
+        el.innerHTML = `<p style="color:var(--pd-success);font-size:13px;"><i class="fas fa-check-circle"></i> Training complete. Accuracy: ${(d.accuracy * 100).toFixed(1)}%, Samples: ${d.samples}</p>`;
     } else {
-        el.innerHTML = `<p style="color:var(--danger);"><i class="fas fa-times-circle"></i> ${r.error}</p>`;
+        el.innerHTML = `<p style="color:var(--pd-danger);font-size:13px;"><i class="fas fa-times-circle"></i> ${r.error}</p>`;
     }
 }
 
 async function exportDpoDataset() {
     const el = document.getElementById('dpoResult');
-    el.innerHTML = '<p style="color:var(--primary);"><i class="fas fa-spinner fa-spin"></i> Exporting...</p>';
+    el.innerHTML = '<p style="color:var(--pd-accent);font-size:13px;"><i class="fas fa-spinner fa-spin"></i> Exporting...</p>';
     const r = await api('/api/finetune/import-dpo-dataset', { method: 'POST', body: {} });
     if (r.success) {
-        el.innerHTML = `<p style="color:var(--success);"><i class="fas fa-check-circle"></i> Exported ${r.count} DPO samples to ${r.filename}</p>`;
+        el.innerHTML = `<p style="color:var(--pd-success);font-size:13px;"><i class="fas fa-check-circle"></i> Exported ${r.count} DPO samples to ${r.filename}</p>`;
     } else {
-        el.innerHTML = `<p style="color:var(--danger);"><i class="fas fa-times-circle"></i> ${r.error}</p>`;
+        el.innerHTML = `<p style="color:var(--pd-danger);font-size:13px;"><i class="fas fa-times-circle"></i> ${r.error}</p>`;
     }
 }
 
@@ -884,12 +1118,12 @@ async function loadEndpoints() {
     tbody.innerHTML = eps.map(ep => `
         <tr>
             <td>
-                <div style="font-weight:700;">${ep.model_name || '-'}</div>
-                <div style="font-size:12px;color:var(--text3);margin-top:4px;">${ep.model_uid || 'No UID'}</div>
+                <div style="font-weight:700;font-size:13px;">${ep.model_name || '-'}</div>
+                <div style="font-size:11px;color:var(--text3);margin-top:4px;">${ep.model_uid || 'No UID'}</div>
             </td>
             <td><span class="endpoint-badge">${endpointTypeLabel(ep.endpoint_type)}</span></td>
             <td><span class="endpoint-badge">${backendLabel(ep.backend)}</span></td>
-            <td style="font-size:13px;color:var(--text2);word-break:break-all;">${ep.base_url}</td>
+            <td style="font-size:12px;color:var(--text2);word-break:break-all;">${ep.base_url}</td>
             <td><span class="endpoint-badge badge-${ep.status}">${ep.status}</span></td>
             <td>
                 ${ep.status === 'running' && ep.endpoint_type === 'chat' ? `<button class="btn btn-sm btn-outline" onclick="useEndpoint('${ep.endpoint_id}')" title="Use as current RLHF chat model"><i class="fas fa-plug"></i></button>` : ''}
@@ -946,12 +1180,7 @@ async function registerEndpoint() {
     const r = await api('/api/pipeline/endpoints/register', {
         method: 'POST',
         body: {
-            backend,
-            endpoint_type,
-            base_url,
-            api_key,
-            model_name,
-            model_uid,
+            backend, endpoint_type, base_url, api_key, model_name, model_uid,
             finetune_task_id: currentPipeline?.config?.sft_task_id || ''
         }
     });
@@ -968,8 +1197,7 @@ async function startVllmEndpoint() {
     const backend = document.getElementById('startBackend').value;
     const endpoint_type = document.getElementById('startEndpointType').value;
     let body = {
-        backend,
-        endpoint_type,
+        backend, endpoint_type,
         finetune_task_id: currentPipeline?.config?.sft_task_id || ''
     };
 
@@ -1015,41 +1243,25 @@ async function startVllmEndpoint() {
 async function useEndpoint(endpointId) {
     const endpointsResp = await api('/api/pipeline/endpoints/list');
     const endpoint = (endpointsResp.data || []).find(ep => ep.endpoint_id === endpointId);
-    if (!endpoint) {
-        showToast('Endpoint not found');
-        return;
-    }
+    if (!endpoint) { showToast('Endpoint not found'); return; }
     if (endpoint.endpoint_type !== 'chat') {
         showToast('Only chat endpoints can be used as the RLHF current model');
         return;
     }
     const r = await api('/api/llm-rl/endpoint/set', {
         method: 'POST',
-        body: {
-            base_url: endpoint.base_url,
-            model: endpoint.model_name,
-            api_key: endpoint.api_key || 'not-needed'
-        }
+        body: { base_url: endpoint.base_url, model: endpoint.model_name, api_key: endpoint.api_key || 'not-needed' }
     });
-    if (r.success) {
-        showToast('RLHF model updated');
-    } else {
-        showToast('Set endpoint failed: ' + (r.error || ''));
-    }
+    if (r.success) { showToast('RLHF model updated'); }
+    else { showToast('Set endpoint failed: ' + (r.error || '')); }
 }
 
 async function viewEndpointModels(endpointId) {
     const endpointsResp = await api('/api/pipeline/endpoints/list');
     const endpoint = (endpointsResp.data || []).find(ep => ep.endpoint_id === endpointId);
-    if (!endpoint) {
-        showToast('Endpoint not found');
-        return;
-    }
+    if (!endpoint) { showToast('Endpoint not found'); return; }
     const r = await api(`/api/pipeline/endpoints/${endpointId}/models`);
-    if (!r.success) {
-        showToast('Read model list failed: ' + (r.error || ''));
-        return;
-    }
+    if (!r.success) { showToast('Read model list failed: ' + (r.error || '')); return; }
     lastViewedEndpoint = endpoint;
     lastEndpointModels = r.data || [];
     document.getElementById('modelsModalTitle').textContent = `${endpoint.model_name || endpoint.endpoint_id} · ${endpoint.base_url}`;

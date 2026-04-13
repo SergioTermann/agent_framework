@@ -158,6 +158,44 @@ def create_session():
         }), 500
 
 
+@collaboration_bp.route('/sessions', methods=['GET'])
+def list_sessions():
+    """获取协作会话列表"""
+    try:
+        manager = get_collaboration_manager()
+        sessions = []
+        for session in manager.sessions.values():
+            active_users = manager.get_active_users(session.session_id)
+            sessions.append({
+                'session_id': session.session_id,
+                'workflow_id': session.workflow_id,
+                'created_at': session.created_at,
+                'version': session.version,
+                'operation_count': len(session.operations),
+                'active_user_count': len(active_users),
+                'users': [
+                    {
+                        'user_id': user.user_id,
+                        'username': user.username,
+                        'color': user.color,
+                        'cursor_position': user.cursor_position,
+                    }
+                    for user in active_users
+                ],
+            })
+
+        sessions.sort(key=lambda item: item['created_at'], reverse=True)
+        return jsonify({
+            'success': True,
+            'sessions': sessions
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
 @collaboration_bp.route('/sessions/<session_id>', methods=['GET'])
 def get_session(session_id: str):
     """获取会话状态"""

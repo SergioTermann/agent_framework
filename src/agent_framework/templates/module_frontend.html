@@ -8,67 +8,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@300..700,0..1&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/module_frontend.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/module_frontend.css') }}?v=20260413-structured">
 </head>
-<body{% if embedded %} class="is-embedded"{% endif %}>
+<body data-module="{{ module.slug }}"{% if embedded %} class="is-embedded"{% endif %}>
     <div class="module-app-shell">
-        {% if not embedded %}
-        <aside class="module-sidebar">
-            <div class="module-brand">
-                <a class="module-brand-home" href="/">
-                    <span class="module-brand-mark material-symbols-outlined">bolt</span>
-                    <span class="module-brand-copy">
-                        <strong>风起时域</strong>
-                        <small>新能源 AI 平台入口</small>
-                    </span>
-                </a>
-            </div>
-
-            <a class="module-primary-entry" href="{{ module.primary_href }}">
-                <span class="material-symbols-outlined">add_circle</span>
-                <span>{{ module.primary_label }}</span>
-            </a>
-
-            <nav class="module-sidebar-nav" aria-label="业务模块导航">
-                <a class="module-sidebar-link{% if module.slug == 'guide-assistant' %} is-active{% endif %}" href="/maintenance-assistant">
-                    <span class="material-symbols-outlined">neurology</span>
-                    <span>智导助手</span>
-                </a>
-                <a class="module-sidebar-link{% if module.slug == 'weather-siting' %} is-active{% endif %}" href="/modules/weather-siting/app">
-                    <span class="material-symbols-outlined">air</span>
-                    <span>气象选址</span>
-                </a>
-                <a class="module-sidebar-link{% if module.slug == 'power-trading' %} is-active{% endif %}" href="/modules/power-trading/app">
-                    <span class="material-symbols-outlined">query_stats</span>
-                    <span>电力交易</span>
-                </a>
-                <a class="module-sidebar-link{% if module.slug == 'smart-workorder' %} is-active{% endif %}" href="/modules/smart-workorder/app">
-                    <span class="material-symbols-outlined">assignment</span>
-                    <span>智能工单</span>
-                </a>
-                <a class="module-sidebar-link{% if module.slug == 'smart-guard' %} is-active{% endif %}" href="/data-platform">
-                    <span class="material-symbols-outlined">shield</span>
-                    <span>智能值守</span>
-                </a>
-                <a class="module-sidebar-link{% if module.slug == 'smart-office' %} is-active{% endif %}" href="/modules/smart-office/app">
-                    <span class="material-symbols-outlined">workspaces</span>
-                    <span>智慧办公</span>
-                </a>
-            </nav>
-
-            <div class="module-sidebar-footer">
-                <a class="module-sidebar-utility" href="{{ module.secondary_href }}">
-                    <span class="material-symbols-outlined">open_in_new</span>
-                    <span>{{ module.secondary_label }}</span>
-                </a>
-                <a class="module-sidebar-utility" href="{{ url_for('settings') }}">
-                    <span class="material-symbols-outlined">settings</span>
-                    <span>平台设置</span>
-                </a>
-            </div>
-        </aside>
-        {% endif %}
-
         <div class="module-main-shell"{% if embedded %} style="margin-left: 0; width: 100%;"{% endif %}>
             {% if not embedded %}
             <header class="module-topbar">
@@ -89,7 +32,7 @@
             </header>
             {% endif %}
 
-            <main class="module-canvas">
+            <main class="module-canvas" style="padding-bottom: 100px;">
                 <section class="module-hero">
                     <div class="module-hero-badge">
                         <span class="material-symbols-outlined">auto_awesome</span>
@@ -111,6 +54,17 @@
                         {% endfor %}
                     </div>
 
+                    <div class="module-command-deck">
+                        {% for item in page.command_deck %}
+                        <article class="module-command-card">
+                            <span class="module-command-label">{{ item.label }}</span>
+                            <strong>{{ item.value }}</strong>
+                            <p>{{ item.note }}</p>
+                            <small>{{ item.meta }}</small>
+                        </article>
+                        {% endfor %}
+                    </div>
+
                     <div class="module-action-grid">
                         {% for action in page.quick_actions %}
                         <button class="module-suggestion-card" type="button" data-action="{{ action }}">
@@ -122,6 +76,137 @@
                     </div>
                 </section>
 
+                <!-- 处理管线条 -->
+                <section class="module-pipeline-strip">
+                    <div class="module-pipeline-head">
+                        <span class="material-symbols-outlined">account_tree</span>
+                        <span>处理管线</span>
+                        <span class="module-pipeline-badge">运行中</span>
+                    </div>
+                    {% set pipeline_steps = page.pipeline_steps if page.pipeline_steps else [
+                        {"label": "数据接入", "state": "done"},
+                        {"label": "特征提取", "state": "done"},
+                        {"label": "AI 推理", "state": "active"},
+                        {"label": "结果校验", "state": "pending"},
+                        {"label": "业务输出", "state": "pending"},
+                    ] %}
+                    <div class="module-pipeline-stages">
+                        {% for step in pipeline_steps %}
+                        <div class="module-pipeline-stage{% if step.state == 'done' %} is-done{% elif step.state == 'active' %} is-active{% endif %}">
+                            <div class="module-stage-icon">
+                                <span class="material-symbols-outlined">{{ "check_circle" if step.state == "done" else "sync" if step.state == "active" else "pending" }}</span>
+                            </div>
+                            <span class="module-stage-label">{{ step.label }}</span>
+                        </div>
+                        {% if not loop.last %}
+                        <div class="module-pipeline-connector{% if step.state == 'done' and pipeline_steps[loop.index0 + 1].state in ['done', 'active'] %} is-done{% endif %}"></div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </section>
+
+                {% if page.operating_sections %}
+                <section class="module-operating-section">
+                    <div class="module-panel-head">
+                        <small>{{ page.operating_kicker or "业务主线" }}</small>
+                        <strong>{{ page.operating_title or (module.name ~ "核心结构") }}</strong>
+                    </div>
+                    <div class="module-operating-grid">
+                        {% for item in page.operating_sections %}
+                        <article class="module-operating-card">
+                            <span class="module-story-label">{{ item.label }}</span>
+                            <strong>{{ item.title }}</strong>
+                            <p>{{ item.desc }}</p>
+                            {% if item.bullets %}
+                            <ul class="module-operating-list">
+                                {% for bullet in item.bullets %}
+                                <li>{{ bullet }}</li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                        </article>
+                        {% endfor %}
+                    </div>
+                </section>
+                {% endif %}
+
+                {% if page.story_blocks or page.timeline_steps or page.matrix_rows %}
+                <section class="module-structure-grid">
+                    {% if page.story_blocks %}
+                    <section class="module-structure-card">
+                        <div class="module-panel-head">
+                            <small>{{ page.story_kicker }}</small>
+                            <strong>{{ page.story_title }}</strong>
+                        </div>
+                        <div class="module-story-grid">
+                            {% for item in page.story_blocks %}
+                            <article class="module-story-card">
+                                <span class="module-story-label">{{ item.label }}</span>
+                                <strong>{{ item.title }}</strong>
+                                <p>{{ item.desc }}</p>
+                                <small>{{ item.meta }}</small>
+                            </article>
+                            {% endfor %}
+                        </div>
+                    </section>
+                    {% endif %}
+
+                    <div class="module-structure-split">
+                        {% if page.timeline_steps %}
+                        <section class="module-structure-card">
+                            <div class="module-panel-head">
+                                <small>{{ page.timeline_kicker }}</small>
+                                <strong>{{ page.timeline_title }}</strong>
+                            </div>
+                            <div class="module-timeline-list">
+                                {% for item in page.timeline_steps %}
+                                <article class="module-timeline-item">
+                                    <div class="module-timeline-marker"></div>
+                                    <div class="module-timeline-body">
+                                        <div class="module-timeline-head">
+                                            <strong>{{ item.title }}</strong>
+                                            <span>{{ item.when }}</span>
+                                        </div>
+                                        <p>{{ item.desc }}</p>
+                                    </div>
+                                </article>
+                                {% endfor %}
+                            </div>
+                        </section>
+                        {% endif %}
+
+                        {% if page.matrix_rows %}
+                        <section class="module-structure-card">
+                            <div class="module-panel-head">
+                                <small>{{ page.matrix_kicker }}</small>
+                                <strong>{{ page.matrix_title }}</strong>
+                            </div>
+                            <div class="module-matrix-wrap">
+                                <table class="module-matrix-table">
+                                    <thead>
+                                        <tr>
+                                            {% for column in page.matrix_columns %}
+                                            <th>{{ column }}</th>
+                                            {% endfor %}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row in page.matrix_rows %}
+                                        <tr>
+                                            {% for cell in row %}
+                                            <td>{{ cell }}</td>
+                                            {% endfor %}
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                        {% endif %}
+                    </div>
+                </section>
+                {% endif %}
+
                 <section class="module-workspace-grid">
                     <div class="module-composer-panel">
                         <div class="module-panel-head">
@@ -129,7 +214,17 @@
                             <strong>{{ module.description }}</strong>
                         </div>
 
-                        <form id="module-form" data-module-name="{{ module.name }}" data-result-title="{{ page.result_title }}">
+                        <div class="module-ops-grid">
+                            {% for card in page.workspace_cards %}
+                            <article class="module-ops-card">
+                                <span class="module-ops-label">{{ card.label }}</span>
+                                <strong>{{ card.value }}</strong>
+                                <p>{{ card.note }}</p>
+                            </article>
+                            {% endfor %}
+                        </div>
+
+                        <form id="module-form" data-module-name="{{ module.name }}" data-module-slug="{{ module.slug }}" data-result-title="{{ page.result_title }}">
                             <div class="module-form-grid">
                                 {% for field in page.fields %}
                                 <label class="module-field{% if field.type == 'textarea' %} is-wide{% endif %}">
@@ -159,16 +254,45 @@
                                 {% endfor %}
                             </div>
 
+                            <div class="module-support-grid">
+                                <section class="module-support-card">
+                                    <div class="module-support-head">
+                                        <small>输入校验</small>
+                                        <strong>本轮受理清单</strong>
+                                    </div>
+                                    <ul class="module-checklist">
+                                        {% for item in page.intake_checklist %}
+                                        <li>{{ item }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </section>
+
+                                <section class="module-support-card">
+                                    <div class="module-support-head">
+                                        <small>流转路径</small>
+                                        <strong>下游协同节点</strong>
+                                    </div>
+                                    <div class="module-delivery-list">
+                                        {% for item in page.delivery_tracks %}
+                                        <article class="module-delivery-item">
+                                            <span class="module-delivery-badge">{{ item.badge }}</span>
+                                            <strong>{{ item.title }}</strong>
+                                            <p>{{ item.desc }}</p>
+                                        </article>
+                                        {% endfor %}
+                                    </div>
+                                </section>
+                            </div>
+
                             <div class="module-composer-bar">
-                                <div class="module-composer-hint">
-                                    <span class="material-symbols-outlined">tips_and_updates</span>
-                                    <p>先补全结构化字段，再结合快捷动作和场景标签，最后流转到下一步业务处理。</p>
-                                </div>
-                                <div class="module-composer-actions">
-                                    <a class="module-secondary-btn" href="{{ module.secondary_href }}">{{ module.secondary_label }}</a>
-                                    <button class="module-primary-btn" type="submit">
-                                        <span class="material-symbols-outlined">send</span>
-                                        <span>生成摘要</span>
+                            <div class="module-composer-hint">
+                                <span class="material-symbols-outlined">tips_and_updates</span>
+                                <p>先补全结构化字段，再结合快捷动作和场景标签，最后流转到下一步业务处理。</p>
+                            </div>
+                            <div class="module-composer-actions">
+                                <button class="module-primary-btn" type="submit">
+                                    <span class="material-symbols-outlined">send</span>
+                                    <span>生成摘要</span>
                                     </button>
                                 </div>
                             </div>
@@ -202,13 +326,153 @@
                                 {% endfor %}
                             </ul>
                         </section>
+
+                        <section class="module-insight-card">
+                            <div class="module-panel-head">
+                                <small>AI 策略</small>
+                                <strong>智能建议</strong>
+                            </div>
+                            <div class="module-recommendation-list">
+                                {% for item in page.ai_recommendations %}
+                                <article class="module-recommendation-item">
+                                    <span class="module-recommendation-tag">{{ item.tag }}</span>
+                                    <strong>{{ item.title }}</strong>
+                                    <p>{{ item.desc }}</p>
+                                </article>
+                                {% endfor %}
+                            </div>
+                        </section>
+
+                        <section class="module-insight-card">
+                            <div class="module-panel-head">
+                                <small>协同队列</small>
+                                <strong>当前角色分工</strong>
+                            </div>
+                            <div class="module-collab-list">
+                                {% for item in page.collab_items %}
+                                <article class="module-collab-item">
+                                    <div class="module-collab-head">
+                                        <strong>{{ item.role }}</strong>
+                                        <span>{{ item.eta }}</span>
+                                    </div>
+                                    <p>{{ item.task }}</p>
+                                </article>
+                                {% endfor %}
+                            </div>
+                        </section>
+                    </aside>
+
+                    <!-- 第三列：状态与活动 -->
+                    <aside class="module-status-panel">
+                        <section class="module-insight-card">
+                            <div class="module-panel-head">
+                                <small>实时健康</small>
+                                <strong>系统监控</strong>
+                            </div>
+                            <div class="module-health-grid">
+                                {% for item in page.health_rings %}
+                                <div class="module-health-item">
+                                    <div class="module-health-ring" style="--pct:{{ item.value }}">
+                                        <svg viewBox="0 0 36 36">
+                                            <circle cx="18" cy="18" r="15" fill="none" stroke="var(--line)" stroke-width="3"/>
+                                            <circle cx="18" cy="18" r="15" fill="none" stroke="{{ item.color }}" stroke-width="3"
+                                                stroke-dasharray="{{ item.value }} {{ 100 - item.value }}" stroke-dashoffset="25" stroke-linecap="round"/>
+                                        </svg>
+                                        <span>{{ item.value }}%</span>
+                                    </div>
+                                    <small>{{ item.label }}</small>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% for item in page.health_bars %}
+                            <div class="module-latency-row">
+                                <span class="module-latency-label">{{ item.label }}</span>
+                                <span class="module-latency-bar-wrap">
+                                    <span class="module-latency-bar{% if item.tone == 'warn' %} is-warn{% endif %}" style="width:{{ item.width }}"></span>
+                                </span>
+                                <span class="module-latency-value">{{ item.value }}</span>
+                            </div>
+                            {% endfor %}
+                        </section>
+
+                        <section class="module-insight-card">
+                            <div class="module-panel-head">
+                                <small>最近活动</small>
+                                <strong>操作日志</strong>
+                            </div>
+                            <div class="module-activity-list">
+                                {% for item in page.activity_feed %}
+                                <div class="module-activity-item">
+                                    <div class="module-activity-dot is-{{ item.tone }}"></div>
+                                    <div class="module-activity-body">
+                                        <span>{{ item.title }}</span>
+                                        <small>{{ item.time }}</small>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </section>
+
+                        <section class="module-insight-card">
+                            <div class="module-panel-head">
+                                <small>风险与依赖</small>
+                                <strong>当前关注点</strong>
+                            </div>
+                            <div class="module-risk-list">
+                                {% for item in page.risk_items %}
+                                <article class="module-risk-item">
+                                    <div class="module-risk-head">
+                                        <span class="module-risk-level">{{ item.level }}</span>
+                                        <strong>{{ item.title }}</strong>
+                                    </div>
+                                    <p>{{ item.desc }}</p>
+                                </article>
+                                {% endfor %}
+                            </div>
+                        </section>
+
+                        <section class="module-insight-card">
+                            <div class="module-panel-head">
+                                <small>资源排布</small>
+                                <strong>当班席位与容量</strong>
+                            </div>
+                            <div class="module-resource-list">
+                                {% for item in page.resource_cards %}
+                                <article class="module-resource-item">
+                                    <div>
+                                        <span>{{ item.label }}</span>
+                                        <strong>{{ item.value }}</strong>
+                                    </div>
+                                    <small>{{ item.note }}</small>
+                                </article>
+                                {% endfor %}
+                            </div>
+                        </section>
+
                     </aside>
                 </section>
 
                 <section class="module-board-section">
-                    <div class="module-panel-head">
-                        <small>运行概览</small>
-                        <strong>{{ page.board_title }}</strong>
+                    <div class="module-board-topbar">
+                        <div class="module-panel-head">
+                            <small>运行概览</small>
+                            <strong>{{ page.board_title }}</strong>
+                        </div>
+                        <div class="module-board-filters">
+                            <button class="module-filter-pill is-active" type="button">全部</button>
+                            <button class="module-filter-pill" type="button">进行中</button>
+                            <button class="module-filter-pill" type="button">已完成</button>
+                            <button class="module-filter-pill" type="button">异常</button>
+                        </div>
+                    </div>
+                    <div class="module-board-kpi-grid">
+                        {% for item in page.board_kpis %}
+                        <article class="module-board-kpi-card">
+                            <span>{{ item.label }}</span>
+                            <strong>{{ item.value }}</strong>
+                            <small>{{ item.note }}</small>
+                        </article>
+                        {% endfor %}
                     </div>
                     <div class="module-board-table-wrap">
                         <table class="module-board-table">
@@ -229,6 +493,43 @@
                                 {% endfor %}
                             </tbody>
                         </table>
+                    </div>
+                    <div class="module-board-footer">
+                        <span class="module-board-count">共 {{ page.board_rows | length }} 条记录</span>
+                        <div class="module-board-actions">
+                            <button class="module-secondary-btn" type="button">
+                                <span class="material-symbols-outlined">download</span>
+                                <span>导出数据</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="module-board-brief-grid">
+                        <section class="module-support-card">
+                            <div class="module-support-head">
+                                <small>关键观察</small>
+                                <strong>本轮看板洞察</strong>
+                            </div>
+                            <ul class="module-checklist">
+                                {% for item in page.board_briefs %}
+                                <li>{{ item }}</li>
+                                {% endfor %}
+                            </ul>
+                        </section>
+                        <section class="module-support-card">
+                            <div class="module-support-head">
+                                <small>推进动作</small>
+                                <strong>下一步安排</strong>
+                            </div>
+                            <div class="module-delivery-list">
+                                {% for item in page.next_actions %}
+                                <article class="module-delivery-item">
+                                    <span class="module-delivery-badge">{{ item.badge }}</span>
+                                    <strong>{{ item.title }}</strong>
+                                    <p>{{ item.desc }}</p>
+                                </article>
+                                {% endfor %}
+                            </div>
+                        </section>
                     </div>
                 </section>
             </main>

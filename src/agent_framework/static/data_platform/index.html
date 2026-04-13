@@ -2,13 +2,11 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="./images/favicon.png" />
-    <link rel="shortcut icon" href="./images/favicon.png" />
-    <link rel="apple-touch-icon" href="./images/favicon.png" />
+    <link rel="icon" href="/data-platform/images/favicon.png" />
+    <link rel="shortcut icon" href="/data-platform/images/favicon.png" />
+    <link rel="apple-touch-icon" href="/data-platform/images/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>智能值守系统</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
       * {
         padding: 0;
@@ -45,23 +43,124 @@
         font-size: 12px;
         color: #fff;
       }
+
+      .app-loading.is-error .app-loading-title {
+        color: #fca5a5;
+      }
+
+      .app-loading.is-error .app-loading-subtitle {
+        max-width: 420px;
+        color: #fecaca;
+        line-height: 1.7;
+        text-align: center;
+      }
     </style>
-    <script type="module" crossorigin src="./js/index-DByEomhj.js"></script>
-    <link rel="modulepreload" crossorigin href="./js/@vue-hjwuK2GK.js">
-    <link rel="modulepreload" crossorigin href="./js/autofit.js-OWhdLV1a.js">
-    <link rel="modulepreload" crossorigin href="./js/vue-router-DsdNuFK9.js">
-    <link rel="stylesheet" crossorigin href="./assets/index-iHfPkjyG.css">
-    <link rel="stylesheet" crossorigin href="./assets/animate-BaVkx4tQ.css">
+    <link rel="modulepreload" crossorigin href="/data-platform/js/@vue-hjwuK2GK.js">
+    <link rel="modulepreload" crossorigin href="/data-platform/js/autofit.js-OWhdLV1a.js">
+    <link rel="modulepreload" crossorigin href="/data-platform/js/vue-router-DsdNuFK9.js">
+    <link rel="stylesheet" crossorigin href="/data-platform/assets/index-iHfPkjyG.css">
+    <link rel="stylesheet" crossorigin href="/data-platform/assets/animate-BaVkx4tQ.css">
   </head>
   <body>
     <div id="app">
       <div class="app-loading">
-        <img class="app-loading-icon" src="./images/spin.svg" alt="" />
+        <img class="app-loading-icon" src="/data-platform/images/spin.svg" alt="" />
         <div class="app-loading-title">正在加载资源</div>
         <div class="app-loading-subtitle">
           首次加载资源可能需要一些时间，请耐心等待
         </div>
       </div>
     </div>
+    <script type="module">
+      const loadingBox = document.querySelector('.app-loading');
+      const loadingTitle = document.querySelector('.app-loading-title');
+      const loadingSubtitle = document.querySelector('.app-loading-subtitle');
+
+      const leafletSources = [
+        {
+          css: 'https://cdn.staticfile.org/leaflet/1.9.4/leaflet.min.css',
+          js: 'https://cdn.staticfile.org/leaflet/1.9.4/leaflet.min.js',
+          label: 'staticfile'
+        },
+        {
+          css: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css',
+          js: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js',
+          label: 'cdnjs'
+        },
+        {
+          css: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+          js: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+          label: 'unpkg'
+        }
+      ];
+
+      function updateLoading(title, subtitle, isError = false) {
+        if (loadingTitle) loadingTitle.textContent = title;
+        if (loadingSubtitle) loadingSubtitle.textContent = subtitle;
+        if (loadingBox) {
+          loadingBox.classList.toggle('is-error', isError);
+        }
+      }
+
+      function loadStyle(href) {
+        return new Promise((resolve, reject) => {
+          const link = document.createElement('link');
+          link.rel = 'stylesheet';
+          link.href = href;
+          link.crossOrigin = 'anonymous';
+          link.onload = () => resolve();
+          link.onerror = () => reject(new Error(`CSS 加载失败: ${href}`));
+          document.head.appendChild(link);
+        });
+      }
+
+      function loadScript(src) {
+        return new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = src;
+          script.crossOrigin = 'anonymous';
+          script.onload = () => resolve();
+          script.onerror = () => reject(new Error(`脚本加载失败: ${src}`));
+          document.head.appendChild(script);
+        });
+      }
+
+      async function ensureLeaflet() {
+        let lastError = null;
+
+        for (const source of leafletSources) {
+          try {
+            updateLoading('正在加载地图引擎', `尝试连接 ${source.label} 资源节点`);
+            await loadStyle(source.css);
+            await loadScript(source.js);
+
+            if (window.L) {
+              updateLoading('正在加载业务资源', '地图引擎已就绪，正在初始化值守应用');
+              return;
+            }
+          } catch (error) {
+            lastError = error;
+          }
+        }
+
+        throw lastError || new Error('Leaflet 资源不可用');
+      }
+
+      async function bootstrap() {
+        try {
+          await ensureLeaflet();
+          await import('/data-platform/js/index-DByEomhj.js');
+        } catch (error) {
+          console.error('智能值守加载失败:', error);
+          updateLoading(
+            '地图资源加载失败',
+            '当前环境无法连接地图依赖资源，所以值守页面没有继续初始化。已增加多源回退；如果仍失败，说明当前网络无法访问这些 CDN。',
+            true
+          );
+        }
+      }
+
+      bootstrap();
+    </script>
   </body>
 </html>

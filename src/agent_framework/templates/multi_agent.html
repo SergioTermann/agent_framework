@@ -4,472 +4,2728 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>多 Agent 协作 - Agent Framework</title>
-    <!-- <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet"> -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/base-theme.css">
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <style>
         :root {
-            --theme-accent: #1363df;
-            --theme-accent-deep: #0f4eb3;
-            --theme-accent-soft: rgba(19, 99, 223, 0.10);
-            --theme-accent-line: rgba(19, 99, 223, 0.22);
-            --theme-accent-shadow: rgba(19, 99, 223, 0.2);
+            --ma-accent: #1363df;
+            --ma-accent-deep: #0f4eb3;
+            --ma-accent-soft: rgba(19, 99, 223, 0.12);
+            --ma-accent-line: rgba(19, 99, 223, 0.18);
+            --ma-highlight: #d97706;
+            --ma-highlight-soft: rgba(217, 119, 6, 0.12);
+            --ma-ink: #1b2431;
+            --ma-text: #182536;
+            --ma-muted: #66768d;
+            --ma-line: rgba(95, 112, 136, 0.18);
+            --ma-surface: rgba(255, 251, 247, 0.80);
+            --ma-surface-strong: rgba(255, 255, 255, 0.94);
+            --ma-bg: linear-gradient(180deg, #fff8ef 0%, #f5f8f3 54%, #edf5f3 100%);
+            --ma-shadow: 0 22px 54px rgba(35, 44, 66, 0.10);
+            --ma-shadow-strong: 0 30px 70px rgba(25, 39, 58, 0.14);
+            --ma-radius: 24px;
+            --ma-success: #1363df;
+            --ma-success-soft: rgba(19, 99, 223, 0.12);
+            --ma-warning: #b45309;
+            --ma-warning-soft: rgba(180, 83, 9, 0.12);
+            --ma-danger: #c2410c;
+            --ma-danger-soft: rgba(194, 65, 12, 0.12);
         }
 
-        .container {
-            max-width: 1400px;
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        *::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        *::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.42);
+        }
+
+        *::-webkit-scrollbar-thumb {
+            border: 2px solid rgba(255, 255, 255, 0.52);
+            border-radius: 999px;
+            background: linear-gradient(180deg, rgba(19, 99, 223, 0.42), rgba(217, 119, 6, 0.34));
+        }
+
+        *::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, rgba(19, 99, 223, 0.6), rgba(217, 119, 6, 0.48));
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--ma-text);
+            font-family: var(--font-body, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+            background:
+                radial-gradient(circle at 12% 8%, rgba(19, 99, 223, 0.16), transparent 22%),
+                radial-gradient(circle at 88% 10%, rgba(217, 119, 6, 0.14), transparent 20%),
+                radial-gradient(circle at 78% 82%, rgba(20, 184, 166, 0.10), transparent 24%),
+                var(--ma-bg);
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(19, 99, 223, 0.035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(19, 99, 223, 0.035) 1px, transparent 1px);
+            background-size: 34px 34px;
+            mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.26), transparent 72%);
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            inset: auto -8vw -12vh auto;
+            width: 34vw;
+            height: 34vw;
+            border-radius: 50%;
+            pointer-events: none;
+            background:
+                radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.52), transparent 36%),
+                conic-gradient(from 180deg, rgba(19, 99, 223, 0.18), rgba(217, 119, 6, 0.16), rgba(56, 189, 248, 0.12), rgba(19, 99, 223, 0.18));
+            filter: blur(54px);
+            opacity: 0.58;
+            animation: auroraDrift 16s ease-in-out infinite alternate;
+        }
+
+        body.is-embedded {
+            min-height: 100%;
+            background:
+                radial-gradient(circle at 10% 10%, rgba(19, 99, 223, 0.08), transparent 18%),
+                radial-gradient(circle at 86% 12%, rgba(217, 119, 6, 0.06), transparent 18%),
+                linear-gradient(180deg, rgba(248, 251, 248, 0.98), rgba(240, 246, 242, 0.98));
+        }
+
+        body.is-embedded::before,
+        body.is-embedded::after {
+            display: none;
+        }
+
+        .page-shell {
+            position: relative;
+            z-index: 1;
+            max-width: 1680px;
             margin: 0 auto;
-            padding: 40px 20px;
-        }
-
-        .header h1 {
-            font-size: 36px;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--theme-accent-deep), var(--theme-accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
-        }
-
-        .header p {
-            color: #334155;
-            font-size: 16px;
-        }
-
-        .main-content {
+            padding: 24px;
             display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 20px;
-            margin-bottom: 20px;
+            gap: 18px;
         }
 
-        .agents-panel {
-            background: #ffffff;
-            border-radius: 16px;
-            padding: 24px;
-            border: 1px solid rgba(15, 23, 42, 0.15);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        body.is-embedded .page-shell {
+            max-width: none;
+            padding: 14px;
         }
 
-        .agents-panel h2 {
-            font-size: 20px;
-            margin-bottom: 20px;
-            color: #0f172a;
+        .page-shell::before,
+        .page-shell::after {
+            content: "";
+            position: fixed;
+            pointer-events: none;
+            z-index: 0;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.46;
         }
 
-        .agent-card {
-            background: #f8fafc;
-            border: 1px solid rgba(15, 23, 42, 0.15);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
-            transition: all 0.3s;
+        .page-shell::before {
+            top: 18vh;
+            left: -10vw;
+            width: 26vw;
+            height: 26vw;
+            background: radial-gradient(circle, rgba(19, 99, 223, 0.22), transparent 68%);
+            animation: ambientPulse 12s ease-in-out infinite;
         }
 
-        .agent-card:hover {
-            background: #f9fafc;
-            border-color: var(--theme-accent);
+        .page-shell::after {
+            top: 10vh;
+            right: -10vw;
+            width: 28vw;
+            height: 28vw;
+            background: radial-gradient(circle, rgba(217, 119, 6, 0.20), transparent 70%);
+            animation: ambientPulse 14s ease-in-out infinite reverse;
         }
 
-        .agent-card.active {
-            border-color: var(--theme-accent);
-            background: var(--theme-accent-soft);
+        .hero-panel {
+            padding: 0;
         }
 
-        .agent-name {
-            font-weight: 600;
-            font-size: 16px;
-            margin-bottom: 4px;
-            color: #0f172a;
+        .hero-shell {
+            padding: 28px;
+            display: grid;
+            gap: 18px;
         }
 
-        .agent-role {
-            font-size: 13px;
-            color: #64748b;
+        .hero-main {
+            display: grid;
+            grid-template-columns: minmax(0, 1.35fr) 380px;
+            gap: 18px;
+            align-items: start;
         }
 
-        .agent-status {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 11px;
-            margin-top: 8px;
+        .hero-copy {
+            min-width: 0;
         }
 
-        .agent-status.idle {
-            background: #f0fdf4;
-            color: #15803d;
-            border: 1px solid #16a34a;
-        }
-
-        .agent-status.working {
-            background: #fff7ed;
-            color: #c2410c;
-            border: 1px solid #ea580c;
-        }
-
-        .workspace {
-            background: #ffffff;
-            border-radius: 16px;
-            padding: 24px;
-            border: 1px solid rgba(15, 23, 42, 0.15);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .input-area {
-            margin-bottom: 20px;
-        }
-
-        .input-area textarea {
-            width: 100%;
-            min-height: 100px;
-            background: #ffffff;
-            border: 1px solid rgba(15, 23, 42, 0.2);
-            border-radius: 12px;
-            padding: 16px;
-            color: #0f172a;
-            font-size: 14px;
-            resize: vertical;
-            font-family: inherit;
-        }
-
-        .input-area textarea:focus {
-            outline: none;
-            border-color: var(--theme-accent);
-            box-shadow: 0 0 0 3px rgba(19, 99, 223, 0.15);
-        }
-
-        .input-area textarea::placeholder {
-            color: #64748b;
-        }
-
-        .execute-btn {
-            padding: 12px 24px;
-            background: linear-gradient(135deg, var(--theme-accent-deep), var(--theme-accent));
-            border: none;
-            border-radius: 12px;
-            color: #ffffff;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 12px var(--theme-accent-shadow);
-        }
-
-        .execute-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(19, 99, 223, 0.28);
-        }
-
-        .execute-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .progress-area {
-            flex: 1;
-            overflow-y: auto;
-            margin-top: 20px;
-        }
-
-        .progress-item {
-            background: #f8fafc;
-            border-left: 3px solid var(--theme-accent);
-            padding: 16px;
-            margin-bottom: 12px;
-            border-radius: 8px;
-            animation: slideIn 0.3s ease-out;
-            border: 1px solid rgba(15, 23, 42, 0.1);
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        .progress-item.task-assigned {
-            border-left-color: #2563eb;
-            background: #eff6ff;
-        }
-
-        .progress-item.task-executing {
-            border-left-color: #ea580c;
-            background: #fff7ed;
-        }
-
-        .progress-item.task-completed {
-            border-left-color: #16a34a;
-            background: #f0fdf4;
-        }
-
-        .progress-item.task-failed {
-            border-left-color: #dc2626;
-            background: #fef2f2;
-        }
-
-        .progress-header {
-            display: flex;
+        .hero-kicker {
+            display: inline-flex;
             align-items: center;
             gap: 8px;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #0f172a;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, rgba(19, 99, 223, 0.14), rgba(217, 119, 6, 0.12));
+            color: var(--ma-accent-deep);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            border: 1px solid rgba(19, 99, 223, 0.10);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
         }
 
-        .progress-content {
-            font-size: 14px;
-            color: #334155;
+        .hero-copy h1 {
+            margin: 18px 0 12px;
+            font-family: "Manrope", var(--font-display, "Segoe UI", sans-serif);
+            font-size: clamp(34px, 4vw, 50px);
+            line-height: 1.02;
+            letter-spacing: -0.05em;
+            color: var(--ma-ink);
+        }
+
+        .hero-copy p {
+            margin: 0;
+            max-width: 860px;
+            color: var(--ma-muted);
+            font-size: 15px;
+            line-height: 1.85;
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 22px;
+        }
+
+        .hero-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 14px;
+            border: 1px solid rgba(19, 99, 223, 0.10);
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(255, 248, 241, 0.92));
+            color: var(--ma-text);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            box-shadow: 0 14px 28px rgba(36, 46, 68, 0.08);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+        }
+
+        .hero-action:hover {
+            transform: translateY(-1px);
+            border-color: rgba(19, 99, 223, 0.20);
+            box-shadow: 0 18px 34px rgba(31, 41, 61, 0.10);
+        }
+
+        .hero-action i {
+            color: var(--ma-accent);
+        }
+
+        .hero-highlight-grid {
+            margin-top: 22px;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .hero-highlight-card {
+            padding: 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(19, 99, 223, 0.10);
+            background:
+                radial-gradient(circle at top right, rgba(217, 119, 6, 0.10), transparent 28%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(250, 252, 250, 0.90));
+            box-shadow: 0 14px 28px rgba(32, 42, 61, 0.06);
+        }
+
+        .hero-highlight-card span {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--ma-muted);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .hero-highlight-card strong {
+            display: block;
+            margin-top: 12px;
+            font-size: 18px;
+            line-height: 1.35;
+            letter-spacing: -0.03em;
+        }
+
+        .hero-highlight-card p {
+            margin-top: 8px;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .hero-side {
+            display: grid;
+            gap: 14px;
+        }
+
+        .hero-runtime-card,
+        .hero-mini-card {
+            border-radius: 22px;
+            border: 1px solid rgba(19, 99, 223, 0.10);
+            box-shadow: 0 16px 32px rgba(30, 40, 60, 0.08);
+        }
+
+        .hero-runtime-card {
+            padding: 18px;
+            background:
+                radial-gradient(circle at top right, rgba(255, 255, 255, 0.72), transparent 28%),
+                linear-gradient(135deg, rgba(19, 99, 223, 0.12), rgba(217, 119, 6, 0.12), rgba(255, 255, 255, 0.92));
+        }
+
+        .hero-runtime-card span {
+            display: block;
+            color: var(--ma-muted);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .hero-runtime-card strong {
+            display: block;
+            margin-top: 14px;
+            font-family: "Manrope", var(--font-display, "Segoe UI", sans-serif);
+            font-size: 34px;
+            line-height: 1;
+            letter-spacing: -0.06em;
+            color: var(--ma-ink);
+        }
+
+        .hero-runtime-card p {
+            margin: 12px 0 0;
+            color: var(--ma-muted);
+            font-size: 13px;
+            line-height: 1.75;
+        }
+
+        .hero-runtime-meta {
+            margin-top: 14px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .hero-runtime-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid rgba(19, 99, 223, 0.08);
+            color: var(--ma-accent-deep);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .hero-mini-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .hero-mini-card {
+            padding: 16px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 249, 244, 0.92));
+        }
+
+        .hero-mini-card span {
+            display: block;
+            color: var(--ma-muted);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .hero-mini-card strong {
+            display: block;
+            margin-top: 12px;
+            font-family: "Manrope", var(--font-display, "Segoe UI", sans-serif);
+            font-size: 30px;
+            line-height: 1;
+            letter-spacing: -0.05em;
+            color: var(--ma-ink);
+        }
+
+        .hero-mini-card small {
+            display: block;
+            margin-top: 10px;
+            color: var(--ma-muted);
+            font-size: 12px;
             line-height: 1.6;
         }
 
-        .final-result {
-            background: #f9fafc;
-            border: 2px solid var(--theme-accent);
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 20px;
-            box-shadow: 0 4px 12px rgba(19, 99, 223, 0.14);
+        .orchestration-strip {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
         }
 
-        .final-result h3 {
-            color: #0f172a;
-            margin-bottom: 12px;
+        .orchestration-stage {
+            position: relative;
+            padding: 15px 16px 15px 18px;
+            border-radius: 18px;
+            border: 1px solid rgba(19, 99, 223, 0.10);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.90), rgba(251, 252, 249, 0.88));
+            overflow: hidden;
         }
 
-        .final-result-content {
-            line-height: 1.8;
+        .orchestration-stage::before {
+            content: "";
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 4px;
+            border-radius: 18px 0 0 18px;
+            background: linear-gradient(180deg, var(--ma-accent), rgba(217, 119, 6, 0.56));
+        }
+
+        .orchestration-stage span {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--ma-muted);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .orchestration-stage strong {
+            display: block;
+            margin-top: 10px;
+            font-size: 15px;
+            line-height: 1.45;
+            letter-spacing: -0.02em;
+        }
+
+        .orchestration-stage p {
+            margin: 8px 0 0;
+            color: var(--ma-muted);
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .overview-card,
+        .panel {
+            border: 1px solid var(--ma-line);
+            border-radius: var(--ma-radius);
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 249, 243, 0.74)),
+                var(--ma-surface);
+            box-shadow: var(--ma-shadow);
+            backdrop-filter: blur(18px);
+            transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+        }
+
+        .overview-card:hover,
+        .panel:hover {
+            transform: translateY(-2px);
+            border-color: rgba(19, 99, 223, 0.18);
+            box-shadow: var(--ma-shadow-strong);
+        }
+
+        .overview-card {
+            position: relative;
+            padding: 18px 18px 16px;
+            display: grid;
+            gap: 10px;
+            overflow: hidden;
+            isolation: isolate;
+        }
+
+        .overview-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .overview-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            color: var(--ma-accent-deep);
+            font-size: 16px;
+            background: linear-gradient(135deg, rgba(19, 99, 223, 0.14), rgba(217, 119, 6, 0.10));
+            border: 1px solid rgba(19, 99, 223, 0.10);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.74);
+        }
+
+        .overview-card::before {
+            content: "";
+            position: absolute;
+            inset: 0 0 auto 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--ma-accent), rgba(20, 184, 166, 0.72), rgba(217, 119, 6, 0.72));
+        }
+
+        .overview-card::after {
+            content: "";
+            position: absolute;
+            inset: auto -22px -26px auto;
+            width: 104px;
+            height: 104px;
+            border-radius: 28px;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(19, 99, 223, 0.08) 55%, transparent 75%);
+            opacity: 0.9;
+            transform: rotate(14deg);
+        }
+
+        .overview-card:nth-child(2)::before {
+            background: linear-gradient(90deg, rgba(217, 119, 6, 0.92), rgba(245, 158, 11, 0.72), rgba(14, 165, 233, 0.64));
+        }
+
+        .overview-card:nth-child(3)::before {
+            background: linear-gradient(90deg, rgba(19, 99, 223, 0.92), rgba(20, 184, 166, 0.72), rgba(59, 130, 246, 0.64));
+        }
+
+        .overview-card:nth-child(4)::before {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.84), rgba(14, 165, 233, 0.72), rgba(19, 99, 223, 0.64));
+        }
+
+        .overview-card:nth-child(5)::before {
+            background: linear-gradient(90deg, rgba(180, 83, 9, 0.9), rgba(217, 119, 6, 0.72), rgba(19, 99, 223, 0.62));
+        }
+
+        .overview-card-label {
+            color: var(--ma-muted);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .overview-card strong {
+            position: relative;
+            z-index: 1;
+            font-family: var(--font-display, "Segoe UI", sans-serif);
+            font-size: 32px;
+            line-height: 1;
+            letter-spacing: -0.04em;
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.64);
+        }
+
+        .overview-card span:last-child {
+            position: relative;
+            z-index: 1;
+            color: var(--ma-muted);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .overview-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            width: max-content;
+            padding: 8px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .overview-badge.socket {
+            color: var(--ma-accent-deep);
+            background: linear-gradient(135deg, rgba(20, 184, 166, 0.18), rgba(19, 99, 223, 0.12));
+        }
+
+        .overview-badge.http {
+            color: var(--ma-warning);
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.18), rgba(180, 83, 9, 0.10));
+        }
+
+        .overview-badge.offline {
+            color: var(--ma-danger);
+            background: linear-gradient(135deg, rgba(251, 146, 60, 0.18), rgba(194, 65, 12, 0.10));
+        }
+
+        .workspace-grid {
+            display: grid;
+            grid-template-columns: 320px minmax(0, 1fr) 360px;
+            gap: 18px;
+            align-items: start;
+        }
+
+        .workspace-grid > *,
+        .overview-grid > *,
+        .board-columns > * {
+            min-width: 0;
+        }
+
+        .panel {
+            position: relative;
+            overflow: hidden;
+            isolation: isolate;
+        }
+
+        .panel::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(circle at top right, rgba(255, 255, 255, 0.78), transparent 28%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.34), transparent 22%);
+            z-index: 0;
+        }
+
+        .panel::after {
+            content: "";
+            position: absolute;
+            inset: 1px;
+            border-radius: calc(var(--ma-radius) - 1px);
+            pointer-events: none;
+            border: 1px solid rgba(255, 255, 255, 0.34);
+            mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.9), transparent 65%);
+            z-index: 0;
+        }
+
+        .panel > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .panel-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 20px 20px 16px;
+            border-bottom: 1px solid rgba(151, 164, 183, 0.18);
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.66), rgba(255, 255, 255, 0.30)),
+                linear-gradient(90deg, rgba(19, 99, 223, 0.04), transparent 45%, rgba(217, 119, 6, 0.05));
+        }
+
+        .panel-head-main {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .panel-head-copy {
+            min-width: 0;
+        }
+
+        .section-mark {
+            width: 42px;
+            height: 42px;
+            flex: 0 0 42px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            color: var(--ma-accent-deep);
+            font-size: 16px;
+            background: linear-gradient(135deg, rgba(19, 99, 223, 0.14), rgba(217, 119, 6, 0.10));
+            border: 1px solid rgba(19, 99, 223, 0.10);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.76), 0 10px 18px rgba(33, 47, 69, 0.06);
+        }
+
+        .panel-head h2,
+        .panel-head h3 {
+            margin: 0;
+            font-size: 18px;
+            line-height: 1.2;
+            font-family: var(--font-display, "Segoe UI", sans-serif);
+            letter-spacing: -0.02em;
+        }
+
+        .panel-head h2::after,
+        .panel-head h3::after {
+            content: "";
+            display: block;
+            width: 52px;
+            height: 3px;
+            margin-top: 10px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--ma-accent), rgba(217, 119, 6, 0.55));
+        }
+
+        .panel-head p {
+            margin: 8px 0 0;
+            color: var(--ma-muted);
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .panel-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, rgba(19, 99, 223, 0.12), rgba(217, 119, 6, 0.10));
+            color: var(--ma-accent-deep);
+            border: 1px solid rgba(19, 99, 223, 0.10);
+            font-size: 12px;
+            font-weight: 800;
+            white-space: nowrap;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.74);
+        }
+
+        .left-column,
+        .right-column {
+            display: grid;
+            gap: 18px;
+            align-content: start;
+        }
+
+        .panel-body {
+            padding: 18px;
+            position: relative;
+        }
+
+        .panel-body::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(circle at top right, rgba(255, 255, 255, 0.34), transparent 18%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent 18%);
+            z-index: 0;
+        }
+
+        .panel-body > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .team-list,
+        .template-list,
+        .timeline-list,
+        .message-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .team-card,
+        .template-card,
+        .timeline-item,
+        .message-item,
+        .task-card {
+            border: 1px solid rgba(151, 164, 183, 0.18);
+            border-radius: 18px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 251, 248, 0.90));
+            box-shadow: 0 12px 24px rgba(38, 47, 69, 0.05);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+        }
+
+        .team-card:hover,
+        .template-card:hover,
+        .timeline-item:hover,
+        .message-item:hover,
+        .task-card:hover {
+            transform: translateY(-1px);
+            border-color: rgba(19, 99, 223, 0.16);
+            box-shadow: 0 18px 30px rgba(29, 39, 59, 0.08);
+        }
+
+        .team-card {
+            position: relative;
+            padding: 14px;
+            display: grid;
+            gap: 10px;
+            overflow: hidden;
+        }
+
+        .team-card::before,
+        .task-card::before,
+        .template-card::before,
+        .timeline-item::before,
+        .message-item::before {
+            content: "";
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 3px;
+            border-radius: 18px 0 0 18px;
+            background: linear-gradient(180deg, var(--ma-accent), rgba(217, 119, 6, 0.45));
+        }
+
+        .team-card::after,
+        .task-card::after,
+        .template-card::after {
+            content: "";
+            position: absolute;
+            inset: auto -32px -36px auto;
+            width: 96px;
+            height: 96px;
+            border-radius: 28px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.7), rgba(19, 99, 223, 0.08) 58%, transparent 76%);
+            opacity: 0.7;
+            transform: rotate(10deg);
+            pointer-events: none;
+        }
+
+        .team-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .team-name {
+            display: grid;
+            gap: 4px;
+        }
+
+        .team-name strong {
+            font-size: 15px;
+            line-height: 1.3;
+            letter-spacing: -0.01em;
+        }
+
+        .team-name span {
+            color: var(--ma-muted);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .role-pill,
+        .status-pill,
+        .mini-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            width: max-content;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 800;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.58);
+        }
+
+        .role-pill {
+            color: var(--ma-accent-deep);
+            background: linear-gradient(135deg, rgba(19, 99, 223, 0.12), rgba(20, 184, 166, 0.10));
+            border: 1px solid rgba(19, 99, 223, 0.10);
+        }
+
+        .status-pill.idle {
+            color: var(--ma-success);
+            background: linear-gradient(135deg, rgba(20, 184, 166, 0.16), rgba(19, 99, 223, 0.10));
+        }
+
+        .status-pill.working {
+            color: var(--ma-warning);
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.18), rgba(180, 83, 9, 0.10));
+        }
+
+        .status-pill.failed {
+            color: var(--ma-danger);
+            background: linear-gradient(135deg, rgba(251, 146, 60, 0.18), rgba(194, 65, 12, 0.10));
+        }
+
+        .team-meta {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .team-metric {
+            padding: 10px 12px;
+            border-radius: 14px;
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(247, 252, 251, 0.72)),
+                rgba(19, 99, 223, 0.05);
+            border: 1px solid rgba(19, 99, 223, 0.08);
+        }
+
+        .team-metric strong {
+            display: block;
+            font-size: 18px;
+            line-height: 1;
+            font-family: var(--font-display, "Segoe UI", sans-serif);
+        }
+
+        .team-metric span {
+            display: block;
+            margin-top: 6px;
+            color: var(--ma-muted);
+            font-size: 12px;
+        }
+
+        .template-card {
+            position: relative;
+            padding: 14px;
+            display: grid;
+            gap: 8px;
+            cursor: pointer;
+            transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+            overflow: hidden;
+        }
+
+        .template-card:hover {
+            transform: translateY(-1px);
+            border-color: rgba(19, 99, 223, 0.18);
+            box-shadow: 0 18px 30px rgba(31, 43, 64, 0.10);
+        }
+
+        .template-card strong {
+            position: relative;
+            padding-right: 18px;
+        }
+
+        .template-card strong::after {
+            content: "↗";
+            position: absolute;
+            top: 0;
+            right: 0;
+            color: var(--ma-accent);
+            font-size: 12px;
+        }
+
+        .template-card strong {
+            font-size: 14px;
+            line-height: 1.35;
+        }
+
+        .template-card span {
+            color: var(--ma-muted);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .center-column {
+            display: grid;
+            gap: 18px;
+            min-width: 0;
+        }
+
+        .composer-body {
+            padding: 18px;
+            display: grid;
+            gap: 16px;
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.22), transparent),
+                radial-gradient(circle at top right, rgba(217, 119, 6, 0.07), transparent 22%);
+        }
+
+        .composer-textarea {
+            width: 100%;
+            min-height: 154px;
+            padding: 16px 18px;
+            border: 1px solid var(--ma-accent-line);
+            border-radius: 18px;
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 250, 244, 0.92));
+            color: var(--ma-text);
+            font-size: 14px;
+            line-height: 1.75;
+            resize: vertical;
+            font-family: inherit;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.88);
+        }
+
+        .composer-textarea::placeholder {
+            color: rgba(102, 118, 141, 0.9);
+        }
+
+        .composer-textarea:focus {
+            outline: none;
+            border-color: rgba(19, 99, 223, 0.24);
+            box-shadow: 0 0 0 4px rgba(19, 99, 223, 0.10), 0 16px 30px rgba(34, 49, 73, 0.08);
+        }
+
+        .quick-prompts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .composer-signal-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .composer-signal-card {
+            padding: 14px;
+            border-radius: 18px;
+            border: 1px solid rgba(19, 99, 223, 0.10);
+            background:
+                radial-gradient(circle at top right, rgba(255, 255, 255, 0.72), transparent 28%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(246, 251, 250, 0.90));
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.84);
+        }
+
+        .composer-signal-card span {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--ma-muted);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .composer-signal-card strong {
+            display: block;
+            margin-top: 12px;
+            font-size: 15px;
+            line-height: 1.45;
+            letter-spacing: -0.02em;
+        }
+
+        .composer-signal-card p {
+            margin: 8px 0 0;
+            color: var(--ma-muted);
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .prompt-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border: 1px solid rgba(19, 99, 223, 0.10);
+            border-radius: 999px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(255, 248, 241, 0.94));
+            color: var(--ma-text);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.86);
+        }
+
+        .prompt-chip:hover {
+            border-color: rgba(19, 99, 223, 0.20);
+            background: linear-gradient(135deg, rgba(19, 99, 223, 0.12), rgba(217, 119, 6, 0.08));
+        }
+
+        .prompt-chip i {
+            color: var(--ma-accent);
+        }
+
+        .composer-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .composer-hint {
+            color: var(--ma-muted);
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .action-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 16px;
+            border: 1px solid rgba(19, 99, 223, 0.10);
+            border-radius: 14px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 249, 244, 0.92));
+            color: var(--ma-text);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+            overflow: hidden;
+        }
+
+        .btn i {
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn span,
+        .btn {
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            border-color: rgba(19, 99, 223, 0.18);
+            box-shadow: 0 16px 28px rgba(35, 48, 70, 0.10);
+        }
+
+        .btn:disabled {
+            opacity: 0.56;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-primary {
+            border-color: transparent;
+            background: linear-gradient(135deg, var(--ma-accent-deep), var(--ma-accent), #60a5fa);
+            color: #ffffff;
+            box-shadow: 0 18px 30px rgba(19, 99, 223, 0.24);
+        }
+
+        .btn-primary::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(115deg, transparent 24%, rgba(255, 255, 255, 0.34) 46%, transparent 68%);
+            transform: translateX(-120%);
+            transition: transform 0.5s ease;
+        }
+
+        .btn-primary:hover::after {
+            transform: translateX(120%);
+        }
+
+        .btn-soft {
+            background: linear-gradient(135deg, rgba(19, 99, 223, 0.10), rgba(217, 119, 6, 0.08));
+            color: var(--ma-accent-deep);
+        }
+
+        .board-panel {
+            display: grid;
+            gap: 0;
+        }
+
+        .board-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            padding: 20px 20px 16px;
+            border-bottom: 1px solid rgba(151, 164, 183, 0.18);
+            background:
+                linear-gradient(90deg, rgba(19, 99, 223, 0.05), transparent 42%, rgba(217, 119, 6, 0.05)),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.24));
+        }
+
+        .board-head h2,
+        .board-head h3 {
+            margin: 0;
+            font-size: 18px;
+            line-height: 1.2;
+            font-family: var(--font-display, "Segoe UI", sans-serif);
+            letter-spacing: -0.02em;
+        }
+
+        .board-head h2::after,
+        .board-head h3::after {
+            content: "";
+            display: block;
+            width: 52px;
+            height: 3px;
+            margin-top: 10px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--ma-accent), rgba(217, 119, 6, 0.55));
+        }
+
+        .board-head p {
+            margin: 8px 0 0;
+            color: var(--ma-muted);
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .board-legends {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .board-legend {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(19, 99, 223, 0.10);
+            background: rgba(255, 255, 255, 0.78);
+            color: var(--ma-text);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .board-legend i {
+            color: var(--ma-accent);
+        }
+
+        .board-columns {
+            padding: 18px;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+            align-items: start;
+            position: relative;
+        }
+
+        .board-column {
+            min-height: 340px;
+            padding: 14px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.54);
+            border: 1px solid rgba(151, 164, 183, 0.14);
+            display: grid;
+            align-content: start;
+            gap: 12px;
+            min-width: 0;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .board-column:nth-child(1) {
+            background: linear-gradient(180deg, rgba(247, 247, 247, 0.92), rgba(255, 251, 247, 0.82));
+        }
+
+        .board-column:nth-child(2) {
+            background: linear-gradient(180deg, rgba(255, 247, 237, 0.94), rgba(255, 251, 245, 0.84));
+        }
+
+        .board-column:nth-child(3) {
+            background: linear-gradient(180deg, rgba(240, 253, 250, 0.94), rgba(248, 255, 252, 0.84));
+        }
+
+        .board-column:nth-child(4) {
+            background: linear-gradient(180deg, rgba(255, 243, 232, 0.94), rgba(255, 249, 244, 0.84));
+        }
+
+        .board-column::before {
+            content: "";
+            position: absolute;
+            inset: 0 0 auto 0;
+            height: 3px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.24), rgba(19, 99, 223, 0.62), rgba(217, 119, 6, 0.56));
+        }
+
+        .board-column-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed rgba(95, 112, 136, 0.16);
+        }
+
+        .board-column-head strong {
+            font-size: 14px;
+            letter-spacing: -0.01em;
+        }
+
+        .board-column-head span {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 26px;
+            min-height: 26px;
+            padding: 0 8px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--ma-accent-deep);
+            background: linear-gradient(135deg, rgba(19, 99, 223, 0.12), rgba(217, 119, 6, 0.10));
+        }
+
+        .task-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .task-card {
+            position: relative;
+            padding: 14px;
+            display: grid;
+            gap: 10px;
+            overflow: hidden;
+        }
+
+        .task-card strong {
+            position: relative;
+            z-index: 1;
+        }
+
+        .task-card strong {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .task-card p {
+            margin: 0;
+            color: var(--ma-muted);
+            font-size: 12px;
+            line-height: 1.65;
             white-space: pre-wrap;
-            color: #334155;
-        }
-    </style>
-</head>
-<body>
-    <div class="page-wide">
-        <nav class="topbar">
-            <div class="brand">
-                <a class="back-link" href="{{ url_for('developer_home') }}">← 返回主页</a>
-                <h1><i class="fas fa-users"></i> 多 Agent 协作</h1>
-            </div>
-            <div class="topbar-actions">
-            </div>
-        </nav>
-
-    <div class="container">
-        <div class="header">
-            <p>多个智能 Agent 协同工作，完成复杂任务</p>
-        </div>
-
-        <div class="main-content">
-            <div class="agents-panel">
-                <h2><i class="fas fa-robot"></i> Agent 团队</h2>
-                <div id="agentsList"></div>
-            </div>
-
-            <div class="workspace">
-                <div class="input-area">
-                    <textarea id="queryInput" placeholder="输入您的任务，多个 Agent 将协作完成...&#10;&#10;示例：&#10;- 帮我研究人工智能的发展历史，并写一篇文章&#10;- 分析电商用户数据，并提供优化建议&#10;- 设计一个待办事项应用，并实现核心功能"></textarea>
-                    <button class="execute-btn" id="executeBtn" onclick="executeTask()">
-                        <i class="fas fa-play"></i> 开始协作
-                    </button>
-                </div>
-
-                <div class="progress-area" id="progressArea"></div>
-            </div>
-        </div>
-    </div>
-
-    </div> <!-- page-wide -->
-
-    <script>
-        const socket = typeof window.io === 'function' ? io() : null;
-        let isExecuting = false;
-
-        function showSocketUnavailable(message = 'Socket.IO 加载失败，实时协作能力暂不可用。') {
-            const progressArea = document.getElementById('progressArea');
-            if (!progressArea) return;
-            progressArea.innerHTML = `
-                <div class="progress-item task-failed">
-                    <div class="progress-header">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <span>实时通道不可用</span>
-                    </div>
-                    <div class="progress-content">${message}</div>
-                </div>
-            `;
+            word-break: break-word;
+            overflow-wrap: anywhere;
         }
 
-        // 加载 Agent 列表
-        async function loadAgents() {
-            try {
-                const response = await fetch('/api/multi-agent/agents');
-                const data = await response.json();
-                displayAgents(data.agents);
-            } catch (error) {
-                console.error('加载 Agent 失败:', error);
+        .task-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .task-card .task-meta,
+        .team-card .task-meta {
+            position: relative;
+            z-index: 1;
+        }
+
+        .mini-pill {
+            color: var(--ma-muted);
+            background: linear-gradient(135deg, rgba(95, 112, 136, 0.08), rgba(95, 112, 136, 0.12));
+            border: 1px solid rgba(95, 112, 136, 0.10);
+        }
+
+        .empty-card {
+            padding: 16px;
+            border: 1px dashed rgba(151, 164, 183, 0.22);
+            border-radius: 16px;
+            color: var(--ma-muted);
+            font-size: 12px;
+            line-height: 1.7;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(255, 250, 245, 0.68));
+        }
+
+        .result-panel .panel-body,
+        .timeline-panel .panel-body,
+        .message-panel .panel-body {
+            padding: 18px;
+            min-height: 220px;
+        }
+
+        .result-panel .panel-body,
+        .timeline-panel .panel-body,
+        .message-panel .panel-body,
+        .board-panel .board-columns {
+            position: relative;
+        }
+
+        .result-content {
+            min-height: 180px;
+            padding: 16px;
+            border-radius: 18px;
+            background:
+                radial-gradient(circle at top right, rgba(217, 119, 6, 0.10), transparent 24%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(241, 252, 250, 0.88));
+            border: 1px solid rgba(19, 99, 223, 0.12);
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.75;
+            font-size: 14px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-content::after {
+            content: "";
+            position: absolute;
+            inset: auto -20px -24px auto;
+            width: 120px;
+            height: 120px;
+            border-radius: 30px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.88), rgba(217, 119, 6, 0.08) 55%, transparent 75%);
+            opacity: 0.85;
+        }
+
+        .message-item {
+            background:
+                radial-gradient(circle at top right, rgba(19, 99, 223, 0.06), transparent 24%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 251, 248, 0.90));
+        }
+
+        .timeline-item {
+            background:
+                radial-gradient(circle at top right, rgba(217, 119, 6, 0.05), transparent 24%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 251, 248, 0.90));
+        }
+
+        .board-column .empty-card,
+        .timeline-list .empty-card,
+        .message-placeholder {
+            backdrop-filter: blur(10px);
+        }
+
+        .result-placeholder,
+        .message-placeholder {
+            color: var(--ma-muted);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .timeline-item,
+        .message-item {
+            position: relative;
+            padding: 14px;
+            display: grid;
+            gap: 8px;
+            overflow: hidden;
+        }
+
+        .timeline-list,
+        .message-list {
+            position: relative;
+        }
+
+        .timeline-list::before,
+        .message-list::before {
+            content: "";
+            position: absolute;
+            top: 8px;
+            bottom: 8px;
+            left: 22px;
+            width: 1px;
+            background: linear-gradient(180deg, rgba(19, 99, 223, 0.24), rgba(217, 119, 6, 0.18), transparent);
+            pointer-events: none;
+        }
+
+        .timeline-top,
+        .message-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .timeline-title,
+        .message-title {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .timeline-time,
+        .message-time {
+            color: var(--ma-muted);
+            font-size: 11px;
+            white-space: nowrap;
+        }
+
+        .timeline-body,
+        .message-body {
+            color: var(--ma-muted);
+            font-size: 12px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }
+
+        .timeline-item.assigned .timeline-title {
+            color: var(--ma-accent);
+        }
+
+        .timeline-item.executing .timeline-title {
+            color: var(--ma-warning);
+        }
+
+        .timeline-item.completed .timeline-title {
+            color: var(--ma-success);
+        }
+
+        .timeline-item.failed .timeline-title {
+            color: var(--ma-danger);
+        }
+
+        .timeline-item::after,
+        .message-item::after {
+            content: "";
+            position: absolute;
+            top: 18px;
+            left: 18px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--ma-accent), var(--ma-highlight));
+            box-shadow: 0 0 0 5px rgba(19, 99, 223, 0.08);
+        }
+
+        .timeline-title,
+        .message-title {
+            padding-left: 18px;
+        }
+
+        .timeline-item.assigned::after {
+            background: linear-gradient(135deg, #1363df, #60a5fa);
+        }
+
+        .timeline-item.executing::after {
+            background: linear-gradient(135deg, #d97706, #f59e0b);
+            animation: statusPulse 1.8s ease-in-out infinite;
+        }
+
+        .timeline-item.completed::after {
+            background: linear-gradient(135deg, #1363df, #22c55e);
+        }
+
+        .timeline-item.failed::after {
+            background: linear-gradient(135deg, #c2410c, #fb923c);
+        }
+
+        @keyframes ambientPulse {
+            0% {
+                transform: scale(1) translate3d(0, 0, 0);
+                opacity: 0.38;
+            }
+            100% {
+                transform: scale(1.12) translate3d(10px, -12px, 0);
+                opacity: 0.54;
             }
         }
 
-        function displayAgents(agents) {
-            const agentsList = document.getElementById('agentsList');
-            agentsList.innerHTML = agents.map(agent => `
-                <div class="agent-card" id="agent-${agent.agent_id}">
-                    <div class="agent-name">${agent.name}</div>
-                    <div class="agent-role">${getRoleIcon(agent.role)} ${getRoleName(agent.role)}</div>
-                    <span class="agent-status idle">空闲</span>
-                </div>
-            `).join('');
+        @keyframes auroraDrift {
+            0% {
+                transform: translate3d(0, 0, 0) scale(1);
+            }
+            100% {
+                transform: translate3d(-24px, 18px, 0) scale(1.08);
+            }
         }
 
-        function getRoleIcon(role) {
-            const icons = {
-                'researcher': '🔍',
-                'coder': '💻',
-                'analyst': '📊',
-                'writer': '✍️'
+        @keyframes statusPulse {
+            0%, 100% {
+                box-shadow: 0 0 0 5px rgba(19, 99, 223, 0.08);
+            }
+            50% {
+                box-shadow: 0 0 0 8px rgba(217, 119, 6, 0.14);
+            }
+        }
+
+        @media (max-width: 1420px) {
+            .hero-main {
+                grid-template-columns: 1fr;
+            }
+
+            .orchestration-strip {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .overview-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .workspace-grid {
+                grid-template-columns: 300px minmax(0, 1fr);
+            }
+
+            .right-column {
+                grid-column: 1 / -1;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .board-columns {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 1240px) {
+            .workspace-grid,
+            .right-column {
+                grid-template-columns: 1fr;
+            }
+
+            .left-column,
+            .right-column {
+                grid-column: auto;
+            }
+        }
+
+        @media (max-width: 980px) {
+            .page-shell {
+                padding: 14px;
+            }
+
+            .hero-shell {
+                padding: 18px;
+            }
+
+            .hero-highlight-grid,
+            .hero-mini-grid,
+            .orchestration-strip,
+            .composer-signal-grid,
+            .overview-grid,
+            .workspace-grid,
+            .right-column,
+            .board-columns {
+                grid-template-columns: 1fr;
+            }
+
+            .left-column,
+            .right-column {
+                grid-template-columns: 1fr;
+            }
+
+            .composer-actions,
+            .panel-head,
+            .board-head {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body{% if embedded %} class="is-embedded"{% endif %}>
+    <div class="page-shell">
+        <section class="panel hero-panel">
+            <div class="hero-shell">
+                <div class="hero-main">
+                    <div class="hero-copy">
+                        <span class="hero-kicker"><i class="fas fa-diagram-project"></i><span>Multi-Agent Orchestration</span></span>
+                        <h1>多 Agent 协作驾驶舱</h1>
+                        <p>把复杂目标拆成研究、分析、执行、校验和汇总多个子流程，在一个界面里完成任务编排、执行跟踪、结果聚合和消息回溯。页面结构也统一成和业务模块更接近的“总览 + 管线 + 工作区”版式。</p>
+
+                        <div class="hero-actions">
+                            <button class="hero-action" type="button" data-prompt="围绕一个业务目标，拆分为背景研究、方案设计、执行步骤、风险校验和结果汇总五段协作任务。">
+                                <i class="fas fa-layers"></i>
+                                <span>标准协作编排</span>
+                            </button>
+                            <button class="hero-action" type="button" data-prompt="围绕一个功能需求，拆分需求分析、技术设计、实现方案、代码产出和交付说明。">
+                                <i class="fas fa-code-branch"></i>
+                                <span>研发交付模式</span>
+                            </button>
+                            <button class="hero-action" type="button" data-prompt="围绕一组异常数据，拆分指标提炼、原因分析、验证步骤、改进建议和结论输出。">
+                                <i class="fas fa-magnifying-glass-chart"></i>
+                                <span>分析诊断模式</span>
+                            </button>
+                        </div>
+
+                        <div class="hero-highlight-grid">
+                            <article class="hero-highlight-card">
+                                <span><i class="fas fa-route"></i><span>编排入口</span></span>
+                                <strong>统一输入一个目标，自动生成多角色执行链路</strong>
+                                <p>输入后的目标会被协调器拆解成多个子任务，并按能力分派给不同 Agent。</p>
+                            </article>
+                            <article class="hero-highlight-card">
+                                <span><i class="fas fa-arrows-split-up-and-left"></i><span>并行协作</span></span>
+                                <strong>支持并行推进、状态切换和消息回传</strong>
+                                <p>执行中的任务会实时进入不同泳道，右侧同步展示时间线和消息总线。</p>
+                            </article>
+                            <article class="hero-highlight-card">
+                                <span><i class="fas fa-file-waveform"></i><span>结果聚合</span></span>
+                                <strong>输出统一汇总到结果区，便于复核和二次处理</strong>
+                                <p>最终结果、过程事件和 Agent 通信拆开呈现，减少信息混在一起的情况。</p>
+                            </article>
+                        </div>
+                    </div>
+
+                    <div class="hero-side">
+                        <article class="hero-runtime-card">
+                            <span>当前运行态</span>
+                            <strong id="heroRuntimeLabel">待开始</strong>
+                            <p id="heroTransportText">优先走 Socket 实时协作，若链路不可用则自动切换到 HTTP 执行模式。</p>
+                            <div class="hero-runtime-meta">
+                                <span class="hero-runtime-chip"><i class="fas fa-bolt"></i><span>自动回退</span></span>
+                                <span class="hero-runtime-chip"><i class="fas fa-shuffle"></i><span>智能分派</span></span>
+                                <span class="hero-runtime-chip"><i class="fas fa-clock-rotate-left"></i><span>全过程留痕</span></span>
+                            </div>
+                        </article>
+
+                        <div class="hero-mini-grid">
+                            <article class="hero-mini-card">
+                                <span>可用 Agent</span>
+                                <strong id="heroAgentCount">0</strong>
+                                <small>当前参与本页协作编排的角色数量。</small>
+                            </article>
+                            <article class="hero-mini-card">
+                                <span>任务总量</span>
+                                <strong id="heroTaskCount">0</strong>
+                                <small>待分配、执行中、完成和失败任务总和。</small>
+                            </article>
+                            <article class="hero-mini-card">
+                                <span>完成率</span>
+                                <strong id="heroCompletionRate">0%</strong>
+                                <small>根据当前任务总量动态计算执行完成比例。</small>
+                            </article>
+                            <article class="hero-mini-card">
+                                <span>消息回传</span>
+                                <strong id="heroMessageCount">0</strong>
+                                <small>协调器消息总线中已记录的最新消息数。</small>
+                            </article>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="orchestration-strip">
+                    <article class="orchestration-stage">
+                        <span><i class="fas fa-bullseye"></i><span>Step 01</span></span>
+                        <strong>目标理解与任务定义</strong>
+                        <p>先把输入目标规整成一轮可拆分、可分派、可聚合的协作请求。</p>
+                    </article>
+                    <article class="orchestration-stage">
+                        <span><i class="fas fa-object-group"></i><span>Step 02</span></span>
+                        <strong>子任务拆解与角色匹配</strong>
+                        <p>协调器根据任务特征把工作切成多个子块，并选择合适的 Agent。</p>
+                    </article>
+                    <article class="orchestration-stage">
+                        <span><i class="fas fa-wave-square"></i><span>Step 03</span></span>
+                        <strong>并行执行与状态跟踪</strong>
+                        <p>执行事件实时回写到看板、时间线和消息总线，不再只有单点输出。</p>
+                    </article>
+                    <article class="orchestration-stage">
+                        <span><i class="fas fa-sparkles"></i><span>Step 04</span></span>
+                        <strong>结果聚合与最终交付</strong>
+                        <p>最后统一收敛到最终结果区域，便于复核、复制和继续迭代。</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="overview-grid">
+            <article class="overview-card">
+                <div class="overview-top">
+                    <span class="overview-card-label">协作团队</span>
+                    <span class="overview-icon"><i class="fas fa-users-rays"></i></span>
+                </div>
+                <strong id="agentCount">0</strong>
+                <span>当前参与协作的 Agent 数量</span>
+            </article>
+            <article class="overview-card">
+                <div class="overview-top">
+                    <span class="overview-card-label">任务总数</span>
+                    <span class="overview-icon"><i class="fas fa-list-check"></i></span>
+                </div>
+                <strong id="taskCount">0</strong>
+                <span>包含待处理、执行中和已完成任务</span>
+            </article>
+            <article class="overview-card">
+                <div class="overview-top">
+                    <span class="overview-card-label">已完成</span>
+                    <span class="overview-icon"><i class="fas fa-circle-check"></i></span>
+                </div>
+                <strong id="completedCount">0</strong>
+                <span>当前会话或历史记录中的完成数</span>
+            </article>
+            <article class="overview-card">
+                <div class="overview-top">
+                    <span class="overview-card-label">消息记录</span>
+                    <span class="overview-icon"><i class="fas fa-envelopes-bulk"></i></span>
+                </div>
+                <strong id="messageCount">0</strong>
+                <span>协调器消息总线中的消息数</span>
+            </article>
+            <article class="overview-card">
+                <div class="overview-top">
+                    <span class="overview-card-label">传输方式</span>
+                    <span class="overview-icon"><i class="fas fa-tower-broadcast"></i></span>
+                </div>
+                <strong id="transportLabel">HTTP</strong>
+                <span class="overview-badge http" id="transportBadge"><i class="fas fa-wave-square"></i><span>HTTP 回退</span></span>
+            </article>
+        </section>
+
+        <section class="workspace-grid">
+            <aside class="left-column">
+                <section class="panel">
+                    <div class="panel-head">
+                        <div class="panel-head-main">
+                            <span class="section-mark"><i class="fas fa-users-gear"></i></span>
+                            <div class="panel-head-copy">
+                                <h2>团队编组</h2>
+                                <p>查看当前参与协作的角色、负载和状态。</p>
+                            </div>
+                        </div>
+                        <span class="panel-tag"><i class="fas fa-users-gear"></i><span>团队视图</span></span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="team-list" id="agentsList"></div>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <div class="panel-head">
+                        <div class="panel-head-main">
+                            <span class="section-mark"><i class="fas fa-layer-group"></i></span>
+                            <div class="panel-head-copy">
+                                <h3>任务模板</h3>
+                                <p>点一下填入输入框，直接发起协作。</p>
+                            </div>
+                        </div>
+                        <span class="panel-tag"><i class="fas fa-wand-magic-sparkles"></i><span>快捷模板</span></span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="template-list" id="templateList"></div>
+                    </div>
+                </section>
+            </aside>
+
+            <main class="center-column">
+                <section class="panel">
+                    <div class="panel-head">
+                        <div class="panel-head-main">
+                            <span class="section-mark"><i class="fas fa-sitemap"></i></span>
+                            <div class="panel-head-copy">
+                                <h2>协作任务</h2>
+                                <p>输入目标后，系统会自动拆分子任务并分派给合适的 Agent。</p>
+                            </div>
+                        </div>
+                        <span class="panel-tag" id="runtimeState"><i class="fas fa-circle-play"></i><span>待开始</span></span>
+                    </div>
+                    <div class="composer-body">
+                        <textarea class="composer-textarea" id="queryInput" placeholder="输入本轮目标，例如：分析某项业务问题，拆分研究、数据分析、方案设计和结果写作，并输出可执行结论。"></textarea>
+
+                        <div class="quick-prompts" id="quickPrompts">
+                            <button class="prompt-chip" data-prompt="研究某个行业趋势，拆分研究、分析、结论整理三段任务。"><i class="fas fa-magnifying-glass-chart"></i><span>行业研究</span></button>
+                            <button class="prompt-chip" data-prompt="围绕一个新功能，拆分需求分析、实现方案、核心代码和交付说明。"><i class="fas fa-code-branch"></i><span>功能交付</span></button>
+                            <button class="prompt-chip" data-prompt="分析一组业务数据，拆分指标提炼、异常诊断、优化建议和总结输出。"><i class="fas fa-chart-line"></i><span>数据诊断</span></button>
+                            <button class="prompt-chip" data-prompt="围绕一个复杂问题，拆分调查、验证、方案设计和结果汇总。"><i class="fas fa-diagram-project"></i><span>复杂问题</span></button>
+                        </div>
+
+                        <div class="composer-signal-grid">
+                            <article class="composer-signal-card">
+                                <span><i class="fas fa-sliders"></i><span>编排规则</span></span>
+                                <strong>自动拆分 + 角色分派</strong>
+                                <p>协调器会根据任务内容自动判断需要多少子任务以及由谁执行。</p>
+                            </article>
+                            <article class="composer-signal-card">
+                                <span><i class="fas fa-shield-halved"></i><span>容错策略</span></span>
+                                <strong>Socket 优先，HTTP 自动回退</strong>
+                                <p>实时链路异常时切换为 HTTP 执行，避免整轮协作直接中断。</p>
+                            </article>
+                            <article class="composer-signal-card">
+                                <span><i class="fas fa-clipboard-check"></i><span>输出约束</span></span>
+                                <strong>过程可追踪，结果可复核</strong>
+                                <p>最终结果、时间线和消息总线拆开呈现，方便核对与回看。</p>
+                            </article>
+                        </div>
+
+                        <div class="composer-actions">
+                            <div class="composer-hint" id="composerHint">优先走 Socket 实时协作；不可用时自动走 HTTP 执行。</div>
+                            <div class="action-group">
+                                <button class="btn btn-soft" id="clearBtn" type="button">
+                                    <i class="fas fa-eraser"></i> 清空
+                                </button>
+                                <button class="btn btn-primary" id="executeBtn" type="button">
+                                    <i class="fas fa-play"></i> 开始协作
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="panel board-panel">
+                    <div class="board-head">
+                        <div class="panel-head-main">
+                            <span class="section-mark"><i class="fas fa-table-columns"></i></span>
+                            <div class="panel-head-copy">
+                                <h2>任务看板</h2>
+                                <p>自动拆分后的任务会按状态落在对应泳道里。</p>
+                            </div>
+                        </div>
+                        <div class="board-legends">
+                            <span class="board-legend"><i class="fas fa-hourglass-start"></i><span>待分配</span></span>
+                            <span class="board-legend"><i class="fas fa-spinner"></i><span>执行中</span></span>
+                            <span class="board-legend"><i class="fas fa-circle-check"></i><span>已完成</span></span>
+                            <span class="board-legend"><i class="fas fa-triangle-exclamation"></i><span>失败</span></span>
+                        </div>
+                    </div>
+                    <div class="board-columns">
+                        <section class="board-column">
+                            <div class="board-column-head">
+                                <strong>待分配</strong>
+                                <span id="pendingCount">0</span>
+                            </div>
+                            <div class="task-list" id="pendingList"></div>
+                        </section>
+                        <section class="board-column">
+                            <div class="board-column-head">
+                                <strong>执行中</strong>
+                                <span id="inProgressCount">0</span>
+                            </div>
+                            <div class="task-list" id="inProgressList"></div>
+                        </section>
+                        <section class="board-column">
+                            <div class="board-column-head">
+                                <strong>已完成</strong>
+                                <span id="doneCount">0</span>
+                            </div>
+                            <div class="task-list" id="doneList"></div>
+                        </section>
+                        <section class="board-column">
+                            <div class="board-column-head">
+                                <strong>失败</strong>
+                                <span id="failedCount">0</span>
+                            </div>
+                            <div class="task-list" id="failedList"></div>
+                        </section>
+                    </div>
+                </section>
+            </main>
+
+            <aside class="right-column">
+                <section class="panel result-panel">
+                    <div class="panel-head">
+                        <div class="panel-head-main">
+                            <span class="section-mark"><i class="fas fa-sparkles"></i></span>
+                            <div class="panel-head-copy">
+                                <h3>最终结果</h3>
+                                <p>聚合后的输出会显示在这里。</p>
+                            </div>
+                        </div>
+                        <span class="panel-tag"><i class="fas fa-sparkles"></i><span>聚合输出</span></span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="result-content" id="resultContent">还没有结果。</div>
+                    </div>
+                </section>
+
+                <section class="panel timeline-panel">
+                    <div class="panel-head">
+                        <div class="panel-head-main">
+                            <span class="section-mark"><i class="fas fa-wave-square"></i></span>
+                            <div class="panel-head-copy">
+                                <h3>协作时间线</h3>
+                                <p>展示任务分配、执行和完成过程。</p>
+                            </div>
+                        </div>
+                        <span class="panel-tag"><i class="fas fa-timeline"></i><span>过程事件</span></span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="timeline-list" id="timelineList"></div>
+                    </div>
+                </section>
+
+                <section class="panel message-panel">
+                    <div class="panel-head">
+                        <div class="panel-head-main">
+                            <span class="section-mark"><i class="fas fa-envelopes-bulk"></i></span>
+                            <div class="panel-head-copy">
+                                <h3>消息总线</h3>
+                                <p>显示协调器当前持有的 Agent 消息。</p>
+                            </div>
+                        </div>
+                        <span class="panel-tag"><i class="fas fa-envelopes-bulk"></i><span>Agent 通信</span></span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="message-list" id="messageList"></div>
+                    </div>
+                </section>
+            </aside>
+        </section>
+    </div>
+
+    <script>
+        const socket = typeof window.io === "function" ? io() : null;
+        const draftKey = "multi_agent_query_draft";
+        const state = {
+            agents: [],
+            tasks: new Map(),
+            taskOrder: [],
+            messages: [],
+            timeline: [],
+            agentRuntime: {},
+            finalResult: "",
+            runtimeLabel: "待开始",
+            transport: socket && socket.connected ? "socket" : "http",
+            isExecuting: false,
+            status: {
+                total_tasks: 0,
+                pending_tasks: 0,
+                completed_tasks: 0,
+                message_queue_size: 0
+            }
+        };
+
+        const templates = [
+            {
+                title: "研究 + 分析 + 写作",
+                description: "适合行业研究、专题综述和报告输出。",
+                prompt: "请围绕一个主题拆分为研究、分析、写作三个阶段，由不同 Agent 协同完成，并给出最后结论。"
+            },
+            {
+                title: "需求 + 方案 + 代码",
+                description: "适合功能设计、实现方案和代码交付。",
+                prompt: "请围绕一个功能目标拆分需求分析、实现方案、核心代码和交付说明四项任务。"
+            },
+            {
+                title: "诊断 + 优化建议",
+                description: "适合业务异常定位和动作建议。",
+                prompt: "请针对一个问题拆分现象梳理、原因分析、验证思路和优化建议四个子任务。"
+            }
+        ];
+
+        document.addEventListener("DOMContentLoaded", () => {
+            bindComposer();
+            renderTemplateCards();
+            bindSocketEvents();
+            loadInitialData();
+        });
+
+        function bindComposer() {
+            const queryInput = document.getElementById("queryInput");
+            const executeBtn = document.getElementById("executeBtn");
+            const clearBtn = document.getElementById("clearBtn");
+            const quickPrompts = Array.from(document.querySelectorAll("[data-prompt]"));
+
+            try {
+                const draft = sessionStorage.getItem(draftKey);
+                if (draft && !queryInput.value.trim()) {
+                    queryInput.value = draft;
+                }
+            } catch (error) {
+                console.warn("multi agent draft unavailable", error);
+            }
+
+            queryInput.addEventListener("input", () => {
+                try {
+                    sessionStorage.setItem(draftKey, queryInput.value);
+                } catch (error) {
+                    console.warn("multi agent draft unavailable", error);
+                }
+            });
+
+            queryInput.addEventListener("keydown", (event) => {
+                if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+                    event.preventDefault();
+                    executeTask();
+                }
+            });
+
+            executeBtn.addEventListener("click", executeTask);
+            clearBtn.addEventListener("click", () => {
+                queryInput.value = "";
+                try {
+                    sessionStorage.removeItem(draftKey);
+                } catch (error) {
+                    console.warn("multi agent draft unavailable", error);
+                }
+                queryInput.focus();
+            });
+
+            quickPrompts.forEach((chip) => {
+                chip.addEventListener("click", () => {
+                    queryInput.value = String(chip.dataset.prompt || "").trim();
+                    queryInput.focus();
+                    try {
+                        sessionStorage.setItem(draftKey, queryInput.value);
+                    } catch (error) {
+                        console.warn("multi agent draft unavailable", error);
+                    }
+                });
+            });
+        }
+
+        function renderTemplateCards() {
+            const templateList = document.getElementById("templateList");
+            templateList.innerHTML = templates.map((template) => `
+                <div class="template-card" data-template-prompt="${escapeHtml(template.prompt)}">
+                    <strong>${escapeHtml(template.title)}</strong>
+                    <span>${escapeHtml(template.description)}</span>
+                </div>
+            `).join("");
+
+            Array.from(templateList.querySelectorAll(".template-card")).forEach((card, index) => {
+                card.addEventListener("click", () => {
+                    const queryInput = document.getElementById("queryInput");
+                    queryInput.value = templates[index].prompt;
+                    queryInput.focus();
+                    try {
+                        sessionStorage.setItem(draftKey, queryInput.value);
+                    } catch (error) {
+                        console.warn("multi agent draft unavailable", error);
+                    }
+                });
+            });
+        }
+
+        async function loadInitialData() {
+            await Promise.all([
+                loadAgents(),
+                loadStatus(),
+                loadTasks(),
+                loadMessages()
+            ]);
+            renderAll();
+        }
+
+        async function loadAgents() {
+            try {
+                const response = await fetch("/api/multi-agent/agents");
+                const data = await response.json();
+                state.agents = Array.isArray(data.agents) ? data.agents : [];
+                state.agents.forEach((agent) => {
+                    if (!state.agentRuntime[agent.agent_id]) {
+                        state.agentRuntime[agent.agent_id] = "idle";
+                    }
+                });
+            } catch (error) {
+                console.error("加载 Agent 失败:", error);
+                state.agents = [];
+            }
+        }
+
+        async function loadStatus() {
+            try {
+                const response = await fetch("/api/multi-agent/status");
+                const data = await response.json();
+                state.status = data || state.status;
+            } catch (error) {
+                console.error("加载状态失败:", error);
+            }
+        }
+
+        async function loadTasks() {
+            try {
+                const response = await fetch("/api/multi-agent/tasks");
+                const data = await response.json();
+                const tasks = Array.isArray(data.tasks) ? data.tasks : [];
+                syncTasks(tasks);
+            } catch (error) {
+                console.error("加载任务失败:", error);
+            }
+        }
+
+        async function loadMessages() {
+            try {
+                const response = await fetch("/api/multi-agent/messages");
+                const data = await response.json();
+                state.messages = Array.isArray(data.messages) ? data.messages : [];
+            } catch (error) {
+                console.error("加载消息失败:", error);
+                state.messages = [];
+            }
+        }
+
+        function syncTasks(tasks) {
+            state.tasks = new Map();
+            state.taskOrder = [];
+            tasks.forEach((task) => upsertTask(task));
+        }
+
+        function upsertTask(task) {
+            if (!task || !task.id) {
+                return;
+            }
+
+            state.tasks.set(task.id, task);
+            if (!state.taskOrder.includes(task.id)) {
+                state.taskOrder.push(task.id);
+            }
+        }
+
+        function bindSocketEvents() {
+            if (!socket) {
+                updateTransportState("http");
+                return;
+            }
+
+            socket.on("connect", () => {
+                updateTransportState("socket");
+            });
+
+            socket.on("disconnect", () => {
+                updateTransportState("http");
+            });
+
+            socket.on("connect_error", () => {
+                updateTransportState("http");
+            });
+
+            socket.on("multi_agent_progress", (event) => {
+                handleProgressEvent(event);
+            });
+
+            socket.on("multi_agent_complete", async (result) => {
+                state.isExecuting = false;
+                setRuntimeLabel("已完成");
+                state.finalResult = result.final_result || state.finalResult;
+                renderResult();
+                renderOverview();
+                updateExecuteButton();
+                await refreshSnapshots();
+            });
+
+            socket.on("multi_agent_error", (data) => {
+                const errorMessage = data && data.error ? data.error : "执行失败";
+                state.isExecuting = false;
+                setRuntimeLabel("执行失败");
+                pushTimeline({
+                    type: "task_failed",
+                    error: errorMessage,
+                    task: null
+                });
+                renderTimeline();
+                updateExecuteButton();
+                alert("任务执行失败: " + errorMessage);
+            });
+        }
+
+        function updateTransportState(transport) {
+            state.transport = transport;
+            renderOverview();
+            const composerHint = document.getElementById("composerHint");
+            if (composerHint) {
+                composerHint.textContent = transport === "socket"
+                    ? "当前走 Socket 实时协作，可直接看到任务推进。"
+                    : "当前走 HTTP 执行；Socket 不可用时会自动回退。";
+            }
+
+            const heroTransportText = document.getElementById("heroTransportText");
+            if (heroTransportText) {
+                heroTransportText.textContent = transport === "socket"
+                    ? "当前走 Socket 实时协作链路，任务状态和进度会更及时地反映到页面。"
+                    : "当前走 HTTP 执行链路；当实时通道不可用时系统会自动回退，保证流程继续。";
+            }
+        }
+
+        function setRuntimeLabel(label) {
+            state.runtimeLabel = label;
+            const runtimeState = document.getElementById("runtimeState");
+            if (runtimeState) {
+                runtimeState.innerHTML = `<i class="fas fa-wave-square"></i><span>${escapeHtml(label)}</span>`;
+            }
+
+            const heroRuntimeLabel = document.getElementById("heroRuntimeLabel");
+            if (heroRuntimeLabel) {
+                heroRuntimeLabel.textContent = label;
+            }
+        }
+
+        function resetSessionState() {
+            state.timeline = [];
+            state.finalResult = "";
+            state.tasks = new Map();
+            state.taskOrder = [];
+            state.agents.forEach((agent) => {
+                state.agentRuntime[agent.agent_id] = "idle";
+            });
+            setRuntimeLabel("执行中");
+            renderBoard();
+            renderTimeline();
+            renderResult();
+            renderAgents();
+            renderOverview();
+        }
+
+        async function executeTask() {
+            const queryInput = document.getElementById("queryInput");
+            const query = queryInput.value.trim();
+            if (!query || state.isExecuting) {
+                return;
+            }
+
+            state.isExecuting = true;
+            resetSessionState();
+            pushTimeline({
+                type: "task_assigned",
+                task: { description: query },
+                agent_id: "coordinator"
+            });
+            updateExecuteButton();
+
+            try {
+                if (socket && socket.connected) {
+                    updateTransportState("socket");
+                    socket.emit("multi_agent_execute", { query });
+                } else {
+                    updateTransportState("http");
+                    await executeTaskByHttp(query);
+                }
+            } catch (error) {
+                state.isExecuting = false;
+                setRuntimeLabel("执行失败");
+                updateExecuteButton();
+                pushTimeline({
+                    type: "task_failed",
+                    error: error.message,
+                    task: null
+                });
+                renderTimeline();
+                alert("任务执行失败: " + error.message);
+            }
+        }
+
+        async function executeTaskByHttp(query) {
+            const response = await fetch("/api/multi-agent/execute", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ query })
+            });
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "执行失败");
+            }
+
+            syncTasks(Array.isArray(data.subtasks) ? data.subtasks : []);
+
+            state.taskOrder.forEach((taskId) => {
+                const task = state.tasks.get(taskId);
+                if (!task) {
+                    return;
+                }
+                pushTimeline({
+                    type: "task_completed",
+                    task,
+                    result: task.result || ""
+                });
+                if (task.assigned_to) {
+                    state.agentRuntime[task.assigned_to] = "idle";
+                }
+            });
+
+            state.finalResult = data.final_result || "";
+            pushTimeline({
+                type: "all_completed",
+                final_result: state.finalResult
+            });
+            state.isExecuting = false;
+            setRuntimeLabel("已完成");
+            renderBoard();
+            renderTimeline();
+            renderResult();
+            await refreshSnapshots();
+            updateExecuteButton();
+        }
+
+        async function refreshSnapshots() {
+            await Promise.all([
+                loadStatus(),
+                loadMessages()
+            ]);
+            renderAll();
+        }
+
+        function handleProgressEvent(event) {
+            if (!event || !event.type) {
+                return;
+            }
+
+            if (event.task) {
+                upsertTask(event.task);
+            }
+
+            if (event.type === "task_assigned") {
+                if (event.agent_id) {
+                    state.agentRuntime[event.agent_id] = "idle";
+                }
+            }
+
+            if (event.type === "task_executing" && event.agent && event.agent.agent_id) {
+                state.agentRuntime[event.agent.agent_id] = "working";
+                if (event.task) {
+                    upsertTask({
+                        ...event.task,
+                        status: "in_progress"
+                    });
+                }
+            }
+
+            if (event.type === "task_completed" && event.task) {
+                upsertTask({
+                    ...event.task,
+                    status: "completed",
+                    result: event.result || event.task.result
+                });
+                if (event.task.assigned_to) {
+                    state.agentRuntime[event.task.assigned_to] = "idle";
+                }
+            }
+
+            if (event.type === "task_failed" && event.task) {
+                upsertTask({
+                    ...event.task,
+                    status: "failed",
+                    result: event.error || event.task.result
+                });
+                if (event.task.assigned_to) {
+                    state.agentRuntime[event.task.assigned_to] = "failed";
+                }
+            }
+
+            if (event.type === "all_completed") {
+                state.finalResult = event.final_result || "";
+            }
+
+            pushTimeline(event);
+            renderBoard();
+            renderTimeline();
+            renderResult();
+            renderAgents();
+            renderOverview();
+        }
+
+        function pushTimeline(event) {
+            state.timeline.unshift({
+                ...event,
+                _time: new Date().toISOString()
+            });
+            state.timeline = state.timeline.slice(0, 18);
+        }
+
+        function renderAll() {
+            renderOverview();
+            renderAgents();
+            renderBoard();
+            renderTimeline();
+            renderMessages();
+            renderResult();
+            updateExecuteButton();
+        }
+
+        function renderOverview() {
+            const tasks = Array.from(state.tasks.values());
+            const totalTasks = tasks.length || state.status.total_tasks || 0;
+            const completedTasks = tasks.filter((task) => task.status === "completed").length || state.status.completed_tasks || 0;
+            const messageCount = state.messages.length || state.status.message_queue_size || 0;
+            const completionRate = totalTasks > 0 ? `${Math.round((completedTasks / totalTasks) * 100)}%` : "0%";
+
+            document.getElementById("agentCount").textContent = String(state.agents.length);
+            document.getElementById("taskCount").textContent = String(totalTasks);
+            document.getElementById("completedCount").textContent = String(completedTasks);
+            document.getElementById("messageCount").textContent = String(messageCount);
+            document.getElementById("transportLabel").textContent = state.transport === "socket" ? "Socket" : "HTTP";
+
+            const heroAgentCount = document.getElementById("heroAgentCount");
+            const heroTaskCount = document.getElementById("heroTaskCount");
+            const heroCompletionRate = document.getElementById("heroCompletionRate");
+            const heroMessageCount = document.getElementById("heroMessageCount");
+
+            if (heroAgentCount) {
+                heroAgentCount.textContent = String(state.agents.length);
+            }
+            if (heroTaskCount) {
+                heroTaskCount.textContent = String(totalTasks);
+            }
+            if (heroCompletionRate) {
+                heroCompletionRate.textContent = completionRate;
+            }
+            if (heroMessageCount) {
+                heroMessageCount.textContent = String(messageCount);
+            }
+
+            const transportBadge = document.getElementById("transportBadge");
+            if (!transportBadge) {
+                return;
+            }
+
+            if (state.transport === "socket") {
+                transportBadge.className = "overview-badge socket";
+                transportBadge.innerHTML = '<i class="fas fa-bolt"></i><span>实时协作</span>';
+            } else if (socket) {
+                transportBadge.className = "overview-badge http";
+                transportBadge.innerHTML = '<i class="fas fa-wave-square"></i><span>HTTP 回退</span>';
+            } else {
+                transportBadge.className = "overview-badge offline";
+                transportBadge.innerHTML = '<i class="fas fa-triangle-exclamation"></i><span>仅 HTTP</span>';
+            }
+        }
+
+        function renderAgents() {
+            const agentsList = document.getElementById("agentsList");
+
+            if (!state.agents.length) {
+                agentsList.innerHTML = '<div class="empty-card">当前没有可用 Agent。</div>';
+                return;
+            }
+
+            agentsList.innerHTML = state.agents.map((agent) => {
+                const runtimeStatus = state.agentRuntime[agent.agent_id] || "idle";
+                return `
+                    <article class="team-card">
+                        <div class="team-top">
+                            <div class="team-name">
+                                <strong>${escapeHtml(agent.name)}</strong>
+                                <span>${escapeHtml(getRoleName(agent.role))}</span>
+                            </div>
+                            <span class="status-pill ${escapeHtml(runtimeStatus)}">${escapeHtml(getStatusLabel(runtimeStatus))}</span>
+                        </div>
+                        <div class="task-meta">
+                            <span class="role-pill">${escapeHtml(getRoleIcon(agent.role))} ${escapeHtml(agent.agent_id)}</span>
+                        </div>
+                        <div class="team-meta">
+                            <div class="team-metric">
+                                <strong>${Number(agent.task_queue_size || 0)}</strong>
+                                <span>待处理</span>
+                            </div>
+                            <div class="team-metric">
+                                <strong>${Number(agent.completed_tasks || 0)}</strong>
+                                <span>已完成</span>
+                            </div>
+                        </div>
+                    </article>
+                `;
+            }).join("");
+        }
+
+        function renderBoard() {
+            const tasks = state.taskOrder
+                .map((taskId) => state.tasks.get(taskId))
+                .filter(Boolean);
+
+            const columns = {
+                pending: tasks.filter((task) => task.status === "pending"),
+                in_progress: tasks.filter((task) => task.status === "in_progress"),
+                completed: tasks.filter((task) => task.status === "completed"),
+                failed: tasks.filter((task) => task.status === "failed")
             };
-            return icons[role] || '🤖';
+
+            document.getElementById("pendingCount").textContent = String(columns.pending.length);
+            document.getElementById("inProgressCount").textContent = String(columns.in_progress.length);
+            document.getElementById("doneCount").textContent = String(columns.completed.length);
+            document.getElementById("failedCount").textContent = String(columns.failed.length);
+
+            renderTaskList("pendingList", columns.pending, "还没有待分配任务。");
+            renderTaskList("inProgressList", columns.in_progress, "当前没有执行中的任务。");
+            renderTaskList("doneList", columns.completed, "完成结果会出现在这里。");
+            renderTaskList("failedList", columns.failed, "当前没有失败任务。");
+        }
+
+        function renderTaskList(targetId, tasks, emptyText) {
+            const target = document.getElementById(targetId);
+            if (!target) {
+                return;
+            }
+
+            if (!tasks.length) {
+                target.innerHTML = `<div class="empty-card">${escapeHtml(emptyText)}</div>`;
+                return;
+            }
+
+            target.innerHTML = tasks.map((task) => `
+                <article class="task-card">
+                    <strong>${escapeHtml(task.description || "未命名任务")}</strong>
+                    <div class="task-meta">
+                        ${task.assigned_to ? `<span class="mini-pill"><i class="fas fa-user"></i><span>${escapeHtml(task.assigned_to)}</span></span>` : ""}
+                        <span class="mini-pill"><i class="fas fa-hashtag"></i><span>${escapeHtml(task.id.slice(0, 8))}</span></span>
+                    </div>
+                    ${task.result ? `<p>${escapeHtml(truncateText(task.result, 180))}</p>` : '<p>等待结果。</p>'}
+                </article>
+            `).join("");
+        }
+
+        function renderTimeline() {
+            const timelineList = document.getElementById("timelineList");
+            if (!state.timeline.length) {
+                timelineList.innerHTML = '<div class="empty-card">本轮协作开始后，事件会按时间追加到这里。</div>';
+                return;
+            }
+
+            timelineList.innerHTML = state.timeline.map((event) => {
+                const meta = getTimelineMeta(event);
+                return `
+                    <article class="timeline-item ${escapeHtml(meta.className)}">
+                        <div class="timeline-top">
+                            <div class="timeline-title"><i class="${escapeHtml(meta.icon)}"></i><span>${escapeHtml(meta.title)}</span></div>
+                            <span class="timeline-time">${escapeHtml(formatTime(event._time || event.timestamp))}</span>
+                        </div>
+                        <div class="timeline-body">${escapeHtml(meta.body)}</div>
+                    </article>
+                `;
+            }).join("");
+        }
+
+        function renderMessages() {
+            const messageList = document.getElementById("messageList");
+            if (!state.messages.length) {
+                messageList.innerHTML = '<div class="message-placeholder">当前没有 Agent 消息。</div>';
+                return;
+            }
+
+            const latestMessages = state.messages.slice(-6).reverse();
+            messageList.innerHTML = latestMessages.map((message) => `
+                <article class="message-item">
+                    <div class="message-top">
+                        <div class="message-title">
+                            <i class="fas fa-envelope-open-text"></i>
+                            <span>${escapeHtml(message.from_agent)} → ${escapeHtml(message.to_agent)}</span>
+                        </div>
+                        <span class="message-time">${escapeHtml(formatTime(message.timestamp))}</span>
+                    </div>
+                    <div class="message-body">${escapeHtml(message.content || message.type || "")}</div>
+                </article>
+            `).join("");
+        }
+
+        function renderResult() {
+            const resultContent = document.getElementById("resultContent");
+            resultContent.textContent = state.finalResult || "还没有结果。";
+        }
+
+        function updateExecuteButton() {
+            const executeBtn = document.getElementById("executeBtn");
+            if (!executeBtn) {
+                return;
+            }
+
+            executeBtn.disabled = state.isExecuting;
+            executeBtn.innerHTML = state.isExecuting
+                ? '<i class="fas fa-spinner fa-spin"></i> 协作中'
+                : '<i class="fas fa-play"></i> 开始协作';
         }
 
         function getRoleName(role) {
             const names = {
-                'researcher': '研究员',
-                'coder': '程序员',
-                'analyst': '分析师',
-                'writer': '写作者'
+                researcher: "研究员",
+                coder: "程序员",
+                analyst: "分析师",
+                writer: "写作者",
+                reviewer: "审查员",
+                executor: "执行者"
             };
-            return names[role] || role;
+            return names[role] || role || "未知角色";
         }
 
-        function setAgentStatus(agentId, status) {
-            const agentCard = document.getElementById(`agent-${agentId}`);
-            if (agentCard) {
-                const statusEl = agentCard.querySelector('.agent-status');
-                statusEl.className = `agent-status ${status}`;
-                statusEl.textContent = status === 'working' ? '工作中' : '空闲';
-                agentCard.className = status === 'working' ? 'agent-card active' : 'agent-card';
-            }
+        function getRoleIcon(role) {
+            const icons = {
+                researcher: "🔍",
+                coder: "💻",
+                analyst: "📊",
+                writer: "✍️",
+                reviewer: "🧪",
+                executor: "⚙️"
+            };
+            return icons[role] || "🤖";
         }
 
-        function executeTask() {
-            const query = document.getElementById('queryInput').value.trim();
-            if (!query || isExecuting) return;
-            if (!socket) {
-                showSocketUnavailable();
-                return;
+        function getStatusLabel(status) {
+            if (status === "working") {
+                return "工作中";
             }
-
-            isExecuting = true;
-            document.getElementById('executeBtn').disabled = true;
-            document.getElementById('progressArea').innerHTML = '';
-
-            socket.emit('multi_agent_execute', { query });
+            if (status === "failed") {
+                return "异常";
+            }
+            return "空闲";
         }
 
-        if (socket) socket.on('multi_agent_progress', function(event) {
-            console.log('进度更新:', event);
-            const progressArea = document.getElementById('progressArea');
-
-            if (event.type === 'task_assigned') {
-                const item = document.createElement('div');
-                item.className = 'progress-item task-assigned';
-                item.innerHTML = `
-                    <div class="progress-header">
-                        <i class="fas fa-tasks"></i>
-                        <span>任务分配</span>
-                    </div>
-                    <div class="progress-content">
-                        任务: ${event.task.description}<br>
-                        分配给: ${event.agent_id}
-                    </div>
-                `;
-                progressArea.appendChild(item);
-                setAgentStatus(event.agent_id, 'working');
-            }
-            else if (event.type === 'task_executing') {
-                const item = document.createElement('div');
-                item.className = 'progress-item task-executing';
-                item.innerHTML = `
-                    <div class="progress-header">
-                        <i class="fas fa-spinner fa-spin"></i>
-                        <span>执行中</span>
-                    </div>
-                    <div class="progress-content">
-                        ${event.agent.name} 正在执行任务...
-                    </div>
-                `;
-                progressArea.appendChild(item);
-            }
-            else if (event.type === 'task_completed') {
-                const item = document.createElement('div');
-                item.className = 'progress-item task-completed';
-                item.innerHTML = `
-                    <div class="progress-header">
-                        <i class="fas fa-check-circle"></i>
-                        <span>任务完成</span>
-                    </div>
-                    <div class="progress-content">
-                        ${event.result}
-                    </div>
-                `;
-                progressArea.appendChild(item);
-                setAgentStatus(event.task.assigned_to, 'idle');
-            }
-            else if (event.type === 'task_failed') {
-                const item = document.createElement('div');
-                item.className = 'progress-item task-failed';
-                item.innerHTML = `
-                    <div class="progress-header">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <span>任务失败</span>
-                    </div>
-                    <div class="progress-content">
-                        错误: ${event.error}
-                    </div>
-                `;
-                progressArea.appendChild(item);
-                setAgentStatus(event.task.assigned_to, 'idle');
-            }
-            else if (event.type === 'all_completed') {
-                const item = document.createElement('div');
-                item.className = 'final-result';
-                item.innerHTML = `
-                    <h3><i class="fas fa-trophy"></i> 最终结果</h3>
-                    <div class="final-result-content">${event.final_result}</div>
-                `;
-                progressArea.appendChild(item);
+        function getTimelineMeta(event) {
+            if (event.type === "task_assigned") {
+                return {
+                    className: "assigned",
+                    icon: "fas fa-diagram-project",
+                    title: "任务分配",
+                    body: event.task && event.task.description
+                        ? `任务：${event.task.description}${event.agent_id ? `\n目标：${event.agent_id}` : ""}`
+                        : "已创建协作任务。"
+                };
             }
 
-            progressArea.scrollTop = progressArea.scrollHeight;
-        });
+            if (event.type === "task_executing") {
+                return {
+                    className: "executing",
+                    icon: "fas fa-spinner",
+                    title: "开始执行",
+                    body: `${event.agent && event.agent.name ? event.agent.name : "Agent"} 开始处理：${event.task && event.task.description ? event.task.description : "任务"}`
+                };
+            }
 
-        if (socket) socket.on('multi_agent_complete', function(result) {
-            console.log('任务完成:', result);
-            isExecuting = false;
-            document.getElementById('executeBtn').disabled = false;
-        });
+            if (event.type === "task_completed") {
+                return {
+                    className: "completed",
+                    icon: "fas fa-circle-check",
+                    title: "任务完成",
+                    body: `${event.task && event.task.description ? event.task.description : "任务"}\n${truncateText(event.result || (event.task && event.task.result) || "", 140)}`
+                };
+            }
 
-        if (socket) socket.on('multi_agent_error', function(data) {
-            console.error('任务失败:', data);
-            alert('任务执行失败: ' + data.error);
-            isExecuting = false;
-            document.getElementById('executeBtn').disabled = false;
-        });
+            if (event.type === "task_failed") {
+                return {
+                    className: "failed",
+                    icon: "fas fa-circle-exclamation",
+                    title: "任务失败",
+                    body: event.error || "执行失败"
+                };
+            }
 
-        // 页面加载时加载 Agent 列表
-        loadAgents();
-        if (!socket) {
-            const executeBtn = document.getElementById('executeBtn');
-            if (executeBtn) executeBtn.disabled = true;
-            showSocketUnavailable();
+            if (event.type === "all_completed") {
+                return {
+                    className: "completed",
+                    icon: "fas fa-trophy",
+                    title: "聚合完成",
+                    body: truncateText(event.final_result || "已生成最终结果。", 180)
+                };
+            }
+
+            return {
+                className: "assigned",
+                icon: "fas fa-wave-square",
+                title: "状态更新",
+                body: "收到新的协作状态。"
+            };
+        }
+
+        function formatTime(value) {
+            if (!value) {
+                return "--:--";
+            }
+
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) {
+                return "--:--";
+            }
+
+            return date.toLocaleTimeString("zh-CN", {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit"
+            });
+        }
+
+        function truncateText(text, maxLength) {
+            if (!text) {
+                return "";
+            }
+            return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
         }
     </script>
 </body>

@@ -3,418 +3,1317 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>性能监控仪表板</title>
+    <title>性能监控中心 - Agent Framework</title>
     <link rel="stylesheet" href="/static/css/base-theme.css">
     <style>
         :root {
-            --primary: #1363df;
-            --primary-deep: #0f4eb3;
-            --primary-light: #dbeafe;
-            --primary-soft: rgba(19, 99, 223, 0.08);
-            --primary-glow: rgba(19, 99, 223, 0.28);
-            --line-strong: rgba(19, 99, 223, 0.24);
-            --line-glow: rgba(19, 99, 223, 0.42);
-            --warning: #06b6d4;
-        }
-        /* page-specific overrides only — base-theme.css handles resets, body, topbar, btn */
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+            --pf-accent: #1363df;
+            --pf-accent-deep: #0f4eb3;
+            --pf-accent-soft: rgba(19, 99, 223, 0.10);
+            --pf-ok: #059669;
+            --pf-ok-soft: rgba(5, 150, 105, 0.10);
+            --pf-warn: #d97706;
+            --pf-warn-soft: rgba(217, 119, 6, 0.10);
+            --pf-err: #dc2626;
+            --pf-err-soft: rgba(220, 38, 38, 0.10);
+            --pf-muted: #6f746f;
+            --pf-text: #202a36;
+            --pf-line: rgba(101, 120, 144, 0.16);
+            --pf-surface: rgba(255, 252, 247, 0.90);
+            --pf-shadow: 0 18px 42px -28px rgba(34, 44, 63, 0.16);
         }
 
-        .stat-card {
-            background: white;
-            padding: 25px;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            transition: transform 0.3s;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: var(--pf-text);
+            background:
+                radial-gradient(circle at 8% 12%, rgba(19, 99, 223, 0.14), transparent 22%),
+                radial-gradient(circle at 88% 10%, rgba(217, 119, 6, 0.12), transparent 18%),
+                radial-gradient(circle at 76% 86%, rgba(20, 184, 166, 0.10), transparent 24%),
+                linear-gradient(180deg, #f8fbff 0%, #eef4fb 100%);
+            min-height: 100vh;
         }
 
-        .stat-card:hover {
-            transform: translateY(-5px);
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(19, 99, 223, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(19, 99, 223, 0.03) 1px, transparent 1px);
+            background-size: 28px 28px;
+            mask-image: linear-gradient(180deg, rgba(0,0,0,0.12), transparent 60%);
         }
 
-        .stat-card h3 {
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 10px;
-            text-transform: uppercase;
+        .shell {
+            position: relative;
+            z-index: 1;
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 28px 32px 60px;
         }
 
-        .stat-card .value {
-            font-size: 36px;
-            font-weight: bold;
-            color: var(--primary);
-            margin-bottom: 5px;
-        }
-
-        .stat-card .label {
-            color: #999;
-            font-size: 12px;
-        }
-
-        .content-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-
-        .panel {
-            background: white;
-            padding: 30px;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-        }
-
-        .panel h2 {
-            color: var(--primary);
-            font-size: 20px;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #f0f0f0;
-        }
-
-        .function-list {
-            list-style: none;
-        }
-
-        .function-item {
-            padding: 15px;
-            margin-bottom: 10px;
-            background: #f8f9fa;
-            border-radius: 8px;
+        /* ── Hero header ── */
+        .hero {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-        }
-
-        .function-name {
-            font-weight: 600;
-            color: #333;
-        }
-
-        .function-stats {
-            display: flex;
+            justify-content: space-between;
             gap: 20px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+        }
+        .hero-left h1 {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--pf-accent-deep), var(--pf-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero-left p {
+            color: var(--pf-muted);
+            margin-top: 4px;
             font-size: 14px;
-            color: #666;
+        }
+        .hero-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
         }
 
-        .suggestion-list {
-            list-style: none;
-        }
-
-        .suggestion-item {
-            padding: 15px;
-            margin-bottom: 10px;
-            background: rgba(19, 99, 223, 0.08);
-            border-left: 4px solid var(--primary);
-            border-radius: 4px;
-            color: var(--primary-deep);
-        }
-
-        .slow-query-item {
-            padding: 15px;
-            margin-bottom: 10px;
-            background: #f8d7da;
-            border-left: 4px solid #dc3545;
-            border-radius: 4px;
-        }
-
-        .slow-query-name {
+        /* ── Controls ── */
+        .ctrl-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 18px;
+            border-radius: 10px;
+            border: 1.5px solid var(--pf-line);
+            background: var(--pf-surface);
+            color: var(--pf-text);
+            font-size: 13px;
             font-weight: 600;
-            color: #721c24;
-            margin-bottom: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            backdrop-filter: blur(6px);
+        }
+        .ctrl-btn:hover { border-color: var(--pf-accent); color: var(--pf-accent); }
+        .ctrl-btn.primary {
+            background: linear-gradient(135deg, var(--pf-accent-deep), var(--pf-accent));
+            color: #fff;
+            border-color: transparent;
+        }
+        .ctrl-btn.primary:hover { opacity: 0.9; }
+        .ctrl-btn.danger { color: var(--pf-err); }
+        .ctrl-btn.danger:hover { border-color: var(--pf-err); background: var(--pf-err-soft); }
+        .ctrl-btn.active { background: var(--pf-accent-soft); border-color: var(--pf-accent); color: var(--pf-accent); }
+
+        .refresh-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            background: var(--pf-ok-soft);
+            color: var(--pf-ok);
+        }
+        .refresh-badge .dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--pf-ok);
+            animation: pulse 2s infinite;
+        }
+        .refresh-badge.paused { background: #f1f5f9; color: var(--pf-muted); }
+        .refresh-badge.paused .dot { background: var(--pf-muted); animation: none; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
         }
 
-        .slow-query-time {
-            color: #721c24;
+        /* ── Stat cards ── */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: var(--pf-surface);
+            border: 1px solid var(--pf-line);
+            border-radius: 16px;
+            padding: 22px 24px;
+            backdrop-filter: blur(8px);
+            transition: transform 0.25s, box-shadow 0.25s;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--pf-shadow);
+        }
+        .stat-card .sc-icon {
+            width: 40px; height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 14px;
+        }
+        .stat-card .sc-icon.blue   { background: var(--pf-accent-soft); }
+        .stat-card .sc-icon.green  { background: var(--pf-ok-soft); }
+        .stat-card .sc-icon.orange { background: var(--pf-warn-soft); }
+        .stat-card .sc-icon.red    { background: var(--pf-err-soft); }
+        .stat-card .sc-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--pf-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 6px;
+        }
+        .stat-card .sc-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--pf-text);
+            line-height: 1;
+        }
+        .stat-card .sc-sub {
+            font-size: 12px;
+            color: var(--pf-muted);
+            margin-top: 4px;
+        }
+
+        /* ── Panels ── */
+        .panel {
+            background: var(--pf-surface);
+            border: 1px solid var(--pf-line);
+            border-radius: 16px;
+            padding: 24px;
+            backdrop-filter: blur(8px);
+            min-width: 0;
+        }
+        .panel-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .panel-head h2 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--pf-text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .panel-head h2 .icon {
+            width: 28px; height: 28px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             font-size: 14px;
         }
+        .panel-head .badge {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
 
-        .btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px 24px;
+        /* ── Two-column layout ── */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        /* ── Chart area ── */
+        .chart-wrap {
+            position: relative;
+            width: 100%;
+            height: 220px;
+        }
+        .chart-wrap canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        .chart-wrap .chart-empty {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 8px;
+            color: var(--pf-muted);
+            font-size: 13px;
+        }
+        .chart-wrap .chart-empty .icon { font-size: 36px; opacity: 0.3; }
+
+        /* ── Tabs ── */
+        .tab-bar {
+            display: flex;
+            gap: 2px;
+            background: #f1f5f9;
+            border-radius: 10px;
+            padding: 3px;
+            margin-bottom: 16px;
+        }
+        .tab-bar .tab {
+            flex: 1;
+            padding: 8px 14px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 14px;
+            color: var(--pf-muted);
+            transition: all 0.2s;
+            border: none;
+            background: none;
+        }
+        .tab-bar .tab.active {
+            background: #fff;
+            color: var(--pf-accent);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+        .tab-bar .tab:hover:not(.active) { color: var(--pf-text); }
+
+        /* ── Function table ── */
+        .fn-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .fn-table th {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--pf-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: left;
+            padding: 8px 12px;
+            border-bottom: 1.5px solid var(--pf-line);
+        }
+        .fn-table td {
+            padding: 11px 12px;
+            font-size: 13px;
+            border-bottom: 1px solid rgba(0,0,0,0.04);
+            vertical-align: middle;
+        }
+        .fn-table tr:last-child td { border-bottom: none; }
+        .fn-table tr:hover td { background: rgba(19, 99, 223, 0.03); }
+        .fn-name {
             font-weight: 600;
-            transition: background 0.3s;
+            color: var(--pf-text);
+            font-family: ui-monospace, "SF Mono", monospace;
+            font-size: 12.5px;
         }
-
-        .btn:hover {
-            background: var(--primary-deep);
+        .fn-bar {
+            height: 6px;
+            border-radius: 999px;
+            background: #e2e8f0;
+            overflow: hidden;
+            min-width: 80px;
         }
-
-        .btn-danger {
-            background: #dc3545;
+        .fn-bar-fill {
+            height: 100%;
+            border-radius: 999px;
+            transition: width 0.5s;
         }
+        .fn-bar-fill.fast { background: linear-gradient(90deg, #059669, #34d399); }
+        .fn-bar-fill.mid  { background: linear-gradient(90deg, #d97706, #fbbf24); }
+        .fn-bar-fill.slow { background: linear-gradient(90deg, #dc2626, #f87171); }
 
-        .btn-danger:hover {
-            background: #c82333;
-        }
-
-        .actions {
+        /* ── Slow query list ── */
+        .sq-item {
             display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            background: #fefce8;
+            border: 1px solid rgba(217, 119, 6, 0.15);
+            margin-bottom: 8px;
+            transition: transform 0.15s;
+        }
+        .sq-item:hover { transform: translateX(3px); }
+        .sq-item.critical { background: #fef2f2; border-color: rgba(220, 38, 38, 0.15); }
+        .sq-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .sq-dot.warn { background: var(--pf-warn); }
+        .sq-dot.critical { background: var(--pf-err); }
+        .sq-info { flex: 1; min-width: 0; }
+        .sq-name {
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--pf-text);
+            font-family: ui-monospace, "SF Mono", monospace;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .sq-meta {
+            font-size: 11px;
+            color: var(--pf-muted);
+            margin-top: 2px;
+        }
+        .sq-dur {
+            font-weight: 700;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .sq-dur.warn { color: var(--pf-warn); }
+        .sq-dur.critical { color: var(--pf-err); }
+
+        /* ── Suggestion list ── */
+        .sug-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            background: var(--pf-accent-soft);
+            border: 1px solid rgba(19, 99, 223, 0.08);
+            margin-bottom: 8px;
+        }
+        .sug-icon {
+            width: 28px; height: 28px;
+            border-radius: 8px;
+            background: var(--pf-accent);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .sug-text {
+            font-size: 13px;
+            color: var(--pf-accent-deep);
+            line-height: 1.5;
+            font-weight: 500;
+        }
+
+        /* ── Timeline ── */
+        .timeline-wrap {
+            max-height: 340px;
+            overflow-y: auto;
+        }
+        .tl-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.04);
+        }
+        .tl-item:last-child { border-bottom: none; }
+        .tl-time {
+            font-size: 11px;
+            color: var(--pf-muted);
+            font-family: ui-monospace, monospace;
+            flex-shrink: 0;
+            width: 72px;
+            padding-top: 2px;
+        }
+        .tl-dot-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .tl-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            border: 2px solid var(--pf-accent);
+            background: #fff;
+            flex-shrink: 0;
+        }
+        .tl-dot.ok { border-color: var(--pf-ok); background: var(--pf-ok-soft); }
+        .tl-dot.err { border-color: var(--pf-err); background: var(--pf-err-soft); }
+        .tl-body { flex: 1; min-width: 0; }
+        .tl-fn {
+            font-weight: 600;
+            font-size: 13px;
+            font-family: ui-monospace, monospace;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .tl-detail {
+            font-size: 11px;
+            color: var(--pf-muted);
+            margin-top: 2px;
+        }
+        .tl-dur {
+            font-weight: 700;
+            font-size: 13px;
+            flex-shrink: 0;
+            padding-top: 2px;
+        }
+
+        /* ── Empty state ── */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--pf-muted);
+        }
+        .empty-state .icon { font-size: 42px; opacity: 0.25; margin-bottom: 12px; }
+        .empty-state p { font-size: 13px; }
+
+        /* ── Toast ── */
+        .toast-wrap {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .toast {
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+            background: var(--pf-text);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+            animation: toastIn 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .toast.success { background: var(--pf-ok); }
+        .toast.error { background: var(--pf-err); }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Modal ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 900;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-box {
+            background: #fff;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 560px;
+            width: 100%;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.2);
+            animation: modalIn 0.25s;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .modal-desc {
+            color: var(--pf-muted);
+            font-size: 13px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .modal-detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            font-size: 13px;
+        }
+        .modal-detail-row:last-child { border-bottom: none; }
+        .modal-detail-row .label { color: var(--pf-muted); }
+        .modal-detail-row .value { font-weight: 600; font-family: ui-monospace, monospace; }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
             gap: 10px;
             margin-top: 20px;
         }
 
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #666;
+        /* ── Responsive ── */
+        @media (max-width: 1100px) {
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
         }
-
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+        @media (max-width: 860px) {
+            .shell { padding: 20px 16px 40px; }
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+            .hero { flex-direction: column; align-items: flex-start; }
         }
-
-        @media (max-width: 768px) {
-            .content-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
+        @media (max-width: 600px) {
+            .stats-row { grid-template-columns: 1fr; }
+            .hero-right { width: 100%; flex-wrap: wrap; }
+            .ctrl-btn { flex: 1; justify-content: center; }
+            .tab-bar .tab { font-size: 12px; padding: 6px 8px; }
         }
     </style>
 </head>
 <body>
-    <div class="page-wide">
-        <nav class="topbar">
-            <div class="brand">
-                <a class="back-link" href="/developer">← 返回</a>
-                <h1>性能监控仪表板</h1>
-            </div>
-            <div class="topbar-actions">
-            </div>
-        </nav>
+    <div class="toast-wrap" id="toastWrap"></div>
 
-        <div id="error-message" class="error" style="display: none;"></div>
-
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>监控函数</h3>
-                <div class="value" id="total-functions">-</div>
-                <div class="label">个函数正在监控</div>
+    <!-- Function Detail Modal -->
+    <div class="modal-overlay" id="fnModal">
+        <div class="modal-box">
+            <div class="modal-title" id="fnModalTitle">-</div>
+            <div class="modal-desc" id="fnModalDesc">函数性能详情</div>
+            <div id="fnModalBody"></div>
+            <div class="modal-actions">
+                <button class="ctrl-btn" onclick="closeFnModal()">关闭</button>
             </div>
+        </div>
+    </div>
 
-            <div class="stat-card">
-                <h3>总调用次数</h3>
-                <div class="value" id="total-calls">-</div>
-                <div class="label">次API调用</div>
+    <div class="shell">
+        <!-- Hero -->
+        <div class="hero">
+            <div class="hero-left">
+                <h1>性能监控中心</h1>
+                <p>实时监控函数调用性能 · 发现瓶颈 · 优化效率</p>
             </div>
-
-            <div class="stat-card">
-                <h3>平均响应时间</h3>
-                <div class="value" id="avg-time">-</div>
-                <div class="label">秒</div>
-            </div>
-
-            <div class="stat-card">
-                <h3>错误率</h3>
-                <div class="value" id="error-rate">-</div>
-                <div class="label">%</div>
+            <div class="hero-right">
+                <div class="refresh-badge" id="refreshBadge">
+                    <span class="dot"></span>
+                    <span id="refreshLabel">自动刷新中</span>
+                </div>
+                <button class="ctrl-btn" id="toggleRefreshBtn" onclick="toggleAutoRefresh()">暂停</button>
+                <button class="ctrl-btn primary" onclick="refreshData()">刷新数据</button>
+                <button class="ctrl-btn" onclick="exportMetrics()">导出 CSV</button>
+                <button class="ctrl-btn danger" onclick="confirmClear()">清空数据</button>
             </div>
         </div>
 
-        <div class="content-grid">
-            <div class="panel">
-                <h2>最慢的函数 TOP 5</h2>
-                <ul class="function-list" id="slowest-functions">
-                    <li class="loading">加载中...</li>
-                </ul>
+        <!-- Stats row -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="sc-icon blue">📡</div>
+                <div class="sc-label">监控函数</div>
+                <div class="sc-value" id="sTotalFn">-</div>
+                <div class="sc-sub">个函数正在监控</div>
             </div>
-
-            <div class="panel">
-                <h2>调用最频繁的函数 TOP 5</h2>
-                <ul class="function-list" id="most-called-functions">
-                    <li class="loading">加载中...</li>
-                </ul>
+            <div class="stat-card">
+                <div class="sc-icon green">📊</div>
+                <div class="sc-label">总调用次数</div>
+                <div class="sc-value" id="sTotalCalls">-</div>
+                <div class="sc-sub">次 API 调用</div>
             </div>
-        </div>
-
-        <div class="content-grid">
-            <div class="panel">
-                <h2>慢查询检测</h2>
-                <ul class="function-list" id="slow-queries">
-                    <li class="loading">加载中...</li>
-                </ul>
+            <div class="stat-card">
+                <div class="sc-icon orange">⏱️</div>
+                <div class="sc-label">平均响应时间</div>
+                <div class="sc-value" id="sAvgTime">-</div>
+                <div class="sc-sub" id="sAvgTimeSub">秒</div>
             </div>
-
-            <div class="panel">
-                <h2>优化建议</h2>
-                <ul class="suggestion-list" id="suggestions">
-                    <li class="loading">加载中...</li>
-                </ul>
+            <div class="stat-card">
+                <div class="sc-icon red">⚠️</div>
+                <div class="sc-label">错误率</div>
+                <div class="sc-value" id="sErrRate">-</div>
+                <div class="sc-sub" id="sSlowCount">0 个慢查询</div>
             </div>
         </div>
 
-        <div class="panel">
-            <h2>操作</h2>
-            <div class="actions">
-                <button class="btn" onclick="refreshData()">刷新数据</button>
-                <button class="btn" onclick="exportMetrics()">导出指标</button>
-                <button class="btn btn-danger" onclick="clearMetrics()">清空数据</button>
+        <!-- Charts row: response time distribution + call frequency -->
+        <div class="grid-2">
+            <div class="panel">
+                <div class="panel-head">
+                    <h2><span class="icon" style="background:var(--pf-accent-soft);color:var(--pf-accent);">📈</span> 响应时间分布</h2>
+                </div>
+                <div class="chart-wrap" id="rtChartWrap">
+                    <canvas id="rtChart"></canvas>
+                    <div class="chart-empty" id="rtChartEmpty">
+                        <div class="icon">📊</div>
+                        <p>暂无数据</p>
+                    </div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-head">
+                    <h2><span class="icon" style="background:var(--pf-ok-soft);color:var(--pf-ok);">🔥</span> 函数调用频率</h2>
+                </div>
+                <div class="chart-wrap" id="freqChartWrap">
+                    <canvas id="freqChart"></canvas>
+                    <div class="chart-empty" id="freqChartEmpty">
+                        <div class="icon">📊</div>
+                        <p>暂无数据</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Function table + slow queries -->
+        <div class="grid-3">
+            <div class="panel">
+                <div class="panel-head">
+                    <h2><span class="icon" style="background:var(--pf-accent-soft);color:var(--pf-accent);">📋</span> 函数性能排行</h2>
+                    <div>
+                        <div class="tab-bar" id="fnTabBar">
+                            <button class="tab active" data-sort="slowest" onclick="switchFnTab(this)">最慢</button>
+                            <button class="tab" data-sort="most_called" onclick="switchFnTab(this)">最频繁</button>
+                            <button class="tab" data-sort="most_time" onclick="switchFnTab(this)">总耗时</button>
+                        </div>
+                    </div>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table class="fn-table">
+                        <thead>
+                            <tr>
+                                <th style="width:32px;">#</th>
+                                <th>函数名</th>
+                                <th>调用次数</th>
+                                <th>平均耗时</th>
+                                <th style="min-width:100px;">性能</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fnTableBody">
+                            <tr><td colspan="5"><div class="empty-state"><div class="icon">📋</div><p>加载中...</p></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-head">
+                    <h2><span class="icon" style="background:var(--pf-warn-soft);color:var(--pf-warn);">🐌</span> 慢查询检测</h2>
+                    <span class="badge" id="sqBadge" style="background:var(--pf-warn-soft);color:var(--pf-warn);">0</span>
+                </div>
+                <div id="slowQueriesWrap" style="max-height: 400px; overflow-y: auto;">
+                    <div class="empty-state"><div class="icon">🐌</div><p>加载中...</p></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Suggestions + Timeline -->
+        <div class="grid-2">
+            <div class="panel">
+                <div class="panel-head">
+                    <h2><span class="icon" style="background:var(--pf-ok-soft);color:var(--pf-ok);">💡</span> 优化建议</h2>
+                    <span class="badge" id="sugBadge" style="background:var(--pf-ok-soft);color:var(--pf-ok);">0</span>
+                </div>
+                <div id="suggestionsWrap">
+                    <div class="empty-state"><div class="icon">💡</div><p>系统性能良好</p></div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-head">
+                    <h2><span class="icon" style="background:var(--pf-accent-soft);color:var(--pf-accent);">🕐</span> 最近调用时间线</h2>
+                </div>
+                <div class="timeline-wrap" id="timelineWrap">
+                    <div class="empty-state"><div class="icon">🕐</div><p>暂无调用记录</p></div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        let autoRefresh = true;
+    /* ── State ── */
+    let autoRefresh = true;
+    let refreshInterval = null;
+    let dashboardData = null;
+    let currentFnSort = 'slowest';
+    let allFnStats = null;
 
-        async function fetchDashboard() {
-            try {
-                const response = await fetch('/api/performance/dashboard');
-                if (!response.ok) throw new Error('获取数据失败');
-
-                const data = await response.json();
-                updateDashboard(data);
-                hideError();
-            } catch (error) {
-                showError('无法加载性能数据: ' + error.message);
-            }
-        }
-
-        function updateDashboard(data) {
-            // 更新总体统计
-            document.getElementById('total-functions').textContent = data.overview.total_functions;
-            document.getElementById('total-calls').textContent = data.overview.total_calls;
-            document.getElementById('avg-time').textContent = data.overview.avg_time.toFixed(3);
-            document.getElementById('error-rate').textContent = (data.overview.error_rate * 100).toFixed(2);
-
-            // 更新最慢的函数
-            const slowestList = document.getElementById('slowest-functions');
-            slowestList.innerHTML = '';
-            if (data.top_functions.slowest.length === 0) {
-                slowestList.innerHTML = '<li class="loading">暂无数据</li>';
-            } else {
-                data.top_functions.slowest.forEach((func, index) => {
-                    const li = document.createElement('li');
-                    li.className = 'function-item';
-                    li.innerHTML = `
-                        <span class="function-name">${index + 1}. ${func.name}</span>
-                        <div class="function-stats">
-                            <span>平均: ${func.avg_time.toFixed(3)}s</span>
-                            <span>调用: ${func.count}次</span>
-                        </div>
-                    `;
-                    slowestList.appendChild(li);
-                });
-            }
-
-            // 更新调用最频繁的函数
-            const mostCalledList = document.getElementById('most-called-functions');
-            mostCalledList.innerHTML = '';
-            if (data.top_functions.most_called.length === 0) {
-                mostCalledList.innerHTML = '<li class="loading">暂无数据</li>';
-            } else {
-                data.top_functions.most_called.forEach((func, index) => {
-                    const li = document.createElement('li');
-                    li.className = 'function-item';
-                    li.innerHTML = `
-                        <span class="function-name">${index + 1}. ${func.name}</span>
-                        <div class="function-stats">
-                            <span>调用: ${func.count}次</span>
-                            <span>平均: ${func.avg_time.toFixed(3)}s</span>
-                        </div>
-                    `;
-                    mostCalledList.appendChild(li);
-                });
-            }
-
-            // 更新慢查询
-            const slowQueriesList = document.getElementById('slow-queries');
-            slowQueriesList.innerHTML = '';
-            if (data.slow_queries.length === 0) {
-                slowQueriesList.innerHTML = '<li class="loading">未发现慢查询</li>';
-            } else {
-                data.slow_queries.forEach(query => {
-                    const li = document.createElement('li');
-                    li.className = 'slow-query-item';
-                    li.innerHTML = `
-                        <div class="slow-query-name">${query.name}</div>
-                        <div class="slow-query-time">耗时: ${query.duration.toFixed(3)}s | ${query.timestamp}</div>
-                    `;
-                    slowQueriesList.appendChild(li);
-                });
-            }
-
-            // 更新优化建议
-            const suggestionsList = document.getElementById('suggestions');
-            suggestionsList.innerHTML = '';
-            if (data.suggestions.length === 0) {
-                suggestionsList.innerHTML = '<li class="loading">系统性能良好，暂无优化建议</li>';
-            } else {
-                data.suggestions.forEach(suggestion => {
-                    const li = document.createElement('li');
-                    li.className = 'suggestion-item';
-                    li.textContent = suggestion;
-                    suggestionsList.appendChild(li);
-                });
-            }
-        }
-
-        function showError(message) {
-            const errorDiv = document.getElementById('error-message');
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
-        }
-
-        function hideError() {
-            document.getElementById('error-message').style.display = 'none';
-        }
-
-        async function refreshData() {
-            await fetchDashboard();
-        }
-
-        async function exportMetrics() {
-            try {
-                window.open('/api/performance/metrics/export', '_blank');
-            } catch (error) {
-                showError('导出失败: ' + error.message);
-            }
-        }
-
-        async function clearMetrics() {
-            if (!confirm('确定要清空所有性能数据吗？')) return;
-
-            try {
-                const response = await fetch('/api/performance/clear', {
-                    method: 'POST'
-                });
-
-                if (!response.ok) throw new Error('清空失败');
-
-                await fetchDashboard();
-                alert('性能数据已清空');
-            } catch (error) {
-                showError('清空失败: ' + error.message);
-            }
-        }
-
-        // 初始加载
+    /* ── Init ── */
+    document.addEventListener('DOMContentLoaded', () => {
         fetchDashboard();
+        startAutoRefresh();
+    });
 
-        // 自动刷新（每5秒）
-        setInterval(() => {
-            if (autoRefresh) {
-                fetchDashboard();
-            }
+    function startAutoRefresh() {
+        if (refreshInterval) clearInterval(refreshInterval);
+        refreshInterval = setInterval(() => {
+            if (autoRefresh) fetchDashboard();
         }, 5000);
+    }
+
+    function toggleAutoRefresh() {
+        autoRefresh = !autoRefresh;
+        const badge = document.getElementById('refreshBadge');
+        const label = document.getElementById('refreshLabel');
+        const btn = document.getElementById('toggleRefreshBtn');
+        if (autoRefresh) {
+            badge.classList.remove('paused');
+            label.textContent = '自动刷新中';
+            btn.textContent = '暂停';
+        } else {
+            badge.classList.add('paused');
+            label.textContent = '已暂停';
+            btn.textContent = '恢复';
+        }
+    }
+
+    /* ── Data fetching ── */
+    async function fetchDashboard() {
+        try {
+            const res = await fetch('/api/performance/dashboard');
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const data = await res.json();
+            dashboardData = data;
+            renderAll(data);
+        } catch (e) {
+            console.warn('Dashboard fetch failed, using demo data:', e.message);
+            dashboardData = getDemoData();
+            renderAll(dashboardData);
+        }
+    }
+
+    async function fetchFunctionStats() {
+        try {
+            const res = await fetch('/api/performance/stats');
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            allFnStats = await res.json();
+        } catch (e) {
+            allFnStats = null;
+        }
+    }
+
+    /* ── Render All ── */
+    function renderAll(data) {
+        renderStats(data.overview);
+        renderFnTable(data.top_functions, currentFnSort);
+        renderSlowQueries(data.slow_queries || []);
+        renderSuggestions(data.suggestions || []);
+        renderRTChart(data.top_functions);
+        renderFreqChart(data.top_functions);
+        renderTimeline(data.slow_queries || [], data.top_functions);
+    }
+
+    /* ── Stats ── */
+    function renderStats(ov) {
+        document.getElementById('sTotalFn').textContent = formatNum(ov.total_functions);
+        document.getElementById('sTotalCalls').textContent = formatNum(ov.total_calls);
+        const avgTime = ov.avg_time || 0;
+        if (avgTime < 0.001) {
+            document.getElementById('sAvgTime').textContent = (avgTime * 1000000).toFixed(0);
+            document.getElementById('sAvgTimeSub').textContent = '微秒';
+        } else if (avgTime < 1) {
+            document.getElementById('sAvgTime').textContent = (avgTime * 1000).toFixed(1);
+            document.getElementById('sAvgTimeSub').textContent = '毫秒';
+        } else {
+            document.getElementById('sAvgTime').textContent = avgTime.toFixed(3);
+            document.getElementById('sAvgTimeSub').textContent = '秒';
+        }
+        const errRate = (ov.error_rate || 0) * 100;
+        document.getElementById('sErrRate').textContent = errRate.toFixed(2) + '%';
+        document.getElementById('sSlowCount').textContent = (ov.slow_queries_count || 0) + ' 个慢查询';
+    }
+
+    /* ── Function Table ── */
+    function switchFnTab(el) {
+        document.querySelectorAll('#fnTabBar .tab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+        currentFnSort = el.dataset.sort;
+        if (dashboardData) renderFnTable(dashboardData.top_functions, currentFnSort);
+    }
+
+    function renderFnTable(topFns, sort) {
+        const tbody = document.getElementById('fnTableBody');
+        let list = [];
+        if (sort === 'slowest') list = topFns.slowest || [];
+        else if (sort === 'most_called') list = topFns.most_called || [];
+        else list = topFns.most_time_consuming || [];
+
+        if (list.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><div class="icon">📋</div><p>暂无数据</p></div></td></tr>';
+            return;
+        }
+
+        const maxTime = Math.max(...list.map(f => f.avg_time || 0), 0.001);
+        tbody.innerHTML = list.map((fn, i) => {
+            const avg = fn.avg_time || 0;
+            const pct = Math.min((avg / maxTime) * 100, 100);
+            const speed = avg > 1 ? 'slow' : avg > 0.3 ? 'mid' : 'fast';
+            const timeStr = avg < 0.001 ? (avg * 1000000).toFixed(0) + 'μs'
+                : avg < 1 ? (avg * 1000).toFixed(1) + 'ms'
+                : avg.toFixed(3) + 's';
+            const totalStr = fn.total_time ? (fn.total_time < 1 ? (fn.total_time * 1000).toFixed(0) + 'ms' : fn.total_time.toFixed(2) + 's') : '-';
+            return `<tr onclick="showFnDetail('${escHtml(fn.name)}', ${fn.count || 0}, ${avg}, '${totalStr}')" style="cursor:pointer;">
+                <td style="color:var(--pf-muted);font-weight:700;">${i + 1}</td>
+                <td><span class="fn-name">${escHtml(fn.name)}</span></td>
+                <td>${formatNum(fn.count || 0)}</td>
+                <td>${timeStr}</td>
+                <td><div class="fn-bar"><div class="fn-bar-fill ${speed}" style="width:${pct}%"></div></div></td>
+            </tr>`;
+        }).join('');
+    }
+
+    /* ── Slow Queries ── */
+    function renderSlowQueries(queries) {
+        const wrap = document.getElementById('slowQueriesWrap');
+        document.getElementById('sqBadge').textContent = queries.length;
+
+        if (queries.length === 0) {
+            wrap.innerHTML = '<div class="empty-state"><div class="icon">✅</div><p>未发现慢查询</p></div>';
+            return;
+        }
+
+        wrap.innerHTML = queries.map(q => {
+            const dur = q.duration || 0;
+            const isCritical = dur > 2;
+            const cls = isCritical ? 'critical' : '';
+            const dotCls = isCritical ? 'critical' : 'warn';
+            const durCls = isCritical ? 'critical' : 'warn';
+            const durStr = dur < 1 ? (dur * 1000).toFixed(0) + 'ms' : dur.toFixed(3) + 's';
+            const ts = q.timestamp ? new Date(q.timestamp).toLocaleString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '-';
+            return `<div class="sq-item ${cls}">
+                <div class="sq-dot ${dotCls}"></div>
+                <div class="sq-info">
+                    <div class="sq-name">${escHtml(q.name)}</div>
+                    <div class="sq-meta">${ts}</div>
+                </div>
+                <div class="sq-dur ${durCls}">${durStr}</div>
+            </div>`;
+        }).join('');
+    }
+
+    /* ── Suggestions ── */
+    function renderSuggestions(suggestions) {
+        const wrap = document.getElementById('suggestionsWrap');
+        document.getElementById('sugBadge').textContent = suggestions.length;
+
+        if (suggestions.length === 0) {
+            wrap.innerHTML = '<div class="empty-state"><div class="icon">✅</div><p>系统性能良好，暂无优化建议</p></div>';
+            return;
+        }
+
+        wrap.innerHTML = suggestions.map(s =>
+            `<div class="sug-item">
+                <div class="sug-icon">💡</div>
+                <div class="sug-text">${escHtml(s)}</div>
+            </div>`
+        ).join('');
+    }
+
+    /* ── Response Time Chart (Canvas) ── */
+    function renderRTChart(topFns) {
+        const canvas = document.getElementById('rtChart');
+        const empty = document.getElementById('rtChartEmpty');
+        const list = topFns.slowest || [];
+
+        if (list.length === 0) {
+            empty.style.display = 'flex';
+            return;
+        }
+        empty.style.display = 'none';
+
+        const ctx = canvas.getContext('2d');
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.parentElement.getBoundingClientRect();
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr);
+
+        const W = rect.width;
+        const H = rect.height;
+        const padL = 60, padR = 20, padT = 20, padB = 50;
+        const chartW = W - padL - padR;
+        const chartH = H - padT - padB;
+
+        ctx.clearRect(0, 0, W, H);
+
+        const maxVal = Math.max(...list.map(f => f.avg_time || 0)) * 1.2 || 1;
+        const barW = Math.min(chartW / list.length * 0.6, 50);
+        const gap = chartW / list.length;
+
+        // Y-axis grid
+        ctx.strokeStyle = 'rgba(0,0,0,0.06)';
+        ctx.lineWidth = 1;
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '11px -apple-system, sans-serif';
+        ctx.textAlign = 'right';
+        for (let i = 0; i <= 4; i++) {
+            const y = padT + (chartH / 4) * i;
+            const val = maxVal * (1 - i / 4);
+            ctx.beginPath();
+            ctx.moveTo(padL, y);
+            ctx.lineTo(W - padR, y);
+            ctx.stroke();
+            const label = val < 0.001 ? (val * 1e6).toFixed(0) + 'μs'
+                : val < 1 ? (val * 1000).toFixed(0) + 'ms'
+                : val.toFixed(2) + 's';
+            ctx.fillText(label, padL - 8, y + 4);
+        }
+
+        // Bars
+        list.forEach((fn, i) => {
+            const x = padL + gap * i + (gap - barW) / 2;
+            const h = (fn.avg_time / maxVal) * chartH;
+            const y = padT + chartH - h;
+
+            const speed = fn.avg_time > 1 ? 'slow' : fn.avg_time > 0.3 ? 'mid' : 'fast';
+            const colors = { fast: ['#059669', '#34d399'], mid: ['#d97706', '#fbbf24'], slow: ['#dc2626', '#f87171'] };
+            const grad = ctx.createLinearGradient(x, y, x, padT + chartH);
+            grad.addColorStop(0, colors[speed][0]);
+            grad.addColorStop(1, colors[speed][1]);
+
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            roundRect(ctx, x, y, barW, h, 4);
+            ctx.fill();
+
+            // Label
+            ctx.fillStyle = '#64748b';
+            ctx.font = '10px -apple-system, sans-serif';
+            ctx.textAlign = 'center';
+            const name = fn.name.length > 10 ? fn.name.slice(0, 9) + '…' : fn.name;
+            ctx.save();
+            ctx.translate(x + barW / 2, padT + chartH + 14);
+            ctx.rotate(-0.4);
+            ctx.fillText(name, 0, 0);
+            ctx.restore();
+        });
+    }
+
+    /* ── Frequency Chart (Canvas) ── */
+    function renderFreqChart(topFns) {
+        const canvas = document.getElementById('freqChart');
+        const empty = document.getElementById('freqChartEmpty');
+        const list = topFns.most_called || [];
+
+        if (list.length === 0) {
+            empty.style.display = 'flex';
+            return;
+        }
+        empty.style.display = 'none';
+
+        const ctx = canvas.getContext('2d');
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.parentElement.getBoundingClientRect();
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr);
+
+        const W = rect.width;
+        const H = rect.height;
+        const padL = 60, padR = 20, padT = 20, padB = 50;
+        const chartW = W - padL - padR;
+        const chartH = H - padT - padB;
+
+        ctx.clearRect(0, 0, W, H);
+
+        const maxVal = Math.max(...list.map(f => f.count || 0)) * 1.2 || 1;
+        const barW = Math.min(chartW / list.length * 0.6, 50);
+        const gap = chartW / list.length;
+
+        // Y-axis grid
+        ctx.strokeStyle = 'rgba(0,0,0,0.06)';
+        ctx.lineWidth = 1;
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '11px -apple-system, sans-serif';
+        ctx.textAlign = 'right';
+        for (let i = 0; i <= 4; i++) {
+            const y = padT + (chartH / 4) * i;
+            const val = maxVal * (1 - i / 4);
+            ctx.beginPath();
+            ctx.moveTo(padL, y);
+            ctx.lineTo(W - padR, y);
+            ctx.stroke();
+            ctx.fillText(formatNum(Math.round(val)), padL - 8, y + 4);
+        }
+
+        // Bars
+        list.forEach((fn, i) => {
+            const x = padL + gap * i + (gap - barW) / 2;
+            const h = (fn.count / maxVal) * chartH;
+            const y = padT + chartH - h;
+
+            const grad = ctx.createLinearGradient(x, y, x, padT + chartH);
+            grad.addColorStop(0, '#1363df');
+            grad.addColorStop(1, '#d97706');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            roundRect(ctx, x, y, barW, h, 4);
+            ctx.fill();
+
+            // Value on top
+            ctx.fillStyle = '#1363df';
+            ctx.font = 'bold 11px -apple-system, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(formatNum(fn.count), x + barW / 2, y - 6);
+
+            // Label
+            ctx.fillStyle = '#64748b';
+            ctx.font = '10px -apple-system, sans-serif';
+            const name = fn.name.length > 10 ? fn.name.slice(0, 9) + '…' : fn.name;
+            ctx.save();
+            ctx.translate(x + barW / 2, padT + chartH + 14);
+            ctx.rotate(-0.4);
+            ctx.fillText(name, 0, 0);
+            ctx.restore();
+        });
+    }
+
+    function roundRect(ctx, x, y, w, h, r) {
+        if (h < r * 2) r = h / 2;
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h);
+        ctx.lineTo(x, y + h);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+    }
+
+    /* ── Timeline ── */
+    function renderTimeline(slowQueries, topFns) {
+        const wrap = document.getElementById('timelineWrap');
+
+        // Build timeline from slow queries + top function data
+        let items = [];
+
+        // Add slow queries as timeline events
+        (slowQueries || []).forEach(q => {
+            items.push({
+                name: q.name,
+                duration: q.duration,
+                timestamp: q.timestamp,
+                success: false,
+                type: 'slow'
+            });
+        });
+
+        // Build synthetic timeline from top functions if we have data
+        const allFns = [...(topFns.slowest || []), ...(topFns.most_called || [])];
+        const seen = new Set(items.map(i => i.name));
+        allFns.forEach(fn => {
+            if (!seen.has(fn.name)) {
+                seen.add(fn.name);
+                items.push({
+                    name: fn.name,
+                    duration: fn.avg_time || 0,
+                    timestamp: dashboardData?.timestamp || new Date().toISOString(),
+                    success: true,
+                    type: 'normal'
+                });
+            }
+        });
+
+        // Sort by timestamp desc
+        items.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        items = items.slice(0, 15);
+
+        if (items.length === 0) {
+            wrap.innerHTML = '<div class="empty-state"><div class="icon">🕐</div><p>暂无调用记录</p></div>';
+            return;
+        }
+
+        wrap.innerHTML = items.map(item => {
+            const ts = new Date(item.timestamp);
+            const timeStr = ts.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const dotCls = item.type === 'slow' ? 'err' : 'ok';
+            const dur = item.duration || 0;
+            const durStr = dur < 0.001 ? (dur * 1e6).toFixed(0) + 'μs'
+                : dur < 1 ? (dur * 1000).toFixed(1) + 'ms'
+                : dur.toFixed(3) + 's';
+            const durColor = dur > 1 ? 'var(--pf-err)' : dur > 0.3 ? 'var(--pf-warn)' : 'var(--pf-ok)';
+            return `<div class="tl-item">
+                <div class="tl-time">${timeStr}</div>
+                <div class="tl-dot-col"><div class="tl-dot ${dotCls}"></div></div>
+                <div class="tl-body">
+                    <div class="tl-fn">${escHtml(item.name)}</div>
+                    <div class="tl-detail">${item.type === 'slow' ? '慢查询告警' : '正常调用'}</div>
+                </div>
+                <div class="tl-dur" style="color:${durColor}">${durStr}</div>
+            </div>`;
+        }).join('');
+    }
+
+    /* ── Function detail modal ── */
+    function showFnDetail(name, count, avgTime, totalTime) {
+        document.getElementById('fnModalTitle').textContent = name;
+        document.getElementById('fnModalDesc').textContent = '函数性能详情';
+
+        const timeStr = avgTime < 0.001 ? (avgTime * 1e6).toFixed(0) + 'μs'
+            : avgTime < 1 ? (avgTime * 1000).toFixed(1) + 'ms'
+            : avgTime.toFixed(3) + 's';
+
+        const statusColor = avgTime > 1 ? 'var(--pf-err)' : avgTime > 0.3 ? 'var(--pf-warn)' : 'var(--pf-ok)';
+        const statusLabel = avgTime > 1 ? '需要优化' : avgTime > 0.3 ? '可以优化' : '性能良好';
+
+        let html = `
+            <div class="modal-detail-row"><span class="label">函数名</span><span class="value">${escHtml(name)}</span></div>
+            <div class="modal-detail-row"><span class="label">调用次数</span><span class="value">${formatNum(count)}</span></div>
+            <div class="modal-detail-row"><span class="label">平均耗时</span><span class="value">${timeStr}</span></div>
+            <div class="modal-detail-row"><span class="label">总耗时</span><span class="value">${totalTime}</span></div>
+            <div class="modal-detail-row"><span class="label">性能状态</span><span class="value" style="color:${statusColor}">${statusLabel}</span></div>
+        `;
+
+        // Attempt to fetch detailed stats
+        fetch('/api/performance/stats?function=' + encodeURIComponent(name))
+            .then(r => r.json())
+            .then(stats => {
+                if (stats && stats.count) {
+                    const extra = `
+                        <div class="modal-detail-row"><span class="label">最小耗时</span><span class="value">${fmtTime(stats.min_time)}</span></div>
+                        <div class="modal-detail-row"><span class="label">最大耗时</span><span class="value">${fmtTime(stats.max_time)}</span></div>
+                        <div class="modal-detail-row"><span class="label">中位数</span><span class="value">${fmtTime(stats.median_time)}</span></div>
+                        <div class="modal-detail-row"><span class="label">P95</span><span class="value">${fmtTime(stats.p95_time)}</span></div>
+                        <div class="modal-detail-row"><span class="label">P99</span><span class="value">${fmtTime(stats.p99_time)}</span></div>
+                    `;
+                    document.getElementById('fnModalBody').innerHTML = html + extra;
+                }
+            })
+            .catch(() => {});
+
+        document.getElementById('fnModalBody').innerHTML = html;
+        document.getElementById('fnModal').classList.add('open');
+    }
+
+    function closeFnModal() {
+        document.getElementById('fnModal').classList.remove('open');
+    }
+
+    /* ── Actions ── */
+    async function refreshData() {
+        toast('正在刷新...', 'info');
+        await fetchDashboard();
+        toast('数据已刷新', 'success');
+    }
+
+    function exportMetrics() {
+        window.open('/api/performance/metrics/export', '_blank');
+        toast('正在导出 CSV', 'success');
+    }
+
+    function confirmClear() {
+        if (!confirm('确定要清空所有性能数据吗？此操作不可恢复。')) return;
+        fetch('/api/performance/clear', { method: 'POST' })
+            .then(r => {
+                if (!r.ok) throw new Error('清空失败');
+                toast('性能数据已清空', 'success');
+                fetchDashboard();
+            })
+            .catch(e => toast('清空失败: ' + e.message, 'error'));
+    }
+
+    /* ── Toast ── */
+    function toast(msg, type) {
+        const wrap = document.getElementById('toastWrap');
+        const el = document.createElement('div');
+        el.className = 'toast ' + (type || '');
+        el.textContent = msg;
+        wrap.appendChild(el);
+        setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 2500);
+    }
+
+    /* ── Util ── */
+    function formatNum(n) {
+        if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+        if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+        return String(n);
+    }
+
+    function fmtTime(t) {
+        if (t === undefined || t === null) return '-';
+        if (t < 0.001) return (t * 1e6).toFixed(0) + 'μs';
+        if (t < 1) return (t * 1000).toFixed(1) + 'ms';
+        return t.toFixed(3) + 's';
+    }
+
+    function escHtml(s) {
+        const d = document.createElement('div');
+        d.textContent = s;
+        return d.innerHTML;
+    }
+
+    /* ── Demo data fallback ── */
+    function getDemoData() {
+        return {
+            overview: {
+                total_functions: 24,
+                total_calls: 15832,
+                total_time: 487.32,
+                avg_time: 0.0308,
+                error_rate: 0.023,
+                slow_queries_count: 3
+            },
+            top_functions: {
+                slowest: [
+                    { name: 'generate_report', avg_time: 2.341, count: 89 },
+                    { name: 'batch_process', avg_time: 1.856, count: 156 },
+                    { name: 'train_model', avg_time: 1.203, count: 34 },
+                    { name: 'fetch_external_api', avg_time: 0.892, count: 445 },
+                    { name: 'parse_document', avg_time: 0.534, count: 672 }
+                ],
+                most_called: [
+                    { name: 'health_check', count: 4520, avg_time: 0.002 },
+                    { name: 'get_user_session', count: 3210, avg_time: 0.008 },
+                    { name: 'validate_token', count: 2890, avg_time: 0.012 },
+                    { name: 'log_event', count: 2156, avg_time: 0.003 },
+                    { name: 'cache_lookup', count: 1872, avg_time: 0.005 }
+                ],
+                most_time_consuming: [
+                    { name: 'batch_process', total_time: 289.54, count: 156, avg_time: 1.856 },
+                    { name: 'generate_report', total_time: 208.35, count: 89, avg_time: 2.341 },
+                    { name: 'fetch_external_api', total_time: 396.94, count: 445, avg_time: 0.892 },
+                    { name: 'parse_document', total_time: 358.85, count: 672, avg_time: 0.534 },
+                    { name: 'train_model', total_time: 40.90, count: 34, avg_time: 1.203 }
+                ]
+            },
+            slow_queries: [
+                { name: 'generate_report', duration: 4.521, timestamp: new Date(Date.now() - 120000).toISOString() },
+                { name: 'batch_process', duration: 3.102, timestamp: new Date(Date.now() - 300000).toISOString() },
+                { name: 'train_model', duration: 2.847, timestamp: new Date(Date.now() - 600000).toISOString() }
+            ],
+            suggestions: [
+                'generate_report 平均耗时 2.341s，建议添加缓存或分页处理',
+                'batch_process 调用频繁且耗时较长，考虑异步队列处理',
+                'fetch_external_api 平均 892ms，建议增加超时控制和重试机制',
+                '错误率 2.3%，建议检查 train_model 的输入校验逻辑'
+            ],
+            timestamp: new Date().toISOString()
+        };
+    }
+
+    /* ── Resize handler for charts ── */
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            if (dashboardData) {
+                renderRTChart(dashboardData.top_functions);
+                renderFreqChart(dashboardData.top_functions);
+            }
+        }, 200);
+    });
+
+    /* ── Close modal on overlay click ── */
+    document.getElementById('fnModal').addEventListener('click', function(e) {
+        if (e.target === this) closeFnModal();
+    });
     </script>
 </body>
 </html>

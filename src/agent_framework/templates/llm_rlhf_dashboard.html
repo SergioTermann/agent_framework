@@ -5,117 +5,177 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LLM 强化学习平台 - Agent Framework</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js?v=20260410" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="/static/css/base-theme.css">
     <style>
         :root {
-            --grad-start: #2563eb;
-            --grad-end: #06b6d4;
-            --primary: #2563eb;
-            --card-bg: #ffffff;
-            --text2: #475569;
-            --text3: #94a3b8;
-            --border: rgba(37,99,235,.10);
-            --primary-dark: #1d4ed8;
-            --shadow: 0 10px 30px rgba(15,23,42,.06);
-            --success: #10b981;
-            --success-light: rgba(16,185,129,.1);
-            --danger: #ef4444;
-            --danger-light: rgba(239,68,68,.08);
-            --warning: #06b6d4;
-            --warning-light: rgba(6,182,212,.1);
-            --shadow-sm: 0 4px 15px rgba(0,0,0,.08);
-            --glass: rgba(255,255,255,.95);
-            --panel-blue: #2563eb;
-            --panel-cyan: #0891b2;
-            --panel-green: #059669;
-            --panel-violet: #7c3aed;
-            --panel-amber: #d97706;
-            --panel-rose: #db2777;
-            --panel-slate: #475569;
+            --lrf-accent:      #1363df;
+            --lrf-accent2:     #60a5fa;
+            --lrf-accent-deep: #0f4eb3;
+            --lrf-accent-lite: rgba(19, 99, 223,.10);
+            --lrf-surface:     rgba(255,252,247,0.82);
+            --lrf-surface-soft:#eff4fb;
+            --lrf-surface-strong:#ede2d2;
+            --lrf-border:      rgba(101, 120, 144,.12);
+            --lrf-border-strong: rgba(32,100,92,.22);
+            --lrf-text:        #202a36;
+            --lrf-text2:       #525b62;
+            --lrf-text3:       #6f746f;
+            --success:         #1f8f63;
+            --success-light:   rgba(31,143,99,.10);
+            --danger:          #dc2626;
+            --danger-light:    rgba(220,38,38,.08);
+            --warning:         #d97706;
+            --warning-light:   rgba(217,119,6,.10);
+            --grad-start:      #0f4eb3;
+            --grad-end:        #60a5fa;
+            /* legacy compat */
+            --primary:        #1363df;
+            --primary-dark:   #0f4eb3;
+            --text2:          #525b62;
+            --text3:          #6f746f;
+            --panel-blue:     #1363df;
+            --panel-cyan:     #60a5fa;
+            --panel-green:    #1f8f63;
+            --panel-violet:   #475569;
+            --panel-amber:    #d97706;
+            --panel-rose:     #9a3412;
+            --panel-slate:    #475569;
+            --shadow-lg:      0 34px 80px -34px rgba(34, 44, 63, 0.18);
+            --shadow-md:      0 18px 42px -28px rgba(34, 44, 63, 0.16);
+            --radius-xl:      30px;
+            --radius-lg:      22px;
+            --radius-md:      18px;
+            --font-body:      "Inter", "Segoe UI", sans-serif;
+            --font-display:   "Manrope", "Segoe UI", sans-serif;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font-body);
+            background:
+                radial-gradient(circle at 8% 10%, rgba(19, 99, 223, 0.14), transparent 22%),
+                radial-gradient(circle at 88% 12%, rgba(217, 119, 6, 0.12), transparent 20%),
+                radial-gradient(circle at 76% 86%, rgba(20, 184, 166, 0.10), transparent 24%),
+                #eef4fb;
+            min-height: 100vh;
+            color: var(--lrf-text);
+        }
+        body::before {
+            content: '';
+            position: fixed; inset: 0; pointer-events: none; z-index: 0;
+            background-image:
+                linear-gradient(rgba(19, 99, 223, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(19, 99, 223, 0.03) 1px, transparent 1px);
+            background-size: 28px 28px;
+            mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.22), transparent 70%);
         }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes pulseGlow { 0%,100% { box-shadow: 0 0 0 0 rgba(37,99,235,.22); } 50% { box-shadow: 0 0 20px 4px rgba(37,99,235,.12); } }
+        @keyframes pulseGlow { 0%,100% { box-shadow: 0 0 0 0 rgba(31,143,99,.22); } 50% { box-shadow: 0 0 20px 4px rgba(31,143,99,.14); } }
         @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes countUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .page-wide { max-width: 1500px; animation: fadeIn .6s ease-out; }
-
-        /* ── Header ── */
-        .header {
-            background: var(--card-bg); padding: 40px;
-            border-radius: 22px; box-shadow: var(--shadow);
-            margin-bottom: 28px; backdrop-filter: blur(12px);
-            text-align: center; position: relative; overflow: hidden;
-            border: 1px solid rgba(37,99,235,.08);
+        .lrf-shell {
+            position: relative; z-index: 1;
+            max-width: 1540px; margin: 0 auto;
+            padding: 28px 24px 56px;
+            animation: fadeIn .6s ease-out;
         }
-        .header::before {
+
+        /* ── Hero ── */
+        .lrf-hero {
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(255, 250, 244, 0.58)),
+                rgba(247, 242, 234, 0.72);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(101, 120, 144, 0.10);
+            border-radius: var(--radius-xl);
+            padding: 28px 32px 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-md);
+            position: relative; overflow: hidden;
+        }
+        .lrf-hero::before {
             content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
-            background: linear-gradient(90deg, var(--grad-start), var(--grad-end), #67e8f9, var(--grad-start));
+            background: linear-gradient(90deg, var(--grad-start), var(--grad-end), #d97706, var(--grad-start));
             background-size: 300% 100%; animation: shimmer 4s linear infinite;
         }
-        .header h1 {
-            font-size: 2.6em; font-weight: 800;
-            background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-            margin-bottom: 10px;
+        .lrf-hero-top { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+        .lrf-hero-icon {
+            width: 52px; height: 52px; border-radius: 16px; flex-shrink: 0;
+            background: linear-gradient(135deg, var(--lrf-accent-deep), var(--lrf-accent2));
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 22px;
+            box-shadow: 0 18px 35px -20px rgba(27, 42, 57, 0.42);
         }
-        .header p { color: var(--text2); font-size: 16px; line-height: 1.6; }
-        .header-tags { margin-top: 16px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .lrf-hero-titles h1 {
+            font-family: var(--font-display);
+            font-size: 26px; font-weight: 800; letter-spacing: -.5px;
+            background: linear-gradient(135deg, var(--lrf-accent-deep), var(--lrf-accent2));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .lrf-hero-titles p { font-size: 13px; color: var(--lrf-text2); margin-top: 3px; line-height: 1.5; }
+        .lrf-hero-tags { display: flex; gap: 8px; flex-wrap: wrap; }
         .header-tag {
-            padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 700;
-            background: linear-gradient(135deg, rgba(37,99,235,.08), rgba(6,182,212,.10));
-            color: var(--primary-dark); letter-spacing: .3px;
-            border: 1px solid rgba(37,99,235,.08);
+            padding: 5px 14px; border-radius: 20px; font-size: 11px; font-weight: 700;
+            background: rgba(19, 99, 223, 0.08); color: var(--lrf-accent-deep);
+            border: 1px solid rgba(19, 99, 223, 0.12); letter-spacing: .3px;
         }
 
         /* ── Stats Grid ── */
         .stats-grid {
             display: grid; grid-template-columns: repeat(5, 1fr);
-            gap: 16px; margin-bottom: 28px;
+            gap: 16px; margin-bottom: 24px;
         }
         @media (max-width: 1100px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
         @media (max-width: 700px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
         .stat-card {
-            background: var(--card-bg); padding: 24px;
-            border-radius: var(--radius); box-shadow: var(--shadow);
-            text-align: center; backdrop-filter: blur(12px);
+            background: var(--lrf-surface);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--lrf-border);
+            border-radius: var(--radius-lg); padding: 22px;
+            text-align: center;
+            box-shadow: var(--shadow-md);
             animation: slideUp .5s ease-out both;
-            transition: transform .25s;
-            border: 1px solid rgba(37,99,235,.08);
+            transition: transform .25s, box-shadow .25s;
         }
-        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(37,99,235,.08); }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
         .stat-card:nth-child(2) { animation-delay: .05s; }
-        .stat-card:nth-child(3) { animation-delay: .1s; }
+        .stat-card:nth-child(3) { animation-delay: .10s; }
         .stat-card:nth-child(4) { animation-delay: .15s; }
-        .stat-card:nth-child(5) { animation-delay: .2s; }
+        .stat-card:nth-child(5) { animation-delay: .20s; }
         .stat-card .icon {
-            width: 44px; height: 44px; border-radius: 12px;
+            width: 42px; height: 42px; border-radius: 12px;
             display: inline-flex; align-items: center; justify-content: center;
-            font-size: 18px; color: #fff; margin-bottom: 12px;
+            font-size: 17px; color: #fff; margin-bottom: 12px;
             background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
         }
         .stat-card .value {
-            font-size: 2em; font-weight: 800;
+            font-size: 1.9em; font-weight: 800; font-family: var(--font-display);
             background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             animation: countUp .4s ease-out;
         }
-        .stat-card .label { color: var(--text3); font-size: 12px; margin-top: 4px; font-weight: 600; letter-spacing: .2px; }
+        .stat-card .label { color: var(--lrf-text3); font-size: 12px; margin-top: 4px; font-weight: 600; letter-spacing: .2px; }
 
         /* ── Tab Bar ── */
         .tab-bar {
-            display: flex; gap: 0; background: var(--card-bg);
-            border-radius: var(--radius); box-shadow: var(--shadow);
-            margin-bottom: 28px; overflow: hidden; backdrop-filter: blur(12px);
+            display: flex; gap: 0;
+            background: var(--lrf-surface);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--lrf-border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            margin-bottom: 24px; overflow: hidden;
         }
         .tab-btn {
-            flex: 1; padding: 18px 20px; border: none; background: transparent;
-            font-size: 15px; font-weight: 700; cursor: pointer;
-            transition: all .3s; color: var(--text3); position: relative;
+            flex: 1; padding: 17px 20px; border: none; background: transparent;
+            font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit;
+            transition: all .3s; color: var(--lrf-text3); position: relative;
             display: flex; align-items: center; justify-content: center; gap: 10px;
         }
         .tab-btn::after {
@@ -124,65 +184,73 @@
             background: transparent; transition: all .3s;
         }
         .tab-btn.active {
-            color: var(--primary);
-            background: linear-gradient(to bottom, rgba(37,99,235,.08), rgba(6,182,212,.02));
+            color: var(--lrf-accent);
+            background: linear-gradient(to bottom, rgba(19, 99, 223,.08), rgba(217,119,6,.02));
         }
         .tab-btn.active::after {
             background: linear-gradient(90deg, var(--grad-start), var(--grad-end));
             left: 10%; right: 10%;
         }
-        .tab-btn:hover:not(.active) { color: var(--text2); background: rgba(37,99,235,.035); }
-        .tab-btn i { font-size: 16px; }
+        .tab-btn:hover:not(.active) { color: var(--lrf-text2); background: rgba(19, 99, 223,.04); }
+        .tab-btn i { font-size: 15px; }
         .tab-panel { display: none; }
         .tab-panel.active { display: block; animation: fadeIn .35s ease-out; }
 
         /* ── Cards ── */
         .card {
-            background: var(--card-bg); border-radius: var(--radius);
-            box-shadow: var(--shadow); padding: 28px;
-            margin-bottom: 20px; backdrop-filter: blur(12px);
+            background: var(--lrf-surface);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--lrf-border);
+            border-radius: var(--radius-lg); padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-md);
             transition: box-shadow .3s;
-            border: 1px solid rgba(37,99,235,.08);
         }
-        .card:hover { box-shadow: 0 14px 32px rgba(15,23,42,.08); }
+        .card:hover { box-shadow: var(--shadow-lg); }
         .card-title {
-            font-size: 16px; font-weight: 700; color: var(--text);
-            margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+            font-size: 15px; font-weight: 700; color: var(--lrf-text);
+            margin-bottom: 18px; display: flex; align-items: center; gap: 10px;
+            font-family: var(--font-display);
         }
         .card-title i {
-            width: 32px; height: 32px; border-radius: 10px;
+            width: 30px; height: 30px; border-radius: 9px;
             display: inline-flex; align-items: center; justify-content: center;
-            font-size: 14px; color: #fff;
+            font-size: 13px; color: #fff;
             background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
         }
-        .card-title.accent-cyan { color: #0f766e; }
-        .card-title.accent-cyan i { background: linear-gradient(135deg, #06b6d4, #67e8f9); }
-        .card-title.accent-blue { color: #1d4ed8; }
-        .card-title.accent-blue i { background: linear-gradient(135deg, #2563eb, #60a5fa); }
+        .card-title.accent-cyan { color: #1363df; }
+        .card-title.accent-cyan i { background: linear-gradient(135deg, #1363df, #22c55e); }
+        .card-title.accent-blue { color: var(--lrf-accent-deep); }
+        .card-title.accent-blue i { background: linear-gradient(135deg, #0f4eb3, #60a5fa); }
         .card-title.accent-green { color: #047857; }
-        .card-title.accent-green i { background: linear-gradient(135deg, #10b981, #6ee7b7); }
-        .card-title.accent-violet { color: #6d28d9; }
-        .card-title.accent-violet i { background: linear-gradient(135deg, #8b5cf6, #c4b5fd); }
-        .card-title.accent-amber { color: #0f4eb3; }
-        .card-title.accent-amber i { background: linear-gradient(135deg, #2563eb, #67e8f9); }
-        .card-title.accent-rose { color: #be185d; }
-        .card-title.accent-rose i { background: linear-gradient(135deg, #ec4899, #f9a8d4); }
+        .card-title.accent-green i { background: linear-gradient(135deg, #1f8f63, #22c55e); }
+        .card-title.accent-violet { color: var(--lrf-accent-deep); }
+        .card-title.accent-violet i { background: linear-gradient(135deg, #0f4eb3, #1363df); }
+        .card-title.accent-amber { color: var(--lrf-accent-deep); }
+        .card-title.accent-amber i { background: linear-gradient(135deg, #1363df, #d97706); }
+        .card-title.accent-rose { color: var(--lrf-accent-deep); }
+        .card-title.accent-rose i { background: linear-gradient(135deg, #d97706, #60a5fa); }
         .card-title.accent-slate { color: #475569; }
-        .card-title.accent-slate i { background: linear-gradient(135deg, #64748b, #cbd5e1); }
+        .card-title.accent-slate i { background: linear-gradient(135deg, #475569, #94a3b8); }
         .card-title .badge {
             margin-left: auto; padding: 4px 12px; border-radius: 20px;
             font-size: 11px; font-weight: 700;
         }
 
         /* ── Forms ── */
-        label { font-size: 13px; color: var(--text2); font-weight: 600; display: block; margin-bottom: 6px; }
+        label { font-size: 12px; color: var(--lrf-text2); font-weight: 600; display: block; margin-bottom: 6px; letter-spacing: .2px; }
         textarea, input[type=text], input[type=number], select {
-            width: 100%; padding: 12px 16px; border: 2px solid #e8e8ef;
-            border-radius: 12px; font-size: 14px; background: #fafafe;
+            width: 100%; padding: 11px 14px;
+            border: 1.5px solid rgba(101, 120, 144, 0.14); border-radius: 12px;
+            font-size: 13px; background: rgba(255,255,255,0.72); color: var(--lrf-text);
             outline: none; transition: all .25s; font-family: inherit;
         }
-        textarea:focus, input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,.10); }
-        textarea:hover, input:hover, select:hover { border-color: #c5c5d3; }
+        textarea:focus, input:focus, select:focus {
+            border-color: var(--lrf-accent);
+            box-shadow: 0 0 0 3px rgba(19, 99, 223,.10);
+            background: #fff;
+        }
+        textarea:hover, input:hover, select:hover { border-color: rgba(19, 99, 223,.22); }
         textarea { resize: vertical; min-height: 90px; }
         .form-row { margin-bottom: 16px; }
         .form-row-inline { display: flex; gap: 14px; }
@@ -190,43 +258,44 @@
 
         /* ── Buttons ── */
         .btn {
-            padding: 12px 24px; border: none; border-radius: 12px;
-            font-size: 14px; font-weight: 700; cursor: pointer;
+            padding: 11px 22px; border: none; border-radius: 16px;
+            font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit;
             transition: all .25s; position: relative; overflow: hidden;
             display: inline-flex; align-items: center; gap: 8px;
         }
         .btn::before {
             content: ''; position: absolute; top: 0; left: -100%;
-            width: 100%; height: 100%; background: rgba(255,255,255,.2);
+            width: 100%; height: 100%; background: rgba(255,255,255,.18);
             transition: left .4s;
         }
         .btn:hover::before { left: 100%; }
         .btn-primary {
             background: linear-gradient(135deg, var(--grad-start), var(--grad-end)); color: #fff;
         }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(37,99,235,.20); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 18px 35px -20px rgba(27, 42, 57, 0.28); }
         .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
-        .btn-success { background: linear-gradient(135deg, #10b981, #059669); color: #fff; }
-        .btn-success:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(16,185,129,.4); }
+        .btn-success { background: linear-gradient(135deg, #1f8f63, #22c55e); color: #fff; }
+        .btn-success:hover { transform: translateY(-2px); box-shadow: 0 18px 35px -20px rgba(27, 42, 57, 0.26); }
         .btn-outline {
-            background: transparent; color: var(--primary); border: 2px solid var(--primary);
+            background: transparent; color: var(--lrf-accent);
+            border: 1.5px solid rgba(19, 99, 223,.22);
         }
-        .btn-outline:hover { background: rgba(37,99,235,.06); }
+        .btn-outline:hover { background: rgba(19, 99, 223,.05); }
         .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
-        .btn-sm { padding: 9px 16px; font-size: 13px; border-radius: 10px; }
+        .btn-sm { padding: 8px 15px; font-size: 12px; border-radius: 12px; }
         .btn-block { width: 100%; justify-content: center; }
 
         /* ── Side-by-Side Comparison ── */
         .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .response-card {
-            padding: 24px; border-radius: 16px;
-            border: 2px solid #e8e8ef; background: #fafafe;
+            padding: 22px; border-radius: 14px;
+            border: 2px solid rgba(101, 120, 144,.12); background: rgba(255,255,255,0.62);
             cursor: pointer; transition: all .3s;
             min-height: 140px; position: relative;
         }
         .response-card:hover {
-            border-color: var(--primary); transform: translateY(-3px);
-            box-shadow: 0 8px 24px rgba(37,99,235,.12);
+            border-color: var(--lrf-accent); transform: translateY(-3px);
+            box-shadow: 0 18px 35px -22px rgba(27, 42, 57, 0.22);
         }
         .response-card.chosen {
             border-color: var(--success); background: var(--success-light);
@@ -240,20 +309,20 @@
         .response-card .tag.tag-a { background: linear-gradient(135deg, var(--grad-start), var(--grad-end)); }
         .response-card .tag.tag-b { background: linear-gradient(135deg, #10b981, #059669); }
         .response-card .content {
-            font-size: 14px; line-height: 1.8; color: var(--text); white-space: pre-wrap;
+            font-size: 13px; line-height: 1.8; color: var(--lrf-text); white-space: pre-wrap;
             max-height: 350px; overflow-y: auto; margin-top: 8px;
         }
         .response-card .content::-webkit-scrollbar { width: 4px; }
         .response-card .content::-webkit-scrollbar-thumb { background: #c5c5d3; border-radius: 2px; }
 
         /* ── Variant Cards ── */
-        .variants-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+        .variants-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
         .variant-card {
-            padding: 20px; border-radius: 16px;
-            border: 2px solid #e8e8ef; background: #fafafe;
+            padding: 18px; border-radius: 14px;
+            border: 1.5px solid rgba(101, 120, 144,.12); background: rgba(255,255,255,0.62);
             font-size: 13px; position: relative; transition: all .3s;
         }
-        .variant-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,.08); }
+        .variant-card:hover { transform: translateY(-2px); box-shadow: 0 18px 35px -22px rgba(27, 42, 57, 0.18); }
         .variant-card.best {
             border-color: var(--success); background: var(--success-light);
             box-shadow: 0 4px 15px rgba(16,185,129,.15);
@@ -262,7 +331,7 @@
             content: '\f005'; font-family: 'Font Awesome 6 Free'; font-weight: 900;
             position: absolute; top: -8px; right: -8px;
             width: 24px; height: 24px; border-radius: 50%;
-            background: linear-gradient(135deg, #2563eb, #06b6d4);
+            background: linear-gradient(135deg, #1363df, #d97706);
             color: #fff; font-size: 10px;
             display: flex; align-items: center; justify-content: center;
         }
@@ -272,69 +341,68 @@
         }
         .variant-text {
             white-space: pre-wrap; line-height: 1.7; max-height: 100px;
-            overflow-y: auto; color: var(--text2); margin-top: 10px; font-size: 12px;
+            overflow-y: auto; color: var(--lrf-text2); margin-top: 10px; font-size: 12px;
         }
-        .variant-meta { color: var(--text3); font-size: 12px; display: flex; align-items: center; gap: 8px; }
+        .variant-meta { color: var(--lrf-text3); font-size: 12px; display: flex; align-items: center; gap: 8px; }
         .mutation-tag {
             display: inline-block; padding: 3px 10px; border-radius: 8px;
             font-size: 11px; font-weight: 700; letter-spacing: .3px;
-            background: linear-gradient(135deg, rgba(37,99,235,.08), rgba(6,182,212,.10));
-            color: var(--primary-dark);
+            background: rgba(19, 99, 223,.08); color: var(--lrf-accent-deep);
         }
 
-        /* ── Radar / Scores ── */
-        .eval-scores-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        /* ── Eval Scores / Radar ── */
+        .eval-scores-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .dim-row {
-            display: flex; align-items: center; gap: 12px; padding: 10px 14px;
-            background: #fafafe; border-radius: 12px; transition: background .2s;
+            display: flex; align-items: center; gap: 12px; padding: 9px 12px;
+            background: rgba(255,255,255,0.58); border-radius: 11px; transition: background .2s;
         }
-        .dim-row:hover { background: #f0f0f8; }
-        .dim-label { min-width: 60px; font-size: 13px; font-weight: 600; color: var(--text2); }
-        .dim-bar-bg { flex: 1; height: 10px; background: #e8e8ef; border-radius: 5px; overflow: hidden; }
+        .dim-row:hover { background: rgba(19, 99, 223,.04); }
+        .dim-label { min-width: 60px; font-size: 13px; font-weight: 600; color: var(--lrf-text2); }
+        .dim-bar-bg { flex: 1; height: 9px; background: rgba(19, 99, 223,.10); border-radius: 5px; overflow: hidden; }
         .dim-bar { height: 100%; border-radius: 5px; transition: width .8s cubic-bezier(.4,0,.2,1); }
         .dim-val { font-weight: 800; font-size: 15px; min-width: 32px; text-align: right; }
 
         /* ── Big Score Display ── */
         .score-hero {
-            text-align: center; padding: 24px;
-            background: linear-gradient(135deg, rgba(37,99,235,.05), rgba(6,182,212,.06));
-            border-radius: 16px; margin-bottom: 20px;
+            text-align: center; padding: 22px;
+            background: linear-gradient(135deg, rgba(19, 99, 223,.06), rgba(217,119,6,.05));
+            border-radius: 14px; margin-bottom: 18px;
         }
         .score-hero .big-num {
-            font-size: 56px; font-weight: 900;
+            font-size: 54px; font-weight: 900; font-family: 'Manrope', sans-serif;
             background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             line-height: 1;
         }
-        .score-hero .sub { font-size: 14px; color: var(--text3); margin-top: 4px; }
+        .score-hero .sub { font-size: 13px; color: var(--lrf-text3); margin-top: 4px; }
 
         /* ── Leaderboard Table ── */
-        .lb-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+        .lb-table { width: 100%; border-collapse: separate; border-spacing: 0 7px; }
         .lb-table th {
-            text-align: left; padding: 12px 18px; color: var(--text3);
-            font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: .5px;
+            text-align: left; padding: 10px 16px; color: var(--lrf-text3);
+            font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: .5px;
         }
         .lb-table td {
-            padding: 14px 18px; background: #fafafe; font-size: 14px;
+            padding: 13px 16px; background: rgba(255,255,255,0.64); font-size: 13px;
             transition: background .2s;
         }
-        .lb-table tr:hover td { background: #f0f0f8; }
-        .lb-table td:first-child { border-radius: 12px 0 0 12px; }
-        .lb-table td:last-child { border-radius: 0 12px 12px 0; }
+        .lb-table tr:hover td { background: rgba(19, 99, 223,.04); }
+        .lb-table td:first-child { border-radius: 11px 0 0 11px; }
+        .lb-table td:last-child { border-radius: 0 11px 11px 0; }
         .rank-medal {
             display: inline-flex; align-items: center; justify-content: center;
-            width: 34px; height: 34px; border-radius: 10px; font-weight: 900; font-size: 14px;
+            width: 32px; height: 32px; border-radius: 9px; font-weight: 900; font-size: 13px;
         }
-        .rank-1 { background: linear-gradient(135deg, #2563eb, #06b6d4); color: #fff; }
+        .rank-1 { background: linear-gradient(135deg, #1363df, #d97706); color: #fff; }
         .rank-2 { background: linear-gradient(135deg, #94a3b8, #64748b); color: #fff; }
         .rank-3 { background: linear-gradient(135deg, #fb923c, #ea580c); color: #fff; }
-        .rank-n { background: #f1f5f9; color: var(--text3); }
-        .elo-rating { font-weight: 800; font-size: 16px; }
+        .rank-n { background: rgba(19, 99, 223,.07); color: var(--lrf-text3); }
+        .elo-rating { font-weight: 800; font-size: 15px; }
         .elo-sparkline { height: 30px; }
 
         /* ── Progress ── */
         .progress-bar {
-            width: 100%; height: 10px; background: #e8e8ef;
+            width: 100%; height: 9px; background: rgba(19, 99, 223,.10);
             border-radius: 5px; overflow: hidden; margin: 10px 0;
         }
         .progress-fill {
@@ -342,112 +410,395 @@
             background: linear-gradient(90deg, var(--grad-start), var(--grad-end));
         }
 
-        /* ── Best Prompt Showcase ── */
+        /* ── Best Prompt Box ── */
         .best-prompt-box {
-            padding: 20px; background: linear-gradient(135deg, rgba(37,99,235,.04), rgba(6,182,212,.05));
-            border: 2px dashed rgba(37,99,235,.18); border-radius: 14px;
-            font-size: 14px; line-height: 1.8; white-space: pre-wrap; color: var(--text);
+            padding: 18px;
+            background: linear-gradient(135deg, rgba(19, 99, 223,.05), rgba(217,119,6,.05));
+            border: 2px dashed rgba(19, 99, 223,.18); border-radius: 13px;
+            font-size: 13px; line-height: 1.8; white-space: pre-wrap; color: var(--lrf-text);
             min-height: 50px; position: relative;
         }
         .best-prompt-box .copy-btn {
-            position: absolute; top: 8px; right: 8px; padding: 6px 12px;
-            background: var(--primary); color: #fff; border: none; border-radius: 8px;
-            font-size: 11px; cursor: pointer; opacity: 0; transition: opacity .2s;
+            position: absolute; top: 8px; right: 8px; padding: 5px 12px;
+            background: var(--lrf-accent); color: #fff; border: none; border-radius: 8px;
+            font-size: 11px; cursor: pointer; opacity: 0; transition: opacity .2s; font-family: inherit;
         }
         .best-prompt-box:hover .copy-btn { opacity: 1; }
 
         /* ── Loading ── */
-        .spinner { display: inline-block; width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; }
-        .spinner-dark { border-color: #e8e8ef; border-top-color: var(--primary); }
+        .spinner { display: inline-block; width: 16px; height: 16px; border: 2.5px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; }
+        .spinner-dark { border-color: rgba(19, 99, 223,.15); border-top-color: var(--lrf-accent); }
 
-        .empty-state { text-align: center; padding: 50px 20px; color: var(--text3); }
-        .empty-state i { font-size: 48px; margin-bottom: 16px; display: block; opacity: .3; }
-        .empty-state p { font-size: 14px; }
+        .empty-state { text-align: center; padding: 50px 20px; color: var(--lrf-text3); }
+        .empty-state i { font-size: 44px; margin-bottom: 14px; display: block; opacity: .3; }
+        .empty-state p { font-size: 13px; }
 
-        /* ── Pair History Item ── */
+        /* ── Pair History ── */
         .pair-item {
-            padding: 12px 16px; border-radius: 12px; background: #fafafe;
-            margin-bottom: 8px; display: flex; align-items: center; gap: 12px;
+            padding: 11px 14px; border-radius: 11px;
+            background: rgba(255,255,255,0.64);
+            margin-bottom: 7px; display: flex; align-items: center; gap: 12px;
             transition: background .2s; cursor: default;
         }
-        .pair-item:hover { background: #f0f0f8; }
+        .pair-item:hover { background: rgba(19, 99, 223,.04); }
         .pair-chosen {
             width: 28px; height: 28px; border-radius: 8px; font-weight: 800; font-size: 12px;
             display: flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0;
         }
         .pair-chosen.chose-a { background: linear-gradient(135deg, var(--grad-start), var(--grad-end)); }
         .pair-chosen.chose-b { background: linear-gradient(135deg, #10b981, #059669); }
-        .pair-text { flex: 1; font-size: 13px; color: var(--text2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .pair-time { font-size: 11px; color: var(--text3); flex-shrink: 0; }
+        .pair-text { flex: 1; font-size: 13px; color: var(--lrf-text2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .pair-time { font-size: 11px; color: var(--lrf-text3); flex-shrink: 0; }
 
-        /* ── Opt Run List Item ── */
+        /* ── Run List ── */
         .run-item {
-            padding: 14px 16px; border-radius: 12px; background: #fafafe;
-            margin-bottom: 8px; cursor: pointer; transition: all .2s;
+            padding: 13px 14px; border-radius: 11px;
+            background: rgba(255,255,255,0.64);
+            margin-bottom: 7px; cursor: pointer; transition: all .2s;
         }
-        .run-item:hover { background: #f0f0f8; transform: translateX(3px); }
-        .run-item.active { background: rgba(37,99,235,.06); border-left: 3px solid var(--primary); }
+        .run-item:hover { background: rgba(19, 99, 223,.05); transform: translateX(3px); }
+        .run-item.active { background: rgba(19, 99, 223,.08); border-left: 3px solid var(--lrf-accent); }
         .run-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-        .run-id { font-weight: 700; font-size: 13px; color: var(--primary); }
+        .run-id { font-weight: 700; font-size: 13px; color: var(--lrf-accent); }
         .status-tag {
             padding: 3px 10px; border-radius: 8px; font-size: 10px; font-weight: 800;
             text-transform: uppercase; letter-spacing: .5px;
         }
         .status-created { background: #fef3c7; color: #92400e; }
-        .status-running { background: rgba(37,99,235,.10); color: var(--primary); }
+        .status-running { background: rgba(19, 99, 223,.10); color: var(--lrf-accent); }
         .status-completed { background: var(--success-light); color: var(--success); }
-        .run-info { font-size: 12px; color: var(--text3); }
+        .run-info { font-size: 12px; color: var(--lrf-text3); }
 
         /* ── Layout ── */
-        .two-col { display: grid; grid-template-columns: 380px 1fr; gap: 20px; }
+        .two-col { display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: 20px; }
         @media (max-width: 1000px) { .two-col, .comparison { grid-template-columns: 1fr; } }
 
-        /* ── Chart Container ── */
+        /* ── Chart container ── */
         .chart-box { width: 100%; height: 280px; border-radius: 12px; }
 
-        /* ── Tooltip ── */
+        /* ── Toast ── */
         .toast {
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(80px);
-            background: #1a1a2e; color: #fff; padding: 14px 28px; border-radius: 14px;
-            font-size: 14px; font-weight: 600; z-index: 9999;
+            background: #1a1a2e; color: #fff; padding: 13px 26px; border-radius: 13px;
+            font-size: 13px; font-weight: 600; z-index: 9999;
             opacity: 0; transition: all .4s cubic-bezier(.4,0,.2,1); pointer-events: none;
             box-shadow: 0 10px 30px rgba(0,0,0,.3);
         }
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-        /* ── Divider ── */
-        .divider { height: 1px; background: #e8e8ef; margin: 20px 0; }
-
-        /* ── Section subtitle ── */
+        /* ── Divider / Section sub ── */
+        .divider { height: 1px; background: rgba(101, 120, 144,.10); margin: 18px 0; }
         .section-sub {
-            font-size: 13px; font-weight: 700; color: var(--primary-dark);
-            text-transform: uppercase; letter-spacing: .8px; margin-bottom: 14px;
+            font-size: 12px; font-weight: 700; color: var(--lrf-accent-deep);
+            text-transform: uppercase; letter-spacing: .8px; margin-bottom: 12px;
             display: flex; align-items: center; gap: 8px;
         }
-        .section-sub::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(37,99,235,.14), rgba(6,182,212,.04)); }
+        .section-sub::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(19, 99, 223,.14), rgba(217,119,6,.05)); }
         .section-sub.accent-green { color: #047857; }
-        .section-sub.accent-violet { color: #6d28d9; }
+        .section-sub.accent-violet { color: var(--lrf-accent-deep); }
+
+        /* ── Reinforced Workbench ── */
+        .ops-overview-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+            margin-top: 18px;
+        }
+        .ops-overview-grid.compact { margin-top: 0; margin-bottom: 20px; }
+        .ops-overview-grid.compact-three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .ops-panel {
+            padding: 16px 18px;
+            border-radius: var(--radius-md);
+            background: rgba(255,255,255,0.62);
+            border: 1px solid rgba(101, 120, 144,.10);
+            box-shadow: 0 18px 35px -24px rgba(27, 42, 57, 0.16);
+        }
+        .ops-kicker {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: var(--lrf-text3);
+            margin-bottom: 10px;
+        }
+        .ops-value {
+            font-family: 'Manrope', sans-serif;
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--lrf-accent-deep);
+            line-height: 1.1;
+        }
+        .ops-meta {
+            font-size: 12px;
+            line-height: 1.7;
+            color: var(--lrf-text2);
+            margin-top: 8px;
+        }
+        .pipeline-strip {
+            display: flex;
+            gap: 10px;
+            margin: 0 0 16px;
+            flex-wrap: wrap;
+        }
+        .stage-pill {
+            flex: 1 1 180px;
+            min-height: 72px;
+            border-radius: var(--radius-md);
+            padding: 14px 16px;
+            border: 1px solid rgba(101, 120, 144,.12);
+            background: rgba(255,255,255,0.68);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: transform .2s, box-shadow .2s, border-color .2s;
+        }
+        .stage-pill:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 35px -24px rgba(27, 42, 57, 0.16);
+            border-color: rgba(19, 99, 223,.22);
+        }
+        .stage-pill.active {
+            background: linear-gradient(135deg, rgba(19, 99, 223,.10), rgba(217,119,6,.08));
+            border-color: rgba(19, 99, 223,.22);
+        }
+        .stage-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
+            box-shadow: 0 18px 35px -22px rgba(27, 42, 57, 0.16);
+            flex-shrink: 0;
+        }
+        .stage-copy strong {
+            display: block;
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--lrf-text);
+        }
+        .stage-copy span {
+            display: block;
+            margin-top: 3px;
+            font-size: 12px;
+            color: var(--lrf-text3);
+        }
+        .quick-action-row,
+        .pill-cluster {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .quick-action-row { margin: 0 0 24px; }
+        .quick-ghost-btn,
+        .quick-pill {
+            border: 1px solid rgba(101, 120, 144,.14);
+            background: rgba(255,255,255,.68);
+            color: var(--lrf-text2);
+            border-radius: 999px;
+            padding: 10px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all .2s;
+            font-family: inherit;
+        }
+        .quick-ghost-btn:hover,
+        .quick-pill:hover {
+            color: var(--lrf-accent-deep);
+            border-color: rgba(19, 99, 223,.22);
+            background: rgba(255,255,255,.9);
+        }
+        .mini-kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 14px;
+        }
+        .mini-kpi {
+            padding: 12px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.66);
+            border: 1px solid rgba(101, 120, 144,.10);
+        }
+        .mini-kpi strong {
+            display: block;
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--lrf-accent-deep);
+        }
+        .mini-kpi span {
+            display: block;
+            margin-top: 4px;
+            font-size: 11px;
+            color: var(--lrf-text3);
+        }
+        .feature-bars,
+        .timeline-list,
+        .compact-stack {
+            display: grid;
+            gap: 10px;
+        }
+        .feature-item,
+        .timeline-item,
+        .stack-card {
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.66);
+            border: 1px solid rgba(101, 120, 144,.10);
+        }
+        .feature-head,
+        .timeline-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        .feature-head strong,
+        .timeline-head strong,
+        .stack-card strong {
+            font-size: 13px;
+            color: var(--lrf-text);
+        }
+        .feature-head span,
+        .timeline-head span,
+        .stack-card span {
+            font-size: 11px;
+            color: var(--lrf-text3);
+        }
+        .feature-track {
+            height: 8px;
+            border-radius: 999px;
+            background: rgba(19, 99, 223,.10);
+            overflow: hidden;
+        }
+        .feature-fill {
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--grad-start), var(--grad-end));
+        }
+        .analysis-note {
+            margin-top: 12px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: rgba(19, 99, 223,.05);
+            color: var(--lrf-text2);
+            font-size: 12px;
+            line-height: 1.7;
+        }
+        .ruler-chips {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+        .ruler-chip {
+            padding: 7px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--lrf-accent-deep);
+            background: rgba(19, 99, 223,.08);
+            border: 1px solid rgba(19, 99, 223,.10);
+        }
+        .duel-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+        .duel-card {
+            padding: 16px;
+            border-radius: 14px;
+            border: 1px solid rgba(101, 120, 144,.12);
+            background: rgba(255,255,255,.66);
+        }
+        .duel-card h4 {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--lrf-text);
+            margin-bottom: 10px;
+        }
+        .winner-banner {
+            margin-bottom: 14px;
+            padding: 14px 16px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(19, 99, 223,.10), rgba(217,119,6,.08));
+            border: 1px solid rgba(19, 99, 223,.14);
+        }
+        .winner-banner strong {
+            display: block;
+            font-size: 18px;
+            color: var(--lrf-accent-deep);
+        }
+        .winner-banner span {
+            display: block;
+            margin-top: 4px;
+            color: var(--lrf-text2);
+            font-size: 12px;
+        }
+        .duel-score {
+            font-family: 'Manrope', sans-serif;
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--lrf-accent-deep);
+            margin-bottom: 8px;
+        }
+        @media (max-width: 1100px) {
+            .ops-overview-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (max-width: 820px) {
+            .ops-overview-grid,
+            .mini-kpi-grid,
+            .duel-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
 
-<div class="page-wide">
-    <nav class="topbar">
-        <div class="brand">
-            <a class="back-link" href="{{ url_for('developer_home') }}">← 返回主页</a>
-            <h1><i class="fas fa-brain"></i> LLM 强化学习平台</h1>
+<div class="lrf-shell">
+
+    <!-- Hero -->
+    <div class="lrf-hero">
+        <div class="lrf-hero-top">
+            <div class="lrf-hero-icon"><i class="fas fa-brain"></i></div>
+            <div class="lrf-hero-titles">
+                <h1>LLM 强化学习平台</h1>
+                <p>基于人类反馈的强化学习（RLHF）· 偏好数据收集 · 奖励模型训练 · 提示词自动优化 · LLM 裁判评估 · ELO 排名</p>
+            </div>
         </div>
-        <div class="topbar-actions">
+        <div class="lrf-hero-tags">
             <span class="header-tag">Bradley-Terry</span>
             <span class="header-tag">DPO 导出</span>
             <span class="header-tag">演化搜索</span>
             <span class="header-tag">LLM 裁判</span>
             <span class="header-tag">ELO 评分</span>
         </div>
-    </nav>
-
-    <div class="header">
-        <p>基于人类反馈的强化学习（RLHF）· 偏好数据收集 · 奖励模型训练 · 提示词自动优化 · LLM 裁判评估 · ELO 排名</p>
+        <div class="ops-overview-grid">
+            <div class="ops-panel">
+                <div class="ops-kicker">采集节奏</div>
+                <div class="ops-value" id="heroPairVelocity">0 对</div>
+                <div class="ops-meta">最近已接入的人类偏好样本，可直接进入奖励模型训练。</div>
+            </div>
+            <div class="ops-panel">
+                <div class="ops-kicker">评估活跃度</div>
+                <div class="ops-value" id="heroEvalVelocity">0 次</div>
+                <div class="ops-meta">LLM 裁判评估与 ELO 对战共用同一套打分基线。</div>
+            </div>
+            <div class="ops-panel">
+                <div class="ops-kicker">优化运行面</div>
+                <div class="ops-value" id="heroRunFocus">0 个</div>
+                <div class="ops-meta">当前已有的提示词优化任务，可继续迭代或接着看最优变体。</div>
+            </div>
+            <div class="ops-panel">
+                <div class="ops-kicker">奖励模型</div>
+                <div class="ops-value" id="heroRmState">未训练</div>
+                <div class="ops-meta">训练后可直接用于文本打分、优胜样本筛选和优化过程打底。</div>
+            </div>
+        </div>
     </div>
 
     <!-- Stats -->
@@ -479,6 +830,36 @@
         </div>
     </div>
 
+    <div class="pipeline-strip">
+        <button class="stage-pill active" type="button" onclick="switchTab('pref')">
+            <span class="stage-icon"><i class="fas fa-hand-pointer"></i></span>
+            <span class="stage-copy">
+                <strong>偏好采集</strong>
+                <span>生成 A/B 回答并沉淀人类选择</span>
+            </span>
+        </button>
+        <button class="stage-pill" type="button" onclick="switchTab('opt')">
+            <span class="stage-icon"><i class="fas fa-dna"></i></span>
+            <span class="stage-copy">
+                <strong>策略进化</strong>
+                <span>按代生成变体并追踪最优提示词</span>
+            </span>
+        </button>
+        <button class="stage-pill" type="button" onclick="switchTab('eval')">
+            <span class="stage-icon"><i class="fas fa-trophy"></i></span>
+            <span class="stage-copy">
+                <strong>对战评测</strong>
+                <span>LLM 裁判打分并写入 ELO 排名</span>
+            </span>
+        </button>
+    </div>
+
+    <div class="quick-action-row">
+        <button class="quick-ghost-btn" type="button" onclick="applyPreferencePreset('请为海上风电项目生成一份包含风险、收益和实施建议的分析摘要。', 0.2, 0.8)">风电分析采样</button>
+        <button class="quick-ghost-btn" type="button" onclick="applyOptimizationPreset('你是一名电力交易分析助手，请输出结构化风险分析与交易建议。', '输入: 日前市场电价波动明显，新能源出力不稳定。', 8, 4)">交易提示词优化</button>
+        <button class="quick-ghost-btn" type="button" onclick="applyDuelPreset('请给出一个清晰的运维处置建议。', '先按告警等级分层，再列出处置动作和回滚条件。', '直接给出建议，但不解释原因和风险边界。')">运维答复对战</button>
+    </div>
+
     <!-- Tab Bar -->
     <div class="tab-bar">
         <button class="tab-btn active" data-tab="pref">
@@ -497,10 +878,10 @@
     <!-- ═══════════════════════════════════════════════════════════════════ -->
     <div class="tab-panel active" id="tab-pref">
         <!-- Model Endpoint Selector -->
-        <div class="card" style="margin-bottom:16px;border:2px solid rgba(37,99,235,.10);">
+        <div class="card" style="margin-bottom:16px;">
             <div class="card-title accent-cyan" style="margin-bottom:12px;">
                 <i class="fas fa-server"></i> 模型端点
-                <span id="endpointStatus" style="margin-left:auto;font-size:13px;color:var(--text3);">默认模型</span>
+                <span id="endpointStatus" style="margin-left:auto;font-size:13px;color:var(--lrf-text3);">默认模型</span>
             </div>
             <div class="form-row-inline" style="margin-bottom:0;">
                 <div class="form-row" style="flex:2;margin-bottom:0;">
@@ -515,7 +896,7 @@
                 <div class="form-row" id="customModelRow" style="flex:1;margin-bottom:0;display:none;">
                     <input type="text" id="customModelName" placeholder="模型名">
                 </div>
-                <button class="btn btn-primary btn-sm" onclick="applyEndpoint()" style="margin-top:0;height:46px;">
+                <button class="btn btn-primary btn-sm" onclick="applyEndpoint()" style="margin-top:0;height:44px;">
                     <i class="fas fa-check"></i> 应用
                 </button>
             </div>
@@ -526,6 +907,11 @@
                 <!-- Generate -->
                 <div class="card">
                     <div class="card-title accent-blue"><i class="fas fa-pen-fancy"></i> 生成 A/B 对比</div>
+                    <div class="pill-cluster" style="margin-bottom:14px;">
+                        <button class="quick-pill" type="button" onclick="applyPreferencePreset('请输出一份面向管理层的新能源项目风险通报，要求分点说明。', 0.2, 0.9)">管理层通报</button>
+                        <button class="quick-pill" type="button" onclick="applyPreferencePreset('请把智能工单的处理方案写成标准 SOP，包含触发条件、执行动作、验收标准。', 0.3, 0.8)">工单 SOP</button>
+                        <button class="quick-pill" type="button" onclick="applyPreferencePreset('请针对风场选址给出候选区域比较，包含气象、地形、并网和施工因素。', 0.4, 1.0)">风场选址比较</button>
+                    </div>
                     <div class="form-row">
                         <label>提示词</label>
                         <textarea id="prefPrompt" rows="4" placeholder="输入一个提示词，系统将用不同温度参数生成两个回答&#10;供你左右对比并选择更好的一个..."></textarea>
@@ -543,15 +929,48 @@
                     <button class="btn btn-primary btn-block" id="btnGenPair" onclick="generatePair()">
                         <i class="fas fa-play"></i> 生成对比
                     </button>
+                    <div class="mini-kpi-grid">
+                        <div class="mini-kpi">
+                            <strong id="prefQueueCount">0</strong>
+                            <span>已收集偏好对</span>
+                        </div>
+                        <div class="mini-kpi">
+                            <strong id="prefReadyCount">0</strong>
+                            <span>训练样本池</span>
+                        </div>
+                        <div class="mini-kpi">
+                            <strong id="prefCoverageText">基础</strong>
+                            <span>任务覆盖度</span>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Reward Model -->
                 <div class="card">
                     <div class="card-title accent-green"><i class="fas fa-graduation-cap"></i> 奖励模型</div>
+                    <div class="form-row-inline">
+                        <div class="form-row">
+                            <label>学习率</label>
+                            <input type="number" id="rmLr" value="0.1" min="0.01" max="1" step="0.01">
+                        </div>
+                        <div class="form-row">
+                            <label>训练轮数</label>
+                            <input type="number" id="rmEpochs" value="100" min="10" max="1000" step="10">
+                        </div>
+                    </div>
                     <button class="btn btn-success btn-block" id="btnTrainRM" onclick="trainRM()">
                         <i class="fas fa-cogs"></i> 训练 Bradley-Terry 奖励模型
                     </button>
-                    <div id="rmInfo" style="margin-top: 14px;"></div>
+                    <div style="display:flex; gap:10px; margin-top:10px;">
+                        <button class="btn btn-outline btn-sm" type="button" onclick="loadRewardModelInfo()">
+                            <i class="fas fa-wave-square"></i> 刷新模型画像
+                        </button>
+                        <button class="btn btn-outline btn-sm" onclick="exportDPO()">
+                            <i class="fas fa-download"></i> 导出 DPO 数据集
+                        </button>
+                    </div>
+                    <div id="rmInfo" style="margin-top:14px;"></div>
+                    <div class="analysis-note" id="rmModelDigest">当前还没有训练好的奖励模型，先完成几轮偏好采集再训练。</div>
 
                     <div class="divider"></div>
 
@@ -563,14 +982,26 @@
                         <button class="btn btn-outline btn-sm" onclick="scoreText()">
                             <i class="fas fa-star"></i> 打分
                         </button>
-                        <span id="rmScoreResult" style="font-size:13px; color:var(--text2);"></span>
+                        <span id="rmScoreResult" style="font-size:13px; color:var(--lrf-text2);"></span>
+                    </div>
+                    <div class="feature-bars" id="rmFeatureInsight" style="margin-top:14px;">
+                        <div class="feature-item">
+                            <div class="feature-head">
+                                <strong>结构特征画像</strong>
+                                <span>等待打分结果</span>
+                            </div>
+                            <div class="feature-track"><div class="feature-fill" style="width:0%"></div></div>
+                        </div>
                     </div>
 
                     <div class="divider"></div>
-
-                    <button class="btn btn-outline btn-sm" onclick="exportDPO()">
-                        <i class="fas fa-download"></i> 导出 DPO 数据集
-                    </button>
+                    <div class="section-sub accent-green">权重观察</div>
+                    <div class="compact-stack" id="rmWeightList">
+                        <div class="stack-card">
+                            <strong>等待模型画像</strong>
+                            <span>训练后会展示最敏感的特征权重</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -587,6 +1018,25 @@
                             <p>输入提示词并点击"生成对比"<br>将在此展示两个回答供你选择</p>
                         </div>
                     </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title accent-cyan"><i class="fas fa-layer-group"></i> 采集策略看板</div>
+                    <div class="mini-kpi-grid" style="margin-top:0;">
+                        <div class="mini-kpi">
+                            <strong id="prefRecentWindow">0</strong>
+                            <span>最近展示条数</span>
+                        </div>
+                        <div class="mini-kpi">
+                            <strong id="prefChoiceBias">-</strong>
+                            <span>A/B 选择分布</span>
+                        </div>
+                        <div class="mini-kpi">
+                            <strong id="prefScenarioHint">多样</strong>
+                            <span>样本场景</span>
+                        </div>
+                    </div>
+                    <div class="analysis-note" id="prefAnalysisNote">建议把业务问答、结构化摘要、运维处置三类样本混合采集，避免奖励模型只偏好长文本。</div>
                 </div>
 
                 <!-- History -->
@@ -607,10 +1057,37 @@
     <!-- Tab 2: Prompt Optimization                                         -->
     <!-- ═══════════════════════════════════════════════════════════════════ -->
     <div class="tab-panel" id="tab-opt">
+        <div class="ops-overview-grid compact">
+            <div class="ops-panel">
+                <div class="ops-kicker">活动任务</div>
+                <div class="ops-value" id="optRunCount">0</div>
+                <div class="ops-meta">当前已创建的优化任务数量。</div>
+            </div>
+            <div class="ops-panel">
+                <div class="ops-kicker">进行中状态</div>
+                <div class="ops-value" id="optRunStatusText">待命</div>
+                <div class="ops-meta">根据当前选中任务实时切换。</div>
+            </div>
+            <div class="ops-panel">
+                <div class="ops-kicker">当前最优</div>
+                <div class="ops-value" id="optBestScoreHero">0.00</div>
+                <div class="ops-meta">选中优化任务中的历史最高综合得分。</div>
+            </div>
+            <div class="ops-panel">
+                <div class="ops-kicker">变体规模</div>
+                <div class="ops-value" id="optVariantCountHero">0</div>
+                <div class="ops-meta">累计生成的提示词变体，用于筛选和淘汰。</div>
+            </div>
+        </div>
         <div class="two-col">
             <div>
                 <div class="card">
                     <div class="card-title accent-violet"><i class="fas fa-sliders-h"></i> 优化配置</div>
+                    <div class="pill-cluster" style="margin-bottom:14px;">
+                        <button class="quick-pill" type="button" onclick="applyOptimizationPreset('你是一名智慧办公助手，请把用户诉求整理成执行计划、责任人和时间节点。', '输入: 团队需要在一周内完成季度复盘材料。', 6, 3)">办公拆解</button>
+                        <button class="quick-pill" type="button" onclick="applyOptimizationPreset('你是一名新能源运维值守助手，请输出异常告警处置建议和风险提示。', '输入: 风机 07 振动指标异常，最近 30 分钟持续抬升。', 8, 4)">值守处置</button>
+                        <button class="quick-pill" type="button" onclick="applyOptimizationPreset('你是一名交易分析助手，请给出电力交易策略、约束与风险控制。', '输入: 次日负荷预期走高，光伏出力中午集中。', 10, 4)">交易策略</button>
+                    </div>
                     <div class="form-row">
                         <label>基础提示词</label>
                         <textarea id="optBasePrompt" rows="4" placeholder="要优化的提示词模板..."></textarea>
@@ -650,7 +1127,7 @@
                 <div class="card" id="optProgressCard" style="display:none;">
                     <div class="card-title accent-violet">
                         <i class="fas fa-dna"></i> 优化进度
-                        <span class="badge" id="optStatusBadge" style="background:rgba(37,99,235,.10); color:var(--primary);">未开始</span>
+                        <span class="badge" id="optStatusBadge" style="background:rgba(19, 99, 223,.10); color:var(--lrf-accent);">未开始</span>
                     </div>
                     <div style="display:flex; gap:12px; margin-bottom:16px;">
                         <button class="btn btn-primary btn-sm" id="btnStep" onclick="runStep()">
@@ -659,16 +1136,15 @@
                         <button class="btn btn-success btn-sm" id="btnRunAll" onclick="runAll()">
                             <i class="fas fa-forward"></i> 运行全部
                         </button>
-                        <span id="optRunIdLabel" style="margin-left:auto; font-size:11px; color:var(--text3); align-self:center;"></span>
+                        <span id="optRunIdLabel" style="margin-left:auto; font-size:11px; color:var(--lrf-text3); align-self:center;"></span>
                     </div>
 
-                    <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--text2); font-weight:600;">
-                        <span>第 <span id="optCurGen" style="color:var(--primary);">0</span> / <span id="optMaxGen">3</span> 代</span>
-                        <span>最高分 <span id="optBestScore" style="color:var(--primary);">0.00</span></span>
+                    <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--lrf-text2); font-weight:600;">
+                        <span>第 <span id="optCurGen" style="color:var(--lrf-accent);">0</span> / <span id="optMaxGen">3</span> 代</span>
+                        <span>最高分 <span id="optBestScore" style="color:var(--lrf-accent);">0.00</span></span>
                     </div>
                     <div class="progress-bar"><div class="progress-fill" id="optProgress" style="width:0%"></div></div>
 
-                    <!-- Score Chart -->
                     <div id="optScoreChart" class="chart-box" style="height:200px; margin-top:16px;"></div>
 
                     <div class="divider"></div>
@@ -676,7 +1152,20 @@
                     <div class="section-sub accent-violet">最优提示词</div>
                     <div class="best-prompt-box" id="optBestPrompt">
                         <button class="copy-btn" onclick="copyBestPrompt()"><i class="fas fa-copy"></i> 复制</button>
-                        <span style="color:var(--text3);">(尚未评估)</span>
+                        <span style="color:var(--lrf-text3);">(尚未评估)</span>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="section-sub accent-violet">代际时间线</div>
+                    <div class="timeline-list" id="optGenTimeline">
+                        <div class="timeline-item">
+                            <div class="timeline-head">
+                                <strong>等待任务</strong>
+                                <span>创建后开始记录每一代的演化情况</span>
+                            </div>
+                            <div class="feature-track"><div class="feature-fill" style="width:0%"></div></div>
+                        </div>
                     </div>
                 </div>
 
@@ -703,6 +1192,12 @@
                 <!-- Manual Evaluation -->
                 <div class="card">
                     <div class="card-title accent-amber"><i class="fas fa-gavel"></i> LLM 裁判评估</div>
+                    <div class="ruler-chips">
+                        <span class="ruler-chip">准确性 30%</span>
+                        <span class="ruler-chip">有用性 30%</span>
+                        <span class="ruler-chip">安全性 20%</span>
+                        <span class="ruler-chip">创造性 20%</span>
+                    </div>
                     <div class="form-row">
                         <label>用户提示词</label>
                         <textarea id="evalPrompt" rows="3" placeholder="原始用户提示词..."></textarea>
@@ -713,6 +1208,39 @@
                     </div>
                     <button class="btn btn-primary btn-block" id="btnEval" onclick="runEvaluate()">
                         <i class="fas fa-search"></i> 评估
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div class="card-title accent-cyan"><i class="fas fa-swords"></i> A/B 对战评测</div>
+                    <div class="form-row">
+                        <label>对战提示词</label>
+                        <textarea id="duelPrompt" rows="3" placeholder="输入同一个任务，让两份回答进行对战..."></textarea>
+                    </div>
+                    <div class="duel-grid">
+                        <div>
+                            <div class="form-row">
+                                <label>选手 A 名称</label>
+                                <input type="text" id="duelNameA" value="baseline-v1" placeholder="baseline-v1">
+                            </div>
+                            <div class="form-row">
+                                <label>选手 A 回答</label>
+                                <textarea id="duelResponseA" rows="5" placeholder="输入选手 A 的回答..."></textarea>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="form-row">
+                                <label>选手 B 名称</label>
+                                <input type="text" id="duelNameB" value="challenger-v2" placeholder="challenger-v2">
+                            </div>
+                            <div class="form-row">
+                                <label>选手 B 回答</label>
+                                <textarea id="duelResponseB" rows="5" placeholder="输入选手 B 的回答..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-success btn-block" id="btnDuel" onclick="runDuelMatch()">
+                        <i class="fas fa-bolt"></i> 发起对战并更新 ELO
                     </button>
                 </div>
 
@@ -729,6 +1257,42 @@
             </div>
 
             <div>
+                <div class="ops-overview-grid compact compact-three">
+                    <div class="ops-panel">
+                        <div class="ops-kicker">榜首选手</div>
+                        <div class="ops-value" id="eloTopName">-</div>
+                        <div class="ops-meta">当前 ELO 第一名。</div>
+                    </div>
+                    <div class="ops-panel">
+                        <div class="ops-kicker">分差</div>
+                        <div class="ops-value" id="eloSpread">0</div>
+                        <div class="ops-meta">榜首与第二名的 rating 差值。</div>
+                    </div>
+                    <div class="ops-panel">
+                        <div class="ops-kicker">累计对战</div>
+                        <div class="ops-value" id="eloMatchCount">0</div>
+                        <div class="ops-meta">排行榜中记录的总胜负场次。</div>
+                    </div>
+                </div>
+
+                <div class="card" id="duelResultCard" style="display:none;">
+                    <div class="card-title accent-cyan"><i class="fas fa-timeline"></i> 对战结果</div>
+                    <div class="winner-banner" id="duelWinnerBanner">
+                        <strong>等待对战</strong>
+                        <span>发起一次 A/B 对战后，在这里展示胜者与双方分数。</span>
+                    </div>
+                    <div class="duel-grid" id="duelScoreGrid">
+                        <div class="duel-card">
+                            <h4>选手 A</h4>
+                            <div class="duel-score">-</div>
+                        </div>
+                        <div class="duel-card">
+                            <h4>选手 B</h4>
+                            <div class="duel-score">-</div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Leaderboard -->
                 <div class="card">
                     <div class="card-title accent-amber">
@@ -765,6 +1329,7 @@ const ECHARTS_SOURCES = [
 ];
 let currentPair = null;
 let currentRunId = null;
+let currentOptDetail = null;
 let optScoreChart = null;
 let evalRadarChart = null;
 let eloHistoryChart = null;
@@ -834,8 +1399,44 @@ function getMutationTypeLabel(type) {
         add_constraints: '增加约束',
         add_examples: '增加示例',
         change_tone: '调整语气',
+        crossover: '交叉融合',
         simplify: '简化表达',
     }[type] || type;
+}
+
+function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tab);
+    });
+    document.querySelectorAll('.tab-panel').forEach(panel => {
+        panel.classList.toggle('active', panel.id === 'tab-' + tab);
+    });
+    document.querySelectorAll('.stage-pill').forEach((pill, index) => {
+        const stageTab = ['pref', 'opt', 'eval'][index];
+        pill.classList.toggle('active', stageTab === tab);
+    });
+}
+
+function applyPreferencePreset(prompt, tempA = 0.3, tempB = 0.9) {
+    switchTab('pref');
+    document.getElementById('prefPrompt').value = prompt;
+    document.getElementById('tempA').value = tempA;
+    document.getElementById('tempB').value = tempB;
+}
+
+function applyOptimizationPreset(basePrompt, testInput, population = 6, generations = 3) {
+    switchTab('opt');
+    document.getElementById('optBasePrompt').value = basePrompt;
+    document.getElementById('optTestInput').value = testInput;
+    document.getElementById('optPopSize').value = population;
+    document.getElementById('optGens').value = generations;
+}
+
+function applyDuelPreset(prompt, responseA, responseB) {
+    switchTab('eval');
+    document.getElementById('duelPrompt').value = prompt;
+    document.getElementById('duelResponseA').value = responseA;
+    document.getElementById('duelResponseB').value = responseB;
 }
 
 // ─── Endpoint Selector ──────────────────────────────────────────────
@@ -905,7 +1506,7 @@ async function applyEndpoint() {
         if (val === 'default') {
             await fetch(API + '/endpoint/clear', { method: 'POST', headers: {'Content-Type':'application/json'} });
             statusEl.textContent = '默认模型';
-            statusEl.style.color = 'var(--text3)';
+            statusEl.style.color = 'var(--lrf-text3)';
             showToast('已恢复默认模型');
         } else if (val.startsWith('ep:')) {
             const opt = sel.selectedOptions[0];
@@ -928,7 +1529,7 @@ async function applyEndpoint() {
             const modelPath = decodeURIComponent(val.slice(LOCAL_ENDPOINT_PREFIX.length));
             const requestedModelName = opt.dataset.model || 'local-model';
             statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 启动中...';
-            statusEl.style.color = 'var(--text2)';
+            statusEl.style.color = 'var(--lrf-text2)';
 
             const ensureResp = await fetch('/api/pipeline/endpoints/ensure', {
                 method: 'POST',
@@ -1037,10 +1638,7 @@ async function applyEndpoint() {
 // ─── Tabs ──────────────────────────────────────────────────────────────
 document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-        btn.classList.add('active');
-        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+        switchTab(btn.dataset.tab);
     });
 });
 
@@ -1076,6 +1674,13 @@ async function loadStats() {
     animateValue('statElo', d.elo_entries);
     document.getElementById('statRM').textContent = d.reward_model_trained ? '已训练' : '未训练';
     document.getElementById('statRM').style.fontSize = '1.2em';
+    document.getElementById('heroPairVelocity').textContent = d.preference_pairs + ' 对';
+    document.getElementById('heroEvalVelocity').textContent = d.evaluations + ' 次';
+    document.getElementById('heroRunFocus').textContent = d.optimization_runs + ' 个';
+    document.getElementById('heroRmState').textContent = d.reward_model_trained ? '已训练' : '未训练';
+    document.getElementById('prefQueueCount').textContent = d.preference_pairs;
+    document.getElementById('prefReadyCount').textContent = d.preference_pairs;
+    document.getElementById('optRunCount').textContent = d.optimization_runs;
 }
 
 function animateValue(id, target) {
@@ -1086,6 +1691,81 @@ function animateValue(id, target) {
     el.style.animation = 'none';
     el.offsetHeight;
     el.style.animation = 'countUp .4s ease-out';
+}
+
+async function loadRewardModelInfo() {
+    const r = await api('/reward-model/info');
+    if (!r.success) return;
+    renderRewardModelInfo(r.data || {});
+}
+
+function renderRewardModelInfo(info) {
+    const trained = !!info.trained;
+    const samples = info.train_samples || 0;
+    const accuracy = typeof info.accuracy === 'number' ? (info.accuracy * 100).toFixed(1) + '%' : '--';
+    document.getElementById('rmInfo').innerHTML = `
+        <div style="display:flex; gap:20px; padding:14px; background:rgba(19, 99, 223,.04); border-radius:12px;">
+            <div style="text-align:center;">
+                <div style="font-size:22px; font-weight:800; color:var(--lrf-accent);">${samples}</div>
+                <div style="font-size:11px; color:var(--lrf-text3);">训练样本</div>
+            </div>
+            <div style="text-align:center;">
+                <div style="font-size:22px; font-weight:800; color:${trained ? 'var(--success)' : 'var(--lrf-text3)'};">${accuracy}</div>
+                <div style="font-size:11px; color:var(--lrf-text3);">准确率</div>
+            </div>
+            <div style="text-align:center;">
+                <div style="font-size:22px; font-weight:800; color:${trained ? 'var(--success)' : 'var(--lrf-text3)'};">${trained ? '在线' : '待训练'}</div>
+                <div style="font-size:11px; color:var(--lrf-text3);">模型状态</div>
+            </div>
+        </div>
+    `;
+    document.getElementById('rmModelDigest').textContent = trained
+        ? `当前 Bradley-Terry 奖励模型已训练，样本量 ${samples}，训练准确率 ${accuracy}。建议继续扩充不同业务场景的偏好对，降低单一文风偏置。`
+        : '当前还没有训练好的奖励模型，先完成几轮偏好采集再训练。';
+
+    const weights = Array.isArray(info.weights) && Array.isArray(info.feature_names)
+        ? info.feature_names.map((name, index) => ({ name, weight: info.weights[index] || 0 }))
+        : [];
+    const topWeights = weights
+        .sort((a, b) => Math.abs(b.weight) - Math.abs(a.weight))
+        .slice(0, 5);
+
+    document.getElementById('rmWeightList').innerHTML = topWeights.length
+        ? topWeights.map(item => `
+            <div class="stack-card">
+                <strong>${escHtml(item.name)}</strong>
+                <span>权重 ${item.weight > 0 ? '+' : ''}${item.weight.toFixed(4)}</span>
+            </div>
+        `).join('')
+        : `
+            <div class="stack-card">
+                <strong>等待模型画像</strong>
+                <span>训练后会展示最敏感的特征权重</span>
+            </div>
+        `;
+}
+
+function renderFeatureInsight(features) {
+    const featureEntries = Object.entries(features || {}).slice(0, 6);
+    document.getElementById('rmFeatureInsight').innerHTML = featureEntries.length
+        ? featureEntries.map(([name, value]) => `
+            <div class="feature-item">
+                <div class="feature-head">
+                    <strong>${escHtml(name)}</strong>
+                    <span>${value}</span>
+                </div>
+                <div class="feature-track"><div class="feature-fill" style="width:${Math.min(100, Math.max(0, Number(value) * 100))}%"></div></div>
+            </div>
+        `).join('')
+        : `
+            <div class="feature-item">
+                <div class="feature-head">
+                    <strong>结构特征画像</strong>
+                    <span>等待打分结果</span>
+                </div>
+                <div class="feature-track"><div class="feature-fill" style="width:0%"></div></div>
+            </div>
+        `;
 }
 
 // ═════════════════════════════════════════════════════════════════════════
@@ -1125,7 +1805,7 @@ function renderComparison() {
                 <div class="content">${escHtml(d.response_b)}</div>
             </div>
         </div>
-        <p style="text-align:center; margin-top:14px; font-size:13px; color:var(--text3);">
+        <p style="text-align:center; margin-top:14px; font-size:13px; color:var(--lrf-text3);">
             <i class="fas fa-hand-pointer" style="margin-right:4px;"></i> 点击你认为更好的回答来记录偏好
         </p>
     `;
@@ -1168,11 +1848,28 @@ async function loadPairs() {
     const r = await api('/preference/pairs?limit=15');
     if (!r.success) return;
     const el = document.getElementById('pairsList');
-    if (!r.data.length) {
+    const rows = r.data || [];
+    document.getElementById('prefRecentWindow').textContent = rows.length;
+    const aCount = rows.filter(p => p.chosen === 'A').length;
+    const bCount = rows.filter(p => p.chosen === 'B').length;
+    document.getElementById('prefChoiceBias').textContent = rows.length ? `${aCount}/${bCount}` : '-';
+    document.getElementById('prefCoverageText').textContent = rows.length >= 12 ? '丰富' : rows.length >= 5 ? '中等' : '基础';
+    const scenarioSet = new Set(rows.map(p => {
+        const prompt = (p.prompt || '').toLowerCase();
+        if (prompt.includes('风') || prompt.includes('气象')) return '选址';
+        if (prompt.includes('交易')) return '交易';
+        if (prompt.includes('工单') || prompt.includes('值守')) return '运维';
+        return '通用';
+    }));
+    document.getElementById('prefScenarioHint').textContent = Array.from(scenarioSet).join(' / ') || '多样';
+    document.getElementById('prefAnalysisNote').textContent = rows.length
+        ? `当前最近 ${rows.length} 条样本中，回答 A 被选择 ${aCount} 次，回答 B 被选择 ${bCount} 次。建议继续补不同任务长度与输出格式的样本，避免偏好分布过窄。`
+        : '建议把业务问答、结构化摘要、运维处置三类样本混合采集，避免奖励模型只偏好长文本。';
+    if (!rows.length) {
         el.innerHTML = '<div class="empty-state" style="padding:24px;"><i class="fas fa-inbox"></i><p>尚未收集偏好数据</p></div>';
         return;
     }
-    el.innerHTML = r.data.map(p => {
+    el.innerHTML = rows.map(p => {
         const ts = new Date(p.created_at * 1000);
         const timeStr = ts.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
         return `
@@ -1189,26 +1886,27 @@ async function trainRM() {
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span> 训练中...';
 
-    const r = await api('/reward-model/train', { method: 'POST', body: {} });
+    const r = await api('/reward-model/train', {
+        method: 'POST',
+        body: {
+            lr: +document.getElementById('rmLr').value,
+            epochs: +document.getElementById('rmEpochs').value,
+        },
+    });
     btn.disabled = false;
     btn.innerHTML = '<i class="fas fa-cogs"></i> 训练 Bradley-Terry 奖励模型';
 
     if (!r.success) { showToast(r.error || '训练失败'); return; }
-    const d = r.data;
-    document.getElementById('rmInfo').innerHTML = `
-        <div style="display:flex; gap:20px; padding:14px; background:#fafafe; border-radius:12px;">
-            <div style="text-align:center;">
-                <div style="font-size:24px; font-weight:800; color:var(--primary);">${d.samples}</div>
-                <div style="font-size:11px; color:var(--text3);">训练样本</div>
-            </div>
-            <div style="text-align:center;">
-                <div style="font-size:24px; font-weight:800; color:var(--success);">${(d.accuracy * 100).toFixed(1)}%</div>
-                <div style="font-size:11px; color:var(--text3);">准确率</div>
-            </div>
-        </div>
-    `;
+    renderRewardModelInfo({
+        trained: true,
+        train_samples: r.data.samples,
+        accuracy: r.data.accuracy,
+        weights: r.data.weights,
+        feature_names: ['norm_length', 'norm_word_count', 'norm_sentence_count', 'norm_paragraph_count', 'has_list', 'has_code', 'unique_word_ratio', 'avg_word_len', 'avg_sentence_len', 'structure_depth'],
+    });
     showToast('奖励模型训练完成！');
     loadStats();
+    loadRewardModelInfo();
 }
 
 async function scoreText() {
@@ -1216,9 +1914,14 @@ async function scoreText() {
     if (!text) return;
     const r = await api('/reward-model/score', { method: 'POST', body: { text } });
     const el = document.getElementById('rmScoreResult');
-    if (!r.success) { el.innerHTML = `<span style="color:var(--danger);">${r.error || '打分失败'}</span>`; return; }
+    if (!r.success) {
+        el.innerHTML = `<span style="color:var(--danger);">${r.error || '打分失败'}</span>`;
+        renderFeatureInsight(null);
+        return;
+    }
     const color = r.data.score > 0.5 ? 'var(--success)' : r.data.score > 0 ? 'var(--warning)' : 'var(--danger)';
-    el.innerHTML = `<span style="font-weight:800; color:${color}; font-size:18px;">${r.data.score}</span> <span style="color:var(--text3);">奖励分数</span>`;
+    el.innerHTML = `<span style="font-weight:800; color:${color}; font-size:18px;">${r.data.score}</span> <span style="color:var(--lrf-text3);">奖励分数</span>`;
+    renderFeatureInsight(r.data.features);
 }
 
 async function exportDPO() {
@@ -1257,13 +1960,18 @@ async function createOptimization() {
 
 async function loadOptRuns() {
     const r = await api('/optimization/runs');
-    if (!r.success) return;
+    if (!r.success) return [];
     const el = document.getElementById('optRunsList');
-    if (!r.data.length) {
+    const runs = r.data || [];
+    document.getElementById('optRunCount').textContent = runs.length;
+    if (!runs.length) {
         el.innerHTML = '<div class="empty-state" style="padding:24px;"><i class="fas fa-flask"></i><p>暂无优化任务</p></div>';
-        return;
+        document.getElementById('optRunStatusText').textContent = '待命';
+        document.getElementById('optBestScoreHero').textContent = '0.00';
+        document.getElementById('optVariantCountHero').textContent = '0';
+        return runs;
     }
-    el.innerHTML = r.data.map(run => `
+    el.innerHTML = runs.map(run => `
         <div class="run-item ${run.run_id === currentRunId ? 'active' : ''}" onclick="loadOptDetail('${run.run_id}')">
             <div class="run-top">
                 <span class="run-id">#${run.run_id}</span>
@@ -1276,6 +1984,7 @@ async function loadOptRuns() {
             </div>
         </div>
     `).join('');
+    return runs;
 }
 
 async function loadOptDetail(runId) {
@@ -1283,6 +1992,7 @@ async function loadOptDetail(runId) {
     const r = await api('/optimization/' + runId);
     if (!r.success) return;
     const d = r.data;
+    currentOptDetail = d;
 
     document.getElementById('optProgressCard').style.display = 'block';
     document.getElementById('optRunIdLabel').textContent = '#' + runId;
@@ -1293,6 +2003,9 @@ async function loadOptDetail(runId) {
     const statusBadge = document.getElementById('optStatusBadge');
     statusBadge.textContent = getRunStatusLabel(d.status);
     statusBadge.className = 'badge status-tag status-' + d.status;
+    document.getElementById('optRunStatusText').textContent = getRunStatusLabel(d.status);
+    document.getElementById('optBestScoreHero').textContent = (d.best_score || 0).toFixed(2);
+    document.getElementById('optVariantCountHero').textContent = d.variants.length;
 
     const pct = d.max_generations > 0 ? (d.current_generation / d.max_generations * 100) : 0;
     document.getElementById('optProgress').style.width = pct + '%';
@@ -1301,19 +2014,17 @@ async function loadOptDetail(runId) {
     document.getElementById('btnStep').disabled = isFinished;
     document.getElementById('btnRunAll').disabled = isFinished;
 
-    // best prompt
     const best = d.variants.reduce((a, b) => (b.score > a.score ? b : a), { score: 0, prompt_text: '' });
     const bestBox = document.getElementById('optBestPrompt');
     if (best.prompt_text && best.score > 0) {
         bestBox.innerHTML = `<button class="copy-btn" onclick="copyBestPrompt()"><i class="fas fa-copy"></i> 复制</button>${escHtml(best.prompt_text)}`;
     } else {
-        bestBox.innerHTML = '<span style="color:var(--text3);">(尚未评估)</span>';
+        bestBox.innerHTML = '<span style="color:var(--lrf-text3);">(尚未评估)</span>';
     }
 
-    // score chart
     renderOptScoreChart(d.variants);
+    renderOptTimeline(d);
 
-    // variants grid
     const grid = document.getElementById('variantsGrid');
     if (!d.variants.length) {
         grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><p>暂无变体</p></div>';
@@ -1324,7 +2035,7 @@ async function loadOptDetail(runId) {
         const isBest = v.variant_id === bestId && v.score > 0;
         const scoreColor = v.score >= 7 ? `background:var(--success-light); color:var(--success)` :
                           v.score >= 4 ? `background:var(--warning-light); color:var(--warning)` :
-                          `background:#f1f5f9; color:var(--text3)`;
+                          `background:rgba(101, 120, 144,.10); color:var(--lrf-text3)`;
         return `
         <div class="variant-card ${isBest ? 'best' : ''}">
             <span class="variant-score" style="${scoreColor}">${v.score.toFixed(2)}</span>
@@ -1336,11 +2047,44 @@ async function loadOptDetail(runId) {
         </div>`;
     }).join('');
 
-    // update run list highlight
-    document.querySelectorAll('.run-item').forEach(el => {
-        el.classList.toggle('active', el.onclick && el.onclick.toString().includes(runId));
-    });
     loadOptRuns();
+}
+
+function renderOptTimeline(detail) {
+    const timeline = document.getElementById('optGenTimeline');
+    const groups = new Map();
+    (detail.variants || []).forEach(variant => {
+        const list = groups.get(variant.generation) || [];
+        list.push(variant);
+        groups.set(variant.generation, list);
+    });
+    const generations = Array.from(groups.keys()).sort((a, b) => a - b);
+    if (!generations.length) {
+        timeline.innerHTML = `
+            <div class="timeline-item">
+                <div class="timeline-head">
+                    <strong>等待任务</strong>
+                    <span>创建后开始记录每一代的演化情况</span>
+                </div>
+                <div class="feature-track"><div class="feature-fill" style="width:0%"></div></div>
+            </div>
+        `;
+        return;
+    }
+    timeline.innerHTML = generations.map(gen => {
+        const variants = groups.get(gen) || [];
+        const best = variants.reduce((acc, item) => item.score > acc.score ? item : acc, { score: 0 });
+        const pct = detail.max_generations > 0 ? Math.min(100, (gen / detail.max_generations) * 100) : 0;
+        return `
+            <div class="timeline-item">
+                <div class="timeline-head">
+                    <strong>第 ${gen} 代 · ${variants.length} 个变体</strong>
+                    <span>最高 ${Number(best.score || 0).toFixed(2)}</span>
+                </div>
+                <div class="feature-track"><div class="feature-fill" style="width:${pct}%"></div></div>
+            </div>
+        `;
+    }).join('');
 }
 
 function renderOptScoreChart(variants) {
@@ -1374,8 +2118,8 @@ function renderOptScoreChart(variants) {
                 itemStyle: {
                     borderRadius: [6, 6, 0, 0],
                     color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                        { offset: 0, color: '#667eea' },
-                        { offset: 1, color: '#764ba2' },
+                        { offset: 0, color: '#1363df' },
+                        { offset: 1, color: '#d97706' },
                     ]),
                 },
             })),
@@ -1429,7 +2173,7 @@ async function runAll() {
 // ═════════════════════════════════════════════════════════════════════════
 // Tab 3: Evaluation & Ranking
 // ═════════════════════════════════════════════════════════════════════════
-const DIM_COLORS = { accuracy: '#667eea', helpfulness: '#10b981', safety: '#06b6d4', creativity: '#ec4899' };
+const DIM_COLORS = { accuracy: '#1363df', helpfulness: '#1f8f63', safety: '#d97706', creativity: '#475569' };
 const DIM_LABELS = { accuracy: '准确性', helpfulness: '有用性', safety: '安全性', creativity: '创造性' };
 const DIM_ICONS = { accuracy: 'fa-bullseye', helpfulness: 'fa-hands-helping', safety: 'fa-shield-alt', creativity: 'fa-lightbulb' };
 
@@ -1452,7 +2196,6 @@ async function runEvaluate() {
     document.getElementById('evalResultCard').style.display = 'block';
     document.getElementById('evalWeighted').textContent = d.weighted_score.toFixed(2);
 
-    // Score bars
     const scoresEl = document.getElementById('evalScores');
     scoresEl.innerHTML = Object.entries(d.scores).map(([dim, val]) => `
         <div class="dim-row">
@@ -1465,7 +2208,6 @@ async function runEvaluate() {
         </div>
     `).join('');
 
-    // Radar chart
     renderEvalRadar(d.scores);
     showToast('评估完成');
     loadLeaderboard();
@@ -1486,7 +2228,7 @@ function renderEvalRadar(scores) {
             indicator: dims.map(d => ({ name: DIM_LABELS[d], max: 10 })),
             shape: 'polygon',
             axisName: { color: '#666', fontSize: 12 },
-            splitArea: { areaStyle: { color: ['rgba(102,126,234,.03)', 'rgba(102,126,234,.06)'] } },
+            splitArea: { areaStyle: { color: ['rgba(19, 99, 223,.03)', 'rgba(19, 99, 223,.06)'] } },
             splitLine: { lineStyle: { color: '#e8e8ef' } },
             axisLine: { lineStyle: { color: '#e8e8ef' } },
         },
@@ -1495,22 +2237,83 @@ function renderEvalRadar(scores) {
             data: [{ value: dims.map(d => scores[d] || 0), name: '评估分数' }],
             areaStyle: {
                 color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                    { offset: 0, color: 'rgba(102,126,234,.3)' },
-                    { offset: 1, color: 'rgba(118,75,162,.1)' },
+                    { offset: 0, color: 'rgba(19, 99, 223,.28)' },
+                    { offset: 1, color: 'rgba(217,119,6,.10)' },
                 ]),
             },
-            lineStyle: { color: '#667eea', width: 2 },
-            itemStyle: { color: '#667eea' },
+            lineStyle: { color: '#1363df', width: 2 },
+            itemStyle: { color: '#1363df' },
         }],
         tooltip: {},
     });
+}
+
+async function runDuelMatch() {
+    const prompt = document.getElementById('duelPrompt').value.trim();
+    const nameA = document.getElementById('duelNameA').value.trim();
+    const nameB = document.getElementById('duelNameB').value.trim();
+    const responseA = document.getElementById('duelResponseA').value.trim();
+    const responseB = document.getElementById('duelResponseB').value.trim();
+    if (!prompt || !nameA || !nameB || !responseA || !responseB) {
+        showToast('请补全对战提示词、选手名称和双方回答');
+        return;
+    }
+
+    const btn = document.getElementById('btnDuel');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> 对战评估中...';
+
+    const r = await api('/elo/match', {
+        method: 'POST',
+        body: { prompt, name_a: nameA, name_b: nameB, response_a: responseA, response_b: responseB },
+    });
+
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-bolt"></i> 发起对战并更新 ELO';
+
+    if (!r.success) {
+        showToast(r.error || '对战失败');
+        return;
+    }
+
+    const d = r.data;
+    document.getElementById('duelResultCard').style.display = 'block';
+    document.getElementById('duelWinnerBanner').innerHTML = `
+        <strong>${d.winner === 'draw' ? '平局' : `胜者：${escHtml(d.winner)}`}</strong>
+        <span>${escHtml(nameA)} ${Number(d.score_a).toFixed(2)} vs ${escHtml(nameB)} ${Number(d.score_b).toFixed(2)}，已写入排行榜。</span>
+    `;
+    document.getElementById('duelScoreGrid').innerHTML = `
+        <div class="duel-card">
+            <h4>${escHtml(nameA)}</h4>
+            <div class="duel-score">${Number(d.score_a).toFixed(2)}</div>
+            <div class="compact-stack">
+                ${Object.entries(d.details_a || {}).map(([dim, val]) => `<div class="stack-card"><strong>${escHtml(DIM_LABELS[dim] || dim)}</strong><span>${val}</span></div>`).join('')}
+            </div>
+        </div>
+        <div class="duel-card">
+            <h4>${escHtml(nameB)}</h4>
+            <div class="duel-score">${Number(d.score_b).toFixed(2)}</div>
+            <div class="compact-stack">
+                ${Object.entries(d.details_b || {}).map(([dim, val]) => `<div class="stack-card"><strong>${escHtml(DIM_LABELS[dim] || dim)}</strong><span>${val}</span></div>`).join('')}
+            </div>
+        </div>
+    `;
+    showToast(d.winner === 'draw' ? '对战完成，结果平局' : `${d.winner} 赢得本轮对战`);
+    loadLeaderboard();
+    loadStats();
 }
 
 async function loadLeaderboard() {
     const r = await api('/leaderboard');
     if (!r.success) return;
     const el = document.getElementById('leaderboardArea');
-    if (!r.data.length) {
+    const rows = r.data || [];
+    const top = rows[0];
+    const second = rows[1];
+    document.getElementById('eloTopName').textContent = top ? top.name : '-';
+    document.getElementById('eloSpread').textContent = top && second ? (top.rating - second.rating).toFixed(1) : '0';
+    document.getElementById('eloMatchCount').textContent = rows.reduce((sum, item) => sum + item.wins, 0);
+    if (!rows.length) {
         el.innerHTML = '<div class="empty-state" style="padding:36px;"><i class="fas fa-medal"></i><p>暂无排名数据</p></div>';
         document.getElementById('eloHistoryCard').style.display = 'none';
         return;
@@ -1527,9 +2330,9 @@ async function loadLeaderboard() {
                 <th style="width:100px;">趋势</th>
             </tr></thead>
             <tbody>
-                ${r.data.map((e, i) => {
+                ${rows.map((e, i) => {
                     const rankCls = i < 3 ? `rank-${i + 1}` : 'rank-n';
-                    const eloColor = e.rating >= 1600 ? 'var(--success)' : e.rating >= 1400 ? 'var(--primary)' : 'var(--danger)';
+                    const eloColor = e.rating >= 1600 ? 'var(--success)' : e.rating >= 1400 ? 'var(--lrf-accent)' : 'var(--danger)';
                     return `
                     <tr>
                         <td><span class="rank-medal ${rankCls}">${i + 1}</span></td>
@@ -1544,7 +2347,6 @@ async function loadLeaderboard() {
         </table>
     `;
 
-    // Draw sparklines
     document.querySelectorAll('.elo-sparkline').forEach(canvas => {
         const data = JSON.parse(canvas.dataset.history || '[]');
         if (data.length < 2) return;
@@ -1554,7 +2356,7 @@ async function loadLeaderboard() {
         const range = max - min || 1;
         ctx.clearRect(0, 0, w, h);
         ctx.beginPath();
-        ctx.strokeStyle = '#667eea';
+        ctx.strokeStyle = '#1363df';
         ctx.lineWidth = 2;
         data.forEach((v, i) => {
             const x = (i / (data.length - 1)) * w;
@@ -1564,8 +2366,7 @@ async function loadLeaderboard() {
         ctx.stroke();
     });
 
-    // ELO History Chart
-    renderEloHistory(r.data);
+    renderEloHistory(rows);
 }
 
 function renderEloHistory(entries) {
@@ -1580,7 +2381,7 @@ function renderEloHistory(entries) {
     }
     if (!eloHistoryChart) eloHistoryChart = echarts.init(el);
 
-    const colors = ['#2563eb', '#10b981', '#60a5fa', '#ec4899', '#8b5cf6', '#06b6d4'];
+    const colors = ['#1363df', '#1f8f63', '#d97706', '#475569', '#60a5fa', '#94a3b8'];
 
     eloHistoryChart.setOption({
         grid: { left: 10, right: 20, top: 30, bottom: 30, containLabel: true },
@@ -1635,8 +2436,12 @@ window.addEventListener('resize', () => {
 document.addEventListener('DOMContentLoaded', async () => {
     await ensureEcharts();
     loadStats();
+    loadRewardModelInfo();
     loadPairs();
-    loadOptRuns();
+    const runs = await loadOptRuns();
+    if (!currentRunId && runs.length) {
+        loadOptDetail(runs[0].run_id);
+    }
     loadLeaderboard();
 });
 </script>

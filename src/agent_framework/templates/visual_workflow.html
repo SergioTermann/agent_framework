@@ -3,184 +3,270 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>工作流编排 - Agent Framework</title>
+    <title>可视化工作流 - Agent Framework</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/base-theme.css">
     <style>
         :root {
-            --theme-accent: #1363df;
-            --theme-accent-deep: #0f4eb3;
-            --theme-accent-soft: rgba(19, 99, 223, 0.12);
-            --theme-accent-line: rgba(19, 99, 223, 0.18);
-            --theme-accent-grid: rgba(19, 99, 223, 0.05);
+            --wf-accent: #1363df;
+            --wf-accent-deep: #0f4eb3;
+            --wf-accent-soft: rgba(19, 99, 223, 0.10);
+            --wf-accent-line: rgba(19, 99, 223, 0.16);
+            --wf-grid: rgba(19, 99, 223, 0.06);
+            --wf-text: #10233f;
+            --wf-muted: #5f728c;
+            --wf-surface: rgba(255, 255, 255, 0.92);
+            --wf-surface-strong: rgba(255, 255, 255, 0.98);
+            --wf-shadow: 0 18px 42px rgba(17, 38, 74, 0.10);
+            --wf-radius: 22px;
         }
 
         * {
-            margin: 0;
-            padding: 0;
             box-sizing: border-box;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #f5f8fc 0%, #eff4fb 100%);
             margin: 0;
+            min-height: 100vh;
+            font-family: var(--font-body, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+            color: var(--wf-text);
+            background:
+                radial-gradient(circle at 8% 10%, rgba(19, 99, 223, 0.12), transparent 20%),
+                radial-gradient(circle at 88% 8%, rgba(96, 165, 250, 0.12), transparent 18%),
+                linear-gradient(180deg, #f7fbff 0%, #eef4fb 100%);
         }
 
         body.is-embedded {
-            background: transparent;
+            min-height: 100%;
+            background:
+                radial-gradient(circle at 10% 10%, rgba(19, 99, 223, 0.06), transparent 18%),
+                linear-gradient(180deg, rgba(248, 251, 255, 0.98), rgba(240, 246, 252, 0.98));
         }
 
-        .app-container {
-            display: flex;
+        body.is-embedded::before {
+            display: none;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(19, 99, 223, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(19, 99, 223, 0.03) 1px, transparent 1px);
+            background-size: 28px 28px;
+            mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.16), transparent 58%);
+        }
+
+        .workflow-shell {
+            position: relative;
+            z-index: 1;
+            max-width: 1680px;
+            margin: 0 auto;
+            padding: 24px;
+            display: grid;
+            gap: 18px;
+        }
+
+        body.is-embedded .workflow-shell {
+            max-width: none;
+            width: 100%;
             min-height: 100vh;
+            padding: 14px;
         }
 
-        /* 导航侧边栏 */
-        .nav-sidebar {
-            width: 280px;
-            background: linear-gradient(180deg, #0f4eb3 0%, #1363df 52%, #2b7fff 100%);
-            color: white;
+        .layout-grid {
+            display: grid;
+            grid-template-columns: 320px minmax(0, 1fr) 360px;
+            gap: 18px;
+            align-items: start;
+        }
+
+        body.is-embedded .layout-grid {
+            min-height: calc(100vh - 28px);
+        }
+
+        .left-rail {
+            grid-column: 1;
+            grid-row: 1;
+        }
+
+        .workspace-panel {
+            grid-column: 2;
+            grid-row: 1;
+        }
+
+        .config-panel {
+            grid-column: 3;
+            grid-row: 1;
+        }
+
+        .panel {
+            border: 1px solid rgba(219, 228, 240, 0.88);
+            border-radius: var(--wf-radius);
+            background: var(--wf-surface-strong);
+            box-shadow: var(--wf-shadow);
+        }
+
+        .panel-head {
             display: flex;
-            flex-direction: column;
-            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
-        }
-
-        .nav-sidebar-nav {
-            flex: 1;
-            padding: 28px 0;
-            overflow-y: auto;
-        }
-
-        .nav-item {
-            padding: 12px 24px;
-            color: rgba(255,255,255,0.8);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
+            justify-content: space-between;
+            align-items: flex-start;
             gap: 12px;
-            transition: all 0.2s;
+            padding: 20px 20px 16px;
+            border-bottom: 1px solid rgba(219, 228, 240, 0.78);
         }
 
-        .nav-item:hover {
-            background: rgba(255,255,255,0.1);
-            color: white;
+        .panel-head h2,
+        .panel-head h3 {
+            margin: 0;
+            font-size: 18px;
+            line-height: 1.2;
         }
 
-        .nav-item.active {
-            background: rgba(255,255,255,0.15);
-            color: white;
-            border-left: 3px solid white;
-        }
-
-        /* 主内容区 */
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        body.is-embedded .main-content {
-            width: 100%;
-        }
-
-        .header {
-            background: #ffffff;
-            padding: 16px 24px;
-            border-bottom: 1px solid rgba(101, 120, 144, 0.14);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .header h1 {
-            font-size: 20px;
-            color: #253038;
-            font-weight: 600;
-        }
-
-        .workflow-container {
-            flex: 1;
-            display: flex;
-            overflow: hidden;
-        }
-
-        body.is-embedded .workflow-container {
-            flex-direction: column;
-        }
-
-        /* 工具侧边栏 */
-        .sidebar {
-            width: 280px;
-            background: rgba(255, 255, 255, 0.95);
-            border-right: 1px solid var(--theme-accent-line);
-            display: flex;
-            flex-direction: column;
-        }
-
-        body.is-embedded .sidebar {
-            width: 100%;
-            border-right: none;
-            border-bottom: 1px solid var(--theme-accent-line);
-        }
-
-        .sidebar-header {
-            padding: 20px;
-            border-bottom: 1px solid var(--theme-accent-line);
-        }
-
-        .sidebar-title {
-            font-size: 20px;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--theme-accent-deep), var(--theme-accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .sidebar-copy {
-            margin-top: 10px;
+        .panel-head p {
+            margin: 8px 0 0;
+            color: var(--wf-muted);
             font-size: 13px;
-            line-height: 1.6;
-            color: #64748b;
+            line-height: 1.7;
         }
 
-        .sidebar-section {
-            padding: 20px;
-            border-bottom: 1px solid var(--theme-accent-line);
+        .panel-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 10px;
+            border-radius: 999px;
+            background: var(--wf-accent-soft);
+            color: var(--wf-accent);
+            font-size: 12px;
+            font-weight: 800;
+            white-space: nowrap;
         }
 
-        body.is-embedded .sidebar-section:last-child {
-            border-bottom: none;
+        .left-rail,
+        .config-panel {
+            display: grid;
+            gap: 14px;
+            padding: 0;
+            min-width: 0;
+        }
+
+        .left-rail {
+            align-content: start;
+            position: static;
+        }
+
+        .config-panel {
+            position: static;
+        }
+
+        .left-rail.panel,
+        .config-panel.panel {
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+            overflow: visible;
+        }
+
+        .left-rail,
+        .workspace-panel,
+        .canvas-panel,
+        .toolbar,
+        .toolbar-copy,
+        .config-panel,
+        .config-card,
+        .config-content {
+            min-width: 0;
+        }
+
+        .rail-card,
+        .config-card {
+            border: 1px solid rgba(219, 228, 240, 0.88);
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.96);
+            overflow: hidden;
+        }
+
+        .node-library-card {
+            display: block;
+        }
+
+        .node-library-body {
+            max-height: min(340px, calc(100vh - 240px));
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .rail-card-head,
+        .config-card-head {
+            padding: 16px 16px 14px;
+            border-bottom: 1px solid rgba(219, 228, 240, 0.72);
+        }
+
+        .rail-card-head h3,
+        .config-card-head h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .rail-card-head p,
+        .config-card-head p {
+            margin: 8px 0 0;
+            color: var(--wf-muted);
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .rail-card-body,
+        .config-content {
+            padding: 16px;
         }
 
         .section-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #4a4a4a;
-            margin-bottom: 12px;
+            margin: 0 0 12px;
+            color: var(--wf-muted);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
         }
 
         .node-palette {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 10px;
         }
 
         .node-item {
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            padding: 14px 12px;
+            border: 1px solid rgba(19, 99, 223, 0.10);
+            border-radius: 14px;
+            background: linear-gradient(180deg, #ffffff, #f7fbff);
             cursor: grab;
-            transition: all 0.3s;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
             text-align: center;
+            color: var(--wf-text);
             font-size: 12px;
+            font-weight: 700;
+        }
+
+        .node-item::before {
+            content: "";
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 4px;
+            background: linear-gradient(180deg, var(--wf-accent), rgba(96, 165, 250, 0.24));
         }
 
         .node-item:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: var(--theme-accent);
+            transform: translateY(-2px);
+            border-color: rgba(19, 99, 223, 0.18);
+            box-shadow: 0 12px 24px rgba(19, 99, 223, 0.08);
         }
 
         .node-item:active {
@@ -188,191 +274,713 @@
         }
 
         .node-icon {
-            font-size: 24px;
-            margin-bottom: 6px;
+            font-size: 22px;
+            margin-bottom: 8px;
         }
 
-        /* 工具栏 */
-        .toolbar {
-            padding: 16px 20px;
-            background: rgba(255, 255, 255, 0.95);
-            border-bottom: 1px solid var(--theme-accent-line);
+        .template-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .scenario-list,
+        .route-list,
+        .next-step-list,
+        .inventory-list,
+        .preset-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .scenario-card,
+        .route-item,
+        .next-step-item,
+        .inventory-item,
+        .preset-item,
+        .metric-card {
+            border: 1px solid rgba(19, 99, 223, 0.10);
+            border-radius: 16px;
+            background: linear-gradient(180deg, #ffffff, #f7fbff);
+        }
+
+        .scenario-card,
+        .route-item,
+        .next-step-item,
+        .inventory-item,
+        .preset-item {
+            padding: 14px;
+        }
+
+        .scenario-card {
+            cursor: pointer;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .scenario-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(19, 99, 223, 0.18);
+            box-shadow: 0 12px 24px rgba(19, 99, 223, 0.08);
+        }
+
+        .scenario-card.is-active {
+            border-color: rgba(19, 99, 223, 0.28);
+            box-shadow: 0 0 0 3px rgba(19, 99, 223, 0.08);
+        }
+
+        .scenario-head,
+        .metric-head,
+        .preset-head,
+        .inventory-head,
+        .route-head {
             display: flex;
             justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .scenario-title,
+        .metric-title,
+        .preset-title,
+        .inventory-title,
+        .route-title {
+            font-size: 13px;
+            font-weight: 800;
+            line-height: 1.5;
+        }
+
+        .scenario-copy,
+        .preset-copy,
+        .inventory-copy,
+        .route-copy,
+        .metric-copy {
+            margin-top: 6px;
+            color: var(--wf-muted);
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .scenario-chip-row,
+        .metric-chip-row,
+        .preset-chip-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
             align-items: center;
         }
 
-        .toolbar-left {
-            display: flex;
-            gap: 10px;
+        .scenario-chip,
+        .metric-chip,
+        .preset-chip {
+            display: inline-flex;
             align-items: center;
+            gap: 6px;
+            min-height: 26px;
+            padding: 0 10px;
+            border-radius: 999px;
+            background: rgba(19, 99, 223, 0.06);
+            color: var(--wf-accent);
+            font-size: 11px;
+            font-weight: 800;
         }
 
-        .toolbar-right {
+        .helper-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .helper-item {
             display: flex;
             gap: 10px;
+            align-items: flex-start;
+            padding: 12px 14px;
+            border-radius: 14px;
+            background: rgba(19, 99, 223, 0.05);
+            border: 1px solid rgba(19, 99, 223, 0.08);
+            color: var(--wf-text);
+            font-size: 13px;
+            line-height: 1.65;
+        }
+
+        .helper-item i {
+            margin-top: 2px;
+            color: var(--wf-accent);
+        }
+
+        .deployed-llm-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .deployed-llm-item {
+            display: grid;
+            gap: 10px;
+            padding: 14px;
+            border: 1px solid rgba(19, 99, 223, 0.10);
+            border-radius: 16px;
+            background: linear-gradient(180deg, #ffffff, #f7fbff);
+            cursor: pointer;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .deployed-llm-item:hover {
+            transform: translateY(-2px);
+            border-color: rgba(19, 99, 223, 0.18);
+            box-shadow: 0 12px 24px rgba(19, 99, 223, 0.08);
+        }
+
+        .deployed-llm-item.is-active {
+            border-color: rgba(19, 99, 223, 0.30);
+            box-shadow: 0 0 0 3px rgba(19, 99, 223, 0.08);
+        }
+
+        .deployed-llm-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .deployed-llm-title {
+            margin: 0;
+            font-size: 13px;
+            font-weight: 800;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .deployed-llm-desc {
+            margin: 6px 0 0;
+            color: var(--wf-muted);
+            font-size: 12px;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+
+        .deployed-llm-meta {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .deployed-llm-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 26px;
+            padding: 0 10px;
+            border-radius: 999px;
+            background: rgba(19, 99, 223, 0.06);
+            color: var(--wf-accent);
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .deployed-llm-pill.is-status {
+            background: rgba(19, 99, 223, 0.08);
+            color: #1363df;
+        }
+
+        .deployed-llm-foot {
+            color: var(--wf-muted);
+            font-size: 11px;
+            line-height: 1.6;
+            word-break: break-all;
+        }
+
+        .workspace-panel {
+            display: grid;
+            gap: 16px;
+        }
+
+        .lab-panel {
+            border: 1px solid rgba(219, 228, 240, 0.88);
+            border-radius: var(--wf-radius);
+            background: var(--wf-surface-strong);
+            box-shadow: var(--wf-shadow);
+            overflow: hidden;
+        }
+
+        .lab-body {
+            padding: 18px 20px 20px;
+            display: grid;
+            gap: 16px;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .metric-card {
+            display: grid;
+            gap: 10px;
+            padding: 16px;
+        }
+
+        .metric-value {
+            font-size: 28px;
+            font-weight: 900;
+            line-height: 1;
+            letter-spacing: -0.04em;
+        }
+
+        .metric-track {
+            width: 100%;
+            height: 8px;
+            border-radius: 999px;
+            background: rgba(148, 163, 184, 0.18);
+            overflow: hidden;
+        }
+
+        .metric-fill {
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(135deg, var(--wf-accent), #38bdf8);
+        }
+
+        .lab-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .lab-card {
+            display: grid;
+            gap: 12px;
+            padding: 16px;
+            border-radius: 18px;
+            background: rgba(19, 99, 223, 0.04);
+            border: 1px solid rgba(19, 99, 223, 0.08);
+        }
+
+        .lab-card h3 {
+            margin: 0;
+            font-size: 15px;
+            line-height: 1.3;
+        }
+
+        .lab-card p {
+            margin: 0;
+            color: var(--wf-muted);
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .toolbar {
+            padding: 18px 20px;
+            border: 1px solid rgba(219, 228, 240, 0.88);
+            border-radius: var(--wf-radius);
+            background: var(--wf-surface-strong);
+            box-shadow: var(--wf-shadow);
+            display: flex;
+            justify-content: space-between;
+            gap: 18px;
+            align-items: flex-start;
+        }
+
+        .toolbar-copy {
+            display: grid;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .workflow-name-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
         }
 
         .workflow-name {
-            font-size: 18px;
-            font-weight: 600;
-            color: #2c2c2c;
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
         }
 
         .workflow-note {
+            color: var(--wf-muted);
             font-size: 13px;
-            color: #64748b;
+            line-height: 1.7;
+        }
+
+        .workflow-meta {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .meta-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(19, 99, 223, 0.06);
+            border: 1px solid rgba(19, 99, 223, 0.08);
+            color: var(--wf-text);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .meta-chip strong {
+            font-size: 12px;
+            color: var(--wf-accent);
+        }
+
+        .toolbar-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .quick-action-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .quick-action-grid .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .config-helper-note {
+            color: var(--wf-muted);
+            font-size: 12px;
+            line-height: 1.7;
         }
 
         .btn {
-            padding: 8px 16px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            color: #2c2c2c;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+            padding: 10px 14px;
+            border: 1px solid rgba(19, 99, 223, 0.12);
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.92);
+            color: var(--wf-text);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
         }
 
         .btn:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: var(--theme-accent);
+            transform: translateY(-1px);
+            border-color: rgba(19, 99, 223, 0.24);
+            box-shadow: 0 12px 20px rgba(19, 99, 223, 0.08);
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--theme-accent-deep), var(--theme-accent));
-            border: none;
+            border-color: transparent;
+            background: linear-gradient(135deg, var(--wf-accent-deep), var(--wf-accent));
             color: #ffffff;
         }
 
-        .btn-primary:hover {
-            box-shadow: 0 6px 20px rgba(19, 99, 223, 0.22);
-        }
-
         .btn-success {
-            background: linear-gradient(135deg, #34d399, #10b981);
-            border: none;
+            border-color: transparent;
+            background: linear-gradient(135deg, #1363df, #60a5fa);
+            color: #ffffff;
         }
 
-        /* 画布区域 */
-        .canvas-area {
-            flex: 1;
+        .canvas-panel {
+            position: relative;
+            display: grid;
+            grid-template-rows: auto 1fr;
+            border: 1px solid rgba(219, 228, 240, 0.88);
+            border-radius: var(--wf-radius);
+            background: var(--wf-surface-strong);
+            box-shadow: var(--wf-shadow);
+            overflow: hidden;
+        }
+
+        .canvas-panel-head {
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
+            gap: 14px;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(219, 228, 240, 0.74);
+        }
+
+        .canvas-panel-head h2 {
+            margin: 0;
+            font-size: 17px;
+        }
+
+        .canvas-panel-head p {
+            margin: 6px 0 0;
+            color: var(--wf-muted);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .canvas-panel-head .panel-tag {
+            border-radius: 14px;
         }
 
         .canvas {
-            flex: 1;
             position: relative;
+            min-height: 72vh;
+            height: 100%;
             background:
-                linear-gradient(90deg, var(--theme-accent-grid) 1px, transparent 1px),
-                linear-gradient(var(--theme-accent-grid) 1px, transparent 1px);
-            background-size: 20px 20px;
+                linear-gradient(90deg, var(--wf-grid) 1px, transparent 1px),
+                linear-gradient(var(--wf-grid) 1px, transparent 1px),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 248, 255, 0.92));
+            background-size: 28px 28px, 28px 28px, auto;
             overflow: hidden;
         }
 
         .canvas-content {
+            position: relative;
             width: 100%;
             height: 100%;
-            position: relative;
+            min-height: 72vh;
         }
 
-        /* 节点样式 */
+        body.is-embedded .canvas,
+        body.is-embedded .canvas-content {
+            min-height: calc(100vh - 210px);
+        }
+
+        .canvas-guide {
+            position: absolute;
+            inset: 50% auto auto 50%;
+            transform: translate(-50%, -50%);
+            width: min(420px, calc(100% - 40px));
+            padding: 22px 24px;
+            border: 1px dashed rgba(19, 99, 223, 0.18);
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.86);
+            text-align: center;
+            pointer-events: none;
+            box-shadow: 0 20px 40px rgba(19, 99, 223, 0.08);
+        }
+
+        .canvas-guide[hidden] {
+            display: none;
+        }
+
+        .canvas-guide i {
+            display: inline-grid;
+            place-items: center;
+            width: 52px;
+            height: 52px;
+            margin-bottom: 12px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(19, 99, 223, 0.12), rgba(96, 165, 250, 0.16));
+            color: var(--wf-accent);
+            font-size: 22px;
+        }
+
+        .canvas-guide strong {
+            display: block;
+            font-size: 18px;
+            line-height: 1.2;
+        }
+
+        .canvas-guide p {
+            margin: 10px 0 0;
+            color: var(--wf-muted);
+            font-size: 13px;
+            line-height: 1.75;
+        }
+
         .workflow-node {
             position: absolute;
-            min-width: 150px;
-            background: rgba(255, 255, 255, 0.95);
-            border: 2px solid var(--theme-accent-line);
-            border-radius: 12px;
+            min-width: 180px;
+            max-width: 240px;
             padding: 16px;
+            border: 1px solid rgba(19, 99, 223, 0.16);
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.96);
             cursor: move;
-            transition: all 0.3s;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+            box-shadow: 0 14px 28px rgba(19, 99, 223, 0.08);
+        }
+
+        .workflow-node::before {
+            content: "";
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 4px;
+            border-radius: 18px 0 0 18px;
+            background: linear-gradient(180deg, var(--wf-accent), rgba(96, 165, 250, 0.20));
         }
 
         .workflow-node:hover {
-            border-color: rgba(19, 99, 223, 0.45);
-            box-shadow: 0 8px 24px rgba(19, 99, 223, 0.14);
+            border-color: rgba(19, 99, 223, 0.28);
+            box-shadow: 0 18px 34px rgba(19, 99, 223, 0.12);
+            transform: translateY(-1px);
         }
 
         .workflow-node.selected {
-            border-color: var(--theme-accent);
-            box-shadow: 0 0 0 3px var(--theme-accent-soft);
+            border-color: var(--wf-accent);
+            box-shadow: 0 0 0 4px var(--wf-accent-soft), 0 20px 36px rgba(19, 99, 223, 0.16);
         }
 
         .node-header {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
+            gap: 10px;
+            margin-bottom: 10px;
         }
 
         .node-icon-large {
-            font-size: 20px;
+            display: grid;
+            place-items: center;
+            width: 38px;
+            height: 38px;
+            border-radius: 14px;
+            background: rgba(19, 99, 223, 0.08);
+            color: var(--wf-accent);
+            font-size: 18px;
         }
 
         .node-label {
-            font-weight: 600;
             font-size: 14px;
+            font-weight: 800;
+            line-height: 1.3;
         }
 
         .node-type {
             font-size: 11px;
-            color: #666666;
+            color: var(--wf-muted);
+            line-height: 1.5;
         }
 
         .node-ports {
             display: flex;
             justify-content: space-between;
-            margin-top: 12px;
+            align-items: center;
+            margin-top: 14px;
+            padding-top: 10px;
+            border-top: 1px dashed rgba(19, 99, 223, 0.12);
         }
 
         .node-port {
-            width: 12px;
-            height: 12px;
-            background: var(--theme-accent);
-            border: 2px solid rgba(26, 26, 46, 0.95);
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
+            background: linear-gradient(135deg, var(--wf-accent-deep), var(--wf-accent));
+            border: 2px solid rgba(255, 255, 255, 0.98);
             cursor: crosshair;
+            box-shadow: 0 0 0 2px rgba(19, 99, 223, 0.14);
         }
 
         .node-port:hover {
-            box-shadow: 0 0 8px rgba(19, 99, 223, 0.4);
+            box-shadow: 0 0 0 4px rgba(19, 99, 223, 0.12);
         }
 
-        /* 配置面板 */
+        #connectionsSvg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
         .config-panel {
-            width: 320px;
-            background: rgba(255, 255, 255, 0.95);
-            border-left: 1px solid var(--theme-accent-line);
-            display: none;
-            flex-direction: column;
+            align-content: start;
+            min-height: 0;
         }
 
         .config-panel.active {
-            display: flex;
+            box-shadow: 0 20px 40px rgba(19, 99, 223, 0.12);
         }
 
-        .config-header {
-            padding: 20px;
-            border-bottom: 1px solid var(--theme-accent-line);
+        .config-stack {
+            overflow: hidden;
+        }
+
+        .config-stack > .config-card-head {
+            display: none;
+        }
+
+        .config-stack-body {
+            display: grid;
+            gap: 0;
+            padding: 0;
+        }
+
+        .config-subsection {
+            display: grid;
+            gap: 14px;
+            padding: 16px;
+        }
+
+        .config-dual-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+            align-items: start;
+        }
+
+        .config-mini-block {
+            display: grid;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        .config-mini-block + .config-mini-block {
+            padding-left: 14px;
+            border-left: 1px solid rgba(219, 228, 240, 0.78);
+        }
+
+        .config-subsection + .config-subsection {
+            border-top: 1px solid rgba(219, 228, 240, 0.78);
+        }
+
+        .config-subsection-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .config-subsection-head h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .config-subsection-head p {
+            margin: 8px 0 0;
+            color: var(--wf-muted);
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .compact-overview-grid {
+            display: grid;
+            gap: 10px;
+        }
+
+        .run-workbench {
+            display: grid;
+            gap: 14px;
+        }
+
+        .run-output-stack {
+            display: grid;
+            gap: 12px;
+        }
+
+        .run-output-card {
+            display: grid;
+            gap: 10px;
+        }
+
+        .config-title-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 10px;
         }
 
-        .config-title {
-            font-size: 16px;
-            font-weight: 600;
-        }
-
-        .config-content {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
+        .config-title-row .btn {
+            padding: 8px 10px;
         }
 
         .form-group {
@@ -381,155 +989,1109 @@
 
         .form-label {
             display: block;
-            font-size: 13px;
-            font-weight: 500;
-            color: #4a4a4a;
             margin-bottom: 6px;
+            color: var(--wf-muted);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
         }
 
         .form-input {
             width: 100%;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 6px;
-            color: #2c2c2c;
+            padding: 11px 12px;
+            border: 1px solid rgba(19, 99, 223, 0.12);
+            border-radius: 12px;
+            background: #ffffff;
+            color: var(--wf-text);
             font-size: 13px;
+            font-family: inherit;
         }
 
         .form-input:focus {
             outline: none;
-            border-color: var(--theme-accent);
+            border-color: rgba(19, 99, 223, 0.26);
+            box-shadow: 0 0 0 3px rgba(19, 99, 223, 0.08);
         }
 
         .form-textarea {
-            min-height: 100px;
+            min-height: 110px;
             resize: vertical;
-            font-family: monospace;
+            font-family: var(--font-code, "SFMono-Regular", Consolas, monospace);
         }
 
-        .back-btn {
-            position: fixed;
-            top: 24px;
-            left: 24px;
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            color: #2c2c2c;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 14px;
+        .config-empty {
+            display: grid;
+            gap: 10px;
+            padding: 18px;
+            border-radius: 16px;
+            background: rgba(19, 99, 223, 0.05);
+            border: 1px dashed rgba(19, 99, 223, 0.16);
+            color: var(--wf-muted);
+            font-size: 13px;
+            line-height: 1.75;
+        }
+
+        .config-empty strong {
+            color: var(--wf-text);
+            font-size: 15px;
+        }
+
+        .workflow-desc {
+            min-height: 72px;
+            resize: vertical;
+        }
+
+        .canvas-stage-toolbar {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+            padding: 12px 20px;
+            border-bottom: 1px solid rgba(219, 228, 240, 0.74);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(245, 249, 255, 0.92));
+        }
+
+        .hint-chips,
+        .canvas-tools {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .hint-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 10px;
+            border-radius: 999px;
+            background: rgba(19, 99, 223, 0.06);
+            border: 1px solid rgba(19, 99, 223, 0.08);
+            color: var(--wf-muted);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .hint-chip strong {
+            color: var(--wf-accent);
+        }
+
+        .btn-ghost {
+            background: rgba(19, 99, 223, 0.04);
+        }
+
+        @media (max-width: 1380px) {
+            .layout-grid {
+                grid-template-columns: 300px minmax(0, 1fr) 320px;
+            }
+        }
+
+        @media (max-width: 980px) {
+            .toolbar,
+            .workflow-name-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .layout-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .left-rail {
+                grid-column: auto;
+                grid-row: auto;
+                position: static;
+                grid-template-columns: 1fr 1fr;
+                align-items: start;
+            }
+
+            .workspace-panel,
+            .config-panel {
+                grid-column: auto;
+                grid-row: auto;
+            }
+
+            .config-dual-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .config-mini-block + .config-mini-block {
+                padding-left: 0;
+                border-left: 0;
+                padding-top: 14px;
+                border-top: 1px solid rgba(219, 228, 240, 0.78);
+            }
+
+            .left-rail .rail-card:last-child {
+                grid-column: 1 / -1;
+            }
+
+            .toolbar-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .quick-action-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .canvas,
+            .canvas-content {
+                min-height: 60vh;
+            }
+
+            .canvas-stage-toolbar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .node-library-card {
+                display: block;
+            }
+
+            .node-library-body {
+                max-height: none;
+                overflow: visible;
+            }
+        }
+
+        @media (max-width: 760px) {
+            .workflow-shell {
+                padding: 14px;
+            }
+
+            .toolbar,
+            .canvas-panel-head {
+                padding: 18px 16px;
+            }
+
+            .left-rail {
+                grid-template-columns: 1fr;
+                padding: 0;
+            }
+
+            .config-panel {
+                padding: 0;
+            }
+
+            .node-palette {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .toolbar-actions,
+            .workflow-meta,
+            .quick-action-grid {
+                width: 100%;
+            }
+
+            .toolbar-actions .btn {
+                flex: 1 1 calc(50% - 10px);
+                justify-content: center;
+            }
+
+            .quick-action-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .canvas-guide {
+                padding: 18px;
+            }
+        }
+
+        .saved-flow-list,
+        .outline-list,
+        .variable-list,
+        .test-log-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .saved-flow-item,
+        .outline-item,
+        .variable-item,
+        .test-log-item {
+            border: 1px solid rgba(19, 99, 223, 0.10);
+            border-radius: 14px;
+            background: linear-gradient(180deg, #ffffff, #f7fbff);
+        }
+
+        .saved-flow-item,
+        .outline-item {
+            padding: 12px 14px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .saved-flow-item:hover,
+        .outline-item:hover {
+            transform: translateY(-1px);
+            border-color: rgba(19, 99, 223, 0.18);
+            box-shadow: 0 10px 20px rgba(19, 99, 223, 0.08);
+        }
+
+        .saved-flow-item.is-active,
+        .outline-item.is-active {
+            border-color: rgba(19, 99, 223, 0.28);
+            box-shadow: 0 0 0 3px rgba(19, 99, 223, 0.08);
+        }
+
+        .saved-flow-head,
+        .outline-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .saved-flow-title,
+        .outline-title {
+            font-size: 13px;
+            font-weight: 800;
+            line-height: 1.5;
+        }
+
+        .saved-flow-meta,
+        .outline-meta,
+        .saved-flow-desc {
+            margin-top: 6px;
+            color: var(--wf-muted);
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .saved-flow-actions {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .icon-btn {
+            display: inline-grid;
+            place-items: center;
+            width: 30px;
+            height: 30px;
+            border: 1px solid rgba(19, 99, 223, 0.10);
+            border-radius: 10px;
+            background: #ffffff;
+            color: var(--wf-muted);
+            cursor: pointer;
+        }
+
+        .icon-btn:hover {
+            color: var(--wf-accent);
+            border-color: rgba(19, 99, 223, 0.18);
+        }
+
+        .selection-badge,
+        .outline-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 9px;
+            border-radius: 999px;
+            background: rgba(19, 99, 223, 0.08);
+            color: var(--wf-accent);
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .overview-grid {
+            display: grid;
+            gap: 10px;
+        }
+
+        .overview-card {
+            padding: 14px;
+            border-radius: 14px;
+            background: rgba(19, 99, 223, 0.05);
+            border: 1px solid rgba(19, 99, 223, 0.08);
+        }
+
+        .overview-card strong {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+
+        .overview-card p {
+            margin: 0;
+            color: var(--wf-muted);
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .variable-item {
+            padding: 12px;
+        }
+
+        .variable-grid,
+        .field-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .config-panel .variable-grid,
+        .config-panel .field-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .field-grid .form-group.is-wide,
+        .variable-grid .form-group.is-wide {
+            grid-column: 1 / -1;
+        }
+
+        .variable-actions,
+        .editor-actions,
+        .test-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .config-section {
+            display: grid;
+            gap: 12px;
+            padding: 14px;
+            border-radius: 16px;
+            background: rgba(19, 99, 223, 0.04);
+            border: 1px solid rgba(19, 99, 223, 0.08);
+        }
+
+        .config-section h4 {
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.3;
+        }
+
+        .config-group {
+            display: grid;
+            gap: 10px;
+            padding: 12px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid rgba(19, 99, 223, 0.08);
+        }
+
+        .config-group-head {
             display: flex;
             align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .config-group-head strong {
+            font-size: 13px;
+            line-height: 1.3;
+        }
+
+        .config-tabs {
+            display: flex;
             gap: 8px;
-            z-index: 1000;
+            flex-wrap: wrap;
         }
 
-        .back-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: var(--theme-accent-line);
+        .config-tab {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 34px;
+            max-width: 100%;
+            padding: 0 12px;
+            border: 1px solid rgba(19, 99, 223, 0.10);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.76);
+            color: var(--wf-muted);
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            white-space: nowrap;
         }
 
-        /* 连接线 */
-        .connection-line {
-            position: absolute;
-            pointer-events: none;
-            z-index: 1;
+        .config-tab.is-active {
+            background: linear-gradient(135deg, rgba(19, 99, 223, 0.12), rgba(96, 165, 250, 0.12));
+            color: var(--wf-accent);
+            border-color: rgba(19, 99, 223, 0.18);
+            box-shadow: 0 0 0 3px rgba(19, 99, 223, 0.06);
         }
 
-        .connection-line line {
-            stroke: var(--theme-accent);
-            stroke-width: 2;
+        .field-helper {
+            display: grid;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .helper-chip-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .helper-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 28px;
+            max-width: 100%;
+            padding: 0 10px;
+            border: 1px solid rgba(19, 99, 223, 0.10);
+            border-radius: 999px;
+            background: rgba(19, 99, 223, 0.06);
+            color: var(--wf-accent);
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .helper-chip:hover {
+            border-color: rgba(19, 99, 223, 0.18);
+            background: rgba(19, 99, 223, 0.10);
+        }
+
+        .helper-caption {
+            color: var(--wf-muted);
+            font-size: 11px;
+            line-height: 1.6;
+        }
+
+        .section-copy {
+            color: var(--wf-muted);
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .toggle-field {
+            min-height: 44px;
+            padding: 0 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            border: 1px solid rgba(19, 99, 223, 0.12);
+            border-radius: 12px;
+            background: #ffffff;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--wf-text);
+        }
+
+        .toggle-field input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--wf-accent);
+        }
+
+        .node-summary {
+            display: grid;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .summary-pill-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .summary-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 8px;
+            border-radius: 999px;
+            background: rgba(19, 99, 223, 0.08);
+            color: var(--wf-accent);
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .summary-text {
+            color: var(--wf-muted);
+            font-size: 11px;
+            line-height: 1.6;
+        }
+
+        .edge-path {
             fill: none;
+            stroke: #58a6ff;
+            stroke-width: 2;
+            pointer-events: none;
         }
 
-        .connection-line.temp {
-            opacity: 0.5;
+        .edge-hit {
+            fill: none;
+            stroke: transparent;
+            stroke-width: 16;
+            cursor: pointer;
+        }
+
+        .edge-group.is-selected .edge-path {
+            stroke: var(--wf-accent-deep);
+            stroke-width: 3;
+        }
+
+        .edge-label {
+            font-size: 11px;
+            font-weight: 800;
+            fill: var(--wf-accent-deep);
+            paint-order: stroke;
+            stroke: rgba(255, 255, 255, 0.94);
+            stroke-width: 4px;
+            stroke-linejoin: round;
+        }
+
+        #connectionsSvg {
+            pointer-events: auto;
+        }
+
+        .test-input {
+            min-height: 150px;
+            resize: vertical;
+            font-family: var(--font-code, "SFMono-Regular", Consolas, monospace);
+        }
+
+        .test-output {
+            margin: 0;
+            padding: 14px;
+            border-radius: 14px;
+            background: #0f172a;
+            color: #dbeafe;
+            font-size: 12px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            word-break: break-word;
+            min-height: 150px;
+            overflow: auto;
+        }
+
+        .test-log-item {
+            padding: 12px 14px;
+        }
+
+        .test-log-item strong {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 12px;
+        }
+
+        .test-log-item p {
+            margin: 0;
+            color: var(--wf-muted);
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .empty-state {
+            color: var(--wf-muted);
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .llm-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 80;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: rgba(15, 23, 42, 0.42);
+            backdrop-filter: blur(10px);
+        }
+
+        .llm-modal.is-open {
+            display: flex;
+        }
+
+        .llm-modal-dialog {
+            width: min(1120px, calc(100vw - 48px));
+            max-height: calc(100vh - 48px);
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            border-radius: 24px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 250, 255, 0.94));
+            border: 1px solid rgba(219, 228, 240, 0.92);
+            box-shadow: 0 32px 80px rgba(15, 23, 42, 0.24);
+            overflow: hidden;
+        }
+
+        .llm-modal-head,
+        .llm-modal-foot {
+            padding: 18px 22px;
+            border-bottom: 1px solid rgba(219, 228, 240, 0.82);
+            background: rgba(255, 255, 255, 0.86);
+        }
+
+        .llm-modal-foot {
+            border-top: 1px solid rgba(219, 228, 240, 0.82);
+            border-bottom: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .llm-modal-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .llm-modal-title h3 {
+            margin: 0;
+            font-size: 20px;
+            line-height: 1.2;
+        }
+
+        .llm-modal-title p {
+            margin: 8px 0 0;
+            color: var(--wf-muted);
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .llm-modal-body {
+            padding: 20px 22px;
+            overflow: auto;
+            display: grid;
+            gap: 16px;
+        }
+
+        .llm-modal-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+            gap: 16px;
+            align-items: start;
+        }
+
+        .llm-modal-main,
+        .llm-modal-side {
+            display: grid;
+            gap: 16px;
+            min-width: 0;
+        }
+
+        .llm-modal-card {
+            display: grid;
+            gap: 12px;
+            padding: 16px;
+            border-radius: 18px;
+            background: rgba(19, 99, 223, 0.04);
+            border: 1px solid rgba(19, 99, 223, 0.08);
+            min-width: 0;
+        }
+
+        .llm-modal-card h4 {
+            margin: 0;
+            font-size: 15px;
+            line-height: 1.3;
+        }
+
+        .llm-modal-card p {
+            margin: 0;
+            color: var(--wf-muted);
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .llm-modal-preview {
+            padding: 14px;
+            border-radius: 14px;
+            background: #0f172a;
+            color: #dbeafe;
+            font-size: 12px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            word-break: break-word;
+            min-height: 120px;
+        }
+
+        .llm-preset-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .llm-preset-item {
+            padding: 12px 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(19, 99, 223, 0.10);
+            background: rgba(255, 255, 255, 0.86);
+            display: grid;
+            gap: 8px;
+        }
+
+        .llm-preset-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .llm-preset-title {
+            font-size: 13px;
+            font-weight: 800;
+            line-height: 1.5;
+        }
+
+        .llm-preset-copy {
+            color: var(--wf-muted);
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        @media (max-width: 980px) {
+            .llm-modal-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .metric-grid,
+            .lab-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 760px) {
+            .field-grid,
+            .variable-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body{% if embedded %} class="is-embedded"{% endif %}>
-    <div class="app-container">
-        <!-- 主内容区 -->
-        <div class="main-content">
-            {% if not embedded %}
-            <div class="header">
-                <h1>🔄 工作流编排</h1>
-            </div>
-            {% endif %}
-
-            <div class="workflow-container">
-        <!-- 工具侧边栏 -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <div class="sidebar-title">
-                    <i class="fas fa-project-diagram"></i> 工作流编排
-                </div>
-                <div class="sidebar-copy">把多步 Agent 调用从“零散操作”收束成“可复用流程”，先决定要拼哪些能力，再决定怎么串、怎么跑、怎么复用。</div>
-            </div>
-
-            <div class="sidebar-section">
-                <div class="section-title">能力节点</div>
-                <div class="node-palette" id="nodePalette"></div>
-            </div>
-
-            <div class="sidebar-section">
-                <div class="section-title">可复用模板</div>
-                <div id="templateList"></div>
-            </div>
-        </div>
-
-        <!-- 主工作区 -->
-        <div class="canvas-area">
-            <div class="toolbar">
-                <div class="toolbar-left">
-                    <div>
-                        <div class="workflow-name">把流程从“想法”变成“能执行的编排”</div>
-                        <div class="workflow-note">先命名这条流程，再把节点拖进画布，最后检查、保存并直接执行。</div>
+    <div class="workflow-shell">
+        <div class="layout-grid">
+            <aside class="left-rail panel">
+                <section class="rail-card node-library-card">
+                    <div class="rail-card-head">
+                        <h3>节点库</h3>
+                        <p>像 Dify 一样先拖节点，再在右侧补参数。</p>
                     </div>
-                    <input type="text" class="form-input" id="workflowName"
-                           placeholder="给这条流程起个名字" style="width: 220px;">
-                </div>
-                <div class="toolbar-right">
-                    <button class="btn" onclick="clearCanvas()">
-                        <i class="fas fa-trash"></i> 清空画布
-                    </button>
-                    <button class="btn" onclick="validateWorkflow()">
-                        <i class="fas fa-check-circle"></i> 检查流程
-                    </button>
-                    <button class="btn btn-primary" onclick="saveWorkflow()">
-                        <i class="fas fa-save"></i> 保存编排
-                    </button>
-                    <button class="btn btn-success" onclick="executeWorkflow()">
-                        <i class="fas fa-play"></i> 立即执行
-                    </button>
-                </div>
-            </div>
+                    <div class="rail-card-body node-library-body">
+                        <div class="section-title">能力节点</div>
+                        <div class="node-palette" id="nodePalette"></div>
+                    </div>
+                </section>
 
-            <div class="canvas" id="canvas">
-                <div class="canvas-content" id="canvasContent"></div>
-                <svg id="connectionsSvg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></svg>
-            </div>
-        </div>
+                <section class="rail-card">
+                    <div class="rail-card-head">
+                        <h3>已部署 LLM</h3>
+                        <p>点一个已上线模型，立即绑定到当前 LLM 节点并弹出参数框。</p>
+                    </div>
+                    <div class="rail-card-body">
+                        <div class="deployed-llm-list" id="deployedLLMList"></div>
+                    </div>
+                </section>
 
-        <!-- 右侧配置面板 -->
-        <div class="config-panel" id="configPanel">
-            <div class="config-header">
-                <div class="config-title">节点配置</div>
-                <button class="btn" onclick="closeConfigPanel()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="config-content" id="configContent"></div>
+                <section class="rail-card">
+                    <div class="rail-card-head">
+                        <h3>模板</h3>
+                        <p>用现成链路起步，再继续深改。</p>
+                    </div>
+                    <div class="rail-card-body">
+                        <div class="template-list" id="templateList"></div>
+                    </div>
+                </section>
+
+                <section class="rail-card">
+                    <div class="rail-card-head">
+                        <h3>复杂 Demo</h3>
+                        <p>比基础模板更厚，适合直接拿来改成正式工作流。</p>
+                    </div>
+                    <div class="rail-card-body">
+                        <div class="scenario-list" id="workflowScenarioList"></div>
+                    </div>
+                </section>
+
+                <section class="rail-card">
+                    <div class="rail-card-head">
+                        <h3>我的流程</h3>
+                        <p>保存过的编排可以继续编辑。</p>
+                    </div>
+                    <div class="rail-card-body">
+                        <div class="saved-flow-list" id="workflowLibrary"></div>
+                    </div>
+                </section>
+
+                <section class="rail-card">
+                    <div class="rail-card-head">
+                        <h3>编排规则</h3>
+                        <p>高频入口、变量映射和测试都放到同一页完成。</p>
+                    </div>
+                    <div class="rail-card-body">
+                        <div class="helper-list">
+                            <div class="helper-item"><i class="fas fa-layer-group"></i><span>先摆主链路，再补分支和合流。</span></div>
+                            <div class="helper-item"><i class="fas fa-box"></i><span>每个节点只负责一层动作，复杂逻辑拆成多节点。</span></div>
+                            <div class="helper-item"><i class="fas fa-vial-circle-check"></i><span>变量、连线条件和试运行结果都在右侧同步检查。</span></div>
+                        </div>
+                    </div>
+                </section>
+            </aside>
+
+            <main class="workspace-panel">
+                <section class="toolbar">
+                    <div class="toolbar-copy">
+                        <div class="workflow-name-row">
+                            <div>
+                                <div class="workflow-name">工作流画布</div>
+                                <div class="workflow-note">命名、搭建、配变量、配节点、配连线、试运行。</div>
+                            </div>
+                            <input type="text" class="form-input" id="workflowName" placeholder="给这条流程起个名字" style="width: 260px;">
+                        </div>
+                        <textarea class="form-input workflow-desc" id="workflowDescription" placeholder="补一句流程说明，方便后续复用和交接。"></textarea>
+                        <div class="workflow-meta">
+                            <span class="meta-chip"><i class="fas fa-cubes"></i><span>节点</span><strong id="nodeCount">0</strong></span>
+                            <span class="meta-chip"><i class="fas fa-share-nodes"></i><span>连接</span><strong id="edgeCount">0</strong></span>
+                            <span class="meta-chip"><i class="fas fa-floppy-disk"></i><span id="saveState">未保存</span></span>
+                            <span class="meta-chip"><i class="fas fa-crosshairs"></i><span id="selectionState">未选中对象</span></span>
+                        </div>
+                    </div>
+                    <div class="toolbar-actions">
+                        <button class="btn" onclick="clearCanvas()">
+                            <i class="fas fa-trash"></i> 清空
+                        </button>
+                        <button class="btn" onclick="validateWorkflow()">
+                            <i class="fas fa-check-circle"></i> 检查
+                        </button>
+                        <button class="btn btn-primary" onclick="saveWorkflow()">
+                            <i class="fas fa-save"></i> 保存
+                        </button>
+                        <button class="btn btn-success" onclick="executeWorkflow()">
+                            <i class="fas fa-play"></i> 执行
+                        </button>
+                    </div>
+                </section>
+
+                <section class="canvas-panel">
+                    <div class="canvas-panel-head">
+                        <div>
+                            <h2>流程画布</h2>
+                            <p>拖入节点，从右侧端口连到左侧端口；节点、边和变量都能在同页继续编辑。</p>
+                        </div>
+                        <span class="panel-tag"><i class="fas fa-arrows-up-down-left-right"></i><span>强编辑画布</span></span>
+                    </div>
+                    <div class="canvas-stage-toolbar">
+                        <div class="hint-chips">
+                            <span class="hint-chip"><i class="fas fa-circle-play"></i><span>起点和终点必须成对出现</span></span>
+                            <span class="hint-chip"><i class="fas fa-code-branch"></i><span>条件分支建议补 <strong>true/false</strong> 标签</span></span>
+                            <span class="hint-chip"><i class="fas fa-boxes-stacked"></i><span>变量统一在右侧维护</span></span>
+                        </div>
+                    </div>
+                    <div class="canvas" id="canvas">
+                        <div class="canvas-guide" id="canvasGuide">
+                            <i class="fas fa-bezier-curve"></i>
+                            <strong>从左侧拖入第一个节点开始搭建。</strong>
+                            <p>建议先放起点、Agent、结束，再补条件、API、转换和合流。</p>
+                        </div>
+                        <div class="canvas-content" id="canvasContent"></div>
+                        <svg id="connectionsSvg"></svg>
+                    </div>
+                </section>
+
+                <section class="lab-panel">
+                    <div class="canvas-panel-head">
+                        <div>
+                            <h2>编排实验台</h2>
+                            <p>把复杂度分析、运行场景、路径预览和下一步建议收进同一块，避免画布下面再空着。</p>
+                        </div>
+                        <span class="panel-tag"><i class="fas fa-microscope"></i><span>Complex Workflow Lab</span></span>
+                    </div>
+                    <div class="lab-body">
+                        <div class="metric-grid" id="workflowMetricGrid"></div>
+                        <div class="lab-grid">
+                            <div class="lab-card">
+                                <h3>运行场景</h3>
+                                <p>一键把 demo 输入灌到测试区，适合快速回归。</p>
+                                <div class="preset-list" id="workflowPresetList"></div>
+                            </div>
+                            <div class="lab-card">
+                                <h3>路径预览</h3>
+                                <p>按当前连线关系给出主要执行路径和分支走向。</p>
+                                <div class="route-list" id="workflowRouteList"></div>
+                            </div>
+                            <div class="lab-card">
+                                <h3>编排建议</h3>
+                                <p>根据当前节点结构、变量和校验结果给出下一步动作。</p>
+                                <div class="next-step-list" id="workflowNextSteps"></div>
+                            </div>
+                            <div class="lab-card">
+                                <h3>节点盘点</h3>
+                                <p>把节点类型分布、LLM 用量和连线稠密度压缩到一眼可读。</p>
+                                <div class="inventory-list" id="workflowInventory"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+
+            <aside class="config-panel panel" id="configPanel">
+                <div class="config-card config-stack">
+                    <div class="config-card-head">
+                        <h3>工作区侧栏</h3>
+                        <p>把概览、变量、选中对象和试运行拼成一条连续侧栏，减少跳区和空白。</p>
+                    </div>
+                    <div class="config-content config-stack-body">
+                        <section class="config-subsection">
+                            <div class="config-subsection-head">
+                                <div>
+                                    <h3>流程操作</h3>
+                                    <p>把低频管理动作挪到右边，中间只保留清空、检查、保存和执行。</p>
+                                </div>
+                            </div>
+                            <div class="quick-action-grid">
+                                <button class="btn btn-ghost" onclick="newWorkflow()">
+                                    <i class="fas fa-file-circle-plus"></i> 新建
+                                </button>
+                                <button class="btn btn-ghost" onclick="triggerImportWorkflow()">
+                                    <i class="fas fa-file-import"></i> 导入
+                                </button>
+                                <button class="btn btn-ghost" onclick="exportWorkflow()">
+                                    <i class="fas fa-file-export"></i> 导出
+                                </button>
+                                <button class="btn btn-ghost" onclick="autoLayout()">
+                                    <i class="fas fa-wand-magic-sparkles"></i> 自动排布
+                                </button>
+                                <button class="btn btn-ghost" onclick="loadStarterFlow()">
+                                    <i class="fas fa-sparkles"></i> 一键起步
+                                </button>
+                                <button class="btn btn-ghost" onclick="renderWorkflow()">
+                                    <i class="fas fa-rotate"></i> 刷新视图
+                                </button>
+                            </div>
+                            <div class="config-helper-note">右侧适合放管理和辅助动作，中央区域只保留当前搭建流程最常用的执行动作。</div>
+                        </section>
+
+                        <section class="config-subsection">
+                            <div class="config-subsection-head">
+                                <div>
+                                    <h3>画布概览与变量</h3>
+                                    <p>把当前焦点、结构摘要、节点索引和全局变量压在同一层，减少首屏跳区。</p>
+                                </div>
+                            </div>
+                            <div class="config-dual-grid">
+                                <div class="config-mini-block">
+                                    <div class="compact-overview-grid">
+                                        <div class="overview-card">
+                                            <strong>当前焦点</strong>
+                                            <p id="selectionSummary">还没有选中节点或连线。</p>
+                                        </div>
+                                        <div class="overview-card">
+                                            <strong>结构摘要</strong>
+                                            <p id="structureSummary">画布还是空的，可以从模板或节点库开始。</p>
+                                        </div>
+                                    </div>
+                                    <div class="section-title">节点与连接</div>
+                                    <div class="outline-list" id="workflowOutline"></div>
+                                </div>
+                                <div class="config-mini-block">
+                                    <div>
+                                        <div class="section-title">流程变量</div>
+                                        <div class="section-copy">把全局输入、上下文和输出约定先定义清楚。</div>
+                                    </div>
+                                    <div id="workflowSettings"></div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="config-subsection">
+                            <div class="config-subsection-head">
+                                <div>
+                                    <h3>编辑与试运行</h3>
+                                    <p>左侧改节点和连线，右侧立刻带测试输入、执行结果和日志联调。</p>
+                                </div>
+                            </div>
+                            <div class="config-dual-grid">
+                                <div class="config-mini-block">
+                                    <div class="config-subsection-head">
+                                        <div>
+                                            <h3 id="configTitle">选中对象</h3>
+                                            <p id="configDescription">节点、边都能在这里改。</p>
+                                        </div>
+                                        <button class="btn" onclick="closeConfigPanel()">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <div id="configContent">
+                                        <div class="config-empty">
+                                            <strong>还没有选中节点。</strong>
+                                            <span>点击画布中的任意节点后，这里会显示对应的可编辑属性。</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="config-mini-block run-workbench">
+                                    <div>
+                                        <div class="section-title">测试输入</div>
+                                        <div class="section-copy">不再用弹窗输入，直接在这里准备一轮测试数据。</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">测试输入 JSON</label>
+                                        <textarea class="form-input test-input" id="runInput">{
+  "user_query": "帮我总结这条告警并给出处置建议",
+  "severity": 2,
+  "alarm_id": "ALM-1024",
+  "score": 0.86
+}</textarea>
+                                    </div>
+                                    <div class="test-actions">
+                                        <button class="btn" onclick="validateWorkflow()">
+                                            <i class="fas fa-check-double"></i> 先检查
+                                        </button>
+                                        <button class="btn btn-success" onclick="executeWorkflow()">
+                                            <i class="fas fa-play"></i> 运行一次
+                                        </button>
+                                    </div>
+                                    <div class="run-output-stack">
+                                        <div class="run-output-card">
+                                            <div class="section-title">执行结果</div>
+                                            <pre class="test-output" id="runOutput">还没有运行结果。</pre>
+                                        </div>
+                                        <div class="run-output-card">
+                                            <div class="section-title">执行日志</div>
+                                            <div class="test-log-list" id="runLog"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </aside>
         </div>
     </div>
+
+    <input type="file" id="workflowImportInput" accept="application/json" hidden>
+    <div class="llm-modal" id="llmConfigModal" aria-hidden="true">
+        <div class="llm-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="llmModalTitle">
+            <div class="llm-modal-head">
+                <div class="llm-modal-title">
+                    <div>
+                        <h3 id="llmModalTitle">LLM 参数配置</h3>
+                        <p id="llmModalSubtitle">点一下已部署的 LLM 节点，就在这里直接调模型、Prompt 和采样参数。</p>
+                    </div>
+                    <button class="btn" type="button" onclick="closeLLMConfigModal()">
+                        <i class="fas fa-times"></i> 关闭
+                    </button>
+                </div>
+            </div>
+            <div class="llm-modal-body" id="llmModalBody"></div>
+            <div class="llm-modal-foot">
+                <div class="helper-caption">这里改的是当前画布里这一个 LLM 节点，不会影响其他节点。</div>
+                <div class="editor-actions">
+                    <button class="btn" type="button" onclick="focusCurrentLLMNode()">
+                        <i class="fas fa-crosshairs"></i> 回到节点
+                    </button>
+                    <button class="btn btn-primary" type="button" onclick="closeLLMConfigModal()">
+                        <i class="fas fa-check"></i> 完成配置
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
-
     <script src="/static/js/visual-workflow.js"></script>
 </body>
 </html>

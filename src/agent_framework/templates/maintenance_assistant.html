@@ -11,7 +11,7 @@
   <style>
     :root{--bg:#f4f7fb;--card:#fff;--line:#dbe4f0;--text:#10233f;--muted:#5f728c;--primary:#1363df;--soft:#e9f1ff;--ok:#2563eb;--warn:#60a5fa;--shadow:0 12px 28px rgba(16,35,63,.08);--radius:18px}
     *{box-sizing:border-box}html{scroll-behavior:smooth}.material-symbols-outlined{font-variation-settings:"FILL" 0,"wght" 400,"GRAD" 0,"opsz" 24;user-select:none}body{margin:0;font-family:"Inter","Segoe UI","Microsoft YaHei",sans-serif;color:var(--text)}
-    .platform-sidebar{position:fixed;left:0;top:0;z-index:50;display:flex;flex-direction:column;gap:10px;width:16rem;height:100vh;padding:24px 16px;background:#f0f4f7;border-right:1px solid rgba(219,228,240,.7)}.platform-brand{display:flex;align-items:center;gap:12px;padding:0 8px 10px;text-decoration:none;color:inherit}.platform-brand-mark{display:grid;place-items:center;width:40px;height:40px;border-radius:14px;background:linear-gradient(135deg,#1363df,#5794fd);color:#fff;font-size:22px}.platform-brand-copy strong{display:block;font-family:"Manrope",sans-serif;font-size:17px;line-height:1.1}.platform-brand-copy small{display:block;margin-top:4px;color:var(--muted);font-size:11px;letter-spacing:.04em}.platform-primary-entry{display:flex;align-items:center;justify-content:center;gap:8px;margin:2px 0 8px;padding:14px 16px;border-radius:16px;background:linear-gradient(135deg,#1363df,#0f4eb3);color:#fff;text-decoration:none;font-weight:700;box-shadow:0 18px 32px rgba(19,99,223,.2)}.platform-primary-entry:hover{transform:translateY(-1px)}.platform-nav{display:grid;gap:4px}.platform-nav-link,.platform-nav-utility{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;color:rgba(44,52,55,.78);text-decoration:none;font-weight:600;transition:.2s ease}.platform-nav-link:hover,.platform-nav-utility:hover{background:rgba(213,227,253,.55);color:#005cc0}.platform-nav-link.active{background:#d5e3fd;color:#005cc0;box-shadow:inset 0 0 0 1px rgba(0,92,192,.08)}.platform-sidebar-footer{margin-top:auto;padding-top:14px;border-top:1px solid rgba(172,179,183,.18);display:grid;gap:4px}.platform-user-pill{display:flex;align-items:center;gap:12px;padding:12px 14px 0}.platform-user-mark{width:32px;height:32px;border-radius:999px;background:linear-gradient(135deg,#1363df,#5794fd)}.platform-user-pill strong{display:block;font-size:12px}.platform-user-pill small{display:block;margin-top:2px;color:var(--muted);font-size:10px;letter-spacing:.08em;text-transform:uppercase}.platform-header{position:fixed;left:16rem;right:0;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:16px;height:72px;padding:0 32px;background:rgba(247,249,251,.86);backdrop-filter:blur(18px);border-bottom:1px solid rgba(219,228,240,.55)}.platform-header-title{display:flex;align-items:center;gap:12px}.platform-header-title strong{font-family:"Manrope",sans-serif;font-size:20px;font-weight:900}.platform-header-badge{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;background:#d5e3fd;color:#005cc0;font-size:12px;font-weight:700}.platform-header-tools{display:flex;align-items:center;gap:12px}.platform-header-search{position:relative}.platform-header-search .material-symbols-outlined{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--muted)}.platform-header-search input{width:280px;padding:10px 16px 10px 40px;border:1px solid rgba(219,228,240,.95);border-radius:999px;background:#f0f4f7;color:var(--text);font:inherit;outline:none}.platform-header-search input:focus{border-color:rgba(19,99,223,.26);box-shadow:0 0 0 3px rgba(19,99,223,.08)}.platform-header-icon{display:grid;place-items:center;width:40px;height:40px;border-radius:999px;color:var(--muted);text-decoration:none;transition:.2s ease}.platform-header-icon:hover{background:#e9f1ff;color:#1363df}.assistant-page-shell{position:relative;z-index:5;min-height:100vh;width:calc(100% - 16rem);max-width:none;margin:0 0 0 16rem;padding:96px 32px 32px;display:flex;flex-direction:column;gap:20px}.assistant-page-shell>*{width:100%;max-width:none}.assistant-topbar{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start}.title-block{max-width:1120px}.title-block h1{margin:0;font-family:"Manrope",sans-serif;font-size:36px;line-height:1.1}.title-block p{margin:8px 0 0;color:var(--muted);max-width:1040px;line-height:1.7}.mode-badge{display:inline-flex;align-items:center;gap:8px;margin-bottom:10px;padding:6px 12px;border-radius:999px;background:rgba(19,99,223,.08);border:1px solid rgba(19,99,223,.14);color:var(--primary);font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.top-actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+    .platform-sidebar{display:none}.platform-header{position:fixed;left:0;right:0;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:16px;height:72px;padding:0 32px;background:rgba(247,249,251,.86);backdrop-filter:blur(18px);border-bottom:1px solid rgba(219,228,240,.55)}.platform-header-title{display:flex;align-items:center;gap:12px}.platform-header-title strong{font-family:"Manrope",sans-serif;font-size:20px;font-weight:900}.platform-header-badge{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;background:#d5e3fd;color:#005cc0;font-size:12px;font-weight:700}.platform-header-tools{display:flex;align-items:center;gap:12px}.platform-header-search{position:relative}.platform-header-search .material-symbols-outlined{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--muted)}.platform-header-search input{width:280px;padding:10px 16px 10px 40px;border:1px solid rgba(219,228,240,.95);border-radius:999px;background:#f0f4f7;color:var(--text);font:inherit;outline:none}.platform-header-search input:focus{border-color:rgba(19,99,223,.26);box-shadow:0 0 0 3px rgba(19,99,223,.08)}.platform-header-icon{display:grid;place-items:center;width:40px;height:40px;border-radius:999px;color:var(--muted);text-decoration:none;transition:.2s ease}.platform-header-icon:hover{background:#e9f1ff;color:#1363df}.assistant-page-shell{position:relative;z-index:5;min-height:100vh;width:100%;max-width:none;margin:0;padding:96px 32px 32px;display:flex;flex-direction:column;gap:20px}.assistant-page-shell>*{width:100%;max-width:none}.assistant-topbar{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start}.title-block{max-width:1120px}.title-block h1{margin:0;font-family:"Manrope",sans-serif;font-size:36px;line-height:1.1}.title-block p{margin:8px 0 0;color:var(--muted);max-width:1040px;line-height:1.7}.mode-badge{display:inline-flex;align-items:center;gap:8px;margin-bottom:10px;padding:6px 12px;border-radius:999px;background:rgba(19,99,223,.08);border:1px solid rgba(19,99,223,.14);color:var(--primary);font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.top-actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
     .btn{border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:12px;padding:10px 16px;cursor:pointer;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:8px;box-shadow:var(--shadow)}.btn.primary{background:var(--primary);color:#fff;border-color:var(--primary)}.mode-switch{display:inline-flex;padding:4px;border-radius:999px;background:#edf3fb;border:1px solid rgba(19,99,223,.10)}.mode-link{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:999px;font-size:13px;font-weight:800;color:var(--muted);text-decoration:none}.mode-link.active{background:var(--primary);color:#fff;box-shadow:0 10px 24px rgba(19,99,223,.18)}
     .quick-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.summary-card{padding:16px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,#fff,#f7faff);box-shadow:var(--shadow);display:grid;gap:8px}.summary-card strong{font-size:15px}.summary-card p{margin:0;color:var(--muted);font-size:12px;line-height:1.7}.summary-card .meta{color:var(--primary);font-size:12px;font-weight:800}
     .assistant-nav{display:flex;gap:10px;flex-wrap:wrap}.assistant-nav a{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:999px;background:var(--soft);color:var(--primary);text-decoration:none;font-size:13px;font-weight:700;border:1px solid rgba(19,99,223,.12)}.assistant-nav a:hover{transform:translateY(-1px)}
@@ -45,6 +45,12 @@
     body {
       font-size: 17px;
       line-height: 1.7;
+    }
+
+    .assistant-page-shell {
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 28px 32px 32px !important;
     }
 
     .platform-brand-copy strong {
@@ -191,104 +197,150 @@
     .side-card h3 {
       font-size: 16px;
     }
+
+    :root {
+      --bg: #eef4fb;
+      --card: rgba(255, 252, 247, 0.84);
+      --line: rgba(101, 120, 144, 0.16);
+      --text: #202a36;
+      --muted: #6f746f;
+      --primary: #1363df;
+      --soft: #eef8f5;
+      --ok: #1f8f63;
+      --warn: #d97706;
+      --shadow: 0 18px 42px -28px rgba(34, 44, 63, .16);
+    }
+
+    html,
+    body {
+      background:
+        radial-gradient(circle at 8% 10%, rgba(19, 99, 223, .14), transparent 22%),
+        radial-gradient(circle at 88% 12%, rgba(217, 119, 6, .12), transparent 20%),
+        radial-gradient(circle at 76% 86%, rgba(20, 184, 166, .10), transparent 24%),
+        var(--bg) !important;
+      color: var(--text);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(19, 99, 223, .03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(19, 99, 223, .03) 1px, transparent 1px) !important;
+      background-size: 28px 28px !important;
+      mask-image: linear-gradient(180deg, rgba(0, 0, 0, .22), transparent 70%);
+    }
+
+    .platform-header {
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, .74), rgba(255, 250, 245, .56)),
+        rgba(246, 239, 227, .52);
+      border-bottom: 1px solid rgba(101, 120, 144, .08);
+    }
+
+    .platform-header-badge,
+    .mode-badge,
+    .workbench-badge,
+    .flow-pill,
+    .reasoning-mode,
+    .selection-count,
+    .badge.blue {
+      background: linear-gradient(135deg, rgba(255, 255, 255, .92), var(--soft));
+      border: 1px solid rgba(19, 99, 223, .14);
+      color: var(--primary);
+    }
+
+    .platform-header-search input,
+    .field input,
+    .field textarea,
+    .field select,
+    .composer textarea,
+    .knowledge-search {
+      background: linear-gradient(180deg, rgba(255, 255, 255, .92), rgba(255, 250, 245, .76));
+      border-color: var(--line);
+      color: var(--text);
+    }
+
+    .platform-header-search input:focus,
+    .field input:focus,
+    .field textarea:focus,
+    .field select:focus,
+    .composer textarea:focus,
+    .knowledge-search:focus {
+      outline: none;
+      border-color: rgba(19, 99, 223, .22);
+      box-shadow: 0 0 0 4px rgba(19, 99, 223, .08);
+    }
+
+    .card,
+    .workbench-card,
+    .advanced-workbench,
+    .advanced-section,
+    .summary-card,
+    .fusion-card,
+    .flow-board,
+    .reasoning-chain,
+    .reasoning-log,
+    .strategy-card,
+    .shortcut-card,
+    .kv-item,
+    .cause-item,
+    .retrieval-item,
+    .action-item,
+    .kb-group,
+    .kb-item,
+    .toggle-item,
+    .tool-reference,
+    .guide-banner {
+      background: linear-gradient(180deg, rgba(255, 255, 255, .88), rgba(255, 250, 245, .74));
+      border-color: var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .assistant-layout {
+      grid-template-columns: minmax(0, 1.12fr) minmax(320px, .72fr);
+    }
+
+    .side-stack {
+      top: 96px;
+    }
+
+    body:not(.is-embedded) .assistant-page-shell {
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 96px 32px 32px !important;
+    }
+
+    body.is-embedded .assistant-page-shell {
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 16px !important;
+    }
   </style>
 </head>
 <body{% if embedded %} class="is-embedded"{% endif %}>
   {% if not embedded %}
-  <aside class="platform-sidebar">
-    <a class="platform-brand" href="/">
-      <span class="platform-brand-mark material-symbols-outlined">bolt</span>
-      <span class="platform-brand-copy">
-        <strong>风起时域</strong>
-        <small>新能源 AI 平台入口</small>
-      </span>
-    </a>
-
-    <a class="platform-primary-entry" href="/maintenance-assistant">
-      <span class="material-symbols-outlined">support_agent</span>
-      <span>当前助手页</span>
-    </a>
-
-    <nav class="platform-nav" aria-label="平台导航">
-      <a class="platform-nav-link active" href="/maintenance-assistant">
-        <span class="material-symbols-outlined">neurology</span>
-        <span>智导助手</span>
-      </a>
-      <a class="platform-nav-link" href="/modules/weather-siting/app">
-        <span class="material-symbols-outlined">wind_power</span>
-        <span>气象选址</span>
-      </a>
-      <a class="platform-nav-link" href="/modules/power-trading/app">
-        <span class="material-symbols-outlined">query_stats</span>
-        <span>电力交易</span>
-      </a>
-      <a class="platform-nav-link" href="/modules/smart-workorder/app">
-        <span class="material-symbols-outlined">assignment</span>
-        <span>智能工单</span>
-      </a>
-      <a class="platform-nav-link" href="/dashboard">
-        <span class="material-symbols-outlined">dashboard</span>
-        <span>平台看板</span>
-      </a>
-      <a class="platform-nav-link" href="/apps">
-        <span class="material-symbols-outlined">apps</span>
-        <span>应用中心</span>
-      </a>
-    </nav>
-
-    <div class="platform-sidebar-footer">
-      <a class="platform-nav-utility" href="/knowledge">
-        <span class="material-symbols-outlined">library_books</span>
-        <span>知识库</span>
-      </a>
-      <a class="platform-nav-utility" href="/plugins">
-        <span class="material-symbols-outlined">extension</span>
-        <span>插件市场</span>
-      </a>
-      <a class="platform-nav-utility" href="/settings">
-        <span class="material-symbols-outlined">settings</span>
-        <span>平台设置</span>
-      </a>
-      <a class="platform-nav-utility" href="/dev">
-        <span class="material-symbols-outlined">tune</span>
-        <span>开发控制台</span>
-      </a>
-      <div class="platform-user-pill">
-        <span class="platform-user-mark"></span>
-        <div>
-          <strong>统一体验风格</strong>
-          <small>assistant</small>
-        </div>
-      </div>
-    </div>
-  </aside>
-
   <header class="platform-header">
     <div class="platform-header-title">
-      <strong>风电运维智导助手</strong>
       <span class="platform-header-badge">
-        <span class="material-symbols-outlined" style="font-size:16px">palette</span>
-        <span>已对齐平台主视觉</span>
+        <span class="material-symbols-outlined">ecg_heart</span>
+        <span>用户诊断入口</span>
       </span>
+      <strong>智导助手</strong>
     </div>
     <div class="platform-header-tools">
       <label class="platform-header-search">
         <span class="material-symbols-outlined">search</span>
-        <input type="text" value="统一入口 / 中文导航 / 助手诊断工作台" readonly aria-label="页面说明">
+        <input type="text" value="风电故障诊断、知识检索与因果分析统一入口" readonly aria-label="当前页面摘要">
       </label>
-      <a class="platform-header-icon" href="/system-status" aria-label="系统状态">
-        <span class="material-symbols-outlined">monitor_heart</span>
-      </a>
-      <a class="platform-header-icon" href="/logs" aria-label="日志中心">
-        <span class="material-symbols-outlined">notifications</span>
-      </a>
-      <a class="platform-header-icon" href="/dev" aria-label="开发控制台">
-        <span class="material-symbols-outlined">account_circle</span>
+      <a class="platform-header-icon" href="/developer/assistant" aria-label="进入开发版助手">
+        <span class="material-symbols-outlined">open_in_new</span>
       </a>
     </div>
   </header>
   {% endif %}
-
   <div class="assistant-page-shell"{% if embedded %} style="width:100%;margin:0;padding:16px;"{% endif %}>
     <div class="assistant-topbar">
       <div class="title-block">
@@ -533,6 +585,24 @@
           </div>
         </section>
       </div>
+      <aside class="side-stack">
+        <section class="card side-card">
+          <h3>路由信息</h3>
+          <div class="empty" id="routePanel">发送问题后，这里会显示当前轮次的模型路由、模式选择和会话信息。</div>
+        </section>
+        <section class="card side-card">
+          <h3>因果分析</h3>
+          <div class="empty" id="causalPanel">启用因果推断后，这里会显示根因候选、影响因素和推荐动作。</div>
+        </section>
+        <section class="card side-card">
+          <h3>检索结果</h3>
+          <div class="empty" id="retrievalPanel">发送问题后，这里会展示知识片段、记忆命中和会话摘要。</div>
+        </section>
+        <section class="card side-card">
+          <h3>模型策略</h3>
+          <div class="empty" id="modelPanel">这里会展示微调路由、RLHF 状态以及当前模型来源。</div>
+        </section>
+      </aside>
     </div>
   </div>
   <script>

@@ -209,9 +209,30 @@
             line-height: 1.5;
         }
 
+        .nav-link-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .nav-link-badge {
+            display: inline-flex;
+            align-items: center;
+            min-height: 24px;
+            padding: 0 10px;
+            border-radius: 999px;
+            background: var(--primary-soft);
+            color: var(--primary);
+            font-size: 12px;
+            font-weight: 800;
+        }
+
         .main {
             margin-left: 320px;
             padding: 24px 24px 32px;
+            min-width: 0;
+            overflow-x: hidden;
         }
 
         .hero {
@@ -220,6 +241,7 @@
             border-radius: 28px;
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(242, 247, 255, 0.92));
             box-shadow: var(--shadow);
+            min-width: 0;
         }
 
         .hero h2 {
@@ -267,6 +289,8 @@
             display: flex;
             flex-direction: column;
             min-height: calc(100vh - 48px);
+            height: calc(100vh - 48px);
+            min-width: 0;
             border: 1px solid var(--line);
             border-radius: 28px;
             background: rgba(255, 255, 255, 0.78);
@@ -322,15 +346,15 @@
 
         .workspace-frame-wrap {
             flex: 1;
-            min-height: 720px;
+            min-height: 0;
             background: #fff;
         }
 
         .workspace-frame {
             display: block;
             width: 100%;
-            height: calc(100vh - 190px);
-            min-height: 720px;
+            height: 100%;
+            min-height: 0;
             border: 0;
             background: #fff;
         }
@@ -370,6 +394,7 @@
             flex-direction: column;
             gap: 12px;
             min-height: 180px;
+            min-width: 0;
             padding: 20px;
             border-radius: 24px;
             background: var(--panel);
@@ -381,6 +406,25 @@
             display: block;
             font-size: 18px;
             line-height: 1.35;
+        }
+
+        .feature-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feature-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            background: var(--primary-soft);
+            color: var(--primary);
+            font-size: 22px;
+            flex-shrink: 0;
         }
 
         .feature-path {
@@ -402,6 +446,32 @@
             flex: 1;
         }
 
+        .feature-metrics,
+        .feature-highlights,
+        .feature-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .feature-metric,
+        .feature-highlight {
+            display: inline-flex;
+            align-items: center;
+            min-height: 28px;
+            padding: 0 10px;
+            border-radius: 999px;
+            background: rgba(15, 99, 216, 0.08);
+            color: var(--primary);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .feature-highlight {
+            background: rgba(19, 34, 56, 0.05);
+            color: var(--text);
+        }
+
         .feature-card a {
             display: inline-flex;
             align-items: center;
@@ -413,6 +483,12 @@
             color: #fff;
             font-size: 15px;
             font-weight: 700;
+        }
+
+        .feature-link.secondary {
+            background: #fff;
+            color: var(--text);
+            border: 1px solid var(--line);
         }
 
         @media (max-width: 1280px) {
@@ -457,12 +533,12 @@
             }
 
             .workspace-frame-wrap {
-                min-height: 640px;
+                min-height: 0;
             }
 
             .workspace-frame {
-                height: 70vh;
-                min-height: 640px;
+                height: 100%;
+                min-height: 0;
             }
         }
     </style>
@@ -489,9 +565,16 @@
                     </summary>
                     <div class="nav-list">
                         {% for item in section["items"] %}
-                        <a class="nav-link{% if item['active'] %} active{% endif %}" href="{{ item['shell_href'] }}">
+                        <a class="nav-link{% if item['active'] %} active{% endif %}" href="{{ item['href'] }}">
                             <strong>{{ item["name"] }}</strong>
                             <span>{{ item["summary"] }}</span>
+                            {% if item["metrics"] %}
+                            <div class="nav-link-meta">
+                                {% for metric in item["metrics"][:2] %}
+                                <span class="nav-link-badge">{{ metric }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
                         </a>
                         {% endfor %}
                     </div>
@@ -508,9 +591,6 @@
                         <div class="brand-label">工作区</div>
                         <h2>{{ current_item["name"] }}</h2>
                         <p>{{ current_item["summary"] }}</p>
-                    </div>
-                    <div class="workspace-actions">
-                        <a class="action-link" href="{{ url_for('portal_home') }}">返回总览</a>
                     </div>
                 </div>
                 <div class="workspace-frame-wrap">
@@ -544,12 +624,31 @@
                     {% for item in section["items"] %}
                     <article class="feature-card">
                         <div>
-                            <strong>{{ item["name"] }}</strong>
+                            <div class="feature-title">
+                                {% if item["icon"] %}
+                                <span class="feature-icon material-symbols-outlined">{{ item["icon"] }}</span>
+                                {% endif %}
+                                <strong>{{ item["name"] }}</strong>
+                            </div>
                             <span class="feature-path">{{ item["href"] }}</span>
                         </div>
                         <p>{{ item["summary"] }}</p>
-                        <div>
-                            <a href="{{ item['shell_href'] }}">打开功能</a>
+                        {% if item["metrics"] %}
+                        <div class="feature-metrics">
+                            {% for metric in item["metrics"] %}
+                            <span class="feature-metric">{{ metric }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        {% if item["highlights"] %}
+                        <div class="feature-highlights">
+                            {% for highlight in item["highlights"] %}
+                            <span class="feature-highlight">{{ highlight }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <div class="feature-links">
+                            <a class="feature-link" href="{{ item['href'] }}">进入模块</a>
                         </div>
                     </article>
                     {% endfor %}
@@ -560,20 +659,139 @@
         </main>
     </div>
     <script>
+        const sidebar = document.querySelector(".sidebar");
         const sidebarGroups = Array.from(document.querySelectorAll(".sidebar-group"));
+        const navLinks = Array.from(document.querySelectorAll(".nav-link"));
+        const sidebarScrollKey = "portal_sidebar_scroll_top";
+        const sidebarOpenKey = "portal_sidebar_open_group";
+
+        function saveSidebarState() {
+            if (!sidebar) {
+                return;
+            }
+
+            try {
+                sessionStorage.setItem(sidebarScrollKey, String(sidebar.scrollTop));
+                const openIndex = sidebarGroups.findIndex((group) => group.open);
+                sessionStorage.setItem(sidebarOpenKey, String(openIndex));
+            } catch (error) {
+                console.warn("portal sidebar state unavailable", error);
+            }
+        }
+
+        function restoreSidebarState() {
+            if (!sidebar) {
+                return;
+            }
+
+            try {
+                const openIndex = Number(sessionStorage.getItem(sidebarOpenKey));
+                if (Number.isInteger(openIndex) && openIndex >= 0 && sidebarGroups[openIndex]) {
+                    sidebarGroups.forEach((group, index) => {
+                        group.open = index === openIndex;
+                    });
+                }
+
+                const savedScrollTop = Number(sessionStorage.getItem(sidebarScrollKey));
+                if (!Number.isNaN(savedScrollTop)) {
+                    requestAnimationFrame(() => {
+                        sidebar.scrollTop = savedScrollTop;
+                    });
+                }
+            } catch (error) {
+                console.warn("portal sidebar state unavailable", error);
+            }
+        }
+
+        restoreSidebarState();
 
         sidebarGroups.forEach((group) => {
             group.addEventListener("toggle", () => {
                 if (!group.open) {
+                    saveSidebarState();
                     return;
                 }
+
                 sidebarGroups.forEach((other) => {
                     if (other !== group) {
                         other.open = false;
                     }
                 });
+
+                saveSidebarState();
             });
         });
+
+        if (sidebar) {
+            sidebar.addEventListener("scroll", saveSidebarState, { passive: true });
+        }
+
+        navLinks.forEach((link) => {
+            link.addEventListener("click", saveSidebarState);
+        });
+
+        const workspaceFrame = document.querySelector(".workspace-frame");
+
+        function normalizeEmbeddedWorkspace() {
+            if (!workspaceFrame) {
+                return;
+            }
+
+            try {
+                const frameDocument = workspaceFrame.contentDocument;
+                if (!frameDocument) {
+                    return;
+                }
+
+                frameDocument.documentElement.classList.add("is-embedded");
+                if (frameDocument.body) {
+                    frameDocument.body.classList.add("is-embedded");
+                }
+
+                const styleId = "portal-embed-override";
+                let styleTag = frameDocument.getElementById(styleId);
+                if (!styleTag) {
+                    styleTag = frameDocument.createElement("style");
+                    styleTag.id = styleId;
+                    styleTag.textContent = `
+                        html.is-embedded,
+                        body.is-embedded {
+                            width: 100% !important;
+                            max-width: none !important;
+                            min-height: 100% !important;
+                        }
+
+                        body.is-embedded {
+                            margin: 0 !important;
+                            overflow-x: hidden !important;
+                        }
+
+                        body.is-embedded .container,
+                        body.is-embedded .shell,
+                        body.is-embedded .workflow-shell,
+                        body.is-embedded .page-shell,
+                        body.is-embedded .collab-shell,
+                        body.is-embedded .main-content,
+                        body.is-embedded .main,
+                        body.is-embedded .layout-shell {
+                            width: 100% !important;
+                            max-width: none !important;
+                            margin-left: 0 !important;
+                            margin-right: 0 !important;
+                        }
+                    `;
+                    frameDocument.head.appendChild(styleTag);
+                }
+            } catch (error) {
+                console.warn("portal iframe embed normalization unavailable", error);
+            }
+        }
+
+        if (workspaceFrame) {
+            workspaceFrame.addEventListener("load", normalizeEmbeddedWorkspace);
+        }
+
+        window.addEventListener("pagehide", saveSidebarState);
     </script>
 </body>
 </html>

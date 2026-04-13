@@ -11,7 +11,7 @@
             --theme-accent: #1363df;
             --theme-accent-deep: #0f4eb3;
             --theme-accent-soft: rgba(19, 99, 223, 0.12);
-            --theme-accent-line: rgba(19, 99, 223, 0.22);
+            --theme-accent-line: rgba(19, 99, 223, 0.18);
             --theme-accent-shadow: rgba(19, 99, 223, 0.18);
         }
 
@@ -36,10 +36,10 @@
         .header h1 {
             font-size: 2.5em;
             margin-bottom: 10px;
-            background: linear-gradient(135deg, #34495e 0%, #3498db 50%, #9b59b6 100%);
+            background: linear-gradient(135deg, #202a36 0%, #0f4eb3 45%, #d97706 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-weight: 300;
+            font-weight: 600;
         }
 
         .header p {
@@ -561,13 +561,13 @@
         }
 
         .form-input:focus, .form-textarea:focus {
-            border-color: rgba(19, 99, 223, 0.6);
-            box-shadow: 0 0 15px rgba(19, 99, 223, 0.18);
+            border-color: rgba(19, 99, 223, 0.5);
+            box-shadow: 0 0 0 4px rgba(19, 99, 223, 0.10);
         }
 
         .btn {
-            border-color: rgba(19, 99, 223, 0.28);
-            background: linear-gradient(135deg, rgba(19, 99, 223, 0.08) 0%, rgba(96, 165, 250, 0.12) 100%);
+            border-color: rgba(19, 99, 223, 0.22);
+            background: linear-gradient(135deg, rgba(19, 99, 223, 0.08) 0%, rgba(217, 119, 6, 0.10) 100%);
         }
 
         .btn-primary {
@@ -577,28 +577,28 @@
         }
 
         .btn-primary:hover {
-            background: linear-gradient(135deg, #0f4eb3 0%, #1363df 100%);
-            box-shadow: 0 4px 15px rgba(19, 99, 223, 0.2);
+            background: linear-gradient(135deg, #0b5f58 0%, #1363df 100%);
+            box-shadow: 0 18px 32px -18px rgba(19, 99, 223, 0.30);
         }
 
         .chain-node {
             border-color: var(--theme-accent-line);
-            box-shadow: 0 4px 20px rgba(19, 99, 223, 0.08);
+            box-shadow: 0 12px 26px -22px rgba(19, 99, 223, 0.26);
         }
 
         .chain-node:hover {
-            box-shadow: 0 6px 30px rgba(19, 99, 223, 0.16);
-            border-color: rgba(19, 99, 223, 0.42);
+            box-shadow: 0 18px 34px -22px rgba(19, 99, 223, 0.30);
+            border-color: rgba(19, 99, 223, 0.34);
         }
 
         .chain-node.editing {
             border-color: var(--theme-accent);
-            box-shadow: 0 6px 30px rgba(19, 99, 223, 0.18);
+            box-shadow: 0 18px 36px -20px rgba(19, 99, 223, 0.28);
         }
 
         .node-cause {
             background: rgba(19, 99, 223, 0.12);
-            border-color: rgba(19, 99, 223, 0.3);
+            border-color: rgba(19, 99, 223, 0.24);
             color: var(--theme-accent);
         }
 
@@ -630,7 +630,7 @@
         .empty-state,
         .loading,
         .upload-hint {
-            color: rgba(19, 99, 223, 0.6);
+            color: rgba(19, 99, 223, 0.68);
         }
 
         .chain-arrow::before,
@@ -639,20 +639,20 @@
         }
 
         .file-upload {
-            border-color: rgba(19, 99, 223, 0.28);
+            border-color: rgba(19, 99, 223, 0.24);
         }
 
         .file-upload:hover {
-            border-color: rgba(19, 99, 223, 0.55);
+            border-color: rgba(19, 99, 223, 0.42);
             background: rgba(19, 99, 223, 0.05);
         }
 
         .file-info {
-            border-color: rgba(19, 99, 223, 0.26);
+            border-color: rgba(19, 99, 223, 0.22);
         }
 
         .spinner {
-            border-color: rgba(19, 99, 223, 0.18);
+            border-color: rgba(19, 99, 223, 0.16);
             border-top-color: var(--theme-accent);
         }
 
@@ -665,12 +665,12 @@
         }
 
         .template-card:hover {
-            border-color: rgba(19, 99, 223, 0.42);
-            box-shadow: 0 8px 25px rgba(19, 99, 223, 0.12);
+            border-color: rgba(19, 99, 223, 0.34);
+            box-shadow: 0 20px 34px -24px rgba(19, 99, 223, 0.24);
         }
 
         .template-preview {
-            border-left-color: rgba(19, 99, 223, 0.4);
+            border-left-color: rgba(19, 99, 223, 0.34);
         }
 
         .template-preview-label,
@@ -693,11 +693,6 @@
         <path class="ink-line thin" d="M 700 0 Q 680 180, 720 360 T 700 720" stroke-dasharray="3,8" />
         <path class="ink-line" d="M 950 0 Q 930 220, 970 440 T 950 880" stroke-dasharray="5,10" />
     </svg>
-
-    <a href="{{ url_for('developer_home') }}" class="back-btn">
-        <span class="back-btn-icon">←</span>
-        <span>返回主页</span>
-    </a>
 
     <div class="container">
         <div class="header">
@@ -1185,8 +1180,8 @@
 
             // 添加视觉反馈
             const chainContainer = document.getElementById('chainContainer');
-            chainContainer.style.borderColor = 'rgba(19, 99, 223, 0.6)';
-            chainContainer.style.boxShadow = '0 0 25px rgba(19, 99, 223, 0.24)';
+            chainContainer.style.borderColor = 'rgba(19, 99, 223, 0.5)';
+            chainContainer.style.boxShadow = '0 20px 38px -22px rgba(19, 99, 223, 0.28)';
             setTimeout(() => {
                 chainContainer.style.borderColor = '';
                 chainContainer.style.boxShadow = '';

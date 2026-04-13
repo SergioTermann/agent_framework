@@ -196,6 +196,30 @@ def evaluate():
         return _err(str(e), 500)
 
 
+@llm_rlhf_bp.route("/elo/match", methods=["POST"])
+def elo_match():
+    """对两个候选输出进行对战评估并更新 ELO。"""
+    body = request.get_json(silent=True) or {}
+    required = ["name_a", "name_b", "prompt", "response_a", "response_b"]
+    for field in required:
+        value = body.get(field, "")
+        if not isinstance(value, str) or not value.strip():
+            return _err(f"{field} is required")
+
+    try:
+        engine = get_llm_rlhf_engine()
+        result = engine.elo_match(
+            body["name_a"].strip(),
+            body["prompt"].strip(),
+            body["response_a"].strip(),
+            body["response_b"].strip(),
+            body["name_b"].strip(),
+        )
+        return _ok(result)
+    except Exception as e:
+        return _err(str(e), 500)
+
+
 @llm_rlhf_bp.route("/leaderboard", methods=["GET"])
 def leaderboard():
     """ELO 排行榜。"""

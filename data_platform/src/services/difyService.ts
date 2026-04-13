@@ -115,7 +115,7 @@ class DifyService {
     } else if (lowerQuery.includes('数据') || lowerQuery.includes('报告')) {
       answer = '我可以为您提供以下数据报告：\n\n• 实时运行数据\n• 发电量统计\n• 故障记录分析\n• 维护保养记录\n\n请告诉我您需要哪方面的数据？'
     } else if (lowerQuery.includes('你好') || lowerQuery.includes('您好') || lowerQuery.includes('hi') || lowerQuery.includes('hello')) {
-      answer = '您好！我是风起时域科技有限公司AI故障定位系统的智能助手。我可以帮您：\n\n• 查询风场和风机运行状态\n• 分析故障和告警信息\n• 提供维护建议\n• 生成数据报告\n\n请问有什么可以帮您的吗？'
+      answer = '您好！我是智能值守系统的智能助手。我可以帮您：\n\n• 查询风场和风机运行状态\n• 分析故障和告警信息\n• 提供维护建议\n• 生成数据报告\n\n请问有什么可以帮您的吗？'
     } else {
       answer = `我理解您的问题是关于"${query}"。作为AI助手，我可以帮您分析风场运行数据、诊断设备故障、提供维护建议等。\n\n当前系统状态：\n• 在线风机：25台\n• 告警设备：2台\n• 系统运行正常\n\n您还想了解什么信息？`
     }

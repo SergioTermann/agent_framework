@@ -1,7 +1,7 @@
 <template>
   <div class="layout-header">
     <div class="header-midden">
-      <div class="cn">风起时域科技有限公司AI故障定位系统</div>
+      <div class="cn">智能值守系统</div>
       <div class="en">CAUSYRA AI Fault Location System</div>
     </div>
     <div class="header-right">

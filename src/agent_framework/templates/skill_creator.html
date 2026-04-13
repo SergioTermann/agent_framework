@@ -4,883 +4,2284 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Skill Creator - Agent Framework</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/base-theme.css">
     <style>
+        :root {
+            --skill-accent: #0f62fe;
+            --skill-accent-deep: #0b4ecc;
+            --skill-emerald: #1363df;
+            --skill-amber: #b45309;
+            --skill-rose: #be123c;
+            --skill-bg: #eef4fb;
+            --skill-surface: rgba(255, 255, 255, 0.94);
+            --skill-surface-strong: rgba(255, 255, 255, 0.98);
+            --skill-border: rgba(148, 163, 184, 0.24);
+            --skill-text: #0f172a;
+            --skill-muted: #61738b;
+            --skill-shadow: 0 18px 42px rgba(15, 23, 42, 0.10);
+            --skill-radius: 24px;
+        }
+
         * {
-            margin: 0;
-            padding: 0;
             box-sizing: border-box;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--surface-dim);
-            color: var(--text);
+            margin: 0;
+            min-height: 100vh;
+            font-family: var(--font-body, "Segoe UI", sans-serif);
+            color: var(--skill-text);
+            background:
+                radial-gradient(circle at 0% 0%, rgba(15, 98, 254, 0.10), transparent 28%),
+                radial-gradient(circle at 100% 0%, rgba(14, 165, 233, 0.10), transparent 26%),
+                linear-gradient(180deg, #f8fbff 0%, var(--skill-bg) 100%);
         }
 
-        .container {
-            max-width: 1600px;
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(15, 98, 254, 0.028) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(15, 98, 254, 0.028) 1px, transparent 1px);
+            background-size: 28px 28px;
+            mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.18), transparent 68%);
+        }
+
+        .shell {
+            position: relative;
+            z-index: 1;
+            max-width: 1720px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 24px;
+            display: grid;
+            gap: 18px;
         }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
+        .panel {
+            border: 1px solid var(--skill-border);
+            border-radius: var(--skill-radius);
+            background: var(--skill-surface-strong);
+            box-shadow: var(--skill-shadow);
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr);
+            gap: 18px;
+        }
+
+        .hero-main {
+            padding: 28px;
+            display: grid;
+            gap: 18px;
+            background:
+                radial-gradient(circle at 86% 16%, rgba(15, 98, 254, 0.16), transparent 24%),
+                linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(245, 249, 255, 0.94));
+        }
+
+        .hero-pill {
+            display: inline-flex;
             align-items: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: var(--surface);
-            border-radius: var(--radius);
-            border: 1px solid var(--line);
+            gap: 8px;
+            width: fit-content;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(15, 98, 254, 0.08);
+            color: var(--skill-accent);
+            font-size: 12px;
+            font-weight: 800;
         }
 
-        .header h1 {
-            font-size: 28px;
-            color: var(--primary-deep);
+        .hero-main h1 {
+            margin: 0;
+            font-size: clamp(34px, 4vw, 48px);
+            line-height: 1.02;
+            letter-spacing: -0.05em;
+        }
+
+        .hero-main p {
+            margin: 0;
+            max-width: 760px;
+            color: var(--skill-muted);
+            font-size: 15px;
+            line-height: 1.8;
+        }
+
+        .hero-actions,
+        .hero-metrics,
+        .studio-actions,
+        .chip-row,
+        .example-tabs {
             display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
             align-items: center;
-            gap: 12px;
         }
 
-        .header-actions {
-            display: flex;
-            gap: 12px;
+        .hero-aside {
+            padding: 22px;
+            display: grid;
+            gap: 14px;
         }
 
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: var(--radius-sm);
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
+        .mini-title {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .mini-copy {
+            margin: 6px 0 0;
+            color: var(--skill-muted);
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .metric-card {
+            padding: 16px 18px;
+            border-radius: 20px;
+            border: 1px solid var(--skill-border);
+            background: var(--skill-surface);
+            display: grid;
             gap: 8px;
         }
 
+        .metric-card strong {
+            font-size: 30px;
+            line-height: 1;
+            letter-spacing: -0.04em;
+        }
+
+        .metric-card span {
+            color: var(--skill-muted);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 42px;
+            padding: 0 16px;
+            border: 1px solid rgba(15, 98, 254, 0.14);
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.92);
+            color: var(--skill-text);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            border-color: rgba(15, 98, 254, 0.28);
+            box-shadow: 0 12px 24px rgba(15, 98, 254, 0.08);
+        }
+
         .btn-primary {
-            background: var(--primary);
-            color: white;
+            border-color: transparent;
+            color: #ffffff;
+            background: linear-gradient(135deg, var(--skill-accent-deep), var(--skill-accent));
         }
 
-        .btn-primary:hover {
-            background: var(--primary-deep);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-gold);
+        .btn-ghost {
+            background: rgba(15, 98, 254, 0.04);
         }
 
-        .btn-secondary {
-            background: var(--surface-strong);
-            color: var(--text);
-            border: 1px solid var(--line);
-        }
-
-        .btn-secondary:hover {
-            background: var(--surface-dim);
-        }
-
-        .main-layout {
+        .workspace {
             display: grid;
-            grid-template-columns: 300px 1fr;
-            gap: 20px;
+            grid-template-columns: 300px minmax(0, 1fr) 420px;
+            gap: 18px;
+            align-items: start;
         }
 
-        .sidebar {
-            background: var(--surface);
-            border: 1px solid var(--line);
-            border-radius: var(--radius);
-            padding: 20px;
-            height: fit-content;
+        .main-stack {
+            display: grid;
+            gap: 18px;
+            align-content: start;
+        }
+
+        .rail,
+        .studio {
+            display: grid;
+            gap: 18px;
+            align-content: start;
             position: sticky;
             top: 20px;
         }
 
-        .sidebar-section {
-            margin-bottom: 24px;
+        .panel-section {
+            padding: 18px;
+            display: grid;
+            gap: 16px;
         }
 
-        .sidebar-section h3 {
-            font-size: 14px;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 12px;
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
         }
 
-        .category-list {
-            list-style: none;
+        .section-head h2,
+        .section-head h3 {
+            margin: 0;
+            font-size: 17px;
+            line-height: 1.2;
+        }
+
+        .section-head p {
+            margin: 8px 0 0;
+            color: var(--skill-muted);
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 28px;
+            padding: 0 10px;
+            border-radius: 999px;
+            background: rgba(15, 98, 254, 0.08);
+            color: var(--skill-accent);
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .search-box,
+        .input,
+        .select,
+        .textarea {
+            width: 100%;
+            border: 1px solid rgba(148, 163, 184, 0.24);
+            border-radius: 14px;
+            background: #ffffff;
+            color: var(--skill-text);
+            padding: 12px 14px;
+            font: inherit;
+        }
+
+        .search-box:focus,
+        .input:focus,
+        .select:focus,
+        .textarea:focus {
+            outline: none;
+            border-color: rgba(15, 98, 254, 0.34);
+            box-shadow: 0 0 0 3px rgba(15, 98, 254, 0.08);
+        }
+
+        .textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .textarea.code {
+            min-height: 140px;
+            font-family: var(--font-code, "SFMono-Regular", Consolas, monospace);
+            font-size: 12px;
+            line-height: 1.7;
+            background: #0f172a;
+            color: #dbeafe;
+        }
+
+        .list,
+        .template-list,
+        .demo-list,
+        .skill-list,
+        .execution-list,
+        .warning-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .category-item,
+        .template-card,
+        .demo-card,
+        .skill-card,
+        .execution-card,
+        .warning-card,
+        .preview-card,
+        .chip,
+        .example-tab {
+            border: 1px solid rgba(148, 163, 184, 0.20);
+            border-radius: 18px;
+            background: linear-gradient(180deg, #ffffff, #f8fbff);
         }
 
         .category-item {
-            padding: 10px 12px;
-            margin-bottom: 4px;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            padding: 12px 14px;
+            cursor: pointer;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
-        .category-item:hover {
-            background: var(--surface-dim);
+        .category-item:hover,
+        .template-card:hover,
+        .demo-card:hover,
+        .skill-card:hover,
+        .example-tab:hover {
+            transform: translateY(-1px);
+            border-color: rgba(15, 98, 254, 0.24);
+            box-shadow: 0 12px 24px rgba(15, 98, 254, 0.08);
         }
 
-        .category-item.active {
-            background: var(--primary-soft);
-            color: var(--primary-deep);
-            font-weight: 500;
+        .category-item.is-active,
+        .skill-card.is-active,
+        .example-tab.is-active {
+            border-color: rgba(15, 98, 254, 0.30);
+            box-shadow: 0 0 0 3px rgba(15, 98, 254, 0.08);
         }
 
-        .search-box {
-            width: 100%;
-            padding: 12px 16px;
-            background: var(--surface-strong);
-            border: 1px solid var(--line);
-            border-radius: var(--radius-sm);
-            color: var(--text);
-            font-size: 14px;
-            margin-bottom: 20px;
+        .category-item span:last-child {
+            font-size: 13px;
+            font-weight: 700;
         }
 
-        .search-box:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-soft);
-        }
-
-        .content {
-            background: var(--surface);
-            border: 1px solid var(--line);
-            border-radius: var(--radius);
-            padding: 30px;
-            min-height: 600px;
-        }
-
-        .skills-grid {
+        .template-card,
+        .demo-card,
+        .skill-card,
+        .execution-card,
+        .warning-card,
+        .preview-card {
+            padding: 14px;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 20px;
+            gap: 10px;
         }
 
-        .skill-card {
-            background: var(--surface-strong);
-            border: 1px solid var(--line);
-            border-radius: var(--radius);
-            padding: 20px;
+        .demo-card {
             cursor: pointer;
-            transition: all 0.3s;
         }
 
-        .skill-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-gold);
-            border-color: var(--primary);
+        .demo-title,
+        .skill-name,
+        .template-title,
+        .preview-title {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 800;
+            line-height: 1.5;
         }
 
-        .skill-header {
+        .demo-copy,
+        .skill-copy,
+        .template-copy,
+        .skill-meta,
+        .preview-copy,
+        .warning-copy,
+        .execution-meta {
+            color: var(--skill-muted);
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .skill-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+            gap: 16px;
+        }
+
+        .skill-head,
+        .template-head,
+        .preview-head {
             display: flex;
+            justify-content: space-between;
+            gap: 10px;
             align-items: flex-start;
-            gap: 12px;
-            margin-bottom: 12px;
         }
 
-        .skill-icon {
-            width: 48px;
-            height: 48px;
-            background: var(--primary-soft);
-            border-radius: var(--radius-sm);
+        .skill-top {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .skill-icon,
+        .template-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            background: rgba(15, 98, 254, 0.08);
+            color: var(--skill-accent);
+            font-size: 22px;
             flex-shrink: 0;
         }
 
-        .skill-info {
-            flex: 1;
-        }
-
-        .skill-name {
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 4px;
-        }
-
-        .skill-meta {
-            display: flex;
+        .chip {
+            display: inline-flex;
             align-items: center;
-            gap: 12px;
-            font-size: 12px;
-            color: var(--muted);
-        }
-
-        .skill-description {
-            font-size: 14px;
-            color: var(--text-dim);
-            line-height: 1.5;
-            margin-bottom: 12px;
-        }
-
-        .skill-tags {
-            display: flex;
-            flex-wrap: wrap;
             gap: 6px;
-            margin-bottom: 12px;
-        }
-
-        .tag {
-            padding: 4px 10px;
-            background: rgba(184, 134, 11, 0.1);
-            border-radius: 12px;
+            min-height: 28px;
+            padding: 0 10px;
+            border-radius: 999px;
+            color: var(--skill-accent);
+            background: rgba(15, 98, 254, 0.06);
             font-size: 11px;
-            color: var(--primary-deep);
+            font-weight: 800;
         }
 
-        .skill-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-top: 12px;
-            border-top: 1px solid var(--line);
+        .chip.is-success {
+            color: var(--skill-emerald);
+            background: rgba(19, 99, 223, 0.10);
         }
 
-        .skill-stats {
-            display: flex;
-            gap: 16px;
-            font-size: 12px;
-            color: var(--muted);
+        .chip.is-warn {
+            color: var(--skill-amber);
+            background: rgba(180, 83, 9, 0.12);
         }
 
-        .skill-actions {
-            display: flex;
-            gap: 8px;
+        .chip.is-danger {
+            color: var(--skill-rose);
+            background: rgba(190, 18, 60, 0.10);
         }
 
-        .icon-btn {
-            width: 32px;
-            height: 32px;
-            border: none;
-            background: transparent;
-            color: var(--muted);
-            cursor: pointer;
-            border-radius: var(--radius-sm);
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .icon-btn:hover {
-            background: var(--surface-dim);
-            color: var(--primary);
-        }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: var(--surface);
-            border-radius: var(--radius);
-            width: 90%;
-            max-width: 800px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: var(--shadow-lg);
-        }
-
-        .modal-header {
-            padding: 24px;
-            border-bottom: 1px solid var(--line);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-header h2 {
-            font-size: 24px;
-            color: var(--primary-deep);
-        }
-
-        .modal-body {
-            padding: 24px;
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            display: grid;
+            gap: 6px;
+        }
+
+        .form-group.is-wide {
+            grid-column: 1 / -1;
         }
 
         .form-label {
-            display: block;
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text);
-            margin-bottom: 8px;
-        }
-
-        .form-input,
-        .form-textarea,
-        .form-select {
-            width: 100%;
-            padding: 12px;
-            background: var(--surface-strong);
-            border: 1px solid var(--line);
-            border-radius: var(--radius-sm);
-            color: var(--text);
-            font-size: 14px;
-            font-family: inherit;
-        }
-
-        .form-textarea {
-            min-height: 120px;
-            resize: vertical;
-            font-family: 'Monaco', 'Menlo', monospace;
-        }
-
-        .form-input:focus,
-        .form-textarea:focus,
-        .form-select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-soft);
-        }
-
-        .form-hint {
+            color: var(--skill-muted);
             font-size: 12px;
-            color: var(--muted);
-            margin-top: 4px;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
         }
 
-        .modal-footer {
-            padding: 20px 24px;
-            border-top: 1px solid var(--line);
+        .helper-text {
+            color: var(--skill-muted);
+            font-size: 11px;
+            line-height: 1.6;
+        }
+
+        .switch-line {
             display: flex;
-            justify-content: flex-end;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            min-height: 48px;
+            padding: 0 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(148, 163, 184, 0.20);
+            background: linear-gradient(180deg, #ffffff, #f8fbff);
+        }
+
+        .switch-line input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--skill-accent);
+        }
+
+        .example-tab {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 34px;
+            padding: 0 12px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--skill-muted);
+        }
+
+        .example-tab.is-active {
+            color: var(--skill-accent);
+        }
+
+        .preview-grid {
+            display: grid;
             gap: 12px;
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
+        .insight-grid,
+        .score-grid {
+            display: grid;
+            gap: 14px;
         }
 
-        .empty-state-icon {
-            font-size: 64px;
-            margin-bottom: 16px;
-            opacity: 0.3;
+        .insight-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
-        .empty-state-text {
-            font-size: 16px;
-            color: var(--muted);
-            margin-bottom: 20px;
+        .score-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
         }
 
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: var(--muted);
+        .score-card {
+            padding: 16px;
+            border-radius: 18px;
+            border: 1px solid rgba(148, 163, 184, 0.20);
+            background: linear-gradient(180deg, #ffffff, #f8fbff);
+            display: grid;
+            gap: 10px;
         }
 
-        .spinner {
-            border: 3px solid var(--line);
-            border-top: 3px solid var(--primary);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 16px;
+        .score-head,
+        .score-foot,
+        .insight-item {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .score-label {
+            color: var(--skill-muted);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .score-value {
+            font-size: 28px;
+            line-height: 1;
+            font-weight: 900;
+            letter-spacing: -0.05em;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 8px;
+            border-radius: 999px;
+            background: rgba(148, 163, 184, 0.18);
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(135deg, var(--skill-accent), #38bdf8);
+        }
+
+        .insight-list,
+        .timeline-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .insight-item,
+        .timeline-item {
+            padding: 12px 14px;
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            background: rgba(255, 255, 255, 0.88);
+        }
+
+        .timeline-item {
+            display: grid;
+            gap: 4px;
+        }
+
+        .timeline-title {
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .timeline-copy,
+        .score-copy {
+            color: var(--skill-muted);
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .code-block {
+            margin: 0;
+            padding: 14px;
+            border-radius: 16px;
+            background: #0f172a;
+            color: #dbeafe;
+            font-size: 12px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            word-break: break-word;
+            overflow: auto;
+            max-height: 280px;
+        }
+
+        .empty-card {
+            padding: 18px;
+            border-radius: 18px;
+            border: 1px dashed rgba(148, 163, 184, 0.30);
+            background: rgba(15, 98, 254, 0.04);
+            color: var(--skill-muted);
+            font-size: 13px;
+            line-height: 1.8;
         }
 
         .toast {
             position: fixed;
-            bottom: 20px;
             right: 20px;
-            background: var(--surface);
-            border: 1px solid var(--line);
-            border-radius: var(--radius);
-            padding: 16px 20px;
-            box-shadow: var(--shadow-lg);
+            bottom: 20px;
             z-index: 2000;
-            display: none;
-            align-items: center;
-            gap: 12px;
-            min-width: 300px;
-        }
-
-        .toast.active {
-            display: flex;
-            animation: slideIn 0.3s ease-out;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        .toast.success {
-            border-left: 4px solid #10b981;
-        }
-
-        .toast.error {
-            border-left: 4px solid #ef4444;
-        }
-
-        .code-editor {
-            background: #1e1e1e;
-            color: #d4d4d4;
-            padding: 16px;
-            border-radius: var(--radius-sm);
-            font-family: 'Monaco', 'Menlo', monospace;
+            padding: 12px 16px;
+            border-radius: 14px;
+            background: rgba(15, 23, 42, 0.92);
+            color: #ffffff;
             font-size: 13px;
-            line-height: 1.6;
-            overflow-x: auto;
+            font-weight: 700;
+            box-shadow: 0 18px 42px rgba(15, 23, 42, 0.24);
+            opacity: 0;
+            transform: translateY(8px);
+            pointer-events: none;
+            transition: opacity 0.22s ease, transform 0.22s ease;
+        }
+
+        .toast.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 1480px) {
+            .workspace {
+                grid-template-columns: 280px minmax(0, 1fr);
+            }
+
+            .studio {
+                position: static;
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 1180px) {
+            .hero,
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+
+            .rail,
+            .studio {
+                position: static;
+            }
+        }
+
+        @media (max-width: 860px) {
+            .shell {
+                padding: 14px;
+            }
+
+            .metric-grid,
+            .form-grid,
+            .insight-grid,
+            .score-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-main,
+            .hero-aside,
+            .panel-section {
+                padding: 18px;
+            }
+
+            .skill-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>
-                <span>⚡</span>
-                Skill Creator
-            </h1>
-            <div class="header-actions">
-                <button class="btn btn-secondary" onclick="refreshSkills()">
-                    <span>🔄</span>
-                    刷新
-                </button>
-                <button class="btn btn-primary" onclick="openCreateModal()">
-                    <span>➕</span>
-                    创建技能
-                </button>
-            </div>
-        </div>
-
-        <div class="main-layout">
-            <aside class="sidebar">
-                <input type="text" class="search-box" placeholder="搜索技能..." id="searchInput" oninput="handleSearch()">
-
-                <div class="sidebar-section">
-                    <h3>分类</h3>
-                    <ul class="category-list">
-                        <li class="category-item active" data-category="all" onclick="filterByCategory('all')">
-                            <span>📋</span>
-                            全部技能
-                        </li>
-                        <li class="category-item" data-category="data-processing" onclick="filterByCategory('data-processing')">
-                            <span>📊</span>
-                            数据处理
-                        </li>
-                        <li class="category-item" data-category="text-analysis" onclick="filterByCategory('text-analysis')">
-                            <span>📝</span>
-                            文本分析
-                        </li>
-                        <li class="category-item" data-category="automation" onclick="filterByCategory('automation')">
-                            <span>🤖</span>
-                            自动化
-                        </li>
-                        <li class="category-item" data-category="integration" onclick="filterByCategory('integration')">
-                            <span>🔗</span>
-                            集成工具
-                        </li>
-                        <li class="category-item" data-category="custom" onclick="filterByCategory('custom')">
-                            <span>⚙️</span>
-                            自定义
-                        </li>
-                    </ul>
+    <div class="shell">
+        <section class="hero">
+            <div class="hero-main panel">
+                <span class="hero-pill"><i class="fas fa-wand-magic-sparkles"></i><span>Skill Studio</span></span>
+                <div>
+                    <h1>技能创建器工作台</h1>
+                    <p>把技能模板、演示蓝图、参数 schema、Prompt 预览和执行测试收进同一页。先从 demo 技能起步，再继续改成真正可发布的技能包。</p>
                 </div>
-
-                <div class="sidebar-section">
-                    <h3>统计</h3>
-                    <div style="font-size: 13px; color: var(--muted); line-height: 1.8;">
-                        <div>总技能数: <strong id="totalSkills">0</strong></div>
-                        <div>我的技能: <strong id="mySkills">0</strong></div>
-                        <div>公开技能: <strong id="publicSkills">0</strong></div>
+                <div class="hero-actions">
+                    <button class="btn btn-primary" type="button" onclick="openNewDraft()">
+                        <i class="fas fa-plus"></i> 新建草稿
+                    </button>
+                    <button class="btn" type="button" onclick="seedDemoBlueprint('incident_triage')">
+                        <i class="fas fa-flask"></i> 载入 Demo
+                    </button>
+                    <button class="btn btn-ghost" type="button" onclick="refreshWorkspace()">
+                        <i class="fas fa-rotate"></i> 刷新工作台
+                    </button>
+                </div>
+                <div class="hero-metrics metric-grid" id="metricGrid"></div>
+            </div>
+            <div class="hero-aside panel">
+                <div>
+                    <h2 class="mini-title">当前工作流</h2>
+                    <p class="mini-copy">右侧工作台支持直接编辑技能元信息、Prompt、输入输出 schema、示例输入和发布开关，不用反复开关弹窗。</p>
+                </div>
+                <div class="preview-grid">
+                    <div class="preview-card">
+                        <div class="preview-head">
+                            <div>
+                                <div class="preview-title" id="draftTitle">未命名草稿</div>
+                                <div class="preview-copy" id="draftMeta">新建草稿 · custom</div>
+                            </div>
+                            <span class="chip is-warn" id="draftStateChip">未保存</span>
+                        </div>
+                        <div class="preview-copy" id="draftDescriptionPreview">从左边选择 demo 或模板后，右侧会自动填入更复杂的技能配置。</div>
+                    </div>
+                    <div class="preview-card">
+                        <div class="preview-head">
+                            <div>
+                                <div class="preview-title">变量抽取</div>
+                                <div class="preview-copy">根据 Prompt 自动识别占位符，帮助你补齐 schema 和示例。</div>
+                            </div>
+                        </div>
+                        <div class="chip-row" id="variableChipRow"></div>
                     </div>
                 </div>
+            </div>
+        </section>
+
+        <section class="workspace">
+            <aside class="rail">
+                <section class="panel panel-section">
+                    <div class="section-head">
+                        <div>
+                            <h2>筛选与分类</h2>
+                            <p>先从技能库里找已有能力，再决定是复制还是新建。</p>
+                        </div>
+                    </div>
+                    <input class="search-box" id="searchInput" placeholder="搜索技能名称、标签、作者" oninput="handleSearch()">
+                    <div class="list" id="categoryList"></div>
+                </section>
+
+                <section class="panel panel-section">
+                    <div class="section-head">
+                        <div>
+                            <h2>复杂 Demo</h2>
+                            <p>这里不是简单模板，而是带输入 schema、输出格式和示例数据的演示技能蓝图。</p>
+                        </div>
+                    </div>
+                    <div class="demo-list" id="demoList"></div>
+                </section>
+
+                <section class="panel panel-section">
+                    <div class="section-head">
+                        <div>
+                            <h2>官方模板</h2>
+                            <p>使用后会直接带入工作台，你可以在此基础上继续扩展。</p>
+                        </div>
+                    </div>
+                    <div class="template-list" id="templateList"></div>
+                </section>
             </aside>
 
-            <main class="content">
-                <div id="skillsContainer" class="loading">
-                    <div class="spinner"></div>
-                    <div>加载中...</div>
-                </div>
+            <main class="main-stack">
+                <section class="panel panel-section">
+                    <div class="section-head">
+                        <div>
+                            <h2>技能库</h2>
+                            <p>左边是外部 demo 与模板，下面是已经落库的真实技能。点任何一张卡片都能拉到右侧继续编辑。</p>
+                        </div>
+                        <span class="badge"><i class="fas fa-boxes-stacked"></i><span id="librarySummary">0 个技能</span></span>
+                    </div>
+                    <div id="skillGrid" class="skill-grid"></div>
+                </section>
+
+                <section class="panel panel-section">
+                    <div class="section-head">
+                        <div>
+                            <h2>蓝图实验台</h2>
+                            <p>围绕当前草稿补上场景用途、验证样例、预期输出和演进方向，方便你直接从 demo 长成正式技能。</p>
+                        </div>
+                        <span class="badge"><i class="fas fa-layer-group"></i><span id="blueprintSummary">当前未绑定 Demo</span></span>
+                    </div>
+                    <div class="insight-grid" id="blueprintWorkbench"></div>
+                </section>
+
+                <section class="panel panel-section">
+                    <div class="section-head">
+                        <div>
+                            <h2>发布与扩展</h2>
+                            <p>把准备度、发布清单和下一阶段增强路线收口到一起，减少“能编辑但不好上线”的半成品状态。</p>
+                        </div>
+                    </div>
+                    <div class="score-grid" id="readinessCards"></div>
+                    <div class="insight-grid">
+                        <div class="preview-card">
+                            <div class="preview-head">
+                                <div>
+                                    <div class="preview-title">发布清单</div>
+                                    <div class="preview-copy">优先补全上线前必须确认的条目。</div>
+                                </div>
+                            </div>
+                            <div class="timeline-list" id="publishChecklist"></div>
+                        </div>
+                        <div class="preview-card">
+                            <div class="preview-head">
+                                <div>
+                                    <div class="preview-title">扩展路线</div>
+                                    <div class="preview-copy">从 demo 到正式技能的推荐演进路径。</div>
+                                </div>
+                            </div>
+                            <div class="timeline-list" id="evolutionRoadmap"></div>
+                        </div>
+                    </div>
+                </section>
             </main>
-        </div>
+
+            <aside class="studio">
+                <section class="panel panel-section">
+                    <div class="section-head">
+                        <div>
+                            <h2>技能工作台</h2>
+                            <p>这里是当前草稿的主编辑面，支持保存、复制、测试和删除。</p>
+                        </div>
+                    </div>
+                    <div class="studio-actions">
+                        <button class="btn btn-primary" type="button" onclick="saveCurrentSkill()">
+                            <i class="fas fa-save"></i> 保存技能
+                        </button>
+                        <button class="btn" type="button" onclick="duplicateCurrentSkill()">
+                            <i class="fas fa-copy"></i> 复制草稿
+                        </button>
+                        <button class="btn" type="button" onclick="runSkillTest()">
+                            <i class="fas fa-play"></i> 测试执行
+                        </button>
+                        <button class="btn btn-ghost" type="button" onclick="deleteCurrentSkill()">
+                            <i class="fas fa-trash"></i> 删除
+                        </button>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="skillName">技能名称</label>
+                            <input class="input" id="skillName" placeholder="例如：工单归因研判">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="skillIcon">图标</label>
+                            <input class="input" id="skillIcon" placeholder="🧭">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="skillCategory">分类</label>
+                            <select class="select" id="skillCategory"></select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="skillVersion">版本</label>
+                            <input class="input" id="skillVersion" placeholder="1.0.0">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="skillAuthor">作者</label>
+                            <input class="input" id="skillAuthor" placeholder="例如：Platform Team">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="skillTags">标签</label>
+                            <input class="input" id="skillTags" placeholder="例如：incident, reasoning, ops">
+                        </div>
+                        <div class="form-group is-wide">
+                            <label class="form-label" for="skillDescription">描述</label>
+                            <textarea class="textarea" id="skillDescription" style="min-height:90px;" placeholder="描述技能作用、触发条件和输出预期。"></textarea>
+                        </div>
+                    </div>
+                    <label class="switch-line">
+                        <span>
+                            <strong>公开技能</strong><br>
+                            <span class="helper-text">打开后其他用户也可以在技能库里看到这个技能。</span>
+                        </span>
+                        <input type="checkbox" id="skillPublic">
+                    </label>
+                </section>
+
+                <section class="panel panel-section">
+                    <div class="section-head">
+                        <div>
+                            <h3>Prompt 与 Schema</h3>
+                            <p>复杂技能建议同时维护 Prompt 模板、输入 schema 和输出 schema，方便后续接入执行链路。</p>
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group is-wide">
+                            <label class="form-label" for="skillPrompt">Prompt 模板</label>
+                            <textarea class="textarea" id="skillPrompt" placeholder="例如：请基于 {incident}、{logs} 和 {constraints} 输出根因、证据链和建议动作。"></textarea>
+                            <div class="helper-text">使用 `{变量名}` 声明输入变量，右上角会自动识别并生成变量胶囊。</div>
+                        </div>
+                        <div class="form-group is-wide">
+                            <label class="form-label" for="skillInputSchema">输入 Schema(JSON)</label>
+                            <textarea class="textarea code" id="skillInputSchema" placeholder='{"incident":{"type":"string","label":"故障现象","required":true}}'></textarea>
+                        </div>
+                        <div class="form-group is-wide">
+                            <label class="form-label" for="skillOutputSchema">输出 Schema(JSON)</label>
+                            <textarea class="textarea code" id="skillOutputSchema" placeholder='{"summary":{"type":"string"},"actions":{"type":"array"}}'></textarea>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="panel panel-section">
+                    <div class="section-head">
+                        <div>
+                            <h3>示例与执行</h3>
+                            <p>先切一个示例输入，再看 Prompt 预览和执行输出，能更快发现变量缺失和结构问题。</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="skillExamples">示例输入(JSON Array)</label>
+                        <textarea class="textarea code" id="skillExamples" placeholder='[{"text":"示例输入"}]'></textarea>
+                    </div>
+                    <div class="example-tabs" id="exampleTabs"></div>
+                    <div class="preview-grid">
+                        <div class="preview-card">
+                            <div class="preview-head">
+                                <div>
+                                    <div class="preview-title">渲染后的 Prompt</div>
+                                    <div class="preview-copy">根据当前选中的示例自动替换变量。</div>
+                                </div>
+                            </div>
+                            <pre class="code-block" id="promptPreview">还没有 Prompt 预览。</pre>
+                        </div>
+                        <div class="preview-card">
+                            <div class="preview-head">
+                                <div>
+                                    <div class="preview-title">执行输出</div>
+                                    <div class="preview-copy">保存后的技能会直接调用执行接口；未保存草稿先展示本地预演结果。</div>
+                                </div>
+                            </div>
+                            <pre class="code-block" id="executionPreview">还没有执行结果。</pre>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="panel panel-section">
+                    <div class="section-head">
+                        <div>
+                            <h3>发布检查</h3>
+                            <p>把变量、schema、示例、最近执行记录和风险提示压在一起，减少上线前漏项。</p>
+                        </div>
+                    </div>
+                    <div class="warning-list" id="warningList"></div>
+                    <div class="execution-list" id="executionList"></div>
+                </section>
+            </aside>
+        </section>
     </div>
 
-    <!-- Create/Edit Modal -->
-    <div class="modal" id="skillModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalTitle">创建技能</h2>
-                <button class="icon-btn" onclick="closeModal()">✕</button>
-            </div>
-            <div class="modal-body">
-                <form id="skillForm">
-                    <input type="hidden" id="skillId">
-
-                    <div class="form-group">
-                        <label class="form-label">技能名称 *</label>
-                        <input type="text" class="form-input" id="skillName" required placeholder="例如：文本摘要生成">
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">描述</label>
-                        <textarea class="form-textarea" id="skillDescription" placeholder="描述这个技能的功能和用途..." style="min-height: 80px;"></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">分类 *</label>
-                        <select class="form-select" id="skillCategory" required>
-                            <option value="">选择分类</option>
-                            <option value="data-processing">数据处理</option>
-                            <option value="text-analysis">文本分析</option>
-                            <option value="automation">自动化</option>
-                            <option value="integration">集成工具</option>
-                            <option value="custom">自定义</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">图标</label>
-                        <input type="text" class="form-input" id="skillIcon" placeholder="例如：📝 或 emoji">
-                        <div class="form-hint">可以使用 emoji 或图标代码</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Prompt 模板 *</label>
-                        <textarea class="form-textarea" id="skillPrompt" required placeholder="例如：请对以下文本进行摘要：{text}&#10;&#10;要求：&#10;- 保留关键信息&#10;- 控制在 {max_length} 字以内"></textarea>
-                        <div class="form-hint">使用 {变量名} 来定义输入参数</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">标签</label>
-                        <input type="text" class="form-input" id="skillTags" placeholder="用逗号分隔，例如：NLP, 摘要, AI">
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">示例输入（JSON 格式）</label>
-                        <textarea class="form-textarea code-editor" id="skillExamples" placeholder='[&#10;  {&#10;    "text": "这是一段很长的文本...",&#10;    "max_length": 100&#10;  }&#10;]'></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">
-                            <input type="checkbox" id="skillPublic" style="margin-right: 8px;">
-                            公开技能（其他用户可见）
-                        </label>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal()">取消</button>
-                <button class="btn btn-primary" onclick="saveSkill()">保存</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Toast Notification -->
-    <div class="toast" id="toast">
-        <span id="toastIcon"></span>
-        <span id="toastMessage"></span>
-    </div>
+    <div class="toast" id="toast"></div>
 
     <script>
-        let currentCategory = 'all';
-        let currentSearch = '';
-        let allSkills = [];
+        const demoBlueprints = [
+            {
+                id: "incident_triage",
+                name: "工单归因研判",
+                icon: "🧭",
+                category: "business",
+                version: "1.3.0",
+                author: "Ops Strategy",
+                is_public: 1,
+                tags: ["incident", "root-cause", "ops"],
+                description: "面向智能运维和复杂告警场景，输出根因候选、证据链、处置优先级和升级建议。",
+                prompt_template: "你是风电运维值守专家。请基于以下输入完成工单归因研判。\n\n故障现象：{incident}\n告警列表：{alarms}\n日志片段：{logs}\n设备拓扑：{topology}\n限制条件：{constraints}\n\n请输出：\n1. 三个最可能的根因候选\n2. 每个根因对应的证据链\n3. 建议动作清单（按优先级排序）\n4. 是否需要人工升级和值守说明",
+                input_schema: {
+                    incident: { type: "string", label: "故障现象", required: true },
+                    alarms: { type: "array", label: "告警列表", required: true },
+                    logs: { type: "string", label: "日志片段", required: true },
+                    topology: { type: "string", label: "设备拓扑" },
+                    constraints: { type: "string", label: "限制条件", default: "优先给出现场可执行动作" }
+                },
+                output_schema: {
+                    summary: { type: "string", label: "结论摘要" },
+                    root_causes: { type: "array", label: "根因候选" },
+                    evidence_chain: { type: "array", label: "证据链" },
+                    actions: { type: "array", label: "建议动作" },
+                    escalation: { type: "string", label: "升级建议" }
+                },
+                examples: [
+                    {
+                        incident: "风机 17 停机后无法重新并网",
+                        alarms: ["偏航系统过流", "主控通信抖动", "并网允许信号缺失"],
+                        logs: "12:03 偏航电机电流峰值异常；12:04 主控与 PLC 心跳中断 7 秒；12:05 并网准备条件校验失败。",
+                        topology: "风机 17 -> 场站主控 -> 偏航控制柜 -> 并网单元",
+                        constraints: "优先给出 30 分钟内可执行的排查动作"
+                    }
+                ]
+            },
+            {
+                id: "site_daily_brief",
+                name: "风场选址日报",
+                icon: "🌬️",
+                category: "research",
+                version: "2.0.0",
+                author: "Energy Intelligence",
+                is_public: 1,
+                tags: ["site-selection", "briefing", "research"],
+                description: "把资源评估、气象窗口、政策限制和建设条件汇总成管理层可读的日报简报。",
+                prompt_template: "请基于以下风场候选信息生成一份给管理层看的选址日报。\n\n候选区域：{candidate_region}\n风资源摘要：{wind_profile}\n建设条件：{construction_condition}\n政策与审批：{policy_constraints}\n竞品动态：{competitor_signal}\n输出风格：{tone}\n\n请输出：\n- 今日核心判断\n- 候选区域排序\n- 最值得跟进的三个动作\n- 明日需要补充的数据",
+                input_schema: {
+                    candidate_region: { type: "string", label: "候选区域", required: true },
+                    wind_profile: { type: "string", label: "风资源摘要", required: true },
+                    construction_condition: { type: "string", label: "建设条件", required: true },
+                    policy_constraints: { type: "string", label: "政策约束", required: true },
+                    competitor_signal: { type: "string", label: "竞品动态" },
+                    tone: { type: "string", label: "输出风格", default: "管理层日报" }
+                },
+                output_schema: {
+                    judgment: { type: "string" },
+                    ranking: { type: "array" },
+                    actions: { type: "array" },
+                    next_data: { type: "array" }
+                },
+                examples: [
+                    {
+                        candidate_region: "吉林西部、内蒙古东部、河北北部",
+                        wind_profile: "吉林西部平均风速稳定但冬季结冰风险较高；内蒙古东部年利用小时数更高；河北北部电网消纳条件更优。",
+                        construction_condition: "河北北部道路和吊装窗口更成熟，内蒙古东部集电线路拉通成本偏高。",
+                        policy_constraints: "河北北部审批周期更可控，吉林西部需额外关注生态红线。",
+                        competitor_signal: "两家头部开发商近期在内蒙古东部启动测风塔复测。",
+                        tone: "管理层日报"
+                    }
+                ]
+            },
+            {
+                id: "integration_risk_digest",
+                name: "联调风险摘要",
+                icon: "🧩",
+                category: "code",
+                version: "1.8.2",
+                author: "Platform Delivery",
+                is_public: 0,
+                tags: ["integration", "risk", "api"],
+                description: "针对接口联调、前后端编排和发布前检查，输出风险列表、影响面和优先级。",
+                prompt_template: "你是平台交付负责人。请基于以下联调信息输出风险摘要。\n\n模块范围：{modules}\n接口变化：{api_changes}\n前端状态：{frontend_status}\n后端状态：{backend_status}\n测试情况：{test_status}\n上线时间：{release_window}\n\n要求：\n1. 风险按 P0/P1/P2 分类\n2. 标注影响面和阻塞项\n3. 给出每条风险的 owner 和缓解动作\n4. 最后补一句是否建议按计划上线",
+                input_schema: {
+                    modules: { type: "string", label: "模块范围", required: true },
+                    api_changes: { type: "string", label: "接口变化", required: true },
+                    frontend_status: { type: "string", label: "前端状态", required: true },
+                    backend_status: { type: "string", label: "后端状态", required: true },
+                    test_status: { type: "string", label: "测试情况", required: true },
+                    release_window: { type: "string", label: "上线时间窗", required: true }
+                },
+                output_schema: {
+                    risks: { type: "array" },
+                    blockers: { type: "array" },
+                    owners: { type: "array" },
+                    go_live: { type: "string" }
+                },
+                examples: [
+                    {
+                        modules: "技能创建器、协作管理、可视化工作流",
+                        api_changes: "新增协作会话列表接口；技能创建器补模板/统计/执行链路；工作流侧栏布局大改。",
+                        frontend_status: "页面改动已完成，待做缓存与移动端回归。",
+                        backend_status: "协作接口可用，技能执行仍可能走 mock。",
+                        test_status: "静态检查已过，缺浏览器回归。",
+                        release_window: "今晚 20:00-22:00"
+                    }
+                ]
+            },
+            {
+                id: "knowledge_router",
+                name: "知识路由编排器",
+                icon: "🗂️",
+                category: "research",
+                version: "1.5.1",
+                author: "Knowledge Ops",
+                is_public: 1,
+                tags: ["retrieval", "routing", "knowledge"],
+                description: "根据问题类型选择知识源、整理检索结果并输出带引用的答复框架，适合知识库问答和资产核验。",
+                prompt_template: "你是知识路由助手。请根据以下内容生成可执行的检索答复方案。\n\n用户问题：{question}\n业务域：{domain}\n候选知识源：{knowledge_sources}\n召回片段：{retrieved_chunks}\n会话记忆：{memory}\n答复策略：{response_policy}\n\n请输出：\n1. 最佳知识源排序与原因\n2. 最终答案草稿\n3. 引用片段清单\n4. 仍需补充的信息",
+                input_schema: {
+                    question: { type: "string", label: "用户问题", required: true },
+                    domain: { type: "string", label: "业务域", required: true },
+                    knowledge_sources: { type: "array", label: "候选知识源", required: true },
+                    retrieved_chunks: { type: "array", label: "召回片段", required: true },
+                    memory: { type: "string", label: "会话记忆" },
+                    response_policy: { type: "string", label: "答复策略", default: "优先给出带引用的结论" }
+                },
+                output_schema: {
+                    route_plan: { type: "array" },
+                    answer_draft: { type: "string" },
+                    citations: { type: "array" },
+                    follow_ups: { type: "array" }
+                },
+                examples: [
+                    {
+                        question: "风机大部件更换流程里，吊装审批最晚要提前多久发起？",
+                        domain: "运维治理",
+                        knowledge_sources: ["运维制度库", "作业票库", "项目群 FAQ"],
+                        retrieved_chunks: [
+                            "《吊装作业管理细则》要求计划作业需至少提前 3 个工作日发起审批。",
+                            "现场特殊天气条件下需补充气象窗口确认单。",
+                            "FAQ 中提到跨场站协同吊装建议提前 5 天锁资源。"
+                        ],
+                        memory: "当前用户来自东北区域运维中心",
+                        response_policy: "优先回答制度要求，再补充实践建议"
+                    }
+                ]
+            },
+            {
+                id: "contract_risk_review",
+                name: "合同风险复核",
+                icon: "📑",
+                category: "business",
+                version: "2.1.0",
+                author: "Commercial Control",
+                is_public: 1,
+                tags: ["contract", "risk", "review"],
+                description: "针对采购、工程和服务合同抽取关键条款，输出风险等级、谈判建议和补充条款建议。",
+                prompt_template: "你是新能源业务法务与商务复核助手。请根据以下信息完成合同风险复核。\n\n合同类型：{contract_type}\n核心条款：{core_terms}\n付款安排：{payment_terms}\n交付计划：{delivery_plan}\n违约责任：{liability_terms}\n特殊背景：{special_context}\n\n请输出：\n- 风险等级与总体判断\n- 高风险条款清单\n- 建议补充或重写的条款\n- 谈判优先级",
+                input_schema: {
+                    contract_type: { type: "string", label: "合同类型", required: true },
+                    core_terms: { type: "string", label: "核心条款", required: true },
+                    payment_terms: { type: "string", label: "付款安排", required: true },
+                    delivery_plan: { type: "string", label: "交付计划", required: true },
+                    liability_terms: { type: "string", label: "违约责任", required: true },
+                    special_context: { type: "string", label: "特殊背景" }
+                },
+                output_schema: {
+                    risk_level: { type: "string" },
+                    risks: { type: "array" },
+                    clause_rewrites: { type: "array" },
+                    negotiation_priority: { type: "array" }
+                },
+                examples: [
+                    {
+                        contract_type: "风机叶片年度维护框架协议",
+                        core_terms: "乙方负责年度巡检、缺陷修复和应急到场，甲方有权按场站实际需求调整工作量。",
+                        payment_terms: "按季度结算，验收后 90 天付款，质保金 10%。",
+                        delivery_plan: "接到通知后 72 小时内到场，重大缺陷 15 天内修复。",
+                        liability_terms: "乙方延迟到场每日按合同额 0.1% 支付违约金，上限 5%。",
+                        special_context: "该供应商是新引入合作方，历史交付记录有限。"
+                    }
+                ]
+            },
+            {
+                id: "meeting_action_commander",
+                name: "会议行动指挥台",
+                icon: "🗓️",
+                category: "text",
+                version: "1.4.0",
+                author: "Office Intelligence",
+                is_public: 1,
+                tags: ["meeting", "action-items", "coordination"],
+                description: "把会议纪要整理成负责人、截止时间、依赖关系和风险提醒，适合周会和联调会跟进。",
+                prompt_template: "请将下面的会议内容整理为可执行的行动清单。\n\n会议主题：{meeting_topic}\n参会角色：{participants}\n会议纪要：{meeting_notes}\n关键争议：{open_issues}\n目标输出风格：{format_style}\n\n请输出：\n1. 行动项列表（负责人、截止时间、依赖项）\n2. 需要升级处理的问题\n3. 下次会议前必须补齐的材料",
+                input_schema: {
+                    meeting_topic: { type: "string", label: "会议主题", required: true },
+                    participants: { type: "array", label: "参会角色", required: true },
+                    meeting_notes: { type: "string", label: "会议纪要", required: true },
+                    open_issues: { type: "string", label: "关键争议" },
+                    format_style: { type: "string", label: "输出风格", default: "项目追踪表" }
+                },
+                output_schema: {
+                    actions: { type: "array" },
+                    escalations: { type: "array" },
+                    required_materials: { type: "array" }
+                },
+                examples: [
+                    {
+                        meeting_topic: "可视化工作流二期评审",
+                        participants: ["产品经理", "前端负责人", "后端负责人", "测试负责人"],
+                        meeting_notes: "确认本周完成节点参数面板、部署节点弹窗和工作流发布入口；后端需补运行记录接口；测试需准备两轮回归。",
+                        open_issues: "节点参数 schema 是否要支持动态联动；发布审批是否纳入本期。",
+                        format_style: "项目追踪表"
+                    }
+                ]
+            }
+        ];
 
-        // 加载技能列表
+        const blueprintProfiles = {
+            incident_triage: {
+                complexity: "L4 / 复杂联调",
+                maturity: "适合直接扩成正式技能",
+                use_cases: ["智能值守告警归因", "工单分拨前置判断", "夜间值守升级建议"],
+                test_cases: ["单机告警链路断裂", "多风机同类告警并发", "缺日志但有拓扑与告警"],
+                launch_checklist: ["确认输入里有告警和日志来源", "输出动作需要能落到现场执行", "人工升级条件必须写明触发阈值"],
+                evolution_steps: ["补充更多异常类型样例", "接入真实告警和 CMDB 数据源", "将根因候选映射到 SOP 处置动作"],
+                sample_output: {
+                    summary: "偏航系统故障导致并网准备失败，建议先核查偏航控制柜与主控心跳恢复情况。",
+                    root_causes: ["偏航电机瞬时过流", "主控与 PLC 通信抖动", "并网允许信号未复位"],
+                    actions: ["复核偏航控制柜状态", "查看 PLC 心跳恢复时间", "二次确认并网条件信号"],
+                    escalation: "若 15 分钟内无法恢复心跳，升级至区域值守工程师"
+                }
+            },
+            site_daily_brief: {
+                complexity: "L3 / 管理报告",
+                maturity: "适合日报和领导简报",
+                use_cases: ["风场候选日报", "资源评估周报", "区域机会盘点"],
+                test_cases: ["多区域条件冲突", "政策收紧但资源优", "竞品动作突然增强"],
+                launch_checklist: ["候选区域要有同一时间窗数据", "输出排序标准需提前定义", "管理口径和专业口径要区分"],
+                evolution_steps: ["补项目投资估算字段", "接入地图与气象 API", "增加季度趋势对比视图"],
+                sample_output: {
+                    judgment: "内蒙古东部短期排名第一，但需尽快确认集电成本和土地边界。",
+                    ranking: ["内蒙古东部", "河北北部", "吉林西部"],
+                    actions: ["发起内蒙古东部成本复核", "河北北部补消纳测算", "吉林西部跟进生态红线核查"],
+                    next_data: ["最新地形约束图层", "送出工程报价", "竞品测风塔复测结果"]
+                }
+            },
+            integration_risk_digest: {
+                complexity: "L4 / 发布门禁",
+                maturity: "适合版本上线前会审",
+                use_cases: ["前后端联调风险梳理", "版本发布门禁审查", "跨团队阻塞项归并"],
+                test_cases: ["接口未对齐但前端已提测", "上线窗变窄", "部分能力仍在 mock 模式"],
+                launch_checklist: ["风险需要有 owner", "P0 与 P1 必须能给出缓解动作", "上线建议必须明确 go/no-go"],
+                evolution_steps: ["补接口契约自动比对", "对接测试平台结果", "加入版本回滚建议生成"],
+                sample_output: {
+                    risks: ["P0: 工作流参数面板依赖接口缺失", "P1: 技能执行链路仍使用 mock"],
+                    blockers: ["运行记录接口未联通"],
+                    owners: ["前端负责人", "平台后端负责人"],
+                    go_live: "不建议按原计划上线，至少先关闭 P0"
+                }
+            },
+            knowledge_router: {
+                complexity: "L4 / 检索编排",
+                maturity: "适合知识助手核心能力",
+                use_cases: ["制度问答", "资产资料路由", "多知识源答案拼装"],
+                test_cases: ["命中片段冲突", "多个知识源都不完整", "需要带引用返回结论"],
+                launch_checklist: ["召回片段必须保留原始出处", "答复策略要区分总结与引用", "问题域识别要有兜底源"],
+                evolution_steps: ["增加知识源优先级配置", "接入会话记忆策略", "扩展为多轮检索代理"],
+                sample_output: {
+                    route_plan: ["先查运维制度库", "再查作业票 FAQ"],
+                    answer_draft: "吊装审批制度要求至少提前 3 个工作日发起，跨场站协同时建议提前 5 天锁定资源。",
+                    citations: ["《吊装作业管理细则》", "项目群 FAQ"],
+                    follow_ups: ["确认本次是否跨场站调度", "补天气窗口单"]
+                }
+            },
+            contract_risk_review: {
+                complexity: "L3 / 商务复核",
+                maturity: "适合法务商务协同",
+                use_cases: ["采购合同复核", "工程服务协议审查", "框架协议条款对比"],
+                test_cases: ["付款周期过长", "违约责任失衡", "新供应商履约能力不明"],
+                launch_checklist: ["高风险条款要有重写建议", "风险等级口径保持一致", "特殊背景要影响最终判断"],
+                evolution_steps: ["扩展标准条款库", "增加红线条款比对", "连接审批流程生成审签意见"],
+                sample_output: {
+                    risk_level: "中高风险",
+                    risks: ["付款周期过长影响现金流", "新供应商履约能力未验证"],
+                    clause_rewrites: ["建议缩短付款周期至 45 天", "增加到场响应的保障条款"],
+                    negotiation_priority: ["付款安排", "履约担保", "重大故障赔付"]
+                }
+            },
+            meeting_action_commander: {
+                complexity: "L2 / 协同跟进",
+                maturity: "适合项目与联调周会",
+                use_cases: ["项目例会行动项", "联调会待办拆解", "跨团队依赖跟踪"],
+                test_cases: ["责任人不明确", "依赖项互相阻塞", "纪要信息很长且杂乱"],
+                launch_checklist: ["行动项必须能落到责任人", "截止时间要可追踪", "升级事项要单独标红"],
+                evolution_steps: ["补状态机字段", "接工单或日历系统", "支持自动追催和周报汇总"],
+                sample_output: {
+                    actions: ["前端本周完成节点参数面板", "后端补运行记录接口", "测试准备两轮回归清单"],
+                    escalations: ["发布审批范围待产品负责人确认"],
+                    required_materials: ["节点 schema 文档", "回归用例清单"]
+                }
+            }
+        };
+
+        const state = {
+            skills: [],
+            categories: [],
+            templates: [],
+            stats: null,
+            currentSkill: createEmptyDraft(),
+            selectedSkillId: "",
+            currentCategory: "all",
+            currentSearch: "",
+            currentExampleIndex: 0,
+            lastExecution: null,
+            isDirty: false,
+        };
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            bindFormEvents();
+            await refreshWorkspace();
+        });
+
+        function createEmptyDraft(overrides = {}) {
+            return {
+                skill_id: "",
+                blueprint_id: "",
+                name: "",
+                description: "",
+                category: "custom",
+                icon: "⚡",
+                prompt_template: "",
+                input_schema: {},
+                output_schema: {},
+                examples: [],
+                tags: [],
+                author: "Platform Team",
+                version: "1.0.0",
+                is_public: 0,
+                recent_executions: [],
+                avg_rating: 0,
+                usage_count: 0,
+                source: "draft",
+                ...overrides,
+            };
+        }
+
+        function normalizeSkill(skill) {
+            return createEmptyDraft({
+                ...skill,
+                tags: Array.isArray(skill.tags) ? skill.tags : [],
+                examples: Array.isArray(skill.examples) ? skill.examples : [],
+                input_schema: skill.input_schema && typeof skill.input_schema === "object" ? skill.input_schema : {},
+                output_schema: skill.output_schema && typeof skill.output_schema === "object" ? skill.output_schema : {},
+                recent_executions: Array.isArray(skill.recent_executions) ? skill.recent_executions : [],
+            });
+        }
+
+        function bindFormEvents() {
+            [
+                "skillName",
+                "skillIcon",
+                "skillDescription",
+                "skillCategory",
+                "skillVersion",
+                "skillAuthor",
+                "skillTags",
+                "skillPrompt",
+                "skillInputSchema",
+                "skillOutputSchema",
+                "skillExamples",
+                "skillPublic",
+            ].forEach((id) => {
+                const element = document.getElementById(id);
+                if (!element) return;
+                const eventName = element.type === "checkbox" ? "change" : "input";
+                element.addEventListener(eventName, handleFormChange);
+            });
+        }
+
+        async function refreshWorkspace() {
+            await Promise.all([loadMetadata(), loadSkills()]);
+            renderRail();
+            if (!state.selectedSkillId && state.skills.length) {
+                await selectSkill(state.skills[0].skill_id);
+                return;
+            }
+            if (!state.selectedSkillId && !state.currentSkill.name) {
+                seedDemoBlueprint("incident_triage", false);
+                return;
+            }
+            renderAll();
+        }
+
+        async function loadMetadata() {
+            const [categoriesRes, templatesRes, statsRes] = await Promise.all([
+                fetch("/api/skills/categories").then((res) => res.json()).catch(() => ({ success: false })),
+                fetch("/api/skills/templates").then((res) => res.json()).catch(() => ({ success: false })),
+                fetch("/api/skills/stats").then((res) => res.json()).catch(() => ({ success: false })),
+            ]);
+
+            state.categories = categoriesRes.success
+                ? categoriesRes.categories
+                : [
+                    { id: "text", name: "文本处理", icon: "📝" },
+                    { id: "data", name: "数据分析", icon: "📊" },
+                    { id: "code", name: "代码生成", icon: "💻" },
+                    { id: "custom", name: "自定义", icon: "⚙️" },
+                ];
+            state.templates = templatesRes.success ? templatesRes.templates : [];
+            state.stats = statsRes.success ? statsRes.stats : { total_skills: 0, total_executions: 0, total_ratings: 0, avg_rating: 0 };
+        }
+
         async function loadSkills() {
             try {
                 const params = new URLSearchParams();
-                if (currentCategory !== 'all') {
-                    params.append('category', currentCategory);
-                }
-                if (currentSearch) {
-                    params.append('search', currentSearch);
-                }
-
-                const response = await fetch(`/api/skills?${params}`);
+                if (state.currentCategory !== "all") params.append("category", state.currentCategory);
+                if (state.currentSearch) params.append("search", state.currentSearch);
+                const response = await fetch(`/api/skills/?${params.toString()}`);
                 const data = await response.json();
-
-                if (data.success) {
-                    allSkills = data.skills;
-                    renderSkills(data.skills);
-                    updateStats(data.skills);
-                } else {
-                    showToast('加载失败: ' + data.error, 'error');
-                }
+                if (!data.success) throw new Error(data.error || "加载失败");
+                state.skills = (data.skills || []).map(normalizeSkill);
             } catch (error) {
-                showToast('加载失败: ' + error.message, 'error');
+                console.error("加载技能失败:", error);
+                state.skills = [];
             }
         }
 
-        // 渲染技能列表
-        function renderSkills(skills) {
-            const container = document.getElementById('skillsContainer');
+        async function selectSkill(skillId) {
+            state.selectedSkillId = skillId;
+            try {
+                const response = await fetch(`/api/skills/${skillId}`);
+                const data = await response.json();
+                if (!data.success) throw new Error(data.error || "加载失败");
+                state.currentSkill = normalizeSkill(data.skill);
+                state.currentSkill.source = "saved";
+                state.currentExampleIndex = 0;
+                state.lastExecution = null;
+                state.isDirty = false;
+                renderAll();
+            } catch (error) {
+                showToast(`加载技能失败: ${error.message || error}`, "error");
+            }
+        }
 
-            if (skills.length === 0) {
+        function renderRail() {
+            renderMetrics();
+            renderCategoryList();
+            renderDemoList();
+            renderTemplateList();
+            renderCategorySelect();
+        }
+
+        function renderAll() {
+            renderRail();
+            renderSkillGrid();
+            fillForm();
+            renderDraftSummary();
+            renderVariableChips();
+            renderExampleTabs();
+            renderPromptPreview();
+            renderBlueprintWorkbench();
+            renderReadinessPanel();
+            renderValidation();
+        }
+
+        function renderMetrics() {
+            const metricGrid = document.getElementById("metricGrid");
+            const stats = state.stats || { total_skills: 0, total_executions: 0, total_ratings: 0, avg_rating: 0 };
+            const metricItems = [
+                { label: "技能总数", value: stats.total_skills || state.skills.length || 0, hint: "当前工作台可用技能" },
+                { label: "累计执行", value: stats.total_executions || 0, hint: "所有技能执行次数" },
+                { label: "评分条数", value: stats.total_ratings || 0, hint: "用户评价沉淀" },
+                { label: "平均评分", value: stats.avg_rating || 0, hint: "技能整体质量水位" },
+            ];
+            metricGrid.innerHTML = metricItems.map((item) => `
+                <div class="metric-card">
+                    <span>${escapeHtml(item.label)}</span>
+                    <strong>${escapeHtml(String(item.value))}</strong>
+                    <span>${escapeHtml(item.hint)}</span>
+                </div>
+            `).join("");
+        }
+
+        function renderCategoryList() {
+            const list = document.getElementById("categoryList");
+            const categories = [{ id: "all", name: "全部技能", icon: "📋" }, ...state.categories];
+            list.innerHTML = categories.map((category) => `
+                <div class="category-item ${state.currentCategory === category.id ? "is-active" : ""}" onclick="setCategory('${category.id}')">
+                    <span>${escapeHtml(category.icon || "⚡")}</span>
+                    <span>${escapeHtml(category.name)}</span>
+                </div>
+            `).join("");
+        }
+
+        function renderDemoList() {
+            const list = document.getElementById("demoList");
+            list.innerHTML = demoBlueprints.map((demo) => `
+                <div class="demo-card" onclick="seedDemoBlueprint('${demo.id}')">
+                    <div class="template-head">
+                        <div style="display:flex; gap:12px; align-items:flex-start;">
+                            <div class="template-icon">${escapeHtml(demo.icon)}</div>
+                            <div>
+                                <div class="demo-title">${escapeHtml(demo.name)}</div>
+                                <div class="demo-copy">${escapeHtml(demo.description)}</div>
+                            </div>
+                        </div>
+                        <span class="chip is-success">${escapeHtml(getBlueprintProfile(demo).complexity)}</span>
+                    </div>
+                    <div class="chip-row">
+                        ${demo.tags.map((tag) => `<span class="chip">${escapeHtml(tag)}</span>`).join("")}
+                    </div>
+                    <div class="demo-copy">${escapeHtml(getBlueprintProfile(demo).maturity)}</div>
+                </div>
+            `).join("");
+        }
+
+        function renderTemplateList() {
+            const list = document.getElementById("templateList");
+            if (!state.templates.length) {
+                list.innerHTML = '<div class="empty-card">当前没有模板返回。你仍然可以直接使用上面的复杂 Demo 作为起点。</div>';
+                return;
+            }
+            list.innerHTML = state.templates.map((template) => `
+                <div class="template-card" onclick="applyTemplate('${template.id}')">
+                    <div class="template-head">
+                        <div>
+                            <div class="template-title">${escapeHtml(template.name)}</div>
+                            <div class="template-copy">${escapeHtml(template.description || "暂无说明")}</div>
+                        </div>
+                        <span class="chip">${escapeHtml(template.category || "template")}</span>
+                    </div>
+                    <div class="chip-row">
+                        <span class="chip">变量 ${extractVariables(template.prompt_template || "").length}</span>
+                        <span class="chip">示例 ${Array.isArray(template.examples) ? template.examples.length : 0}</span>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        function renderSkillGrid() {
+            const container = document.getElementById("skillGrid");
+            document.getElementById("librarySummary").textContent = `${state.skills.length} 个技能`;
+            if (!state.skills.length) {
                 container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">📦</div>
-                        <div class="empty-state-text">还没有技能，创建第一个吧！</div>
-                        <button class="btn btn-primary" onclick="openCreateModal()">
-                            <span>➕</span>
-                            创建技能
-                        </button>
+                    <div class="empty-card">
+                        技能库还是空的。可以先从左边点一个复杂 Demo，右侧编辑后直接保存到真实技能库。
                     </div>
                 `;
                 return;
             }
-
-            container.innerHTML = `
-                <div class="skills-grid">
-                    ${skills.map(skill => `
-                        <div class="skill-card" onclick="viewSkill('${skill.skill_id}')">
-                            <div class="skill-header">
-                                <div class="skill-icon">${skill.icon || '⚡'}</div>
-                                <div class="skill-info">
-                                    <div class="skill-name">${skill.name}</div>
-                                    <div class="skill-meta">
-                                        <span>⭐ ${skill.avg_rating || 0}</span>
-                                        <span>📊 ${skill.usage_count} 次使用</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="skill-description">${skill.description || '暂无描述'}</div>
-                            <div class="skill-tags">
-                                ${(skill.tags || []).map(tag => `<span class="tag">${tag}</span>`).join('')}
-                            </div>
-                            <div class="skill-footer">
-                                <div class="skill-stats">
-                                    <span>v${skill.version}</span>
-                                    <span>${skill.author || '匿名'}</span>
-                                </div>
-                                <div class="skill-actions" onclick="event.stopPropagation()">
-                                    <button class="icon-btn" onclick="editSkill('${skill.skill_id}')" title="编辑">✏️</button>
-                                    <button class="icon-btn" onclick="testSkill('${skill.skill_id}')" title="测试">▶️</button>
-                                    <button class="icon-btn" onclick="deleteSkill('${skill.skill_id}')" title="删除">🗑️</button>
-                                </div>
+            container.innerHTML = state.skills.map((skill) => `
+                <div class="skill-card ${state.selectedSkillId === skill.skill_id ? "is-active" : ""}" onclick="selectSkill('${skill.skill_id}')">
+                    <div class="skill-head">
+                        <div class="skill-top">
+                            <div class="skill-icon">${escapeHtml(skill.icon || "⚡")}</div>
+                            <div>
+                                <div class="skill-name">${escapeHtml(skill.name)}</div>
+                                <div class="skill-meta">${escapeHtml(skill.description || "暂无描述")}</div>
                             </div>
                         </div>
-                    `).join('')}
+                        <span class="chip ${skill.is_public ? "is-success" : ""}">${skill.is_public ? "公开" : "私有"}</span>
+                    </div>
+                    <div class="chip-row">
+                        <span class="chip">${escapeHtml(skill.category || "custom")}</span>
+                        <span class="chip">v${escapeHtml(skill.version || "1.0.0")}</span>
+                        <span class="chip">⭐ ${escapeHtml(String(skill.avg_rating || 0))}</span>
+                    </div>
+                    <div class="skill-meta">作者 ${escapeHtml(skill.author || "匿名")} · 使用 ${escapeHtml(String(skill.usage_count || 0))} 次</div>
+                    <div class="chip-row">
+                        ${(skill.tags || []).slice(0, 4).map((tag) => `<span class="chip">${escapeHtml(tag)}</span>`).join("")}
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        function renderCategorySelect() {
+            const select = document.getElementById("skillCategory");
+            const selected = state.currentSkill.category || "custom";
+            const categories = [...state.categories];
+            if (!categories.some((category) => category.id === selected)) {
+                categories.push({ id: selected, name: selected, icon: guessIconByCategory(selected) });
+            }
+            select.innerHTML = categories.map((category) => `
+                <option value="${escapeHtml(category.id)}" ${category.id === selected ? "selected" : ""}>${escapeHtml(category.icon || "⚡")} ${escapeHtml(category.name)}</option>
+            `).join("");
+        }
+
+        function fillForm() {
+            const skill = state.currentSkill;
+            document.getElementById("skillName").value = skill.name || "";
+            document.getElementById("skillIcon").value = skill.icon || "";
+            document.getElementById("skillDescription").value = skill.description || "";
+            renderCategorySelect();
+            document.getElementById("skillVersion").value = skill.version || "1.0.0";
+            document.getElementById("skillAuthor").value = skill.author || "";
+            document.getElementById("skillTags").value = (skill.tags || []).join(", ");
+            document.getElementById("skillPrompt").value = skill.prompt_template || "";
+            document.getElementById("skillInputSchema").value = stringifyObject(skill.input_schema, {});
+            document.getElementById("skillOutputSchema").value = stringifyObject(skill.output_schema, {});
+            document.getElementById("skillExamples").value = stringifyObject(skill.examples, []);
+            document.getElementById("skillPublic").checked = Number(skill.is_public || 0) === 1;
+        }
+
+        function renderDraftSummary() {
+            const skill = state.currentSkill;
+            document.getElementById("draftTitle").textContent = skill.name || "未命名草稿";
+            document.getElementById("draftMeta").textContent = `${skill.source === "saved" ? "已入库技能" : "草稿"} · ${skill.category || "custom"} · ${skill.author || "未填写作者"}`;
+            document.getElementById("draftDescriptionPreview").textContent = skill.description || "请先补技能说明，明确它解决的问题、触发条件和输出形式。";
+            const stateChip = document.getElementById("draftStateChip");
+            stateChip.className = `chip ${state.isDirty ? "is-warn" : skill.skill_id ? "is-success" : "is-warn"}`;
+            stateChip.textContent = state.isDirty ? "未保存变更" : skill.skill_id ? "已保存" : "未保存";
+        }
+
+        function renderVariableChips() {
+            const row = document.getElementById("variableChipRow");
+            const variables = extractVariables(state.currentSkill.prompt_template || "");
+            row.innerHTML = variables.length
+                ? variables.map((variable) => `<span class="chip">${escapeHtml(variable)}</span>`).join("")
+                : '<span class="chip is-warn">还没有识别到变量</span>';
+        }
+
+        function renderExampleTabs() {
+            const tabs = document.getElementById("exampleTabs");
+            const examples = parseJsonSafe(document.getElementById("skillExamples").value, []);
+            if (!Array.isArray(examples) || !examples.length) {
+                tabs.innerHTML = '<div class="empty-card">还没有示例输入。建议至少补 1 条样例，方便预览和测试。</div>';
+                return;
+            }
+            if (state.currentExampleIndex >= examples.length) state.currentExampleIndex = 0;
+            tabs.innerHTML = examples.map((example, index) => `
+                <div class="example-tab ${index === state.currentExampleIndex ? "is-active" : ""}" onclick="setExampleIndex(${index})">
+                    <i class="fas fa-vial"></i><span>示例 ${index + 1}</span>
+                </div>
+            `).join("");
+        }
+
+        function renderPromptPreview() {
+            const prompt = document.getElementById("skillPrompt").value || "";
+            const examples = parseJsonSafe(document.getElementById("skillExamples").value, []);
+            const example = Array.isArray(examples) && examples[state.currentExampleIndex] ? examples[state.currentExampleIndex] : {};
+            const rendered = renderPrompt(prompt, example || {});
+            document.getElementById("promptPreview").textContent = rendered || "还没有 Prompt 预览。";
+            if (!state.lastExecution) {
+                document.getElementById("executionPreview").textContent = "还没有执行结果。";
+            }
+        }
+
+        function renderBlueprintWorkbench() {
+            const container = document.getElementById("blueprintWorkbench");
+            const draft = getDraftSnapshot();
+            const analysis = analyzeDraft(draft);
+            const blueprint = getActiveBlueprint(draft);
+            const profile = getBlueprintProfile(blueprint);
+
+            document.getElementById("blueprintSummary").textContent = blueprint
+                ? `${blueprint.name} · ${profile.complexity}`
+                : "当前为自定义草稿";
+
+            const scenarioList = blueprint
+                ? profile.use_cases
+                : deriveGenericList(draft.tags, `适用于 ${draft.category || "custom"} 类技能`);
+            const testCases = blueprint
+                ? profile.test_cases
+                : deriveExamplesAsCases(draft.examples);
+            const outputSample = state.lastExecution || (blueprint ? profile.sample_output : (Object.keys(draft.output_schema || {}).length ? draft.output_schema : { note: "补充输出 schema 后，这里会显示推荐的结构样例。" }));
+            const stackText = blueprint
+                ? `推荐先以 ${blueprint.name} 为起点，逐步补齐真实数据源、更多样例和发布门禁。`
+                : "当前还没有绑定复杂 Demo。可以从左侧选择一个 Demo 蓝图，或者继续把这份草稿完善为正式技能。";
+
+            container.innerHTML = `
+                <div class="preview-card">
+                    <div class="preview-head">
+                        <div>
+                            <div class="preview-title">${escapeHtml(blueprint ? blueprint.name : (draft.name || "自定义草稿"))}</div>
+                            <div class="preview-copy">${escapeHtml(blueprint ? blueprint.description : (draft.description || "请继续补齐描述信息。"))}</div>
+                        </div>
+                        <span class="chip ${analysis.releaseScore >= 75 ? "is-success" : analysis.releaseScore >= 45 ? "is-warn" : "is-danger"}">${escapeHtml(blueprint ? profile.maturity : "自定义演进中")}</span>
+                    </div>
+                    <div class="insight-list">
+                        <div class="insight-item">
+                            <span class="score-label">变量数量</span>
+                            <strong>${escapeHtml(String(analysis.variableCount))}</strong>
+                        </div>
+                        <div class="insight-item">
+                            <span class="score-label">Schema 字段</span>
+                            <strong>${escapeHtml(String(analysis.schemaKeyCount))}</strong>
+                        </div>
+                        <div class="insight-item">
+                            <span class="score-label">示例条数</span>
+                            <strong>${escapeHtml(String(analysis.exampleCount))}</strong>
+                        </div>
+                        <div class="insight-item">
+                            <span class="score-label">复杂度定位</span>
+                            <strong>${escapeHtml(profile.complexity)}</strong>
+                        </div>
+                    </div>
+                    <div class="score-copy">${escapeHtml(stackText)}</div>
+                </div>
+                <div class="preview-card">
+                    <div class="preview-head">
+                        <div>
+                            <div class="preview-title">适用场景</div>
+                            <div class="preview-copy">优先选择最贴近真实业务的一组能力边界。</div>
+                        </div>
+                    </div>
+                    <div class="timeline-list">
+                        ${scenarioList.map((item) => `
+                            <div class="timeline-item">
+                                <div class="timeline-title">${escapeHtml(item)}</div>
+                            </div>
+                        `).join("")}
+                    </div>
+                </div>
+                <div class="preview-card">
+                    <div class="preview-head">
+                        <div>
+                            <div class="preview-title">验证样例</div>
+                            <div class="preview-copy">这些 case 更适合拿来做 Prompt 和结构测试。</div>
+                        </div>
+                    </div>
+                    <div class="timeline-list">
+                        ${testCases.map((item) => `
+                            <div class="timeline-item">
+                                <div class="timeline-title">${escapeHtml(item)}</div>
+                            </div>
+                        `).join("")}
+                    </div>
+                </div>
+                <div class="preview-card">
+                    <div class="preview-head">
+                        <div>
+                            <div class="preview-title">预期输出结构</div>
+                            <div class="preview-copy">当前显示蓝图样例或最近一次测试结果。</div>
+                        </div>
+                    </div>
+                    <pre class="code-block">${escapeHtml(prettyJson(outputSample))}</pre>
                 </div>
             `;
         }
 
-        // 更新统计信息
-        function updateStats(skills) {
-            document.getElementById('totalSkills').textContent = skills.length;
-            document.getElementById('mySkills').textContent = skills.filter(s => !s.is_public).length;
-            document.getElementById('publicSkills').textContent = skills.filter(s => s.is_public).length;
+        function renderReadinessPanel() {
+            const container = document.getElementById("readinessCards");
+            const draft = getDraftSnapshot();
+            const analysis = analyzeDraft(draft);
+            const blueprint = getActiveBlueprint(draft);
+            const profile = getBlueprintProfile(blueprint);
+
+            const cards = [
+                { label: "Prompt 完整度", value: analysis.promptScore, copy: `变量 ${analysis.variableCount} 个，已覆盖 ${analysis.schemaCoveredVars}/${analysis.variableCount || 0}` },
+                { label: "输入覆盖率", value: analysis.schemaCoverage, copy: `示例覆盖 ${analysis.exampleCoveredVars}/${analysis.variableCount || 0} 个变量` },
+                { label: "示例质量", value: analysis.exampleScore, copy: `${analysis.exampleCount} 条样例，标签 ${analysis.tagCount} 个` },
+                { label: "发布准备度", value: analysis.releaseScore, copy: blueprint ? profile.maturity : "继续补齐结构后可进入测试" },
+            ];
+
+            container.innerHTML = cards.map((card) => `
+                <div class="score-card">
+                    <div class="score-head">
+                        <span class="score-label">${escapeHtml(card.label)}</span>
+                        <span class="chip ${card.value >= 75 ? "is-success" : card.value >= 45 ? "is-warn" : "is-danger"}">${escapeHtml(String(card.value))}%</span>
+                    </div>
+                    <div class="score-value">${escapeHtml(String(card.value))}</div>
+                    <div class="progress-track">
+                        <div class="progress-fill" style="width:${Math.max(0, Math.min(card.value, 100))}%"></div>
+                    </div>
+                    <div class="score-copy">${escapeHtml(card.copy)}</div>
+                </div>
+            `).join("");
+
+            const checklist = blueprint ? profile.launch_checklist : buildGenericChecklist(draft, analysis);
+            document.getElementById("publishChecklist").innerHTML = checklist.map((item, index) => `
+                <div class="timeline-item">
+                    <div class="timeline-title">检查项 ${index + 1}</div>
+                    <div class="timeline-copy">${escapeHtml(item)}</div>
+                </div>
+            `).join("");
+
+            const roadmap = blueprint ? profile.evolution_steps : buildGenericRoadmap(draft, analysis);
+            document.getElementById("evolutionRoadmap").innerHTML = roadmap.map((item, index) => `
+                <div class="timeline-item">
+                    <div class="timeline-title">阶段 ${index + 1}</div>
+                    <div class="timeline-copy">${escapeHtml(item)}</div>
+                </div>
+            `).join("");
         }
 
-        // 分类筛选
-        function filterByCategory(category) {
-            currentCategory = category;
-            document.querySelectorAll('.category-item').forEach(item => {
-                item.classList.toggle('active', item.dataset.category === category);
+        function renderValidation() {
+            const warnings = [];
+            const prompt = document.getElementById("skillPrompt").value.trim();
+            const name = document.getElementById("skillName").value.trim();
+            const inputSchemaText = document.getElementById("skillInputSchema").value.trim();
+            const outputSchemaText = document.getElementById("skillOutputSchema").value.trim();
+            const examplesText = document.getElementById("skillExamples").value.trim();
+            const variables = extractVariables(prompt);
+            const inputSchema = parseJsonSafe(inputSchemaText, {});
+            const outputSchema = parseJsonSafe(outputSchemaText, {});
+            const examples = parseJsonSafe(examplesText, []);
+
+            if (!name) warnings.push({ title: "缺少技能名称", copy: "没有名字时很难在技能库里复用和检索。", tone: "danger" });
+            if (!prompt) warnings.push({ title: "缺少 Prompt 模板", copy: "技能的核心行为还没定义，执行时无法生成有效结果。", tone: "danger" });
+            if (variables.length && !inputSchemaText) warnings.push({ title: "未补输入 Schema", copy: "Prompt 里已经有变量，但输入 schema 还是空的。", tone: "warn" });
+            if (inputSchemaText && inputSchema === null) warnings.push({ title: "输入 Schema JSON 错误", copy: "请修正 JSON 格式，否则保存后会影响后续执行。", tone: "danger" });
+            if (outputSchemaText && outputSchema === null) warnings.push({ title: "输出 Schema JSON 错误", copy: "输出 schema 不合法，后续很难做结构化消费。", tone: "danger" });
+            if (examplesText && examples === null) warnings.push({ title: "示例输入 JSON 错误", copy: "示例输入无法解析，Prompt 预览和测试会失效。", tone: "danger" });
+            if (!examplesText) warnings.push({ title: "建议补示例输入", copy: "至少放 1 条样例，能明显提升调 Prompt 的效率。", tone: "warn" });
+            if (variables.length && inputSchema && typeof inputSchema === "object") {
+                const missingVars = variables.filter((variable) => !Object.prototype.hasOwnProperty.call(inputSchema, variable));
+                if (missingVars.length) {
+                    warnings.push({ title: "Schema 未覆盖全部变量", copy: `这些变量还没有写进输入 schema：${missingVars.join("、")}`, tone: "warn" });
+                }
+            }
+            if (!outputSchemaText) warnings.push({ title: "建议补输出 Schema", copy: "复杂技能最好显式定义输出结构，便于后续接工作流与解析链路。", tone: "warn" });
+            if (Array.isArray(examples) && variables.length) {
+                const uncoveredByExamples = variables.filter((variable) => !examples.some((example) => example && Object.prototype.hasOwnProperty.call(example, variable)));
+                if (uncoveredByExamples.length) {
+                    warnings.push({ title: "示例没有覆盖全部变量", copy: `当前样例未覆盖这些输入：${uncoveredByExamples.join("、")}`, tone: "warn" });
+                }
+            }
+            if (!variables.length && prompt) warnings.push({ title: "Prompt 没有变量", copy: "如果这是静态技能可以保留；否则建议补变量让技能更可复用。", tone: "success" });
+
+            const warningList = document.getElementById("warningList");
+            warningList.innerHTML = warnings.length
+                ? warnings.map((warning) => `
+                    <div class="warning-card">
+                        <div class="preview-head">
+                            <div>
+                                <div class="preview-title">${escapeHtml(warning.title)}</div>
+                                <div class="warning-copy">${escapeHtml(warning.copy)}</div>
+                            </div>
+                            <span class="chip ${warning.tone === "danger" ? "is-danger" : warning.tone === "warn" ? "is-warn" : "is-success"}">${warning.tone === "danger" ? "高风险" : warning.tone === "warn" ? "待补" : "已知"}</span>
+                        </div>
+                    </div>
+                `).join("")
+                : '<div class="empty-card">当前没有明显的结构问题，可以继续测试或直接保存。</div>';
+
+            const executions = state.currentSkill.recent_executions || [];
+            const executionList = document.getElementById("executionList");
+            executionList.innerHTML = executions.length
+                ? executions.slice(0, 3).map((execution) => `
+                    <div class="execution-card">
+                        <div class="preview-head">
+                            <div>
+                                <div class="preview-title">最近执行</div>
+                                <div class="execution-meta">${escapeHtml(formatIsoTime(execution.created_at) || "刚刚")} · ${escapeHtml(String(Number(execution.execution_time || 0).toFixed(2)))}s</div>
+                            </div>
+                            <span class="chip is-success">${escapeHtml(execution.status || "success")}</span>
+                        </div>
+                        <pre class="code-block">${escapeHtml(prettyJson(parseJsonSafe(execution.output_data, execution.output_data || {})))}</pre>
+                    </div>
+                `).join("")
+                : '<div class="empty-card">还没有历史执行记录。保存技能后跑一次测试，这里会显示最近的执行结果。</div>';
+        }
+
+        function handleFormChange() {
+            const draft = collectFormData();
+            state.currentSkill = normalizeSkill({
+                ...state.currentSkill,
+                ...draft,
             });
-            loadSkills();
+            state.isDirty = true;
+            state.lastExecution = null;
+            renderDraftSummary();
+            renderVariableChips();
+            renderExampleTabs();
+            renderPromptPreview();
+            renderBlueprintWorkbench();
+            renderReadinessPanel();
+            renderValidation();
         }
 
-        // 搜索
-        function handleSearch() {
-            currentSearch = document.getElementById('searchInput').value;
-            loadSkills();
-        }
-
-        // 刷新
-        function refreshSkills() {
-            loadSkills();
-        }
-
-        // 打开创建模态框
-        function openCreateModal() {
-            document.getElementById('modalTitle').textContent = '创建技能';
-            document.getElementById('skillForm').reset();
-            document.getElementById('skillId').value = '';
-            document.getElementById('skillModal').classList.add('active');
-        }
-
-        // 关闭模态框
-        function closeModal() {
-            document.getElementById('skillModal').classList.remove('active');
-        }
-
-        // 保存技能
-        async function saveSkill() {
-            const skillId = document.getElementById('skillId').value;
-            const isEdit = !!skillId;
-
-            const skillData = {
-                name: document.getElementById('skillName').value,
-                description: document.getElementById('skillDescription').value,
-                category: document.getElementById('skillCategory').value,
-                icon: document.getElementById('skillIcon').value,
-                prompt_template: document.getElementById('skillPrompt').value,
-                tags: document.getElementById('skillTags').value.split(',').map(t => t.trim()).filter(t => t),
-                is_public: document.getElementById('skillPublic').checked ? 1 : 0,
+        function collectFormData() {
+            return {
+                skill_id: state.currentSkill.skill_id || "",
+                name: document.getElementById("skillName").value.trim(),
+                description: document.getElementById("skillDescription").value.trim(),
+                category: document.getElementById("skillCategory").value,
+                icon: document.getElementById("skillIcon").value.trim() || "⚡",
+                prompt_template: document.getElementById("skillPrompt").value,
+                input_schema: parseJsonSafe(document.getElementById("skillInputSchema").value, {}),
+                output_schema: parseJsonSafe(document.getElementById("skillOutputSchema").value, {}),
+                examples: parseJsonSafe(document.getElementById("skillExamples").value, []),
+                tags: document.getElementById("skillTags").value.split(",").map((item) => item.trim()).filter(Boolean),
+                author: document.getElementById("skillAuthor").value.trim() || "Platform Team",
+                version: document.getElementById("skillVersion").value.trim() || "1.0.0",
+                is_public: document.getElementById("skillPublic").checked ? 1 : 0,
+                source: state.currentSkill.source,
+                recent_executions: state.currentSkill.recent_executions || [],
+                avg_rating: state.currentSkill.avg_rating || 0,
+                usage_count: state.currentSkill.usage_count || 0,
             };
-
-            // 解析示例
-            const examplesText = document.getElementById('skillExamples').value;
-            if (examplesText) {
-                try {
-                    skillData.examples = JSON.parse(examplesText);
-                } catch (e) {
-                    showToast('示例 JSON 格式错误', 'error');
-                    return;
-                }
-            }
-
-            try {
-                const url = isEdit ? `/api/skills/${skillId}` : '/api/skills/';
-                const method = isEdit ? 'PUT' : 'POST';
-
-                const response = await fetch(url, {
-                    method: method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(skillData),
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    showToast(isEdit ? '技能已更新' : '技能已创建', 'success');
-                    closeModal();
-                    loadSkills();
-                } else {
-                    showToast('保存失败: ' + data.error, 'error');
-                }
-            } catch (error) {
-                showToast('保存失败: ' + error.message, 'error');
-            }
         }
 
-        // 编辑技能
-        async function editSkill(skillId) {
-            try {
-                const response = await fetch(`/api/skills/${skillId}`);
-                const data = await response.json();
-
-                if (data.success) {
-                    const skill = data.skill;
-                    document.getElementById('modalTitle').textContent = '编辑技能';
-                    document.getElementById('skillId').value = skill.skill_id;
-                    document.getElementById('skillName').value = skill.name;
-                    document.getElementById('skillDescription').value = skill.description || '';
-                    document.getElementById('skillCategory').value = skill.category;
-                    document.getElementById('skillIcon').value = skill.icon || '';
-                    document.getElementById('skillPrompt').value = skill.prompt_template;
-                    document.getElementById('skillTags').value = (skill.tags || []).join(', ');
-                    document.getElementById('skillExamples').value = JSON.stringify(skill.examples || [], null, 2);
-                    document.getElementById('skillPublic').checked = skill.is_public === 1;
-                    document.getElementById('skillModal').classList.add('active');
-                } else {
-                    showToast('加载失败: ' + data.error, 'error');
-                }
-            } catch (error) {
-                showToast('加载失败: ' + error.message, 'error');
-            }
+        function openNewDraft() {
+            state.selectedSkillId = "";
+            state.currentSkill = createEmptyDraft();
+            state.currentExampleIndex = 0;
+            state.lastExecution = null;
+            state.isDirty = false;
+            renderAll();
         }
 
-        // 删除技能
-        async function deleteSkill(skillId) {
-            if (!confirm('确定要删除这个技能吗？')) {
+        function seedDemoBlueprint(demoId, notify = true) {
+            const blueprint = demoBlueprints.find((item) => item.id === demoId);
+            if (!blueprint) return;
+            state.selectedSkillId = "";
+            state.currentSkill = normalizeSkill({
+                ...blueprint,
+                skill_id: "",
+                blueprint_id: demoId,
+                source: "demo",
+            });
+            state.currentExampleIndex = 0;
+            state.lastExecution = null;
+            state.isDirty = true;
+            renderAll();
+            if (notify) showToast(`已载入 Demo：${blueprint.name}`);
+        }
+
+        function applyTemplate(templateId) {
+            const template = state.templates.find((item) => item.id === templateId);
+            if (!template) return;
+            state.selectedSkillId = "";
+            state.currentSkill = normalizeSkill({
+                name: template.name,
+                description: template.description,
+                category: template.category || "custom",
+                icon: guessIconByCategory(template.category || "custom"),
+                prompt_template: template.prompt_template,
+                input_schema: template.input_schema || {},
+                output_schema: {},
+                examples: template.examples || [],
+                tags: [template.category || "template", "starter"],
+                author: "Template Library",
+                version: "1.0.0",
+                is_public: 0,
+                blueprint_id: "",
+                source: "template",
+            });
+            state.currentExampleIndex = 0;
+            state.lastExecution = null;
+            state.isDirty = true;
+            renderAll();
+            showToast(`已套用模板：${template.name}`);
+        }
+
+        async function saveCurrentSkill() {
+            const payload = collectFormData();
+            if (!payload.name || !payload.prompt_template) {
+                showToast("技能名称和 Prompt 模板不能为空", "error");
+                return;
+            }
+
+            if (payload.input_schema === null || payload.output_schema === null || payload.examples === null) {
+                showToast("请先修正 JSON 格式错误", "error");
                 return;
             }
 
             try {
-                const response = await fetch(`/api/skills/${skillId}`, {
-                    method: 'DELETE',
+                const isEdit = Boolean(state.currentSkill.skill_id);
+                const url = isEdit ? `/api/skills/${state.currentSkill.skill_id}` : "/api/skills/";
+                const method = isEdit ? "PUT" : "POST";
+                const response = await fetch(url, {
+                    method,
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
                 });
-
                 const data = await response.json();
-
-                if (data.success) {
-                    showToast('技能已删除', 'success');
-                    loadSkills();
-                } else {
-                    showToast('删除失败: ' + data.error, 'error');
+                if (!data.success) throw new Error(data.error || "保存失败");
+                showToast(isEdit ? "技能已更新" : "技能已创建");
+                await refreshWorkspace();
+                if (data.skill_id) {
+                    await selectSkill(data.skill_id);
+                } else if (state.currentSkill.skill_id) {
+                    await selectSkill(state.currentSkill.skill_id);
                 }
             } catch (error) {
-                showToast('删除失败: ' + error.message, 'error');
+                showToast(`保存失败: ${error.message || error}`, "error");
             }
         }
 
-        // 测试技能
-        async function testSkill(skillId) {
-            // TODO: 实现技能测试功能
-            showToast('测试功能开发中...', 'success');
+        function duplicateCurrentSkill() {
+            const next = normalizeSkill({
+                ...collectFormData(),
+                skill_id: "",
+                name: `${document.getElementById("skillName").value.trim() || "未命名技能"} 副本`,
+                source: "draft",
+                recent_executions: [],
+            });
+            state.selectedSkillId = "";
+            state.currentSkill = next;
+            state.isDirty = true;
+            state.lastExecution = null;
+            renderAll();
+            showToast("已复制到新草稿");
         }
 
-        // 查看技能详情
-        function viewSkill(skillId) {
-            // TODO: 实现技能详情页面
-            console.log('View skill:', skillId);
-        }
-
-        // 显示提示
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            const icon = document.getElementById('toastIcon');
-            const messageEl = document.getElementById('toastMessage');
-
-            icon.textContent = type === 'success' ? '✓' : '✕';
-            messageEl.textContent = message;
-            toast.className = `toast ${type} active`;
-
-            setTimeout(() => {
-                toast.classList.remove('active');
-            }, 3000);
-        }
-
-        // 初始化
-        document.addEventListener('DOMContentLoaded', () => {
-            loadSkills();
-        });
-
-        // 点击模态框外部关闭
-        document.getElementById('skillModal').addEventListener('click', (e) => {
-            if (e.target.id === 'skillModal') {
-                closeModal();
+        async function deleteCurrentSkill() {
+            if (!state.currentSkill.skill_id) {
+                openNewDraft();
+                showToast("草稿已清空");
+                return;
             }
-        });
+            if (!window.confirm(`确定删除技能「${state.currentSkill.name}」吗？`)) return;
+            try {
+                const response = await fetch(`/api/skills/${state.currentSkill.skill_id}`, { method: "DELETE" });
+                const data = await response.json();
+                if (!data.success) throw new Error(data.error || "删除失败");
+                showToast("技能已删除");
+                state.selectedSkillId = "";
+                state.currentSkill = createEmptyDraft();
+                state.lastExecution = null;
+                await refreshWorkspace();
+            } catch (error) {
+                showToast(`删除失败: ${error.message || error}`, "error");
+            }
+        }
+
+        async function runSkillTest() {
+            const draft = collectFormData();
+            if (!draft.prompt_template) {
+                showToast("先补 Prompt 模板再测试", "error");
+                return;
+            }
+            const example = Array.isArray(draft.examples) && draft.examples[state.currentExampleIndex] ? draft.examples[state.currentExampleIndex] : {};
+            if (!draft.skill_id) {
+                const simulated = {
+                    mode: "local-preview",
+                    rendered_prompt: renderPrompt(draft.prompt_template, example || {}),
+                    example,
+                    note: "当前还是未保存草稿，所以先展示本地 Prompt 预演结果。保存后可直接调用执行接口。",
+                };
+                state.lastExecution = simulated;
+                document.getElementById("executionPreview").textContent = prettyJson(simulated);
+                showToast("已生成本地预演结果");
+                return;
+            }
+            try {
+                const response = await fetch(`/api/skills/${draft.skill_id}/execute`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ input: example || {} }),
+                });
+                const data = await response.json();
+                if (!data.success) throw new Error(data.error || "执行失败");
+                const output = data.output;
+                state.lastExecution = output;
+                document.getElementById("executionPreview").textContent = prettyJson(output);
+                showToast("技能测试执行完成");
+                await selectSkill(draft.skill_id);
+                state.lastExecution = output;
+                document.getElementById("executionPreview").textContent = prettyJson(output);
+                renderBlueprintWorkbench();
+                renderReadinessPanel();
+            } catch (error) {
+                showToast(`测试失败: ${error.message || error}`, "error");
+            }
+        }
+
+        function setCategory(categoryId) {
+            state.currentCategory = categoryId;
+            loadSkills().then(renderAll);
+        }
+
+        function handleSearch() {
+            state.currentSearch = document.getElementById("searchInput").value.trim();
+            loadSkills().then(renderAll);
+        }
+
+        function setExampleIndex(index) {
+            state.currentExampleIndex = index;
+            renderExampleTabs();
+            renderPromptPreview();
+        }
+
+        function guessIconByCategory(category) {
+            const map = {
+                text: "📝",
+                data: "📊",
+                code: "💻",
+                creative: "✨",
+                business: "💼",
+                research: "🔬",
+                translation: "🌐",
+                custom: "⚙️",
+            };
+            return map[category] || "⚡";
+        }
+
+        function extractVariables(prompt) {
+            const matches = [...String(prompt || "").matchAll(/\{([a-zA-Z0-9_]+)\}/g)];
+            return [...new Set(matches.map((match) => match[1]))];
+        }
+
+        function renderPrompt(prompt, values) {
+            let next = String(prompt || "");
+            Object.entries(values || {}).forEach(([key, value]) => {
+                const formatted = typeof value === "string" ? value : JSON.stringify(value, null, 2);
+                next = next.replaceAll(`{${key}}`, formatted);
+            });
+            return next;
+        }
+
+        function getDraftSnapshot() {
+            const nameInput = document.getElementById("skillName");
+            if (!nameInput) return normalizeSkill(state.currentSkill);
+            return normalizeSkill({
+                ...state.currentSkill,
+                ...collectFormData(),
+            });
+        }
+
+        function getActiveBlueprint(skill = state.currentSkill) {
+            if (skill.blueprint_id) {
+                const match = demoBlueprints.find((item) => item.id === skill.blueprint_id);
+                if (match) return match;
+            }
+            if (skill.name) {
+                const byName = demoBlueprints.find((item) => item.name === skill.name);
+                if (byName) return byName;
+            }
+            const prompt = String(skill.prompt_template || "").trim();
+            if (!prompt) return null;
+            return demoBlueprints.find((item) => String(item.prompt_template || "").trim() === prompt) || null;
+        }
+
+        function getBlueprintProfile(blueprint) {
+            if (!blueprint) {
+                return {
+                    complexity: "L2 / 自定义",
+                    maturity: "可继续扩展",
+                    use_cases: [],
+                    test_cases: [],
+                    launch_checklist: [],
+                    evolution_steps: [],
+                    sample_output: {},
+                };
+            }
+            return blueprintProfiles[blueprint.id] || {
+                complexity: "L2 / Demo",
+                maturity: "可继续扩展",
+                use_cases: [],
+                test_cases: [],
+                launch_checklist: [],
+                evolution_steps: [],
+                sample_output: {},
+            };
+        }
+
+        function analyzeDraft(skill) {
+            const variables = extractVariables(skill.prompt_template || "");
+            const inputSchema = skill.input_schema && typeof skill.input_schema === "object" ? skill.input_schema : {};
+            const outputSchema = skill.output_schema && typeof skill.output_schema === "object" ? skill.output_schema : {};
+            const examples = Array.isArray(skill.examples) ? skill.examples : [];
+            const tags = Array.isArray(skill.tags) ? skill.tags : [];
+            const schemaKeys = Object.keys(inputSchema);
+            const outputKeys = Object.keys(outputSchema);
+            const schemaCoveredVars = variables.filter((variable) => Object.prototype.hasOwnProperty.call(inputSchema, variable)).length;
+            const exampleCoveredVars = variables.filter((variable) => examples.some((example) => example && Object.prototype.hasOwnProperty.call(example, variable) && example[variable] !== "" && example[variable] !== undefined)).length;
+            const promptScore = clampScore(
+                (skill.name ? 18 : 0) +
+                (skill.prompt_template ? 32 : 0) +
+                Math.min(variables.length * 8, 24) +
+                (skill.description ? 14 : 0) +
+                (tags.length ? 12 : 0)
+            );
+            const schemaCoverage = variables.length
+                ? clampScore(Math.round((schemaCoveredVars / variables.length) * 100))
+                : clampScore((schemaKeys.length ? 40 : 0) + (outputKeys.length ? 30 : 0) + (examples.length ? 30 : 10));
+            const exampleScore = clampScore(
+                Math.min(examples.length * 28, 56) +
+                (variables.length ? Math.round((exampleCoveredVars / variables.length) * 24) : 12) +
+                Math.min(tags.length * 6, 12) +
+                (outputKeys.length ? 12 : 0)
+            );
+            const releaseScore = clampScore(
+                Math.round((promptScore * 0.32) + (schemaCoverage * 0.34) + (exampleScore * 0.22) + ((outputKeys.length ? 100 : 30) * 0.12))
+            );
+
+            return {
+                variableCount: variables.length,
+                schemaKeyCount: schemaKeys.length,
+                outputKeyCount: outputKeys.length,
+                exampleCount: examples.length,
+                tagCount: tags.length,
+                schemaCoveredVars,
+                exampleCoveredVars,
+                promptScore,
+                schemaCoverage,
+                exampleScore,
+                releaseScore,
+            };
+        }
+
+        function deriveGenericList(tags, fallback) {
+            const items = Array.isArray(tags) && tags.length
+                ? tags.slice(0, 4).map((tag) => `${tag} 场景能力`)
+                : [];
+            return items.length ? items : [fallback, "建议增加一个跨团队或跨系统的真实业务场景"];
+        }
+
+        function deriveExamplesAsCases(examples) {
+            if (Array.isArray(examples) && examples.length) {
+                return examples.slice(0, 3).map((example, index) => {
+                    const keys = Object.keys(example || {});
+                    return keys.length
+                        ? `样例 ${index + 1}: 覆盖 ${keys.slice(0, 4).join("、")}`
+                        : `样例 ${index + 1}: 空样例，建议补真实字段`;
+                });
+            }
+            return ["增加至少 1 条完整样例", "补一条边界 case", "补一条失败或异常 case"];
+        }
+
+        function buildGenericChecklist(draft, analysis) {
+            const checklist = [];
+            if (!draft.name) checklist.push("补技能名称和可检索描述");
+            if (!draft.prompt_template) checklist.push("补 Prompt 模板");
+            if (analysis.variableCount && analysis.schemaCoveredVars < analysis.variableCount) checklist.push("让输入 schema 覆盖全部 Prompt 变量");
+            if (!analysis.outputKeyCount) checklist.push("定义输出 schema，避免后续消费困难");
+            if (!analysis.exampleCount) checklist.push("补至少 1 条真实样例");
+            if (!draft.author) checklist.push("补作者或所属团队，方便后续维护");
+            return checklist.length ? checklist : ["执行一次测试确认结果结构", "保存后再做联调验证", "评估是否需要扩展为多场景技能包"];
+        }
+
+        function buildGenericRoadmap(draft, analysis) {
+            return [
+                `先把 ${draft.name || "当前草稿"} 的核心变量与 schema 对齐`,
+                analysis.exampleCount ? "补更多边界样例，形成回归集" : "增加标准样例、边界样例和失败样例",
+                "接入真实数据源或工作流节点，减少纯手工输入",
+                "沉淀发布说明、风险边界和后续维护 owner",
+            ];
+        }
+
+        function clampScore(value) {
+            return Math.max(0, Math.min(Math.round(value), 100));
+        }
+
+        function parseJsonSafe(value, fallback) {
+            if (value === undefined || value === null || value === "") return fallback;
+            if (typeof value !== "string") return value;
+            const text = value.trim();
+            if (!text) return fallback;
+            try {
+                return JSON.parse(text);
+            } catch (_error) {
+                return null;
+            }
+        }
+
+        function prettyJson(value) {
+            if (typeof value === "string") return value;
+            try {
+                return JSON.stringify(value, null, 2);
+            } catch (_error) {
+                return String(value);
+            }
+        }
+
+        function stringifyObject(value, fallback = {}) {
+            const next = value === undefined || value === null ? fallback : value;
+            return JSON.stringify(next, null, 2);
+        }
+
+        function formatIsoTime(value) {
+            if (!value) return "";
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return "";
+            return date.toLocaleString("zh-CN", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+        }
+
+        let toastTimer = null;
+        function showToast(message, type = "success") {
+            const toast = document.getElementById("toast");
+            toast.textContent = message;
+            toast.style.background = type === "error" ? "rgba(127, 29, 29, 0.96)" : "rgba(15, 23, 42, 0.92)";
+            toast.classList.add("is-visible");
+            window.clearTimeout(toastTimer);
+            toastTimer = window.setTimeout(() => {
+                toast.classList.remove("is-visible");
+            }, 2400);
+        }
+
+        window.refreshWorkspace = refreshWorkspace;
+        window.openNewDraft = openNewDraft;
+        window.seedDemoBlueprint = seedDemoBlueprint;
+        window.applyTemplate = applyTemplate;
+        window.saveCurrentSkill = saveCurrentSkill;
+        window.duplicateCurrentSkill = duplicateCurrentSkill;
+        window.deleteCurrentSkill = deleteCurrentSkill;
+        window.runSkillTest = runSkillTest;
+        window.setCategory = setCategory;
+        window.handleSearch = handleSearch;
+        window.selectSkill = selectSkill;
+        window.setExampleIndex = setExampleIndex;
     </script>
 </body>
 </html>

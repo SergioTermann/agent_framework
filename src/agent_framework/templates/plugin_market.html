@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>插件市场 - Agent Framework</title>
+    <title>风起时域 · 插件市场</title>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/base-theme.css">
     <style>
@@ -21,98 +21,286 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #f5f8fc 0%, #eff4fb 100%);
             margin: 0;
+            font-family: var(--font-body);
+            color: var(--text);
+            background:
+                radial-gradient(circle at 8% 12%, rgba(19, 99, 223, 0.12), transparent 22%),
+                radial-gradient(circle at 88% 10%, rgba(96, 165, 250, 0.12), transparent 18%),
+                linear-gradient(180deg, #f7fbff 0%, #eef4fb 100%);
         }
 
         body.is-embedded {
             background: transparent;
         }
 
+        body.is-embedded::before,
+        body.is-embedded::after {
+            display: none;
+        }
+
+        body::before,
+        body::after {
+            content: "";
+            position: fixed;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body::before {
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(19, 99, 223, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(19, 99, 223, 0.03) 1px, transparent 1px);
+            background-size: 28px 28px;
+            mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.12), transparent 60%);
+        }
+
+        body::after {
+            right: 4vw;
+            bottom: 7vh;
+            width: 320px;
+            height: 320px;
+            border-radius: 999px;
+            background: radial-gradient(circle, rgba(19, 99, 223, 0.12) 0%, transparent 72%);
+            filter: blur(10px);
+        }
+
         .app-container {
             display: flex;
             min-height: 100vh;
+            position: relative;
+            z-index: 1;
         }
 
-        /* 侧边栏 */
         .sidebar {
-            width: 280px;
-            background: linear-gradient(180deg, #0f4eb3 0%, #1363df 52%, #2b7fff 100%);
-            color: white;
+            position: sticky;
+            top: 0;
             display: flex;
             flex-direction: column;
-            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+            gap: 12px;
+            width: 16rem;
+            height: 100vh;
+            padding: 24px 16px;
+            overflow-y: auto;
+            background: rgba(240, 245, 252, 0.86);
+            backdrop-filter: blur(18px);
+            border-right: 1px solid rgba(219, 228, 240, 0.78);
+            box-shadow: 10px 0 40px rgba(16, 35, 63, 0.04);
         }
 
         .sidebar-header {
-            padding: 28px 24px;
-            border-bottom: 1px solid rgba(255,255,255,0.15);
+            padding: 0 8px 10px;
         }
 
         .sidebar-logo {
-            font-size: 26px;
-            font-weight: 800;
             display: flex;
             align-items: center;
             gap: 12px;
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .sidebar-mark {
+            display: grid;
+            place-items: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--theme-accent), #5d9cff);
+            color: #fff;
+            font-size: 22px;
+            box-shadow: 0 14px 26px rgba(19, 99, 223, 0.28);
+        }
+
+        .sidebar-copy strong {
+            display: block;
+            font-family: var(--font-display);
+            font-size: 18px;
+            line-height: 1.1;
+            color: #10233f;
+        }
+
+        .sidebar-copy small {
+            display: block;
+            margin-top: 4px;
+            color: #5f728c;
+            font-size: 12px;
+            letter-spacing: 0.05em;
+        }
+
+        .sidebar-primary {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin: 4px 0 10px;
+            padding: 15px 16px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, var(--theme-accent), var(--theme-accent-deep));
+            color: #fff;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 800;
+            box-shadow: 0 20px 34px rgba(19, 99, 223, 0.22);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .sidebar-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 22px 36px rgba(19, 99, 223, 0.26);
         }
 
         .sidebar-nav {
             flex: 1;
-            padding: 20px 0;
-            overflow-y: auto;
+        }
+
+        .sidebar-nav,
+        .sidebar-footer {
+            display: grid;
+            gap: 6px;
+        }
+
+        .nav-section-label {
+            padding: 6px 14px 2px;
+            color: rgba(95, 114, 140, 0.88);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
         }
 
         .nav-item {
-            padding: 12px 24px;
-            color: rgba(255,255,255,0.8);
-            text-decoration: none;
             display: flex;
             align-items: center;
             gap: 12px;
-            transition: all 0.2s;
+            padding: 12px 14px;
+            border-radius: 14px;
+            color: rgba(44, 52, 55, 0.82);
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 700;
+            transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+        }
+
+        .nav-item .material-symbols-outlined {
+            font-size: 20px;
+            color: #6b7d94;
         }
 
         .nav-item:hover {
-            background: rgba(255,255,255,0.1);
-            color: white;
+            background: rgba(213, 227, 253, 0.62);
+            color: #005cc0;
+            transform: translateX(2px);
+        }
+
+        .nav-item:hover .material-symbols-outlined,
+        .nav-item.active .material-symbols-outlined {
+            color: inherit;
         }
 
         .nav-item.active {
-            background: rgba(255,255,255,0.15);
-            color: white;
-            border-left: 3px solid white;
+            background: linear-gradient(135deg, rgba(19, 99, 223, 0.14), rgba(93, 156, 255, 0.14));
+            color: var(--theme-accent);
+            box-shadow: inset 0 0 0 1px rgba(19, 99, 223, 0.08);
         }
 
-        /* 主内容区 */
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 14px;
+            border-top: 1px solid rgba(172, 179, 183, 0.18);
+        }
+
+        .sidebar-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px 0;
+        }
+
+        .sidebar-user-mark {
+            width: 34px;
+            height: 34px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--theme-accent), #7ab1ff);
+            box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.5);
+        }
+
+        .sidebar-user strong {
+            display: block;
+            font-size: 14px;
+            color: #10233f;
+        }
+
+        .sidebar-user small {
+            display: block;
+            margin-top: 2px;
+            color: #5f728c;
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
         .main-content {
             flex: 1;
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            min-width: 0;
         }
 
         .header {
-            background: #ffffff;
-            padding: 16px 24px;
-            border-bottom: 1px solid rgba(101, 120, 144, 0.14);
+            position: sticky;
+            top: 0;
+            z-index: 20;
             display: flex;
             align-items: center;
-            gap: 12px;
+            justify-content: space-between;
+            gap: 18px;
+            min-height: 76px;
+            padding: 14px 24px;
+            background: rgba(247, 250, 255, 0.72);
+            backdrop-filter: blur(22px);
+            border-bottom: 1px solid rgba(219, 228, 240, 0.55);
+        }
+
+        .header-copy {
+            display: grid;
+            gap: 4px;
         }
 
         .header h1 {
             font-size: 20px;
-            color: #253038;
-            font-weight: 600;
+            color: #10233f;
+            font-family: var(--font-display);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .header p {
+            margin: 0;
+            color: #5f728c;
+            font-size: 13px;
+        }
+
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(19, 99, 223, 0.08);
+            color: var(--theme-accent);
+            font-size: 13px;
+            font-weight: 800;
+            white-space: nowrap;
         }
 
         .container {
             flex: 1;
             overflow-y: auto;
-            padding: 30px 20px;
-            max-width: 1400px;
+            padding: 32px 24px 40px;
+            max-width: 1440px;
             width: 100%;
             margin: 0 auto;
         }
@@ -135,7 +323,7 @@
         .hero p{margin:0;color:#617181;max-width:62ch}.hero-points{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}.metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
         .metric{padding:18px;border-radius:22px;background:rgba(19,99,223,.05);border:1px solid rgba(19,99,223,.1)}.metric .label{display:flex;align-items:center;gap:8px;font-size:13px;color:#617181}
         .metric strong{display:block;margin:12px 0 6px;font-size:30px;line-height:1;color:#253038}.metric span:last-child{font-size:13px;color:#617181}
-        .controls{margin-top:22px;padding:22px;border-radius:28px}.controls-top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center}
+        .controls{position:sticky;top:20px;z-index:12;margin-top:22px;padding:22px;border-radius:28px;background:linear-gradient(180deg,rgba(255,255,255,.94),rgba(241,247,255,.92));backdrop-filter:blur(18px)}.controls-top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center}
         .search{position:relative}.search .material-symbols-outlined{position:absolute;left:18px;top:50%;transform:translateY(-50%);color:#617181}
         .search input,.sort{width:100%;height:54px;padding:0 16px 0 52px;border-radius:18px;border:1px solid rgba(101,120,144,.14);background:rgba(255,255,255,.9);color:#253038;font-size:15px}
         .sort{width:170px;padding-left:16px;height:44px;border-radius:14px}.search input:focus,.sort:focus{outline:none;border-color:#60a5fa;box-shadow:0 0 0 4px rgba(19,99,223,.08)}
@@ -143,10 +331,18 @@
         .ghost,.secondary,.close-btn{border:1px solid rgba(101,120,144,.14);background:rgba(255,255,255,.9);color:#253038}.ghost{height:44px;padding:0 16px;border-radius:14px;font-weight:700}.filters{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
         .chip{padding:10px 14px;color:#617181;cursor:pointer}.chip strong{font-size:12px;color:#4c5a68}.chip.active{color:#ffffff;background:linear-gradient(135deg,#1363df,#60a5fa);border-color:transparent;box-shadow:0 14px 28px rgba(19,99,223,.22)}.chip:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
         .summary{margin-top:14px;font-size:14px;color:#617181}.error{margin-top:14px;padding:12px 14px;border-radius:16px;background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.2);color:#dc2626}
+        .radar-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:16px}
+        .radar-card{padding:16px 18px;border-radius:20px;background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(239,244,251,.92));border:1px solid rgba(101,120,144,.12);box-shadow:0 10px 22px rgba(19,99,223,.06)}
+        .radar-label{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:#617181;text-transform:uppercase;letter-spacing:.06em}
+        .radar-value{display:block;margin-top:10px;font:700 28px/1 var(--font-display);color:#253038}
+        .radar-note{display:block;margin-top:8px;font-size:13px;line-height:1.6;color:#617181}
         .section{margin-top:24px}.section-head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:14px}.section-head h3{margin:0;color:#253038;font-size:20px}.section-head span{font-size:14px;color:#617181}
-        .featured-grid,.grid,.loading{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.featured{padding:22px;border-radius:28px;background:linear-gradient(150deg,rgba(239,244,251,.96),rgba(255,255,255,.9));position:relative;overflow:hidden}
+        .featured-grid,.grid,.loading{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.featured{padding:22px;border-radius:28px;background:linear-gradient(150deg,rgba(239,244,251,.96),rgba(255,255,255,.9));position:relative;overflow:hidden;transition:transform .24s ease,box-shadow .24s ease,border-color .24s ease}
         .featured::before,.card::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at top right,rgba(96,165,250,.08),transparent 24%);pointer-events:none}
-        .card{position:relative;overflow:hidden;min-height:315px;padding:22px;border-radius:26px;background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(239,244,251,.98));cursor:pointer;border:1px solid rgba(101,120,144,.14)}
+        .featured::after,.card::after{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:linear-gradient(180deg,var(--plugin-accent,#1363df),rgba(96,165,250,.18))}
+        .featured::after{width:5px}
+        .card{position:relative;overflow:hidden;min-height:315px;padding:22px;border-radius:26px;background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(239,244,251,.98));cursor:pointer;border:1px solid rgba(101,120,144,.14);transition:transform .24s ease,box-shadow .24s ease,border-color .24s ease}
+        .featured:hover,.card:hover,.overview-tile:hover,.category-section:hover,.radar-card:hover{transform:translateY(-2px);box-shadow:0 18px 30px rgba(19,99,223,.12);border-color:rgba(19,99,223,.16)}
         .top{display:flex;justify-content:space-between;gap:16px}.badges,.meta,.tags{display:flex;gap:8px;flex-wrap:wrap}.badge,.tag{padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid rgba(101,120,144,.12)}
         .badge{background:rgba(19,99,223,.07);color:#253038}.badge.highlight{background:rgba(19,99,223,.16);color:#1363df}.badge.success{background:rgba(34,160,107,.16);color:#22a06b}
         .icon,.modal-icon{display:grid;place-items:center;width:56px;height:56px;border-radius:18px;background:linear-gradient(135deg,#1363df,#60a5fa);color:#fff;box-shadow:0 14px 30px rgba(19,99,223,.24);font-size:28px}
@@ -155,6 +351,31 @@
         .meta .material-symbols-outlined{font-size:18px;color:#1363df}.tag{background:rgba(19,99,223,.05);color:#253038}.buttons{display:flex;gap:10px;margin-top:18px}
         .primary,.secondary{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border-radius:16px;font-weight:700}.primary{flex:1;padding:0 16px;border:none;color:#ffffff;background:linear-gradient(135deg,#1363df,#60a5fa);box-shadow:0 16px 28px rgba(19,99,223,.22)}
         .primary.installed{color:#ffffff;background:linear-gradient(135deg,#22a06b,#86efac);box-shadow:0 16px 28px rgba(34,160,107,.18)}.primary.warning{color:#ffffff;background:linear-gradient(135deg,#f97316,#fb7185);box-shadow:0 16px 28px rgba(249,115,22,.22)}.secondary{min-width:106px;padding:0 16px}.primary[disabled],.secondary[disabled]{opacity:.72;cursor:wait}
+        .directory-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:0 0 16px}.overview-tile{padding:18px 20px;border-radius:24px;border:1px solid rgba(101,120,144,.12);background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(239,244,251,.92));box-shadow:0 12px 24px rgba(19,99,223,.06);transition:transform .24s ease,box-shadow .24s ease,border-color .24s ease}
+        .overview-tile-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.overview-tile-head strong{font-size:17px;color:#253038}.overview-tile-kicker{display:inline-flex;align-items:center;gap:8px;padding:7px 10px;border-radius:999px;background:rgba(19,99,223,.08);color:#1363df;font-size:12px;font-weight:700}
+        .overview-tile p{margin:10px 0 14px;color:#617181;font-size:14px;line-height:1.6}.overview-list{display:grid;gap:10px}.overview-item{display:flex;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:16px;background:rgba(19,99,223,.05);border:1px solid rgba(101,120,144,.08);font-size:13px;color:#253038}
+        .overview-item strong{font-size:13px;font-weight:700}.overview-item span:last-child{color:#617181;text-align:right}
+        .directory-sections{display:grid;gap:18px}
+        .category-section{padding:20px;border-radius:28px;border:1px solid rgba(101,120,144,.12);background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(239,244,251,.94));box-shadow:0 14px 30px rgba(19,99,223,.06);transition:transform .24s ease,box-shadow .24s ease,border-color .24s ease}
+        .category-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:16px}
+        .category-head h4{margin:8px 0 6px;color:#253038;font:700 24px/1.1 var(--font-display)}
+        .category-head p{margin:0;color:#617181;font-size:14px;line-height:1.65;max-width:66ch}
+        .category-kicker{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:rgba(19,99,223,.08);border:1px solid rgba(19,99,223,.12);color:#1363df;font-size:12px;font-weight:700;text-transform:uppercase}
+        .category-aside{display:grid;gap:10px;min-width:220px}
+        .category-stat{padding:12px 14px;border-radius:18px;background:rgba(255,255,255,.88);border:1px solid rgba(101,120,144,.1)}
+        .category-stat strong{display:block;color:#253038;font-size:22px;line-height:1}
+        .category-stat span{display:block;margin-top:6px;font-size:13px;color:#617181}
+        .category-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+        .plugin-card{min-height:360px;display:grid;grid-template-rows:auto auto auto 1fr auto auto}
+        .plugin-card .desc{min-height:auto;margin:12px 0 14px}
+        .plugin-state{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 14px}
+        .plugin-state .item{display:inline-flex;align-items:center;gap:6px;padding:8px 10px;border-radius:14px;background:rgba(19,99,223,.05);font-size:12px;color:#253038}
+        .plugin-state .material-symbols-outlined{font-size:16px;color:#1363df}
+        .capability-list{display:grid;gap:8px;margin-bottom:14px}
+        .capability-list .line{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.55;color:#4c5a68}
+        .capability-list .material-symbols-outlined{font-size:16px;color:#1363df;margin-top:1px}
+        .card-foot{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-top:14px;padding-top:14px;border-top:1px solid rgba(101,120,144,.1)}
+        .card-footnote{font-size:12px;color:#617181}
         .loading .card,.empty{padding:28px;border-radius:28px}.loading .card{min-height:220px;cursor:default}.s-line,.s-icon{background:rgba(101,120,144,.08);border-radius:999px}.s-icon{width:56px;height:56px;border-radius:18px;margin-bottom:18px}.s-line{height:14px;margin-bottom:12px}.s-line.s{width:42%}.s-line.m{width:68%}.s-line.l{width:100%}
         .card.loading::after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(96,165,250,.08),transparent);animation:shimmer 1.5s infinite}.empty{text-align:center;background:rgba(19,99,223,.04)}.empty .material-symbols-outlined{font-size:48px;color:#617181}.empty h4{margin:14px 0 8px;color:#253038;font-size:20px}
         .modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(37,48,56,.74);backdrop-filter:blur(14px);z-index:1000}.modal-shell{width:min(960px,100%);max-height:calc(100vh - 48px);overflow:auto;padding:24px;border-radius:30px;background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(239,244,251,.98));border:1px solid rgba(101,120,144,.14)}
@@ -167,50 +388,83 @@
         .toast{position:fixed;right:24px;bottom:24px;min-width:220px;max-width:360px;padding:14px 16px;border-radius:18px;background:rgba(255,255,255,.94);border:1px solid rgba(101,120,144,.14);box-shadow:var(--shadow-md);color:#253038;opacity:0;pointer-events:none;transform:translateY(14px);transition:.25s ease;z-index:1100}
         .toast.show{opacity:1;transform:translateY(0)}.toast.error{background:rgba(220,38,38,.94);border-color:rgba(220,38,38,.28);color:#ffffff}.spinner{width:16px;height:16px;border:2px solid rgba(19,99,223,.22);border-top-color:rgba(19,99,223,.82);border-radius:50%;animation:spin .9s linear infinite}
         @keyframes shimmer{100%{transform:translateX(100%)}}@keyframes spin{to{transform:rotate(360deg)}}
-        @media (max-width:1180px){.hero-grid,.featured-grid,.grid,.loading,.modal-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.hero-grid{grid-template-columns:1fr}}
-        @media (max-width:860px){.page-wide{padding:20px}.controls-top,.featured-grid,.grid,.loading,.modal-head,.modal-grid,.metrics{grid-template-columns:1fr}.actions,.buttons,.pagination-actions{flex-direction:column}.actions>*,.buttons>*,.pagination-actions>*{width:100%}.sort{width:100%}.pagination{align-items:stretch}}
+        @media (max-width:1180px){.sidebar{position:static;width:auto;height:auto;margin:0 14px 12px;border-right:none;border-bottom:1px solid rgba(219,228,240,.7);border-radius:0 0 24px 24px}.header{position:static;margin:0 14px 8px;border:1px solid rgba(219,228,240,.55);border-radius:20px}.container{padding:16px 14px 28px}.hero-grid,.featured-grid,.grid,.loading,.modal-grid,.directory-overview,.category-cards,.radar-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.hero-grid{grid-template-columns:1fr}.category-head{grid-template-columns:1fr}}
+        @media (max-width:860px){.header,.header-copy{align-items:flex-start}.header{flex-direction:column}.header-badge{white-space:normal}.controls{position:relative;top:0}.controls-top,.featured-grid,.grid,.loading,.modal-head,.modal-grid,.metrics,.directory-overview,.category-cards,.radar-grid{grid-template-columns:1fr}.actions,.buttons,.pagination-actions{flex-direction:column}.actions>*,.buttons>*,.pagination-actions>*{width:100%}.sort{width:100%}.pagination{align-items:stretch}.category-head{flex-direction:column}.category-aside{min-width:0;width:100%}}
+        @media (max-width:760px){.sidebar{margin:0 12px 10px;padding:18px 14px}.header{margin:0 12px 8px;padding:14px}.container{padding:14px 12px 24px}}
     </style>
 </head>
 <body{% if embedded %} class="is-embedded"{% endif %}>
     <div class="app-container">
-        <!-- 侧边栏 -->
         {% if not embedded %}
         <div class="sidebar">
             <div class="sidebar-header">
-                <div class="sidebar-logo">
-                    🤖 Agent Framework
-                </div>
+                <a class="sidebar-logo" href="/">
+                    <span class="sidebar-mark material-symbols-outlined">extension</span>
+                    <span class="sidebar-copy">
+                        <strong>插件市场</strong>
+                        <small>能力目录 / 接入管理</small>
+                    </span>
+                </a>
             </div>
-            <nav class="sidebar-nav">
+            <a class="sidebar-primary" href="/">
+                <span class="material-symbols-outlined">space_dashboard</span>
+                <span>返回开发控制台</span>
+            </a>
+            <nav class="sidebar-nav" aria-label="插件市场导航">
+                <div class="nav-section-label">平台入口</div>
                 <a href="/" class="nav-item">
-                    <span>🏠</span>
+                    <span class="material-symbols-outlined">home</span>
                     <span>首页</span>
                 </a>
                 <a href="/chat" class="nav-item">
-                    <span>💬</span>
+                    <span class="material-symbols-outlined">chat</span>
                     <span>对话助手</span>
                 </a>
                 <a href="/visual_workflow" class="nav-item">
-                    <span>🔄</span>
+                    <span class="material-symbols-outlined">hub</span>
                     <span>工作流编排</span>
                 </a>
                 <a href="/knowledge" class="nav-item">
-                    <span>📚</span>
+                    <span class="material-symbols-outlined">library_books</span>
                     <span>知识库</span>
                 </a>
                 <a href="/plugins" class="nav-item active">
-                    <span>🔌</span>
+                    <span class="material-symbols-outlined">extension</span>
                     <span>插件市场</span>
                 </a>
             </nav>
+            <div class="sidebar-footer">
+                <div class="nav-section-label">常用视图</div>
+                <a href="/settings" class="nav-item">
+                    <span class="material-symbols-outlined">settings</span>
+                    <span>平台设置</span>
+                </a>
+                <a href="/logs" class="nav-item">
+                    <span class="material-symbols-outlined">receipt_long</span>
+                    <span>日志中心</span>
+                </a>
+                <div class="sidebar-user">
+                    <span class="sidebar-user-mark"></span>
+                    <div>
+                        <strong>插件目录</strong>
+                        <small>plugin catalog</small>
+                    </div>
+                </div>
+            </div>
         </div>
         {% endif %}
 
-        <!-- 主内容区 -->
         <div class="main-content">
             {% if not embedded %}
             <div class="header">
-                <h1>🔌 插件市场</h1>
+                <div class="header-copy">
+                    <h1>插件市场</h1>
+                    <p>按能力域筛选、安装和评估插件，查看当前可用的扩展能力。</p>
+                </div>
+                <div class="header-badge">
+                    <span class="material-symbols-outlined" style="font-size:16px">network_intelligence</span>
+                    <span>搜索 / 分类 / 安装状态 / 评分</span>
+                </div>
             </div>
             {% endif %}
 
@@ -220,13 +474,13 @@
         <section class="hero">
             <div class="hero-grid">
                 <div>
-                    <div class="eyebrow"><span class="material-symbols-outlined">diamond</span>Curated Marketplace</div>
-                    <h2>把插件页从“清单”升级成<span>真正可用的能力目录</span></h2>
-                    <p>现在的重点不是把卡片做得更花，而是让这页更适合实际决策：先看什么值得装，再看装没装、最新版本、兼容性和当前筛选结果。</p>
+                    <div class="eyebrow"><span class="material-symbols-outlined">apps</span>能力目录</div>
+                    <h2>插件能力目录<span>按能力域快速浏览与接入</span></h2>
+                    <p>查看插件的能力归属、安装状态、版本、兼容性和最近更新，直接完成筛选、评估和接入。</p>
                     <div class="hero-points">
-                        <div class="toggle"><span class="material-symbols-outlined">verified</span>官方校验</div>
-                        <div class="toggle"><span class="material-symbols-outlined">bolt</span>安装状态联动</div>
-                        <div class="toggle"><span class="material-symbols-outlined">tune</span>筛选与排序更清晰</div>
+                        <div class="toggle"><span class="material-symbols-outlined">verified</span>验证状态</div>
+                        <div class="toggle"><span class="material-symbols-outlined">download_done</span>安装状态</div>
+                        <div class="toggle"><span class="material-symbols-outlined">update</span>版本与更新</div>
                     </div>
                 </div>
                 <div class="metrics">
@@ -263,6 +517,7 @@
             </div>
             <div id="category-filter-bar" class="filters"></div>
             <div id="filter-summary" class="summary">正在加载插件目录...</div>
+            <div id="directory-radar" class="radar-grid"></div>
             <div id="error-banner" class="error" hidden></div>
         </section>
 
@@ -272,13 +527,14 @@
         </section>
 
         <section class="section">
-            <div class="section-head"><div><h3>插件目录</h3><span id="catalog-note">支持搜索、分类过滤和安装状态联动。</span></div></div>
+            <div class="section-head"><div><h3>能力目录</h3><span id="catalog-note">支持搜索、分类过滤和安装状态联动。</span></div></div>
+            <div id="directory-overview" class="directory-overview" hidden></div>
             <div id="loading-grid" class="loading">
                 <div class="card loading"><div class="s-icon"></div><div class="s-line m"></div><div class="s-line s"></div><div class="s-line l"></div><div class="s-line l"></div></div>
                 <div class="card loading"><div class="s-icon"></div><div class="s-line m"></div><div class="s-line s"></div><div class="s-line l"></div><div class="s-line l"></div></div>
                 <div class="card loading"><div class="s-icon"></div><div class="s-line m"></div><div class="s-line s"></div><div class="s-line l"></div><div class="s-line l"></div></div>
             </div>
-            <div id="plugins-grid" class="grid" hidden></div>
+            <div id="plugins-grid" class="directory-sections" hidden></div>
             <div id="pagination-bar" class="pagination" hidden>
                 <div id="pagination-info" class="pagination-info"></div>
                 <div id="pagination-actions" class="pagination-actions"></div>
@@ -336,6 +592,14 @@
     <script>
         const state = {allPlugins:[], featuredPlugins:[], categories:[], pagination:null, currentFilter:'all', currentSort:'popular', currentPage:1, pageSize:6, search:'', installedOnly:false, stats:null, currentPluginId:null, modalPlugin:null, busy:new Set(), ratingBusyPluginId:null, toastTimer:null, loadTimer:null, listAbortController:null, listRequestToken:0, isLoading:false};
         const labels = {all:'全部', integration:'系统集成', ai:'AI 能力', data:'数据处理', automation:'自动化', utility:'运维工具'};
+        const categoryMeta = {
+            all: {icon:'apps', title:'全部能力', desc:'从全局角度看当前目录中的插件能力。'},
+            integration: {icon:'lan', title:'系统集成', desc:'面向外部系统对接、接口接入、平台互通与同步桥接。'},
+            ai: {icon:'psychology_alt', title:'AI 能力', desc:'围绕推理、生成、识别、编排增强与模型侧扩展的能力。'},
+            data: {icon:'database', title:'数据处理', desc:'聚焦清洗、转换、提取、索引、检索与分析处理链路。'},
+            automation: {icon:'auto_mode', title:'自动化', desc:'适合执行调度、流程触发、批量动作与自动闭环处理。'},
+            utility: {icon:'build', title:'运维工具', desc:'偏基础设施、诊断、辅助治理和平台运行支持类能力。'},
+        };
         const sortOptions = new Set(['popular', 'rating', 'recent', 'name']);
         const pageSizeOptions = new Set([6, 9, 12]);
         const qs = (id) => document.getElementById(id);
@@ -502,6 +766,85 @@
             qs('category-filter-bar').innerHTML = categories.map((item) => `<button type="button" class="chip ${item.id === state.currentFilter ? 'active' : ''}" onclick="selectCategory('${item.id}')" ${state.isLoading ? 'disabled' : ''}><span>${escapeHtml(item.label)}</span><strong>${num(item.count)}</strong></button>`).join('');
         }
 
+        function renderRadar() {
+            const baseCategories = state.categories.length
+                ? state.categories.filter((item) => item.id !== 'all')
+                : Object.entries(labels).filter(([id]) => id !== 'all').map(([id, label]) => ({id, label, count:0}));
+            const topCategories = [...baseCategories]
+                .sort((a, b) => Number(b.count || 0) - Number(a.count || 0))
+                .slice(0, 4);
+            qs('directory-radar').innerHTML = topCategories.map((item) => {
+                const meta = categoryMeta[item.id] || categoryMeta.all;
+                return `<article class="radar-card"><div class="radar-label"><span class="material-symbols-outlined" style="font-size:16px">${escapeHtml(meta.icon)}</span><span>${escapeHtml(item.label || labels[item.id] || item.id)}</span></div><strong class="radar-value">${num(item.count)}</strong><span class="radar-note">${escapeHtml(meta.desc)}</span></article>`;
+            }).join('');
+        }
+
+        function pluginSignals(plugin) {
+            const signals = [];
+            if (plugin.highlights?.length) signals.push(...plugin.highlights.slice(0, 2));
+            if (plugin.compatibility) signals.push(`兼容：${plugin.compatibility}`);
+            if (plugin.tags?.length) signals.push(`标签：${plugin.tags.slice(0, 2).join(' / ')}`);
+            if (!signals.length) signals.push('已收录到目录，可查看详情、安装状态和版本信息。');
+            return signals.slice(0, 3);
+        }
+
+        function pluginFootnote(plugin) {
+            if (plugin.installed && plugin.enabled) return '已接入当前平台链路';
+            if (plugin.installed) return '已安装，等待启用';
+            if (plugin.featured) return '适合优先评估接入';
+            if (plugin.verified) return '已通过验证检查';
+            return '可加入能力组合';
+        }
+
+        function buildPluginCard(plugin, options = {}) {
+            const {featured = false} = options;
+            const busy = state.busy.has(plugin.id) || state.isLoading;
+            const signalHtml = pluginSignals(plugin).map((item) => `<div class="line"><span class="material-symbols-outlined">subdirectory_arrow_right</span><span>${escapeHtml(item)}</span></div>`).join('');
+            const stateHtml = [
+                `<span class="item"><span class="material-symbols-outlined">bolt</span>${plugin.installed ? (plugin.enabled ? '已启用' : '已安装') : '待接入'}</span>`,
+                `<span class="item"><span class="material-symbols-outlined">deployed_code_update</span>${escapeHtml(plugin.version)}</span>`,
+                `<span class="item"><span class="material-symbols-outlined">schedule</span>${escapeHtml(dateText(plugin.updated_at))}</span>`,
+            ].join('');
+            if (featured) {
+                return `<article class="featured" style="--plugin-accent:${escapeHtml(plugin.accent || '#d4a574')}"><div class="top"><div class="badges"><span class="badge highlight">官方精选</span>${plugin.verified ? '<span class="badge success">已验证</span>' : ''}${plugin.installed ? `<span class="badge ${plugin.enabled ? 'success' : ''}">${plugin.enabled ? '已启用' : '已停用'}</span>` : ''}</div><div class="icon material-symbols-outlined">${escapeHtml(plugin.icon || 'extension')}</div></div><h4 class="name">${escapeHtml(plugin.name)}</h4><div class="author">by ${escapeHtml(plugin.author)}</div><p class="desc">${escapeHtml(plugin.description)}</p><div class="capability-list">${signalHtml}</div><div class="meta"><span class="item"><span class="material-symbols-outlined">download</span>${num(plugin.downloads)}</span><span class="item"><span class="material-symbols-outlined">star</span>${Number(plugin.rating || 0).toFixed(1)}</span><span class="item"><span class="material-symbols-outlined">category</span>${escapeHtml(plugin.category_label || labels[plugin.category] || plugin.category)}</span></div><div class="buttons"><button type="button" class="primary ${plugin.installed ? 'installed' : ''}" onclick="toggleInstall('${plugin.id}', event)" ${busy ? 'disabled' : ''}>${busy ? '<span class="spinner"></span>处理中...' : `<span class="material-symbols-outlined">${plugin.installed ? 'check_circle' : 'download'}</span>${plugin.installed ? '已安装' : '立即安装'}`}</button><button type="button" class="secondary" onclick="openModal('${plugin.id}')">查看详情</button></div></article>`;
+            }
+            return `<article class="card plugin-card" style="--plugin-accent:${escapeHtml(plugin.accent || '#d4a574')}" role="button" tabindex="0" onclick="openModal('${plugin.id}')" onkeydown="handleCardKey(event,'${plugin.id}')"><div class="top"><div class="badges"><span class="badge ${plugin.featured ? 'highlight' : ''}">${escapeHtml(plugin.featured ? '精选' : (plugin.category_label || labels[plugin.category] || plugin.category))}</span>${plugin.installed ? `<span class="badge ${plugin.enabled ? 'success' : ''}">${plugin.enabled ? '已启用' : '已停用'}</span>` : ''}${plugin.verified ? '<span class="badge">已验证</span>' : ''}</div><div class="icon material-symbols-outlined">${escapeHtml(plugin.icon || 'extension')}</div></div><h4 class="name">${escapeHtml(plugin.name)}</h4><div class="author">by ${escapeHtml(plugin.author)}</div><p class="desc">${escapeHtml(plugin.description)}</p><div class="plugin-state">${stateHtml}</div><div class="capability-list">${signalHtml}</div><div class="card-foot"><span class="card-footnote">${escapeHtml(pluginFootnote(plugin))}</span><span class="meta"><span class="item"><span class="material-symbols-outlined">download</span>${num(plugin.downloads)}</span><span class="item"><span class="material-symbols-outlined">star</span>${Number(plugin.rating || 0).toFixed(1)}${plugin.rating_count ? ` / ${num(plugin.rating_count)} 评` : ''}</span></span></div><div class="buttons"><button type="button" class="primary ${plugin.installed ? 'installed' : ''}" onclick="toggleInstall('${plugin.id}', event)" ${busy ? 'disabled' : ''}>${busy ? '<span class="spinner"></span>处理中...' : `<span class="material-symbols-outlined">${plugin.installed ? 'check_circle' : 'download'}</span>${plugin.installed ? '已安装' : '安装插件'}`}</button><button type="button" class="secondary" onclick="openModal('${plugin.id}')">详情</button></div></article>`;
+        }
+
+        function renderDirectoryOverview(list) {
+            const board = qs('directory-overview');
+            if (!list.length) {
+                board.hidden = true;
+                board.innerHTML = '';
+                return;
+            }
+            const installed = list.filter((plugin) => plugin.installed).slice(0, 3);
+            const featured = list.filter((plugin) => plugin.featured).slice(0, 3);
+            const recent = [...list].sort((a, b) => new Date(b.updated_at || 0) - new Date(a.updated_at || 0)).slice(0, 3);
+            const blocks = [
+                {
+                    title: '已接入能力',
+                    kicker: '接入现状',
+                    desc: '先看哪些能力已经装到平台里，适合继续启用、联调或扩充配置。',
+                    items: installed.length ? installed.map((plugin) => ({left: plugin.name, right: plugin.enabled ? '已启用' : '待启用'})) : [{left: '当前还没有安装插件', right: '从推荐能力开始'}],
+                },
+                {
+                    title: '推荐评估能力',
+                    kicker: '优先尝试',
+                    desc: '精选或高价值插件优先放这里，避免在平铺列表里逐个判断。',
+                    items: featured.length ? featured.map((plugin) => ({left: plugin.name, right: `${Number(plugin.rating || 0).toFixed(1)} 分`})) : [{left: '暂无精选插件', right: '等待目录数据'}],
+                },
+                {
+                    title: '最近活跃更新',
+                    kicker: '最近变化',
+                    desc: '如果你更关心新能力和最近维护状态，这里会先给你最该看的更新项。',
+                    items: recent.length ? recent.map((plugin) => ({left: plugin.name, right: dateText(plugin.updated_at)})) : [{left: '暂无更新记录', right: '目录稳定'}],
+                },
+            ];
+            board.hidden = false;
+            board.innerHTML = blocks.map((block) => `<article class="overview-tile"><div class="overview-tile-head"><div><div class="overview-tile-kicker"><span class="material-symbols-outlined" style="font-size:16px">dashboard_customize</span><span>${escapeHtml(block.kicker)}</span></div><strong>${escapeHtml(block.title)}</strong></div></div><p>${escapeHtml(block.desc)}</p><div class="overview-list">${block.items.map((item) => `<div class="overview-item"><strong>${escapeHtml(item.left)}</strong><span>${escapeHtml(item.right)}</span></div>`).join('')}</div></article>`).join('');
+        }
+
         function renderPagination() {
             const pagination = state.pagination;
             const bar = qs('pagination-bar');
@@ -538,25 +881,36 @@
             const list = [...state.featuredPlugins];
             if (!list.length) { section.hidden = true; return; }
             section.hidden = false;
-            grid.innerHTML = list.map((p) => {
-                const busy = state.busy.has(p.id) || state.isLoading;
-                return `<article class="featured" style="--plugin-accent:${escapeHtml(p.accent || '#d4a574')}"><div class="top"><div class="badges"><span class="badge highlight">官方精选</span>${p.verified ? '<span class="badge success">已验证</span>' : ''}${p.installed ? `<span class="badge ${p.enabled ? 'success' : ''}">${p.enabled ? '已启用' : '已停用'}</span>` : ''}</div><div class="icon material-symbols-outlined">${escapeHtml(p.icon || 'extension')}</div></div><h4 class="name">${escapeHtml(p.name)}</h4><div class="author">by ${escapeHtml(p.author)}</div><p class="desc">${escapeHtml(p.description)}</p><div class="meta"><span class="item"><span class="material-symbols-outlined">download</span>${num(p.downloads)}</span><span class="item"><span class="material-symbols-outlined">star</span>${Number(p.rating || 0).toFixed(1)}</span><span class="item"><span class="material-symbols-outlined">schedule</span>${escapeHtml(dateText(p.updated_at))}</span></div><div class="buttons"><button type="button" class="primary ${p.installed ? 'installed' : ''}" onclick="toggleInstall('${p.id}', event)" ${busy ? 'disabled' : ''}>${busy ? '<span class="spinner"></span>处理中...' : `<span class="material-symbols-outlined">${p.installed ? 'check_circle' : 'download'}</span>${p.installed ? '已安装' : '立即安装'}`}</button><button type="button" class="secondary" onclick="openModal('${p.id}')">查看详情</button></div></article>`;
-            }).join('');
+            grid.innerHTML = list.map((p) => buildPluginCard(p, {featured:true})).join('');
         }
 
         function renderGrid() {
             const list = visiblePlugins();
             renderStats();
             renderFilters();
+            renderRadar();
             renderFeatured();
+            renderDirectoryOverview(list);
             qs('filter-summary').textContent = [`当前匹配 ${list.length} 个插件`, `总目录 ${num(state.stats?.total_plugins || list.length)} 个`, state.currentFilter !== 'all' ? `分类：${labels[state.currentFilter]}` : '', state.installedOnly ? '仅查看已安装' : '', state.search.trim() ? `关键词：“${state.search.trim()}”` : ''].filter(Boolean).join(' · ');
             qs('catalog-note').textContent = `当前排序：${qs('sort-select').selectedOptions[0].text}`;
-            if (!list.length) { qs('plugins-grid').innerHTML = ''; qs('plugins-grid').hidden = true; qs('pagination-bar').hidden = true; qs('empty-state').hidden = false; return; }
+            if (!list.length) { qs('directory-overview').hidden = true; qs('plugins-grid').innerHTML = ''; qs('plugins-grid').hidden = true; qs('pagination-bar').hidden = true; qs('empty-state').hidden = false; return; }
             qs('empty-state').hidden = true;
             qs('plugins-grid').hidden = false;
-            qs('plugins-grid').innerHTML = list.map((p) => {
-                const busy = state.busy.has(p.id) || state.isLoading;
-                return `<article class="card" style="--plugin-accent:${escapeHtml(p.accent || '#d4a574')}" role="button" tabindex="0" onclick="openModal('${p.id}')" onkeydown="handleCardKey(event,'${p.id}')"><div class="top"><div class="badges"><span class="badge ${p.featured ? 'highlight' : ''}">${escapeHtml(p.featured ? '精选' : (p.category_label || labels[p.category] || p.category))}</span>${p.installed ? `<span class="badge ${p.enabled ? 'success' : ''}">${p.enabled ? '已启用' : '已停用'}</span>` : ''}${p.verified ? '<span class="badge">已验证</span>' : ''}</div><div class="icon material-symbols-outlined">${escapeHtml(p.icon || 'extension')}</div></div><h4 class="name">${escapeHtml(p.name)}</h4><div class="author">by ${escapeHtml(p.author)}</div><p class="desc">${escapeHtml(p.description)}</p><div class="meta"><span class="item"><span class="material-symbols-outlined">download</span>${num(p.downloads)}</span><span class="item"><span class="material-symbols-outlined">star</span>${Number(p.rating || 0).toFixed(1)}${p.rating_count ? ` / ${num(p.rating_count)} 评` : ''}</span><span class="item"><span class="material-symbols-outlined">deployed_code_update</span>${escapeHtml(p.version)}</span></div><div class="tags">${(p.tags || []).slice(0,3).map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}</div><div class="buttons"><button type="button" class="primary ${p.installed ? 'installed' : ''}" onclick="toggleInstall('${p.id}', event)" ${busy ? 'disabled' : ''}>${busy ? '<span class="spinner"></span>处理中...' : `<span class="material-symbols-outlined">${p.installed ? 'check_circle' : 'download'}</span>${p.installed ? '已安装' : '安装插件'}`}</button><button type="button" class="secondary" onclick="openModal('${p.id}')">详情</button></div></article>`;
+            const grouped = [];
+            const order = state.currentFilter !== 'all'
+                ? [state.currentFilter]
+                : (state.categories.length ? state.categories.map((item) => item.id).filter((id) => id !== 'all') : Object.keys(labels).filter((id) => id !== 'all'));
+            for (const categoryId of order) {
+                const plugins = list.filter((plugin) => plugin.category === categoryId);
+                if (plugins.length) grouped.push({categoryId, plugins});
+            }
+            if (!grouped.length && list.length) grouped.push({categoryId: state.currentFilter === 'all' ? 'all' : state.currentFilter, plugins: list});
+            qs('plugins-grid').innerHTML = grouped.map(({categoryId, plugins}) => {
+                const meta = categoryMeta[categoryId] || categoryMeta.all;
+                const categoryLabel = labels[categoryId] || meta.title || categoryId;
+                const installed = plugins.filter((plugin) => plugin.installed).length;
+                const enabled = plugins.filter((plugin) => plugin.enabled).length;
+                return `<section class="category-section"><div class="category-head"><div><div class="category-kicker"><span class="material-symbols-outlined" style="font-size:16px">${escapeHtml(meta.icon)}</span><span>${escapeHtml(categoryLabel)}</span></div><h4>${escapeHtml(meta.title || categoryLabel)}</h4><p>${escapeHtml(meta.desc || '围绕相同能力域组织插件，方便你按场景而不是按单条清单逐个判断。')}</p></div><div class="category-aside"><div class="category-stat"><strong>${num(plugins.length)}</strong><span>当前页该能力域插件数</span></div><div class="category-stat"><strong>${num(installed)} / ${num(enabled)}</strong><span>已安装 / 已启用</span></div></div></div><div class="category-cards">${plugins.map((plugin) => buildPluginCard(plugin)).join('')}</div></section>`;
             }).join('');
             renderPagination();
         }
@@ -679,6 +1033,7 @@
                 if (requestToken !== state.listRequestToken) return;
                 console.error(error);
                 setError(error.message || '插件目录加载失败');
+                qs('directory-overview').hidden = true;
                 qs('plugins-grid').innerHTML = '';
                 qs('plugins-grid').hidden = true;
                 qs('featured-section').hidden = true;

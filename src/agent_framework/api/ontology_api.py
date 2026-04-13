@@ -64,6 +64,14 @@ def create_object():
     return jsonify({'error': '创建失败'}), 400
 
 
+@ontology_api.route('/api/ontology/objects/<object_id>', methods=['DELETE'])
+def delete_object(object_id):
+    """删除对象"""
+    if ontology.delete_object(object_id):
+        return jsonify({'success': True})
+    return jsonify({'error': '对象不存在'}), 404
+
+
 @ontology_api.route('/api/ontology/links', methods=['GET'])
 def get_links():
     """获取所有链接"""
@@ -86,6 +94,14 @@ def create_link():
     if link:
         return jsonify(link.to_dict())
     return jsonify({'error': '创建失败'}), 400
+
+
+@ontology_api.route('/api/ontology/links/<link_id>', methods=['DELETE'])
+def delete_link(link_id):
+    """删除链接"""
+    if ontology.delete_link(link_id):
+        return jsonify({'success': True})
+    return jsonify({'error': '链接不存在'}), 404
 
 
 @ontology_api.route('/api/ontology/causal_chain', methods=['POST'])
@@ -629,5 +645,4 @@ def create_complex_demo_data():
             'links': len(ontology.links)
         }
     })
-
 

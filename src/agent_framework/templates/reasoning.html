@@ -5,420 +5,614 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>高级推理实验室 - Agent Framework</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/base-theme.css">
     <style>
         :root {
-            --theme-accent: #1363df;
-            --theme-accent-deep: #0f4eb3;
-            --theme-accent-soft: rgba(19, 99, 223, 0.10);
+            --rs-accent: #1363df;
+            --rs-accent-deep: #0f4eb3;
+            --rs-indigo: #60a5fa;
+            --rs-violet: #475569;
+            --rs-emerald: #1f8f63;
+            --rs-amber: #d97706;
+            --rs-bg: #eef4fb;
+            --rs-surface: rgba(255, 252, 247, 0.92);
+            --rs-border: rgba(101, 120, 144, 0.18);
+            --rs-text: #202a36;
+            --rs-muted: #525b62;
+            --rs-shadow: 0 18px 42px -28px rgba(34, 44, 63, 0.16);
+            --rs-radius: 22px;
         }
 
-        .container {
-            max-width: 1400px;
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            color: var(--rs-text);
+            background:
+                radial-gradient(circle at 8% 10%, rgba(19, 99, 223, 0.14), transparent 22%),
+                radial-gradient(circle at 88% 12%, rgba(217, 119, 6, 0.12), transparent 20%),
+                linear-gradient(180deg, #f8fbff 0%, var(--rs-bg) 100%);
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(19, 99, 223, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(19, 99, 223, 0.03) 1px, transparent 1px);
+            background-size: 28px 28px;
+            mask-image: linear-gradient(180deg, rgba(0,0,0,0.16), transparent 64%);
+        }
+
+        h1, h2, h3, p { margin: 0; }
+
+        .shell {
+            position: relative;
+            z-index: 1;
+            max-width: 1680px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 24px;
+            display: grid;
+            gap: 18px;
         }
 
-        .header {
+        .panel {
+            border: 1px solid var(--rs-border);
+            border-radius: var(--rs-radius);
+            background: var(--rs-surface);
+            box-shadow: var(--rs-shadow);
+        }
+
+        /* ── Hero ── */
+        .hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 380px;
+            gap: 18px;
+        }
+
+        .hero-main {
+            padding: 28px;
+            display: grid;
+            gap: 16px;
+            background:
+                radial-gradient(circle at 88% 14%, rgba(19, 99, 223, 0.12), transparent 22%),
+                linear-gradient(135deg, rgba(255,255,255,0.98), rgba(249,245,239,0.94));
+        }
+
+        .hero-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 30px;
+            padding: 0 12px;
+            width: fit-content;
+            border-radius: 999px;
+            background: rgba(19, 99, 223, 0.08);
+            color: var(--rs-accent);
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .hero-main h1 {
+            font-size: clamp(30px, 4vw, 44px);
+            line-height: 1.04;
+            letter-spacing: -0.04em;
+        }
+
+        .hero-copy {
+            color: var(--rs-muted);
+            font-size: 13px;
+            line-height: 1.8;
+            max-width: 680px;
+        }
+
+        .hero-side {
+            padding: 24px;
+            display: grid;
+            gap: 16px;
+            align-content: start;
+        }
+
+        /* ── Layout ── */
+        .workspace {
+            display: grid;
+            grid-template-columns: 300px minmax(0, 1fr);
+            gap: 18px;
+            align-items: start;
+        }
+
+        .rail {
+            display: grid;
+            gap: 18px;
+            position: sticky;
+            top: 20px;
+        }
+
+        .center {
+            display: grid;
+            gap: 18px;
+        }
+
+        .section {
+            padding: 22px;
+            display: grid;
+            gap: 14px;
+        }
+
+        .section-head {
             display: flex;
             justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .section-head h2 {
+            font-size: 17px;
+            line-height: 1.25;
+        }
+
+        /* ── Components ── */
+        .chip {
+            display: inline-flex;
             align-items: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: #ffffff;
-            border-radius: 12px;
-            border: 1px solid rgba(15, 23, 42, 0.15);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            gap: 6px;
+            min-height: 28px;
+            padding: 0 10px;
+            border-radius: 999px;
+            background: rgba(19, 99, 223, 0.08);
+            color: var(--rs-accent);
+            font-size: 11px;
+            font-weight: 800;
         }
 
-        .header h1 {
-            font-size: 28px;
-            background: linear-gradient(135deg, var(--theme-accent-deep), var(--theme-accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 400px;
-            gap: 20px;
-        }
-
-        .reasoning-panel {
-            background: white;
-            border-radius: 12px;
-            border: 1px solid rgba(15, 23, 42, 0.15);
-            padding: 24px;
-        }
-
-        .input-section {
-            margin-bottom: 24px;
-        }
-
-        .input-section label {
+        .form-label {
+            color: var(--rs-muted);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
             display: block;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #0f172a;
+            margin-bottom: 6px;
         }
 
-        .input-section textarea {
+        .input, .textarea, .select {
+            font: inherit;
+            font-size: 13px;
             width: 100%;
+            padding: 12px 14px;
+            border: 1px solid rgba(148, 163, 184, 0.24);
+            border-radius: 14px;
+            background: #ffffff;
+            color: var(--rs-text);
+        }
+
+        .input:focus, .textarea:focus, .select:focus {
+            outline: none;
+            border-color: rgba(19, 99, 223, 0.26);
+            box-shadow: 0 0 0 3px rgba(19, 99, 223, 0.08);
+        }
+
+        .textarea {
             min-height: 120px;
-            padding: 12px;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            font-family: inherit;
-            font-size: 14px;
             resize: vertical;
+            line-height: 1.7;
         }
 
-        .reasoning-modes {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .mode-card {
-            padding: 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
+        .btn {
+            font: inherit;
+            font-size: 13px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 40px;
+            padding: 0 16px;
+            border: 1px solid rgba(101, 120, 144, 0.14);
+            border-radius: 14px;
+            background: rgba(255,255,255,0.94);
+            color: var(--rs-text);
             cursor: pointer;
-            text-align: center;
-            transition: all 0.2s;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
         }
 
-        .mode-card:hover {
-            border-color: var(--theme-accent);
-            background: var(--theme-accent-soft);
-        }
-
-        .mode-card.active {
-            border-color: var(--theme-accent);
-            background: var(--theme-accent-soft);
-        }
-
-        .mode-icon {
-            font-size: 24px;
-            margin-bottom: 8px;
-        }
-
-        .mode-name {
-            font-weight: 600;
-            color: #0f172a;
-            font-size: 14px;
+        .btn:hover {
+            transform: translateY(-1px);
+            border-color: rgba(19, 99, 223, 0.22);
+            box-shadow: 0 18px 35px -24px rgba(27, 42, 57, 0.16);
         }
 
         .btn-primary {
+            border-color: transparent;
+            background: linear-gradient(135deg, var(--rs-accent-deep), var(--rs-accent));
+            color: #ffffff;
+        }
+
+        .btn-ghost {
+            background: rgba(19, 99, 223, 0.05);
+        }
+
+        .btn-full {
             width: 100%;
+        }
+
+        /* ── Mode cards ── */
+        .mode-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .mode-card {
             padding: 14px;
-            background: linear-gradient(135deg, var(--theme-accent), var(--theme-accent-deep));
-            color: white;
-            border: none;
-            border-radius: 8px;
+            border: 1px solid var(--rs-border);
+            border-radius: 18px;
+            background: linear-gradient(180deg, #ffffff, #f8fbff);
             cursor: pointer;
-            font-weight: 600;
-            font-size: 16px;
+            text-align: center;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
-        .btn-primary:hover {
-            opacity: 0.9;
+        .mode-card:hover {
+            transform: translateY(-1px);
+            border-color: rgba(19, 99, 223, 0.22);
+            box-shadow: 0 18px 35px -24px rgba(27, 42, 57, 0.16);
         }
 
-        .reasoning-output {
-            background: white;
-            border-radius: 12px;
-            border: 1px solid rgba(15, 23, 42, 0.15);
-            padding: 24px;
+        .mode-card.active {
+            border-color: rgba(19, 99, 223, 0.24);
+            background: linear-gradient(135deg, rgba(19, 99, 223,0.08), rgba(217,119,6,0.03));
+            box-shadow: 0 0 0 3px rgba(19, 99, 223, 0.08);
         }
 
-        .output-header {
+        .mode-icon { font-size: 22px; margin-bottom: 6px; }
+
+        .mode-name {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--rs-text);
+        }
+
+        /* ── Config items ── */
+        .config-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+            gap: 10px;
         }
 
-        .output-title {
-            font-size: 18px;
+        .config-item:last-child { border-bottom: none; }
+
+        .config-label {
+            color: var(--rs-muted);
+            font-size: 12px;
+        }
+
+        .config-value {
             font-weight: 700;
-            color: #0f172a;
+            font-size: 13px;
+            color: var(--rs-accent);
         }
 
+        input[type="range"] {
+            width: 100%;
+            margin: 6px 0;
+            accent-color: var(--rs-accent);
+        }
+
+        /* ── Example prompts ── */
+        .example-list {
+            display: grid;
+            gap: 8px;
+        }
+
+        .example-prompt {
+            padding: 12px 14px;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            border-radius: 14px;
+            background: linear-gradient(180deg, #ffffff, #f8fbff);
+            cursor: pointer;
+            font-size: 12px;
+            line-height: 1.5;
+            color: var(--rs-text);
+            transition: transform 0.15s ease, border-color 0.15s ease;
+        }
+
+        .example-prompt:hover {
+            transform: translateY(-1px);
+            border-color: rgba(19, 99, 223, 0.20);
+            background: rgba(19,99,223,0.04);
+        }
+
+        /* ── Stats ── */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .mini-stat {
+            padding: 12px;
+            border-radius: 16px;
+            background: rgba(19, 99, 223, 0.05);
+            border: 1px solid rgba(19, 99, 223, 0.08);
+            text-align: center;
+        }
+
+        .mini-stat strong {
+            display: block;
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            line-height: 1;
+            color: var(--rs-accent);
+        }
+
+        .mini-stat small {
+            font-size: 10px;
+            color: var(--rs-muted);
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        /* ── Reasoning steps ── */
         .step-chain {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
+            display: grid;
+            gap: 14px;
         }
 
         .reasoning-step {
             padding: 16px;
-            background: #f8fafc;
-            border-left: 4px solid var(--theme-accent);
-            border-radius: 8px;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            border-radius: 18px;
+            background: linear-gradient(180deg, #ffffff, #f8fbff);
+            border-left: 3px solid var(--rs-accent);
         }
 
         .step-header {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
+            gap: 10px;
+            margin-bottom: 10px;
         }
 
         .step-number {
-            width: 28px;
-            height: 28px;
+            width: 26px;
+            height: 26px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: var(--theme-accent);
-            color: white;
+            background: linear-gradient(135deg, var(--rs-accent-deep), var(--rs-accent));
+            color: #ffffff;
             border-radius: 50%;
+            font-weight: 800;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .step-title {
             font-weight: 700;
             font-size: 14px;
         }
 
-        .step-title {
-            font-weight: 600;
-            color: #0f172a;
-        }
-
         .step-content {
-            color: #475569;
-            line-height: 1.6;
-            font-size: 14px;
+            color: var(--rs-muted);
+            font-size: 13px;
+            line-height: 1.7;
         }
 
         .confidence-bar {
             margin-top: 12px;
-            height: 6px;
-            background: #e2e8f0;
+            height: 5px;
+            background: rgba(148, 163, 184, 0.18);
             border-radius: 999px;
             overflow: hidden;
         }
 
         .confidence-fill {
             height: 100%;
-            background: linear-gradient(90deg, var(--theme-accent), #10b981);
-            transition: width 0.3s;
+            background: linear-gradient(90deg, var(--rs-accent), #10b981);
+            transition: width 0.4s ease;
         }
 
-        .sidebar {
-            background: white;
-            border-radius: 12px;
-            border: 1px solid rgba(15, 23, 42, 0.15);
-            padding: 20px;
-            height: fit-content;
+        .empty-card {
+            padding: 40px 20px;
+            border-radius: 18px;
+            border: 1px dashed rgba(148, 163, 184, 0.28);
+            background: rgba(19, 99, 223, 0.03);
+            color: var(--rs-muted);
+            font-size: 13px;
+            line-height: 1.8;
+            text-align: center;
         }
 
-        .sidebar-section {
-            margin-bottom: 24px;
-        }
-
-        .sidebar-title {
-            font-weight: 700;
-            color: #0f172a;
+        .empty-card i {
+            display: block;
+            font-size: 36px;
+            color: var(--rs-accent);
+            opacity: 0.4;
             margin-bottom: 12px;
         }
 
-        .config-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid #e2e8f0;
+        /* ── Responsive ── */
+        @media (max-width: 1200px) {
+            .hero { grid-template-columns: 1fr; }
         }
 
-        .config-item:last-child {
-            border-bottom: none;
+        @media (max-width: 900px) {
+            .workspace { grid-template-columns: 1fr; }
+            .rail { position: static; }
+            .mode-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
         }
 
-        .config-label {
-            color: #64748b;
-            font-size: 13px;
-        }
-
-        .config-value {
-            font-weight: 600;
-            color: #0f172a;
-        }
-
-        input[type="range"] {
-            width: 100%;
-            margin: 8px 0;
-        }
-
-        .example-prompts {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .example-prompt {
-            padding: 10px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-            transition: all 0.2s;
-        }
-
-        .example-prompt:hover {
-            border-color: var(--theme-accent);
-            background: var(--theme-accent-soft);
+        @media (max-width: 640px) {
+            .shell { padding: 14px; }
+            .section { padding: 16px; }
+            .hero-main, .hero-side { padding: 18px; }
+            .mode-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .stats-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div>
-                <h1>🧠 高级推理实验室</h1>
-                <p>探索复杂推理能力，支持思维链、多步骤推理和逻辑分析</p>
-            </div>
-        </div>
-
-        <div class="main-content">
-            <div>
-                <div class="reasoning-panel">
-                    <div class="input-section">
-                        <label>输入问题或任务</label>
-                        <textarea id="reasoningInput" placeholder="例如：分析为什么电动汽车在寒冷地区续航会下降，并提出解决方案..."></textarea>
-                    </div>
-
-                    <div class="input-section">
-                        <label>推理模式</label>
-                        <div class="reasoning-modes">
-                            <div class="mode-card active" data-mode="chain-of-thought">
-                                <div class="mode-icon">🔗</div>
-                                <div class="mode-name">思维链</div>
-                            </div>
-                            <div class="mode-card" data-mode="tree-of-thought">
-                                <div class="mode-icon">🌳</div>
-                                <div class="mode-name">思维树</div>
-                            </div>
-                            <div class="mode-card" data-mode="step-by-step">
-                                <div class="mode-icon">📝</div>
-                                <div class="mode-name">分步推理</div>
-                            </div>
-                            <div class="mode-card" data-mode="causal">
-                                <div class="mode-icon">⚡</div>
-                                <div class="mode-name">因果分析</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button class="btn-primary" onclick="startReasoning()">
-                        <i class="fas fa-brain"></i> 开始推理
-                    </button>
+    <div class="shell">
+        <!-- Hero -->
+        <section class="hero">
+            <div class="hero-main panel">
+                <span class="hero-pill"><i class="fas fa-brain"></i>&nbsp;推理实验室</span>
+                <div>
+                    <h1>高级推理实验室</h1>
+                    <p class="hero-copy">探索复杂推理能力，支持思维链、多步骤推理和逻辑分析。选择推理模式、设置参数，让 AI 逐步拆解问题。</p>
                 </div>
-
-                <div class="reasoning-output" style="margin-top: 20px;">
-                    <div class="output-header">
-                        <div class="output-title">推理过程</div>
-                        <button class="btn-secondary" onclick="exportReasoning()">
-                            <i class="fas fa-download"></i> 导出
-                        </button>
-                    </div>
-                    <div class="step-chain" id="reasoningSteps">
-                        <div style="text-align: center; color: #94a3b8; padding: 40px;">
-                            <i class="fas fa-lightbulb" style="font-size: 48px; margin-bottom: 16px;"></i>
-                            <p>输入问题并选择推理模式，开始探索AI的推理能力</p>
-                        </div>
-                    </div>
+                <div class="stats-row" id="statsRow">
+                    <div class="mini-stat"><strong id="statTotal">0</strong><small>总推理次数</small></div>
+                    <div class="mini-stat"><strong id="statSteps">0</strong><small>平均步骤</small></div>
+                    <div class="mini-stat"><strong id="statConf">0%</strong><small>平均置信</small></div>
                 </div>
             </div>
-
-            <div class="sidebar">
-                <div class="sidebar-section">
-                    <div class="sidebar-title">推理配置</div>
-                    <div class="config-item">
-                        <div class="config-label">推理深度</div>
-                        <div class="config-value" id="depthValue">5</div>
+            <div class="hero-side panel">
+                <div class="section-head">
+                    <h2>推理配置</h2>
+                    <span class="chip" id="modeChip">思维链</span>
+                </div>
+                <div>
+                    <label class="form-label">推理深度</label>
+                    <div class="config-item" style="border-bottom:none;padding:0;">
+                        <span class="config-label">当前深度</span>
+                        <span class="config-value" id="depthValue">5</span>
                     </div>
                     <input type="range" id="depthSlider" min="1" max="10" value="5" oninput="updateDepth(this.value)">
-
-                    <div class="config-item">
-                        <div class="config-label">创造性</div>
-                        <div class="config-value" id="tempValue">0.7</div>
+                </div>
+                <div>
+                    <label class="form-label">创造性（温度）</label>
+                    <div class="config-item" style="border-bottom:none;padding:0;">
+                        <span class="config-label">当前温度</span>
+                        <span class="config-value" id="tempValue">0.7</span>
                     </div>
                     <input type="range" id="tempSlider" min="0" max="1" step="0.1" value="0.7" oninput="updateTemp(this.value)">
                 </div>
-
-                <div class="sidebar-section">
-                    <div class="sidebar-title">示例问题</div>
-                    <div class="example-prompts">
-                        <div class="example-prompt" onclick="loadExample(this)">
-                            为什么深度学习模型需要大量数据？
-                        </div>
-                        <div class="example-prompt" onclick="loadExample(this)">
-                            分析可再生能源的经济可行性
-                        </div>
-                        <div class="example-prompt" onclick="loadExample(this)">
-                            如何优化供应链管理？
-                        </div>
-                        <div class="example-prompt" onclick="loadExample(this)">
-                            解释量子计算的优势和局限
-                        </div>
-                    </div>
-                </div>
-
-                <div class="sidebar-section">
-                    <div class="sidebar-title">推理统计</div>
-                    <div class="config-item">
-                        <div class="config-label">总推理次数</div>
-                        <div class="config-value">0</div>
-                    </div>
-                    <div class="config-item">
-                        <div class="config-label">平均步骤数</div>
-                        <div class="config-value">0</div>
-                    </div>
-                    <div class="config-item">
-                        <div class="config-label">平均置信度</div>
-                        <div class="config-value">0%</div>
-                    </div>
-                </div>
             </div>
-        </div>
+        </section>
+
+        <!-- Workspace -->
+        <section class="workspace">
+            <aside class="rail">
+                <!-- 推理模式 -->
+                <section class="panel section">
+                    <h2>推理模式</h2>
+                    <div class="mode-grid">
+                        <div class="mode-card active" data-mode="chain-of-thought">
+                            <div class="mode-icon">🔗</div>
+                            <div class="mode-name">思维链</div>
+                        </div>
+                        <div class="mode-card" data-mode="tree-of-thought">
+                            <div class="mode-icon">🌳</div>
+                            <div class="mode-name">思维树</div>
+                        </div>
+                        <div class="mode-card" data-mode="step-by-step">
+                            <div class="mode-icon">📝</div>
+                            <div class="mode-name">分步推理</div>
+                        </div>
+                        <div class="mode-card" data-mode="causal">
+                            <div class="mode-icon">⚡</div>
+                            <div class="mode-name">因果分析</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 示例问题 -->
+                <section class="panel section">
+                    <h2>示例问题</h2>
+                    <div class="example-list">
+                        <div class="example-prompt" onclick="loadExample(this)">为什么深度学习模型需要大量数据？</div>
+                        <div class="example-prompt" onclick="loadExample(this)">分析可再生能源的经济可行性</div>
+                        <div class="example-prompt" onclick="loadExample(this)">如何优化供应链管理？</div>
+                        <div class="example-prompt" onclick="loadExample(this)">解释量子计算的优势和局限</div>
+                    </div>
+                </section>
+            </aside>
+
+            <main class="center">
+                <!-- 输入区 -->
+                <section class="panel section">
+                    <div class="section-head">
+                        <div>
+                            <h2>输入问题</h2>
+                            <p style="color:var(--rs-muted);font-size:13px;margin-top:4px;">描述你需要推理分析的问题或任务</p>
+                        </div>
+                    </div>
+                    <textarea class="textarea" id="reasoningInput" rows="5"
+                        placeholder="例如：分析为什么电动汽车在寒冷地区续航会下降，并提出解决方案..."></textarea>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                        <button class="btn btn-primary" style="flex:1;min-width:140px;" onclick="startReasoning()">
+                            <i class="fas fa-brain"></i> 开始推理
+                        </button>
+                        <button class="btn btn-ghost" onclick="exportReasoning()">
+                            <i class="fas fa-download"></i> 导出
+                        </button>
+                    </div>
+                </section>
+
+                <!-- 推理过程 -->
+                <section class="panel section">
+                    <div class="section-head">
+                        <div>
+                            <h2>推理过程</h2>
+                            <p style="color:var(--rs-muted);font-size:13px;margin-top:4px;">逐步展示 AI 的推理链路与置信度</p>
+                        </div>
+                        <span class="chip" id="stepCountChip">0 步</span>
+                    </div>
+                    <div class="step-chain" id="reasoningSteps">
+                        <div class="empty-card">
+                            <i class="fas fa-lightbulb"></i>
+                            输入问题并选择推理模式，开始探索 AI 的推理能力
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </section>
     </div>
 
     <script>
         let currentMode = 'chain-of-thought';
+        let totalReasoning = 0;
+        let totalSteps = 0;
+        let totalConf = 0;
 
-        // 推理模式选择
         document.querySelectorAll('.mode-card').forEach(card => {
             card.addEventListener('click', function() {
                 document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
                 this.classList.add('active');
                 currentMode = this.dataset.mode;
+                const names = { 'chain-of-thought':'思维链','tree-of-thought':'思维树','step-by-step':'分步推理','causal':'因果分析' };
+                document.getElementById('modeChip').textContent = names[currentMode] || currentMode;
             });
         });
 
-        // 开始推理
         async function startReasoning() {
             const input = document.getElementById('reasoningInput').value;
-            if (!input.trim()) {
-                alert('请输入问题或任务');
-                return;
-            }
+            if (!input.trim()) { alert('请输入问题或任务'); return; }
 
             const stepsContainer = document.getElementById('reasoningSteps');
-            stepsContainer.innerHTML = '<div style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin" style="font-size: 32px; color: var(--theme-accent);"></i><p style="margin-top: 16px; color: #64748b;">正在推理中...</p></div>';
+            stepsContainer.innerHTML = '<div class="empty-card"><i class="fas fa-spinner fa-spin"></i>正在推理中...</div>';
 
             try {
                 const response = await fetch('/api/reasoning', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        input: input,
+                        input,
                         mode: currentMode,
                         depth: document.getElementById('depthSlider').value,
                         temperature: document.getElementById('tempSlider').value
                     })
                 });
-
                 const result = await response.json();
                 renderReasoningSteps(result.steps || []);
             } catch (error) {
@@ -429,11 +623,7 @@
 
         function renderReasoningSteps(steps) {
             const container = document.getElementById('reasoningSteps');
-
-            if (!steps || steps.length === 0) {
-                renderPlaceholderSteps();
-                return;
-            }
+            if (!steps || steps.length === 0) { renderPlaceholderSteps(); return; }
 
             container.innerHTML = steps.map((step, index) => `
                 <div class="reasoning-step">
@@ -447,40 +637,32 @@
                     </div>
                 </div>
             `).join('');
+
+            document.getElementById('stepCountChip').textContent = steps.length + ' 步';
+            totalReasoning++;
+            totalSteps += steps.length;
+            totalConf += steps.reduce((s, st) => s + (st.confidence || 85), 0) / steps.length;
+            document.getElementById('statTotal').textContent = totalReasoning;
+            document.getElementById('statSteps').textContent = (totalSteps / totalReasoning).toFixed(1);
+            document.getElementById('statConf').textContent = (totalConf / totalReasoning).toFixed(0) + '%';
         }
 
         function renderPlaceholderSteps() {
-            const container = document.getElementById('reasoningSteps');
-            const placeholderSteps = [
+            renderReasoningSteps([
                 { title: '问题分析', content: '首先，我们需要理解问题的核心要素和约束条件...', confidence: 90 },
                 { title: '信息收集', content: '收集相关的背景知识和数据，建立分析基础...', confidence: 85 },
                 { title: '逻辑推导', content: '基于已知信息，进行逻辑推理和因果分析...', confidence: 88 },
                 { title: '方案生成', content: '综合考虑各种因素，提出可行的解决方案...', confidence: 82 },
                 { title: '结论总结', content: '总结推理过程，给出最终结论和建议...', confidence: 87 }
-            ];
-            renderReasoningSteps(placeholderSteps);
+            ]);
         }
 
-        function updateDepth(value) {
-            document.getElementById('depthValue').textContent = value;
-        }
+        function updateDepth(value) { document.getElementById('depthValue').textContent = value; }
+        function updateTemp(value) { document.getElementById('tempValue').textContent = value; }
+        function loadExample(element) { document.getElementById('reasoningInput').value = element.textContent.trim(); }
+        function exportReasoning() { alert('推理结果导出功能开发中...'); }
 
-        function updateTemp(value) {
-            document.getElementById('tempValue').textContent = value;
-        }
-
-        function loadExample(element) {
-            document.getElementById('reasoningInput').value = element.textContent.trim();
-        }
-
-        function exportReasoning() {
-            alert('推理结果导出功能开发中...');
-        }
-
-        // 页面加载时显示示例
-        window.addEventListener('load', () => {
-            renderPlaceholderSteps();
-        });
+        window.addEventListener('load', renderPlaceholderSteps);
     </script>
 </body>
 </html>

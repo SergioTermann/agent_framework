@@ -16,6 +16,10 @@ from dataclasses import dataclass, field
 from typing import Any, Optional, List, Dict
 from datetime import datetime
 import agent_framework.core.fast_json as json
+import re
+from urllib import error as urllib_error
+from urllib import parse as urllib_parse
+from urllib import request as urllib_request
 import uuid
 
 
@@ -23,6 +27,7 @@ class NodeType:
     """节点类型"""
     START = "start"
     END = "end"
+    LLM = "llm"
     AGENT = "agent"
     CODE = "code"
     CONDITION = "condition"
@@ -181,6 +186,18 @@ class Workflow:
             if edge.target not in node_ids:
                 return False, f"连接目标节点不存在: {edge.target}"
 
+        for node in self.nodes:
+            if node.type == NodeType.LLM and not node.config.get('prompt'):
+                return False, f"LLM 节点缺少提示模板: {node.label or node.id}"
+            if node.type == NodeType.AGENT and not node.config.get('prompt'):
+                return False, f"Agent 节点缺少提示模板: {node.label or node.id}"
+            if node.type == NodeType.CONDITION and not node.config.get('condition'):
+                return False, f"条件节点缺少表达式: {node.label or node.id}"
+            if node.type == NodeType.API and not node.config.get('url'):
+                return False, f"API 节点缺少 URL: {node.label or node.id}"
+            if node.type == NodeType.MERGE and not node.config.get('source_vars'):
+                return False, f"合流节点缺少来源变量: {node.label or node.id}"
+
         return True, "验证通过"
 
 
@@ -191,6 +208,7 @@ class WorkflowExecutor:
         self.workflow = workflow
         self.context = {}
         self.execution_log = []
+        self.max_steps = 200
 
     def execute(self, input_data: dict = None, callback=None) -> dict:
         """执行工作流"""
@@ -203,7 +221,7 @@ class WorkflowExecutor:
             }
 
         # 初始化上下文
-        self.context = input_data or {}
+        self.context = self._build_initial_context(input_data or {})
         self.execution_log = []
 
         # 查找开始节点
@@ -216,7 +234,7 @@ class WorkflowExecutor:
 
         # 从开始节点执行
         try:
-            self._execute_node(start_nodes[0], callback)
+            self._execute_node(start_nodes[0], callback, depth=0)
             return {
                 'success': True,
                 'context': self.context,
@@ -229,8 +247,11 @@ class WorkflowExecutor:
                 'log': self.execution_log
             }
 
-    def _execute_node(self, node: WorkflowNode, callback=None):
+    def _execute_node(self, node: WorkflowNode, callback=None, depth: int = 0):
         """执行单个节点"""
+        if depth > self.max_steps:
+            raise RuntimeError('工作流执行超过最大步数限制')
+
         self.execution_log.append({
             'node_id': node.id,
             'node_type': node.type,
@@ -246,18 +267,33 @@ class WorkflowExecutor:
 
         # 根据节点类型执行
         if node.type == NodeType.START:
-            pass  # 开始节点不需要执行
+            self._execute_start_node(node)
         elif node.type == NodeType.END:
-            pass  # 结束节点不需要执行
+            self._execute_end_node(node)
+            if callback:
+                callback({
+                    'type': 'node_complete',
+                    'node': node.to_dict(),
+                    'context': self.context
+                })
+            return
+        elif node.type == NodeType.LLM:
+            self._execute_llm_node(node)
         elif node.type == NodeType.AGENT:
             self._execute_agent_node(node)
         elif node.type == NodeType.CODE:
             self._execute_code_node(node)
         elif node.type == NodeType.CONDITION:
-            self._execute_condition_node(node, callback)
+            self._execute_condition_node(node, callback, depth)
             return  # 条件节点自己处理后续流程
         elif node.type == NodeType.TRANSFORM:
             self._execute_transform_node(node)
+        elif node.type == NodeType.API:
+            self._execute_api_node(node)
+        elif node.type == NodeType.LOOP:
+            self._execute_loop_node(node)
+        elif node.type == NodeType.MERGE:
+            self._execute_merge_node(node)
 
         if callback:
             callback({
@@ -271,51 +307,156 @@ class WorkflowExecutor:
         for edge in next_edges:
             next_node = self.workflow.get_node(edge.target)
             if next_node:
-                self._execute_node(next_node, callback)
+                self._execute_node(next_node, callback, depth + 1)
+
+    def _build_initial_context(self, input_data: dict) -> dict:
+        """合并流程默认变量与运行时输入。"""
+        context: Dict[str, Any] = {}
+        for key, value in (self.workflow.variables or {}).items():
+            if isinstance(value, dict) and ('value' in value or 'type' in value or 'description' in value):
+                context[key] = value.get('value')
+            else:
+                context[key] = value
+        context.update(input_data)
+        return context
+
+    def _resolve_template(self, value: Any) -> Any:
+        """把 {var} 模板替换成上下文里的值。"""
+        if value is None:
+            return value
+        if isinstance(value, dict):
+            return {key: self._resolve_template(val) for key, val in value.items()}
+        if isinstance(value, list):
+            return [self._resolve_template(item) for item in value]
+        if not isinstance(value, str):
+            return value
+
+        def replace(match):
+            key = match.group(1)
+            resolved = self.context.get(key, "")
+            if isinstance(resolved, (dict, list)):
+                return json.dumps(resolved, ensure_ascii=False)
+            return str(resolved)
+
+        return re.sub(r'\{([^{}]+)\}', replace, value)
+
+    def _parse_json_like(self, value: str, default: Any):
+        """尽量把字符串解析成 JSON。"""
+        if value is None:
+            return default
+        if isinstance(value, (dict, list)):
+            return value
+        try:
+            return json.loads(value)
+        except Exception:
+            return default
+
+    def _safe_eval(self, expression: str) -> Any:
+        """在受限上下文里执行简单表达式。"""
+        safe_globals = {"__builtins__": {}, "len": len, "sum": sum, "min": min, "max": max, "any": any, "all": all}
+        return eval(expression, safe_globals, dict(self.context))
+
+    def _execute_start_node(self, node: WorkflowNode):
+        """执行开始节点。"""
+        config = node.config or {}
+        output_var = config.get('output_var')
+        if output_var:
+            self.context[output_var] = dict(self.context)
+
+    def _execute_end_node(self, node: WorkflowNode):
+        """执行结束节点。"""
+        config = node.config or {}
+        response_template = config.get('response_template')
+        output_key = config.get('output_key', 'final_answer')
+
+        if response_template:
+            resolved = self._resolve_template(response_template)
+            self.context[output_key] = resolved
+            self.context['final_output'] = resolved
+        elif output_key in self.context:
+            self.context['final_output'] = self.context[output_key]
 
     def _execute_agent_node(self, node: WorkflowNode):
         """执行 Agent 节点"""
         config = node.config
         agent_type = config.get('agent_type', 'general')
-        prompt = config.get('prompt', '')
-
-        # 替换变量
-        for key, value in self.context.items():
-            prompt = prompt.replace(f"{{{key}}}", str(value))
+        prompt = self._resolve_template(config.get('prompt', ''))
+        system_prompt = self._resolve_template(config.get('system_prompt', ''))
+        model = config.get('model', 'auto')
 
         # 这里应该调用实际的 Agent
         # 简化实现,直接返回模拟结果
-        result = f"Agent ({agent_type}) 处理结果: {prompt}"
+        result = f"Agent ({agent_type}/{model}) 处理结果: {prompt}"
+        if system_prompt:
+            result = f"{system_prompt}\n{result}"
         output_var = config.get('output_var', 'result')
         self.context[output_var] = result
+
+    def _execute_llm_node(self, node: WorkflowNode):
+        """执行 LLM 节点。"""
+        config = node.config or {}
+        provider = config.get('provider', 'openai')
+        model = config.get('model', 'gpt-4.1-mini')
+        mode = config.get('completion_mode', 'chat')
+        system_prompt = self._resolve_template(config.get('system_prompt', ''))
+        prompt = self._resolve_template(config.get('prompt', ''))
+        temperature = config.get('temperature', 0.7)
+        top_p = config.get('top_p', 1)
+        max_tokens = config.get('max_tokens', 1024)
+        response_format = config.get('response_format', 'text')
+        stop_words = config.get('stop', '')
+        output_var = config.get('output_var', 'llm_result')
+
+        response = {
+            'provider': provider,
+            'model': model,
+            'mode': mode,
+            'temperature': temperature,
+            'top_p': top_p,
+            'max_tokens': max_tokens,
+            'response_format': response_format,
+            'stop': stop_words,
+            'system_prompt': system_prompt,
+            'prompt': prompt,
+            'text': f"LLM ({provider}/{model}) 响应: {prompt}",
+        }
+        self.context[output_var] = response
+        self.context[f'{output_var}_text'] = response['text']
 
     def _execute_code_node(self, node: WorkflowNode):
         """Code nodes are disabled because the sandbox has been removed."""
         raise RuntimeError("Code sandbox support has been removed; code nodes are no longer available")
 
 
-    def _execute_condition_node(self, node: WorkflowNode, callback=None):
+    def _execute_condition_node(self, node: WorkflowNode, callback=None, depth: int = 0):
         """执行条件节点"""
         config = node.config
-        condition = config.get('condition', '')
+        condition = self._resolve_template(config.get('condition', ''))
 
         # 简单的条件判断
         try:
-            # 替换变量
-            for key, value in self.context.items():
-                condition = condition.replace(f"{{{key}}}", str(value))
-
             # 评估条件
-            result = eval(condition)
+            result = bool(self._safe_eval(condition))
+            self.context[f"{node.id}_condition_result"] = result
 
             # 根据结果选择分支
             next_edges = [e for e in self.workflow.edges if e.source == node.id]
+            matched = False
             for edge in next_edges:
-                if (result and edge.label == 'true') or (not result and edge.label == 'false'):
+                label = (edge.label or '').lower()
+                if (result and label == 'true') or (not result and label == 'false'):
                     next_node = self.workflow.get_node(edge.target)
                     if next_node:
-                        self._execute_node(next_node, callback)
+                        self._execute_node(next_node, callback, depth + 1)
+                        matched = True
                     break
+            if not matched:
+                for edge in next_edges:
+                    if not edge.label:
+                        next_node = self.workflow.get_node(edge.target)
+                        if next_node:
+                            self._execute_node(next_node, callback, depth + 1)
+                        break
         except Exception as e:
             self.execution_log.append({
                 'error': f"条件判断失败: {str(e)}"
@@ -323,20 +464,148 @@ class WorkflowExecutor:
 
     def _execute_transform_node(self, node: WorkflowNode):
         """执行转换节点"""
-        config = node.config
-        transform_type = config.get('transform_type', 'map')
-        input_var = config.get('input_var', '')
+        config = node.config or {}
+        transform_type = config.get('transform_type', 'template')
         output_var = config.get('output_var', 'transformed')
+        template_value = self._resolve_template(config.get('template', ''))
+        input_var = config.get('input_var', '')
+        source_data = self.context.get(input_var) if input_var else self.context
 
-        if input_var in self.context:
-            data = self.context[input_var]
-            # 简单的转换逻辑
-            if transform_type == 'upper':
-                self.context[output_var] = str(data).upper()
-            elif transform_type == 'lower':
-                self.context[output_var] = str(data).lower()
+        if transform_type == 'template':
+            self.context[output_var] = template_value or source_data
+            return
+
+        if transform_type == 'json':
+            parsed = self._parse_json_like(template_value, {})
+            self.context[output_var] = parsed if parsed != {} or template_value == '{}' else template_value
+            return
+
+        if transform_type == 'text':
+            self.context[output_var] = template_value
+            return
+
+        if transform_type == 'upper':
+            self.context[output_var] = str(source_data).upper()
+            return
+
+        if transform_type == 'lower':
+            self.context[output_var] = str(source_data).lower()
+            return
+
+        self.context[output_var] = source_data
+
+    def _execute_api_node(self, node: WorkflowNode):
+        """执行 API 节点。"""
+        config = node.config or {}
+        method = str(config.get('method', 'GET')).upper()
+        url = self._resolve_template(config.get('url', ''))
+        headers = self._parse_json_like(self._resolve_template(config.get('headers', '{}')), {})
+        body = self._resolve_template(config.get('body', ''))
+        output_var = config.get('output_var', 'api_result')
+        timeout_ms = int(config.get('timeout_ms', 10000) or 10000)
+
+        if not url:
+            self.context[output_var] = {'error': 'API 节点缺少 URL'}
+            return
+
+        if url.startswith('mock://'):
+            self.context[output_var] = {
+                'mock': True,
+                'url': url,
+                'method': method,
+                'headers': headers,
+                'body': self._parse_json_like(body, body),
+            }
+            return
+
+        request_body = None
+        if method != 'GET' and body not in (None, ''):
+            if isinstance(body, str):
+                request_body = body.encode('utf-8')
             else:
-                self.context[output_var] = data
+                request_body = json.dumps(body, ensure_ascii=False).encode('utf-8')
+
+        if method == 'GET' and body:
+            params = self._parse_json_like(body, {})
+            if isinstance(params, dict) and params:
+                url = f"{url}?{urllib_parse.urlencode(params, doseq=True)}"
+
+        request_obj = urllib_request.Request(url, data=request_body, method=method)
+        for key, value in headers.items():
+            request_obj.add_header(str(key), str(value))
+
+        try:
+            with urllib_request.urlopen(request_obj, timeout=timeout_ms / 1000) as response:
+                raw = response.read().decode('utf-8')
+                self.context[output_var] = {
+                    'status': response.status,
+                    'headers': dict(response.headers.items()),
+                    'data': self._parse_json_like(raw, raw),
+                }
+        except urllib_error.HTTPError as exc:
+            self.context[output_var] = {
+                'status': exc.code,
+                'error': exc.reason,
+            }
+        except Exception as exc:
+            self.context[output_var] = {
+                'error': str(exc),
+            }
+
+    def _execute_loop_node(self, node: WorkflowNode):
+        """执行循环节点。"""
+        config = node.config or {}
+        loop_source = config.get('loop_source', 'items')
+        item_var = config.get('item_var', 'item')
+        max_iterations = int(config.get('max_iterations', 20) or 20)
+        output_var = config.get('output_var', 'loop_result')
+
+        items = self.context.get(loop_source, [])
+        if not isinstance(items, list):
+            items = [items]
+
+        results = []
+        for index, item in enumerate(items[:max_iterations]):
+            entry = {
+                'index': index,
+                item_var: item,
+            }
+            results.append(entry)
+        self.context[output_var] = results
+
+    def _execute_merge_node(self, node: WorkflowNode):
+        """执行合流节点。"""
+        config = node.config or {}
+        merge_mode = config.get('merge_mode', 'append')
+        source_vars = [item.strip() for item in str(config.get('source_vars', '')).split(',') if item.strip()]
+        output_var = config.get('output_var', 'merged')
+        values = [self.context.get(name) for name in source_vars]
+
+        if merge_mode == 'object':
+            merged: Dict[str, Any] = {}
+            for name, value in zip(source_vars, values):
+                if isinstance(value, dict):
+                    merged.update(value)
+                else:
+                    merged[name] = value
+            self.context[output_var] = merged
+            return
+
+        if merge_mode == 'first_non_empty':
+            for value in values:
+                if value not in (None, '', [], {}):
+                    self.context[output_var] = value
+                    return
+            self.context[output_var] = None
+            return
+
+        appended = []
+        for value in values:
+            if isinstance(value, list):
+                appended.extend(value)
+            elif value not in (None, ''):
+                appended.append(value)
+        self.context[output_var] = appended
 
 
 # 工作流存储

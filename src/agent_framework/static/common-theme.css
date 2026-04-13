@@ -1,4 +1,21 @@
-/* 通用白色主题 + 蓝色风格 */
+/* 通用白色主题 + 蓝色主色风格 */
+
+:root {
+    --theme-bg: #eef4fb;
+    --theme-surface: rgba(255, 255, 255, 0.86);
+    --theme-surface-strong: rgba(255, 255, 255, 0.94);
+    --theme-line: rgba(101, 120, 144, 0.14);
+    --theme-line-strong: rgba(19, 99, 223, 0.18);
+    --theme-text: #202a36;
+    --theme-muted: #525b62;
+    --theme-accent: #1363df;
+    --theme-accent-deep: #0f4eb3;
+    --theme-accent-soft: rgba(19, 99, 223, 0.1);
+    --theme-accent-shadow: rgba(19, 99, 223, 0.16);
+    --theme-shadow-sm: 0 18px 42px -28px rgba(34, 44, 63, 0.16);
+    --theme-shadow-lg: 0 34px 80px -34px rgba(34, 44, 63, 0.18);
+    --theme-radius: 18px;
+}
 
 * {
     margin: 0;
@@ -7,17 +24,27 @@
 }
 
 body {
-    font-family: 'Rajdhani', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: linear-gradient(135deg, #f5f8fc 0%, #eff4fb 50%, #f5f8fc 100%);
+    font-family: 'Inter', 'Segoe UI', 'PingFang SC', 'Microsoft YaHei UI', sans-serif;
+    background:
+        radial-gradient(circle at 10% 10%, rgba(19, 99, 223, 0.12), transparent 24%),
+        radial-gradient(circle at 88% 12%, rgba(96, 165, 250, 0.10), transparent 22%),
+        linear-gradient(135deg, #f8fbff 0%, var(--theme-bg) 50%, #f5f8fc 100%);
     min-height: 100vh;
     position: relative;
     overflow-x: hidden;
+    color: var(--theme-text);
 }
 
-/* 蓝色波纹动画 */
-body::before {
+/* 平台氛围动画 */
+body::before,
+body::after {
     content: '';
     position: fixed;
+    pointer-events: none;
+    z-index: 0;
+}
+
+body::before {
     top: 0;
     left: 0;
     width: 200%;
@@ -26,10 +53,19 @@ body::before {
         radial-gradient(ellipse 800px 100px at 0% 20%, rgba(19, 99, 223, 0.08) 0%, transparent 50%),
         radial-gradient(ellipse 600px 80px at 100% 40%, rgba(96, 165, 250, 0.06) 0%, transparent 50%),
         radial-gradient(ellipse 700px 90px at 50% 60%, rgba(19, 99, 223, 0.05) 0%, transparent 50%),
-        radial-gradient(ellipse 900px 120px at 30% 80%, rgba(96, 165, 250, 0.07) 0%, transparent 50%);
+        radial-gradient(ellipse 900px 120px at 30% 80%, rgba(96, 165, 250, 0.06) 0%, transparent 50%);
     animation: windFlow 25s ease-in-out infinite;
-    pointer-events: none;
-    z-index: 0;
+}
+
+body::after {
+    right: 5vw;
+    bottom: 6vh;
+    width: 320px;
+    height: 320px;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(19, 99, 223, 0.10) 0%, transparent 72%);
+    filter: blur(8px);
+    animation: floatHalo 16s ease-in-out infinite;
 }
 
 @keyframes windFlow {
@@ -47,7 +83,18 @@ body::before {
     }
 }
 
-/* 水墨画线条 */
+@keyframes floatHalo {
+    0%, 100% {
+        transform: translate3d(0, 0, 0);
+        opacity: 0.65;
+    }
+    50% {
+        transform: translate3d(0, -14px, 0);
+        opacity: 1;
+    }
+}
+
+/* 网格线 */
 .ink-lines {
     position: fixed;
     top: 0;
@@ -91,12 +138,13 @@ body::before {
 
 /* 通用 header 样式 */
 .header {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.82);
     backdrop-filter: blur(20px);
-    color: #253038;
-    padding: 20px;
-    box-shadow: 0 2px 20px rgba(19, 99, 223, 0.1);
-    border-bottom: 2px solid rgba(19, 99, 223, 0.2);
+    color: var(--theme-text);
+    padding: 20px 22px;
+    box-shadow: var(--theme-shadow-sm);
+    border: 1px solid rgba(101, 120, 144, 0.10);
+    border-bottom-color: rgba(19, 99, 223, 0.14);
     position: relative;
     z-index: 10;
 }
@@ -106,33 +154,33 @@ body::before {
     position: fixed !important;
     top: 20px !important;
     left: 20px !important;
-    background: rgba(255, 255, 255, 0.95) !important;
-    border: 1px solid rgba(19, 99, 223, 0.3) !important;
-    color: #253038 !important;
-    padding: 10px 20px !important;
-    border-radius: 8px !important;
+    background: rgba(255, 255, 255, 0.88) !important;
+    border: 1px solid rgba(19, 99, 223, 0.18) !important;
+    color: var(--theme-text) !important;
+    padding: 11px 18px !important;
+    border-radius: 999px !important;
     cursor: pointer !important;
     font-size: 14px !important;
-    font-weight: 500 !important;
+    font-weight: 700 !important;
     transition: all 0.3s ease !important;
     text-decoration: none !important;
     display: inline-flex !important;
     align-items: center !important;
     gap: 8px !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 18px 35px -20px rgba(27, 42, 57, 0.16) !important;
     z-index: 1000 !important;
-    backdrop-filter: blur(10px) !important;
+    backdrop-filter: blur(16px) !important;
 }
 
 .back-btn:hover {
     background: rgba(255, 255, 255, 1) !important;
-    border-color: rgba(19, 99, 223, 0.6) !important;
-    box-shadow: 0 4px 16px rgba(19, 99, 223, 0.2) !important;
-    transform: translateX(-3px) !important;
+    border-color: rgba(19, 99, 223, 0.28) !important;
+    box-shadow: 0 20px 36px -20px rgba(27, 42, 57, 0.18) !important;
+    transform: translate3d(-3px, -1px, 0) !important;
 }
 
 .back-btn:active {
-    transform: translateX(-3px) scale(0.98) !important;
+    transform: translate3d(-3px, -1px, 0) scale(0.98) !important;
 }
 
 .back-btn-icon {
@@ -142,12 +190,53 @@ body::before {
 
 /* 通用卡片样式 */
 .card {
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--theme-surface-strong);
     backdrop-filter: blur(20px);
-    border-radius: 12px;
+    border-radius: var(--theme-radius);
     padding: 20px;
-    box-shadow: 0 4px 20px rgba(19, 99, 223, 0.1);
-    border: 1px solid rgba(101, 120, 144, 0.14);
+    box-shadow: var(--theme-shadow-sm);
+    border: 1px solid var(--theme-line);
     position: relative;
     z-index: 5;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.72), rgba(19, 99, 223, 0.12), rgba(255, 255, 255, 0.72));
+    pointer-events: none;
+}
+
+.card:hover {
+    border-color: var(--theme-line-strong);
+    box-shadow: var(--theme-shadow-lg);
+    transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body::before,
+    body::after,
+    .ink-line {
+        animation: none !important;
+    }
+
+    .back-btn,
+    .card {
+        transition: none !important;
+    }
+}
+
+@media (max-width: 760px) {
+    .back-btn {
+        top: 12px !important;
+        left: 12px !important;
+        padding: 9px 14px !important;
+    }
+
+    .header {
+        padding: 16px 18px;
+    }
 }

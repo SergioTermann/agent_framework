@@ -12,8 +12,8 @@
             --theme-accent: #1363df;
             --theme-accent-deep: #0f4eb3;
             --theme-accent-soft: rgba(19, 99, 223, 0.12);
-            --theme-accent-line: rgba(19, 99, 223, 0.22);
-            --theme-accent-shadow: rgba(19, 99, 223, 0.22);
+            --theme-accent-line: rgba(19, 99, 223, 0.18);
+            --theme-accent-shadow: rgba(19, 99, 223, 0.18);
             --theme-accent-text: rgba(19, 99, 223, 0.82);
         }
 
@@ -24,9 +24,14 @@
         }
 
         body {
-            font-family: 'PingFang SC', 'Microsoft YaHei UI', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #f5f8fc 0%, #eff4fb 100%);
+            font-family: 'Inter', 'Segoe UI', 'PingFang SC', 'Microsoft YaHei UI', sans-serif;
+            background:
+                radial-gradient(circle at 8% 10%, rgba(19, 99, 223, 0.14), transparent 22%),
+                radial-gradient(circle at 88% 12%, rgba(217, 119, 6, 0.12), transparent 20%),
+                radial-gradient(circle at 76% 86%, rgba(20, 184, 166, 0.10), transparent 24%),
+                #eef4fb;
             margin: 0;
+            color: #202a36;
         }
 
         .app-container {
@@ -37,16 +42,20 @@
         /* 侧边栏 */
         .sidebar {
             width: 280px;
-            background: linear-gradient(180deg, #0f4eb3 0%, #1363df 52%, #2b7fff 100%);
-            color: white;
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(255, 250, 244, 0.58)),
+                rgba(247, 242, 234, 0.72);
+            color: #202a36;
             display: flex;
             flex-direction: column;
-            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+            box-shadow: 0 18px 42px -28px rgba(34, 44, 63, 0.16);
+            border-right: 1px solid rgba(101, 120, 144, 0.10);
+            backdrop-filter: blur(22px);
         }
 
         .sidebar-header {
             padding: 28px 24px;
-            border-bottom: 1px solid rgba(255,255,255,0.15);
+            border-bottom: 1px solid rgba(101, 120, 144, 0.12);
         }
 
         .sidebar-logo {
@@ -65,7 +74,7 @@
 
         .nav-item {
             padding: 12px 24px;
-            color: rgba(255,255,255,0.8);
+            color: #525b62;
             text-decoration: none;
             display: flex;
             align-items: center;
@@ -74,14 +83,14 @@
         }
 
         .nav-item:hover {
-            background: rgba(255,255,255,0.1);
-            color: white;
+            background: rgba(19, 99, 223,.06);
+            color: #0f4eb3;
         }
 
         .nav-item.active {
-            background: rgba(255,255,255,0.15);
-            color: white;
-            border-left: 3px solid white;
+            background: rgba(19, 99, 223,.08);
+            color: #0f4eb3;
+            border-left: 3px solid #1363df;
         }
 
         /* 主内容区 */
@@ -93,17 +102,18 @@
         }
 
         .header {
-            background: #ffffff;
+            background: rgba(255,255,255,0.82);
             padding: 16px 24px;
-            border-bottom: 1px solid rgba(101, 120, 144, 0.14);
+            border-bottom: 1px solid rgba(101, 120, 144, 0.12);
             display: flex;
             align-items: center;
             gap: 12px;
+            backdrop-filter: blur(16px);
         }
 
         .header h1 {
             font-size: 20px;
-            color: #253038;
+            color: #202a36;
             font-weight: 600;
         }
 
@@ -135,18 +145,19 @@
 
         /* 卡片样式 */
         .card {
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 252, 247, 0.84);
             backdrop-filter: blur(20px);
             border: 1px solid var(--theme-accent-line);
-            border-radius: 15px;
+            border-radius: 22px;
             padding: 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 18px 42px -28px rgba(34, 44, 63, 0.16);
             transition: all 0.3s;
         }
 
         .card:hover {
-            border-color: rgba(19, 99, 223, 0.36);
-            box-shadow: 0 8px 32px rgba(19, 99, 223, 0.16);
+            border-color: rgba(19, 99, 223, 0.28);
+            box-shadow: 0 20px 38px -26px rgba(19, 99, 223, 0.26);
+            transform: translateY(-2px);
         }
 
         /* 卡片标题 */
@@ -165,7 +176,7 @@
         .form-label {
             display: block;
             margin-bottom: 8px;
-            color: #e0e0e0;
+            color: #525b62;
             font-size: 0.95em;
             font-weight: 500;
         }
@@ -174,26 +185,26 @@
             display: block;
             margin-top: 6px;
             font-size: 0.85em;
-            color: #a0a0a0;
+            color: #6f746f;
             line-height: 1.4;
         }
 
         .form-input, .form-select, .form-textarea {
             width: 100%;
             padding: 12px;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.72);
             border: 1px solid var(--theme-accent-line);
             border-radius: 8px;
-            color: #e0e0e0;
+            color: #202a36;
             font-size: 1em;
             transition: all 0.3s;
         }
 
         .form-input:focus, .form-select:focus, .form-textarea:focus {
             outline: none;
-            border-color: rgba(19, 99, 223, 0.6);
-            box-shadow: 0 0 15px rgba(19, 99, 223, 0.22);
-            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(19, 99, 223, 0.48);
+            box-shadow: 0 0 0 4px rgba(19, 99, 223, 0.10);
+            background: #ffffff;
         }
 
         .form-textarea {
@@ -204,8 +215,8 @@
 
         /* 按钮 */
         .btn {
-            background: linear-gradient(135deg, rgba(19, 99, 223, 0.16) 0%, rgba(96, 165, 250, 0.18) 100%);
-            border: 1px solid rgba(19, 99, 223, 0.32);
+            background: linear-gradient(135deg, rgba(19, 99, 223, 0.10) 0%, rgba(217, 119, 6, 0.10) 100%);
+            border: 1px solid rgba(19, 99, 223, 0.22);
             color: var(--theme-accent-deep);
             padding: 12px 30px;
             border-radius: 8px;
@@ -216,8 +227,8 @@
         }
 
         .btn:hover {
-            background: linear-gradient(135deg, rgba(19, 99, 223, 0.22) 0%, rgba(96, 165, 250, 0.24) 100%);
-            box-shadow: 0 4px 15px rgba(19, 99, 223, 0.24);
+            background: linear-gradient(135deg, rgba(19, 99, 223, 0.18) 0%, rgba(217, 119, 6, 0.14) 100%);
+            box-shadow: 0 18px 35px -20px rgba(27, 42, 57, 0.22);
         }
 
         .btn:disabled {
@@ -232,7 +243,7 @@
         }
 
         .btn-primary:hover {
-            box-shadow: 0 4px 20px rgba(19, 99, 223, 0.28);
+            box-shadow: 0 18px 34px -18px rgba(19, 99, 223, 0.34);
         }
 
         /* 任务列表 */
@@ -303,7 +314,7 @@
         }
 
         .file-upload:hover {
-            border-color: rgba(19, 99, 223, 0.6);
+            border-color: rgba(19, 99, 223, 0.42);
             background: rgba(19, 99, 223, 0.05);
         }
 
@@ -325,7 +336,7 @@
             height: 100%;
             background: linear-gradient(90deg, var(--theme-accent-deep), var(--theme-accent));
             transition: width 0.3s;
-            box-shadow: 0 0 10px rgba(19, 99, 223, 0.28);
+            box-shadow: 0 0 14px rgba(19, 99, 223, 0.24);
         }
 
         /* 训练曲线图 */
@@ -335,13 +346,13 @@
             background: rgba(255, 255, 255, 0.9);
             border-radius: 12px;
             padding: 20px;
-            border: 1px solid rgba(19, 99, 223, 0.15);
+            border: 1px solid rgba(19, 99, 223, 0.16);
         }
 
         .chart-wrapper:hover {
-            border-color: rgba(19, 99, 223, 0.6);
-            box-shadow: 0 0 20px rgba(19, 99, 223, 0.2);
-            transform: translateX(-5px);
+            border-color: rgba(19, 99, 223, 0.34);
+            box-shadow: 0 24px 48px -32px rgba(19, 99, 223, 0.28);
+            transform: translateY(-2px);
         }
     </style>
 </head>
@@ -419,7 +430,7 @@
                 <div class="file-upload" onclick="document.getElementById('datasetFile').click()">
                     <input type="file" id="datasetFile" accept=".json,.jsonl,.csv">
                     <p>📁 点击上传数据集文件</p>
-                    <p style="font-size: 0.9em; color: rgba(19, 99, 223, 0.65); margin-top: 10px;">
+                    <p style="font-size: 0.9em; color: rgba(19, 99, 223, 0.72); margin-top: 10px;">
                         支持 JSON, JSONL, CSV 格式
                     </p>
                 </div>
@@ -482,7 +493,7 @@
             <div class="form-group" style="margin-top: 30px; margin-bottom: 0;">
                 <label class="form-label">已安装模型</label>
                 <div id="localModels" style="max-height: 200px; overflow-y: auto;">
-                    <p style="text-align: center; color: rgba(19, 99, 223, 0.55); padding: 20px;">
+                    <p style="text-align: center; color: rgba(82, 91, 98, 0.72); padding: 20px;">
                         加载中...
                     </p>
                 </div>
@@ -496,7 +507,7 @@
             <div class="chart-wrapper">
                 <canvas id="trainingChart"></canvas>
             </div>
-            <p style="text-align: center; color: rgba(19, 99, 223, 0.65); margin-top: 15px; font-size: 0.9em;">
+            <p style="text-align: center; color: rgba(19, 99, 223, 0.76); margin-top: 15px; font-size: 0.9em;">
                 💡 实时显示训练过程中的损失值和准确率变化。损失越低越好，准确率越高越好。
             </p>
         </div>
@@ -505,7 +516,7 @@
         <div class="card full-width">
             <h2 class="card-title">微调任务</h2>
             <div id="taskList">
-                <p style="text-align: center; color: rgba(19, 99, 223, 0.55); padding: 40px;">
+                <p style="text-align: center; color: rgba(82, 91, 98, 0.72); padding: 40px;">
                     暂无微调任务
                 </p>
             </div>
@@ -572,8 +583,8 @@
                     {
                         label: '准确率',
                         data: [],
-                        borderColor: '#60a5fa',
-                        backgroundColor: 'rgba(96, 165, 250, 0.12)',
+                        borderColor: '#d97706',
+                        backgroundColor: 'rgba(217, 119, 6, 0.12)',
                         borderWidth: 2,
                         tension: 0.4,
                         fill: true,
@@ -600,11 +611,11 @@
                         }
                     },
                     tooltip: {
-                        backgroundColor: 'rgba(10, 14, 39, 0.9)',
-                        borderColor: 'rgba(19, 99, 223, 0.5)',
+                        backgroundColor: 'rgba(32, 42, 54, 0.92)',
+                        borderColor: 'rgba(19, 99, 223, 0.32)',
                         borderWidth: 1,
-                        titleColor: '#1363df',
-                        bodyColor: '#1363df'
+                        titleColor: '#eef4fb',
+                        bodyColor: '#eef4fb'
                     }
                 },
                 scales: {
@@ -619,7 +630,7 @@
                             color: 'rgba(19, 99, 223, 0.08)'
                         },
                         ticks: {
-                            color: 'rgba(19, 99, 223, 0.72)'
+                            color: 'rgba(82, 91, 98, 0.78)'
                         }
                     },
                     y: {
@@ -635,7 +646,7 @@
                             color: 'rgba(19, 99, 223, 0.08)'
                         },
                         ticks: {
-                            color: 'rgba(19, 99, 223, 0.72)'
+                            color: 'rgba(82, 91, 98, 0.78)'
                         }
                     },
                     y1: {
@@ -645,13 +656,13 @@
                         title: {
                             display: true,
                             text: '准确率',
-                            color: '#60a5fa'
+                            color: '#b45309'
                         },
                         grid: {
                             drawOnChartArea: false,
                         },
                         ticks: {
-                            color: 'rgba(96, 165, 250, 0.78)'
+                            color: 'rgba(180, 83, 9, 0.78)'
                         }
                     }
                 }
@@ -875,7 +886,7 @@
 
                 const container = document.getElementById('localModels');
                 if (models.length === 0) {
-                    container.innerHTML = '<p style="text-align: center; color: rgba(19, 99, 223, 0.55); padding: 20px;">暂无已安装模型</p>';
+                    container.innerHTML = '<p style="text-align: center; color: rgba(82, 91, 98, 0.72); padding: 20px;">暂无已安装模型</p>';
                     return;
                 }
 
@@ -884,14 +895,14 @@
                         ? `<button class="btn" style="padding: 6px 12px; font-size: 0.85em;" onclick="useModel(decodeURIComponent('${encodeInlineValue(model.path)}'), decodeURIComponent('${encodeInlineValue(model.name)}'))">用于微调</button>`
                         : '';
                     return `
-                        <div style="background: rgba(10, 14, 39, 0.6); border: 1px solid rgba(19, 99, 223, 0.2); border-radius: 8px; padding: 12px; margin-bottom: 10px;">
+                        <div style="background: rgba(255, 255, 255, 0.82); border: 1px solid rgba(19, 99, 223, 0.16); border-radius: 14px; padding: 14px; margin-bottom: 10px; box-shadow: 0 14px 32px -26px rgba(34, 44, 63, 0.18);">
                             <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
                                 <div style="min-width: 0;">
-                                    <div style="color: #1363df; font-weight: 600;">${escapeHtml(model.name)}</div>
+                                    <div style="color: #0f4eb3; font-weight: 700;">${escapeHtml(model.name)}</div>
                                     <div style="font-size: 0.85em; color: rgba(19, 99, 223, 0.78); margin-top: 4px;">
                                         ${escapeHtml(model.size)} · ${escapeHtml(getModelSourceLabel(model.source))} · ${escapeHtml(getModelCapabilityLabel(model.capability))}
                                     </div>
-                                    <div style="font-size: 0.8em; color: rgba(19, 99, 223, 0.58); margin-top: 4px; word-break: break-all;">
+                                    <div style="font-size: 0.8em; color: rgba(82, 91, 98, 0.72); margin-top: 4px; word-break: break-all;">
                                         ${escapeHtml(model.path)}
                                     </div>
                                 </div>
@@ -980,7 +991,7 @@
 
                 const taskList = document.getElementById('taskList');
                 if (tasks.length === 0) {
-                    taskList.innerHTML = '<p style="text-align: center; color: rgba(19, 99, 223, 0.55); padding: 40px;">暂无微调任务</p>';
+                    taskList.innerHTML = '<p style="text-align: center; color: rgba(82, 91, 98, 0.72); padding: 40px;">暂无微调任务</p>';
                     return;
                 }
 

@@ -8,739 +8,1730 @@
     <link rel="stylesheet" href="/static/css/base-theme.css">
     <style>
         :root {
-            --theme-accent: #1363df;
-            --theme-accent-deep: #0f4eb3;
-            --theme-accent-soft: rgba(19, 99, 223, 0.10);
+            --collab-accent: #0f62fe;
+            --collab-accent-deep: #0b4ecc;
+            --collab-emerald: #1363df;
+            --collab-amber: #b45309;
+            --collab-rose: #be123c;
+            --collab-bg: #eef4fb;
+            --collab-surface: rgba(255, 255, 255, 0.94);
+            --collab-surface-strong: rgba(255, 255, 255, 0.98);
+            --collab-border: rgba(148, 163, 184, 0.24);
+            --collab-text: #0f172a;
+            --collab-muted: #5b6b82;
+            --collab-shadow: 0 18px 42px rgba(15, 23, 42, 0.10);
+            --collab-radius: 24px;
         }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
+        * {
+            box-sizing: border-box;
         }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: #ffffff;
-            border-radius: 12px;
-            border: 1px solid rgba(15, 23, 42, 0.15);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--collab-text);
+            font-family: var(--font-body, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+            background:
+                radial-gradient(circle at 0% 0%, rgba(15, 98, 254, 0.10), transparent 28%),
+                radial-gradient(circle at 100% 10%, rgba(14, 165, 233, 0.10), transparent 26%),
+                linear-gradient(180deg, #f8fbff 0%, var(--collab-bg) 100%);
         }
 
-        .header h1 {
-            font-size: 28px;
-            background: linear-gradient(135deg, var(--theme-accent-deep), var(--theme-accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(15, 98, 254, 0.028) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(15, 98, 254, 0.028) 1px, transparent 1px);
+            background-size: 28px 28px;
+            mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.18), transparent 65%);
         }
 
-        .btn-primary {
-            padding: 10px 20px;
-            background: linear-gradient(135deg, var(--theme-accent), var(--theme-accent-deep));
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
+        body.is-embedded {
+            min-height: 100%;
+            background:
+                radial-gradient(circle at 10% 10%, rgba(15, 98, 254, 0.06), transparent 20%),
+                linear-gradient(180deg, rgba(249, 252, 255, 0.98), rgba(240, 246, 252, 0.98));
         }
 
-        .main-content {
-            display: grid;
-            grid-template-columns: 300px 1fr;
-            gap: 20px;
-        }
-
-        .sidebar {
-            background: white;
-            border-radius: 12px;
-            border: 1px solid rgba(15, 23, 42, 0.15);
-            padding: 20px;
-            height: fit-content;
-        }
-
-        .team-list {
-            display: grid;
-            gap: 12px;
-        }
-
-        .team-member {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .team-member:hover {
-            background: var(--theme-accent-soft);
-        }
-
-        .team-member.active {
-            background: var(--theme-accent-soft);
-            border: 1px solid var(--theme-accent);
-        }
-
-        .member-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--theme-accent), var(--theme-accent-deep));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-        }
-
-        .member-info {
-            flex: 1;
-        }
-
-        .member-name {
-            font-weight: 600;
-            color: #0f172a;
-            font-size: 14px;
-        }
-
-        .member-status {
-            font-size: 12px;
-            color: #64748b;
-        }
-
-        .status-indicator {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 4px;
-        }
-
-        .status-online {
-            background: #10b981;
-        }
-
-        .status-offline {
-            background: #94a3b8;
-        }
-
-        .content-area {
-            background: white;
-            border-radius: 12px;
-            border: 1px solid rgba(15, 23, 42, 0.15);
-            padding: 24px;
-        }
-
-        .tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 24px;
-            border-bottom: 2px solid #e2e8f0;
-        }
-
-        .tab {
-            padding: 12px 20px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            color: #64748b;
-            border-bottom: 2px solid transparent;
-            margin-bottom: -2px;
-        }
-
-        .tab.active {
-            color: var(--theme-accent);
-            border-bottom-color: var(--theme-accent);
-        }
-
-        .tab-content {
+        body.is-embedded::before {
             display: none;
         }
 
-        .tab-content.active {
-            display: block;
+        .collab-shell {
+            position: relative;
+            z-index: 1;
+            max-width: 1680px;
+            margin: 0 auto;
+            padding: 24px;
+            display: grid;
+            gap: 18px;
         }
 
-        .activity-feed {
+        body.is-embedded .collab-shell {
+            max-width: none;
+            padding: 14px;
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1.15fr) minmax(340px, 0.85fr);
+            gap: 18px;
+            align-items: stretch;
+        }
+
+        .panel {
+            border: 1px solid var(--collab-border);
+            border-radius: var(--collab-radius);
+            background: var(--collab-surface-strong);
+            box-shadow: var(--collab-shadow);
+        }
+
+        .hero-main {
+            padding: 26px 28px;
+            display: grid;
+            gap: 18px;
+            background:
+                radial-gradient(circle at 85% 16%, rgba(15, 98, 254, 0.16), transparent 22%),
+                linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(245, 249, 255, 0.94));
+        }
+
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(15, 98, 254, 0.10);
+            color: var(--collab-accent);
+            font-size: 12px;
+            font-weight: 800;
+            width: fit-content;
+        }
+
+        .hero-main h1 {
+            margin: 0;
+            font-size: clamp(34px, 4vw, 46px);
+            line-height: 1.05;
+            letter-spacing: -0.04em;
+        }
+
+        .hero-main p {
+            margin: 0;
+            max-width: 760px;
+            color: var(--collab-muted);
+            font-size: 15px;
+            line-height: 1.8;
+        }
+
+        .hero-actions,
+        .hero-metrics {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .hero-aside {
+            padding: 22px;
+            display: grid;
+            gap: 14px;
+        }
+
+        .mini-heading {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 800;
+        }
+
+        .mini-copy {
+            margin: 6px 0 0;
+            color: var(--collab-muted);
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .session-quick-form {
+            display: grid;
+            gap: 12px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .form-group {
+            display: grid;
+            gap: 6px;
+        }
+
+        .form-group.is-wide {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            color: var(--collab-muted);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            border: 1px solid rgba(148, 163, 184, 0.24);
+            border-radius: 14px;
+            background: #ffffff;
+            color: var(--collab-text);
+            padding: 12px 14px;
+            font: inherit;
+        }
+
+        .form-textarea {
+            min-height: 110px;
+            resize: vertical;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: rgba(15, 98, 254, 0.34);
+            box-shadow: 0 0 0 3px rgba(15, 98, 254, 0.08);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 42px;
+            padding: 0 16px;
+            border: 1px solid rgba(15, 98, 254, 0.14);
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.92);
+            color: var(--collab-text);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            border-color: rgba(15, 98, 254, 0.28);
+            box-shadow: 0 12px 24px rgba(15, 98, 254, 0.08);
+        }
+
+        .btn-primary {
+            border-color: transparent;
+            color: #ffffff;
+            background: linear-gradient(135deg, var(--collab-accent-deep), var(--collab-accent));
+        }
+
+        .btn-ghost {
+            background: rgba(15, 98, 254, 0.04);
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .metric-card {
+            padding: 16px 18px;
+            border: 1px solid var(--collab-border);
+            border-radius: 20px;
+            background: var(--collab-surface);
+            box-shadow: var(--collab-shadow);
+            display: grid;
+            gap: 8px;
+        }
+
+        .metric-card strong {
+            font-size: 28px;
+            line-height: 1;
+            letter-spacing: -0.04em;
+        }
+
+        .metric-card span {
+            color: var(--collab-muted);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: 320px minmax(0, 1fr);
+            gap: 18px;
+            align-items: start;
+        }
+
+        .side-column,
+        .main-column {
+            display: grid;
+            gap: 18px;
+            min-width: 0;
+        }
+
+        .section-panel {
+            padding: 18px;
             display: grid;
             gap: 16px;
         }
 
-        .activity-item {
+        .section-head {
             display: flex;
-            gap: 16px;
-            padding: 16px;
-            background: #f8fafc;
-            border-radius: 8px;
-            border-left: 4px solid var(--theme-accent);
+            justify-content: space-between;
+            gap: 12px;
+            align-items: flex-start;
         }
 
-        .activity-icon {
-            width: 40px;
-            height: 40px;
-            display: flex;
+        .section-head h2,
+        .section-head h3 {
+            margin: 0;
+            font-size: 17px;
+            line-height: 1.2;
+        }
+
+        .section-head p {
+            margin: 8px 0 0;
+            color: var(--collab-muted);
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .section-tag {
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
-            background: var(--theme-accent-soft);
-            border-radius: 8px;
-            color: var(--theme-accent);
+            gap: 6px;
+            padding: 7px 10px;
+            border-radius: 999px;
+            background: rgba(15, 98, 254, 0.08);
+            color: var(--collab-accent);
+            font-size: 11px;
+            font-weight: 800;
         }
 
-        .activity-content {
-            flex: 1;
+        .session-list,
+        .member-list,
+        .timeline-list,
+        .checklist,
+        .note-list,
+        .comment-list {
+            display: grid;
+            gap: 12px;
         }
 
-        .activity-title {
-            font-weight: 600;
-            color: #0f172a;
-            margin-bottom: 4px;
+        .session-card,
+        .member-card,
+        .timeline-item,
+        .note-card,
+        .comment-card,
+        .resource-card,
+        .check-item,
+        .signal-card {
+            border: 1px solid rgba(148, 163, 184, 0.20);
+            border-radius: 18px;
+            background: linear-gradient(180deg, #ffffff, #f8fbff);
         }
 
-        .activity-description {
+        .session-card {
+            padding: 14px;
+            display: grid;
+            gap: 10px;
+            cursor: pointer;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .session-card:hover {
+            transform: translateY(-1px);
+            border-color: rgba(15, 98, 254, 0.22);
+            box-shadow: 0 12px 24px rgba(15, 98, 254, 0.08);
+        }
+
+        .session-card.is-active {
+            border-color: rgba(15, 98, 254, 0.32);
+            box-shadow: 0 0 0 3px rgba(15, 98, 254, 0.08);
+        }
+
+        .session-head,
+        .member-head,
+        .resource-head,
+        .comment-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .session-title,
+        .member-name,
+        .resource-title,
+        .comment-author {
+            margin: 0;
             font-size: 14px;
-            color: #64748b;
+            font-weight: 800;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .session-meta,
+        .member-meta,
+        .resource-meta,
+        .comment-meta,
+        .timeline-meta {
+            color: var(--collab-muted);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .pill-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 26px;
+            padding: 0 10px;
+            border-radius: 999px;
+            background: rgba(15, 98, 254, 0.08);
+            color: var(--collab-accent);
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .pill.is-success {
+            background: rgba(19, 99, 223, 0.10);
+            color: var(--collab-emerald);
+        }
+
+        .pill.is-warn {
+            background: rgba(180, 83, 9, 0.12);
+            color: var(--collab-amber);
+        }
+
+        .pill.is-danger {
+            background: rgba(190, 18, 60, 0.10);
+            color: var(--collab-rose);
+        }
+
+        .member-card,
+        .timeline-item,
+        .check-item,
+        .note-card,
+        .comment-card,
+        .resource-card,
+        .signal-card {
+            padding: 14px;
+        }
+
+        .avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 14px;
+            display: inline-grid;
+            place-items: center;
+            background: linear-gradient(135deg, var(--collab-accent), #3b82f6);
+            color: #ffffff;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .member-card {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .member-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #94a3b8;
+        }
+
+        .status-dot.is-online {
+            background: #10b981;
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.14);
+        }
+
+        .board-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
+            gap: 18px;
+        }
+
+        .stack {
+            display: grid;
+            gap: 18px;
+        }
+
+        .signal-grid,
+        .resource-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .stage-grid,
+        .role-grid,
+        .risk-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .stage-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .role-grid,
+        .risk-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .signal-card strong {
+            display: block;
+            font-size: 12px;
+            color: var(--collab-muted);
+            margin-bottom: 8px;
+        }
+
+        .signal-card p {
+            margin: 0;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .stage-card,
+        .role-card,
+        .risk-card {
+            padding: 14px;
+            border: 1px solid rgba(148, 163, 184, 0.20);
+            border-radius: 18px;
+            background: linear-gradient(180deg, #ffffff, #f8fbff);
+            display: grid;
+            gap: 10px;
+        }
+
+        .stage-card.is-active {
+            border-color: rgba(15, 98, 254, 0.28);
+            box-shadow: 0 0 0 3px rgba(15, 98, 254, 0.08);
+        }
+
+        .stage-kicker,
+        .role-kicker,
+        .risk-kicker {
+            color: var(--collab-muted);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .stage-title,
+        .role-title,
+        .risk-title {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 800;
             line-height: 1.5;
         }
 
-        .activity-time {
+        .stage-copy,
+        .role-copy,
+        .risk-copy {
+            color: var(--collab-muted);
             font-size: 12px;
-            color: #94a3b8;
-            margin-top: 8px;
+            line-height: 1.7;
         }
 
-        .shared-resources {
+        .progress-track {
+            position: relative;
+            height: 8px;
+            border-radius: 999px;
+            background: rgba(148, 163, 184, 0.18);
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            position: absolute;
+            inset: 0 auto 0 0;
+            border-radius: inherit;
+            background: linear-gradient(135deg, var(--collab-accent-deep), var(--collab-accent));
+        }
+
+        .timeline-item {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 16px;
+            gap: 8px;
+            border-left: 4px solid rgba(15, 98, 254, 0.22);
+        }
+
+        .timeline-title {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .timeline-body {
+            color: var(--collab-muted);
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .check-item {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .check-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 10px;
+            display: grid;
+            place-items: center;
+            background: rgba(15, 98, 254, 0.08);
+            color: var(--collab-accent);
+            flex-shrink: 0;
+        }
+
+        .check-title {
+            margin: 0;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .check-copy {
+            margin: 4px 0 0;
+            color: var(--collab-muted);
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .resource-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
         }
 
         .resource-card {
-            padding: 16px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            transition: all 0.2s;
+            display: grid;
+            gap: 10px;
         }
 
-        .resource-card:hover {
-            border-color: var(--theme-accent);
-            box-shadow: 0 2px 8px rgba(19, 99, 223, 0.1);
-        }
-
-        .resource-header {
-            display: flex;
+        .resource-head {
             align-items: center;
-            gap: 12px;
-            margin-bottom: 12px;
         }
 
         .resource-icon {
             width: 36px;
             height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--theme-accent-soft);
-            border-radius: 6px;
-            color: var(--theme-accent);
-        }
-
-        .resource-title {
-            font-weight: 600;
-            color: #0f172a;
-            font-size: 14px;
-        }
-
-        .resource-meta {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            color: #64748b;
-            margin-top: 8px;
-        }
-
-        .comment-section {
+            border-radius: 12px;
             display: grid;
-            gap: 16px;
+            place-items: center;
+            background: rgba(15, 98, 254, 0.08);
+            color: var(--collab-accent);
         }
 
-        .comment-item {
-            display: flex;
-            gap: 12px;
-            padding: 16px;
-            background: #f8fafc;
-            border-radius: 8px;
+        .comment-card {
+            display: grid;
+            gap: 10px;
         }
 
-        .comment-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--theme-accent), var(--theme-accent-deep));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-            font-size: 14px;
-        }
-
-        .comment-content {
-            flex: 1;
-        }
-
-        .comment-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-        }
-
-        .comment-author {
-            font-weight: 600;
-            color: #0f172a;
-            font-size: 14px;
-        }
-
-        .comment-time {
-            font-size: 12px;
-            color: #94a3b8;
-        }
-
-        .comment-text {
-            font-size: 14px;
+        .comment-body {
             color: #475569;
-            line-height: 1.6;
+            font-size: 13px;
+            line-height: 1.8;
         }
 
-        .comment-input {
-            display: flex;
-            gap: 12px;
-            margin-top: 20px;
+        .reply-list {
+            display: grid;
+            gap: 8px;
+            margin-top: 6px;
+            padding-top: 10px;
+            border-top: 1px dashed rgba(148, 163, 184, 0.28);
         }
 
-        .comment-input textarea {
-            flex: 1;
-            padding: 12px;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            font-family: inherit;
-            font-size: 14px;
-            resize: vertical;
-            min-height: 80px;
+        .reply-item {
+            padding: 10px 12px;
+            border-radius: 14px;
+            background: rgba(15, 98, 254, 0.04);
+            color: var(--collab-muted);
+            font-size: 12px;
+            line-height: 1.7;
         }
 
-        .btn-send {
-            padding: 12px 24px;
-            background: var(--theme-accent);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            align-self: flex-end;
+        .empty-card {
+            padding: 18px;
+            border-radius: 18px;
+            border: 1px dashed rgba(148, 163, 184, 0.30);
+            background: rgba(15, 98, 254, 0.04);
+            color: var(--collab-muted);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .toast {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            padding: 12px 16px;
+            border-radius: 14px;
+            background: rgba(15, 23, 42, 0.92);
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 700;
+            box-shadow: 0 18px 42px rgba(15, 23, 42, 0.24);
+            opacity: 0;
+            transform: translateY(8px);
+            pointer-events: none;
+            transition: opacity 0.22s ease, transform 0.22s ease;
+        }
+
+        .toast.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 1280px) {
+            .hero,
+            .workspace,
+            .board-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stage-grid,
+            .role-grid,
+            .risk-grid,
+            .resource-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 860px) {
+            .collab-shell {
+                padding: 14px;
+            }
+
+            .metric-grid,
+            .signal-grid,
+            .stage-grid,
+            .role-grid,
+            .risk-grid,
+            .resource-grid,
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-main,
+            .hero-aside,
+            .section-panel {
+                padding: 18px;
+            }
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <div>
-                <h1>👥 协作管理</h1>
-                <p>团队协作、资源共享和实时沟通</p>
+<body{% if embedded %} class="is-embedded"{% endif %}>
+    <div class="collab-shell">
+        <section class="hero">
+            <div class="hero-main panel">
+                <span class="hero-eyebrow"><i class="fas fa-people-arrows"></i><span>Collaboration Hub</span></span>
+                <div>
+                    <h1>协作管理台</h1>
+                    <p>把协作会话、在线成员、交接事项、共享资源和评论流集中到一页，方便围绕同一条工作流同步推进，而不是在多个页面来回切换。</p>
+                </div>
+                <div class="hero-actions">
+                    <button class="btn btn-primary" type="button" onclick="createSessionFromHero()">
+                        <i class="fas fa-plus"></i> 新建协作会话
+                    </button>
+                    <button class="btn" type="button" onclick="loadDemoWorkspace()">
+                        <i class="fas fa-flask"></i> 加载演示数据
+                    </button>
+                    <button class="btn btn-ghost" type="button" onclick="refreshCollaborationBoard()">
+                        <i class="fas fa-rotate"></i> 刷新协作台
+                    </button>
+                </div>
+                <div class="hero-metrics metric-grid" id="metricGrid"></div>
             </div>
-            <button class="btn-primary" onclick="inviteMembers()">
-                <i class="fas fa-user-plus"></i> 邀请成员
-            </button>
-        </div>
-
-        <div class="main-content">
-            <div class="sidebar">
-                <h3 style="margin-bottom: 16px;">团队成员</h3>
-                <div class="team-list" id="teamList">
-                    <!-- 团队成员列表将通过 JavaScript 动态加载 -->
+            <div class="hero-aside panel">
+                <div>
+                    <h2 class="mini-heading">快速发起协作</h2>
+                    <p class="mini-copy">输入工作流标识后直接创建会话，当前页会自动切到新会话并加载评论与成员状态。</p>
                 </div>
-            </div>
-
-            <div class="content-area">
-                <div class="tabs">
-                    <button class="tab active" onclick="switchTab('activity')">活动动态</button>
-                    <button class="tab" onclick="switchTab('resources')">共享资源</button>
-                    <button class="tab" onclick="switchTab('comments')">讨论区</button>
-                </div>
-
-                <div id="activityTab" class="tab-content active">
-                    <div class="activity-feed" id="activityFeed">
-                        <!-- 活动动态将通过 JavaScript 动态加载 -->
+                <div class="session-quick-form">
+                    <div class="form-grid">
+                        <div class="form-group is-wide">
+                            <label class="form-label" for="workflowIdInput">Workflow ID</label>
+                            <input class="form-input" id="workflowIdInput" placeholder="例如 visual_workflow / alarm_triage / workflow-001">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="commentUserInput">评论用户名</label>
+                            <input class="form-input" id="commentUserInput" placeholder="例如 调度经理">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="commentNodeInput">评论节点</label>
+                            <input class="form-input" id="commentNodeInput" value="global" placeholder="global / node_xxx">
+                        </div>
                     </div>
-                </div>
-
-                <div id="resourcesTab" class="tab-content">
-                    <div class="shared-resources" id="sharedResources">
-                        <!-- 共享资源将通过 JavaScript 动态加载 -->
-                    </div>
-                </div>
-
-                <div id="commentsTab" class="tab-content">
-                    <div class="comment-section" id="commentSection">
-                        <!-- 评论将通过 JavaScript 动态加载 -->
-                    </div>
-                    <div class="comment-input">
-                        <textarea id="commentInput" placeholder="输入你的评论..."></textarea>
-                        <button class="btn-send" onclick="postComment()">
-                            <i class="fas fa-paper-plane"></i> 发送
+                    <div class="hero-actions">
+                        <button class="btn btn-primary" type="button" onclick="createSessionFromHero()">
+                            <i class="fas fa-diagram-project"></i> 创建并进入
+                        </button>
+                        <button class="btn" type="button" onclick="loadDemoWorkspace()">
+                            <i class="fas fa-wand-magic-sparkles"></i> 填充 Demo
+                        </button>
+                        <button class="btn" type="button" onclick="seedDemoComment()">
+                            <i class="fas fa-comment-medical"></i> 写一条演示评论
                         </button>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
+
+        <section class="workspace">
+            <aside class="side-column">
+                <section class="section-panel panel">
+                    <div class="section-head">
+                        <div>
+                            <h2>协作会话</h2>
+                            <p>每个会话绑定一条工作流，能看到版本、操作数和当前在线人数。</p>
+                        </div>
+                        <span class="section-tag"><i class="fas fa-layer-group"></i><span id="sessionCountTag">0 个会话</span></span>
+                    </div>
+                    <div class="session-list" id="sessionList"></div>
+                </section>
+
+                <section class="section-panel panel">
+                    <div class="section-head">
+                        <div>
+                            <h2>活跃成员</h2>
+                            <p>优先展示当前会话在线成员，没有会话时展示建议角色分工。</p>
+                        </div>
+                    </div>
+                    <div class="member-list" id="memberList"></div>
+                </section>
+            </aside>
+
+            <main class="main-column">
+                <section class="section-panel panel">
+                    <div class="section-head">
+                        <div>
+                            <h2>协作总览</h2>
+                            <p>会话状态、联动信号、交接动作和推进节奏都压在同一块工作面里。</p>
+                        </div>
+                        <span class="section-tag"><i class="fas fa-bolt"></i><span id="activeSessionTag">未选中会话</span></span>
+                    </div>
+                    <div class="board-grid">
+                        <div class="stack">
+                            <div class="signal-grid" id="signalGrid"></div>
+                            <section class="stack">
+                                <div class="section-head">
+                                    <div>
+                                        <h3>协作时间线</h3>
+                                        <p>把会话创建、评论追加、多人编辑和交接建议按时间串起来。</p>
+                                    </div>
+                                </div>
+                                <div class="timeline-list" id="timelineList"></div>
+                            </section>
+                        </div>
+                        <div class="stack">
+                            <section>
+                                <div class="section-head">
+                                    <div>
+                                        <h3>交付清单</h3>
+                                        <p>给当前协作轮次补一份明确的推进动作，不让信息停在消息里。</p>
+                                    </div>
+                                </div>
+                                <div class="checklist" id="checkList"></div>
+                            </section>
+                            <section>
+                                <div class="section-head">
+                                    <div>
+                                        <h3>协作备注</h3>
+                                        <p>沉淀会话里最常见的对齐点、风险点和资源缺口。</p>
+                                    </div>
+                                </div>
+                                <div class="note-list" id="noteList"></div>
+                            </section>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="section-panel panel">
+                    <div class="section-head">
+                        <div>
+                            <h2>共享资源</h2>
+                            <p>把最常用的工作流资产、接口文档、交付包和验收说明挂到同一块。</p>
+                        </div>
+                    </div>
+                    <div class="resource-grid" id="resourceGrid"></div>
+                </section>
+
+                <section class="section-panel panel">
+                    <div class="section-head">
+                        <div>
+                            <h2>推进面板</h2>
+                            <p>把当前协作轮次拆成阶段推进、角色分工和风险雷达，页面看起来更像真实项目协作面。</p>
+                        </div>
+                    </div>
+                    <div class="stack">
+                        <div>
+                            <div class="section-head">
+                                <div>
+                                    <h3>阶段推进</h3>
+                                    <p>明确本轮已经做到哪一步，下一步该由谁接手。</p>
+                                </div>
+                            </div>
+                            <div class="stage-grid" id="stageGrid"></div>
+                        </div>
+                        <div>
+                            <div class="section-head">
+                                <div>
+                                    <h3>角色分工</h3>
+                                    <p>给每个角色一个清晰的当前职责和交付目标。</p>
+                                </div>
+                            </div>
+                            <div class="role-grid" id="roleGrid"></div>
+                        </div>
+                        <div>
+                            <div class="section-head">
+                                <div>
+                                    <h3>风险雷达</h3>
+                                    <p>把当前协作里最可能卡住推进节奏的问题直接挂出来。</p>
+                                </div>
+                            </div>
+                            <div class="risk-grid" id="riskGrid"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="section-panel panel">
+                    <div class="section-head">
+                        <div>
+                            <h2>讨论区</h2>
+                            <p>评论直接落到当前工作流和节点，便于围绕同一个协作对象持续追踪。</p>
+                        </div>
+                        <span class="section-tag"><i class="fas fa-comments"></i><span id="commentScopeTag">workflow: - / node: global</span></span>
+                    </div>
+                    <div class="comment-list" id="commentList"></div>
+                    <div class="form-grid">
+                        <div class="form-group is-wide">
+                            <label class="form-label" for="commentInput">新增评论</label>
+                            <textarea class="form-textarea" id="commentInput" placeholder="输入本轮协作需要同步的事项、风险、决策或补充说明。"></textarea>
+                        </div>
+                    </div>
+                    <div class="hero-actions">
+                        <button class="btn btn-primary" type="button" onclick="postComment()">
+                            <i class="fas fa-paper-plane"></i> 发送评论
+                        </button>
+                        <button class="btn" type="button" onclick="loadComments()">
+                            <i class="fas fa-arrows-rotate"></i> 刷新评论
+                        </button>
+                    </div>
+                </section>
+            </main>
+        </section>
     </div>
 
+    <div class="toast" id="toast"></div>
+
     <script>
-        // 加载团队成员
-        async function loadTeamMembers() {
-            try {
-                const response = await fetch('/api/collaboration/members');
-                const members = await response.json();
-                renderTeamMembers(members);
-            } catch (error) {
-                console.error('加载团队成员失败:', error);
-                renderPlaceholderMembers();
+        const state = {
+            sessions: [],
+            selectedSessionId: "",
+            selectedSession: null,
+            comments: [],
+            usingDemo: false,
+        };
+
+        const presetResources = [
+            { icon: "fa-diagram-project", title: "工作流编排草图", owner: "协作台", status: "最新", tone: "success", copy: "用于对齐节点结构、分支策略和变量定义。" },
+            { icon: "fa-book-open", title: "联调说明清单", owner: "平台", status: "必看", tone: "warn", copy: "记录接口要求、鉴权方式、样例请求和常见失败场景。" },
+            { icon: "fa-box-archive", title: "交付包目录", owner: "项目组", status: "待补充", tone: "danger", copy: "沉淀发布说明、回滚策略和验收材料入口。" },
+        ];
+
+        const demoSessions = [
+            {
+                session_id: "demo-session-01",
+                workflow_id: "visual_workflow_upgrade",
+                created_at: Date.now() / 1000 - 1800,
+                version: 12,
+                operation_count: 38,
+                active_user_count: 3,
+                users: [
+                    { user_id: "u_pm", username: "产品经理", color: "#0f62fe", cursor_position: { zone: "画布概览" } },
+                    { user_id: "u_fe", username: "前端联调", color: "#1363df", cursor_position: { zone: "节点参数" } },
+                    { user_id: "u_be", username: "后端接口", color: "#b45309", cursor_position: { zone: "试运行" } },
+                ],
+            },
+            {
+                session_id: "demo-session-02",
+                workflow_id: "alarm_dispatch_collab",
+                created_at: Date.now() / 1000 - 7200,
+                version: 7,
+                operation_count: 19,
+                active_user_count: 2,
+                users: [
+                    { user_id: "u_ops", username: "值守负责人", color: "#7c3aed", cursor_position: { zone: "告警分流节点" } },
+                    { user_id: "u_qa", username: "验收同学", color: "#be123c", cursor_position: { zone: "执行日志" } },
+                ],
+            },
+        ];
+
+        const demoCommentsByWorkflow = {
+            visual_workflow_upgrade: [
+                {
+                    comment_id: "demo-comment-01",
+                    node_id: "global",
+                    username: "产品经理",
+                    content: "本轮先把已部署 LLM 一键弹参和工作区侧栏压缩作为主目标，其他视觉微调放到下一轮。",
+                    timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+                    replies: [
+                        {
+                            reply_id: "demo-reply-01",
+                            username: "前端联调",
+                            content: "侧栏已经压成双栏工作区，下一步补交互细节和动效。",
+                            timestamp: new Date(Date.now() - 22 * 60 * 1000).toISOString(),
+                        },
+                    ],
+                },
+                {
+                    comment_id: "demo-comment-02",
+                    node_id: "llm_node_main",
+                    username: "后端接口",
+                    content: "演示环境建议继续保留 mock 执行结果，先把参数编辑链路打顺。",
+                    timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+                    replies: [],
+                },
+            ],
+            alarm_dispatch_collab: [
+                {
+                    comment_id: "demo-comment-03",
+                    node_id: "router",
+                    username: "值守负责人",
+                    content: "告警分流链建议再加一层高优先级人工接管判断，避免误派单。",
+                    timestamp: new Date(Date.now() - 95 * 60 * 1000).toISOString(),
+                    replies: [],
+                },
+            ],
+        };
+
+        const demoWorkbenchByWorkflow = {
+            visual_workflow_upgrade: {
+                stages: [
+                    { kicker: "Stage 01", title: "结构压缩", copy: "把三栏工作面收成高密度工作区，先解决布局冲突和首屏留白。", progress: 100, active: false, status: "已完成" },
+                    { kicker: "Stage 02", title: "参数弹窗", copy: "已部署 LLM 一点即配，节点参数和部署绑定同屏可改。", progress: 88, active: true, status: "进行中" },
+                    { kicker: "Stage 03", title: "交互动效", copy: "补首屏状态反馈、编辑高亮和协作提示，让体验更完整。", progress: 36, active: false, status: "待推进" },
+                ],
+                roles: [
+                    { kicker: "Owner", title: "产品经理", copy: "压口径、控目标、确认本轮先做什么不做什么。", badge: "目标与验收" },
+                    { kicker: "Builder", title: "前端联调", copy: "收敛布局、补 demo、推进交互和参数编辑手感。", badge: "页面与体验" },
+                    { kicker: "Support", title: "后端接口", copy: "保证会话、评论和资源接口稳定，必要时补 mock。", badge: "接口与链路" },
+                    { kicker: "Gate", title: "验收同学", copy: "盯刷新结果、缓存问题和场景回归，不让页面只停在静态图。", badge: "回归与验收" },
+                ],
+                risks: [
+                    { kicker: "Risk 01", title: "缓存导致页面没变化", copy: "模板改了但浏览器还在吃旧缓存，用户会误判为没生效。", badge: "高优先级" },
+                    { kicker: "Risk 02", title: "Demo 和真实数据切换", copy: "如果演示态和真实态逻辑没隔离好，页面会出现状态串线。", badge: "中优先级" },
+                    { kicker: "Risk 03", title: "布局继续膨胀", copy: "不断加功能后，协作页可能再次变松，后续要继续控密度。", badge: "持续关注" },
+                ],
+            },
+            alarm_dispatch_collab: {
+                stages: [
+                    { kicker: "Stage 01", title: "告警分流梳理", copy: "先把告警入口、紧急度和人工接管条件梳清。", progress: 76, active: true, status: "进行中" },
+                    { kicker: "Stage 02", title: "派单链联调", copy: "补接口样例、失败重试和派单回执字段。", progress: 48, active: false, status: "待推进" },
+                    { kicker: "Stage 03", title: "值守验收", copy: "让值守角色跟着场景走一遍，确认最终派单口径。", progress: 20, active: false, status: "待启动" },
+                ],
+                roles: [
+                    { kicker: "Owner", title: "值守负责人", copy: "确认人工接管阈值和异常升级策略。", badge: "现场决策" },
+                    { kicker: "Builder", title: "流程编排", copy: "补路由、条件和合流策略，减少误派单。", badge: "流程逻辑" },
+                    { kicker: "Support", title: "接口联调", copy: "保障工单平台返回结构稳定且可追踪。", badge: "API 稳定性" },
+                    { kicker: "Gate", title: "运营验收", copy: "确认派单内容、责任人和回执链路符合运营要求。", badge: "业务验收" },
+                ],
+                risks: [
+                    { kicker: "Risk 01", title: "紧急度阈值不一致", copy: "值守与平台定义不统一时，容易出现分流错误。", badge: "高优先级" },
+                    { kicker: "Risk 02", title: "回执字段缺失", copy: "如果派单回执信息不完整，后续追责和复盘会断链。", badge: "中优先级" },
+                    { kicker: "Risk 03", title: "人工接管链路缺席", copy: "没有保底人工接管时，系统错误会直接影响现场响应。", badge: "高优先级" },
+                ],
+            },
+        };
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            const queryWorkflowId = new URLSearchParams(window.location.search).get("workflow_id");
+            if (queryWorkflowId) {
+                document.getElementById("workflowIdInput").value = queryWorkflowId;
             }
-        }
-
-        function renderTeamMembers(members) {
-            const list = document.getElementById('teamList');
-            if (!members || members.length === 0) {
-                renderPlaceholderMembers();
-                return;
-            }
-
-            list.innerHTML = members.map(member => `
-                <div class="team-member ${member.active ? 'active' : ''}" onclick="selectMember('${member.id}')">
-                    <div class="member-avatar">${member.name.charAt(0)}</div>
-                    <div class="member-info">
-                        <div class="member-name">${member.name}</div>
-                        <div class="member-status">
-                            <span class="status-indicator ${member.online ? 'status-online' : 'status-offline'}"></span>
-                            ${member.online ? '在线' : '离线'}
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function renderPlaceholderMembers() {
-            const list = document.getElementById('teamList');
-            list.innerHTML = `
-                <div class="team-member active">
-                    <div class="member-avatar">张</div>
-                    <div class="member-info">
-                        <div class="member-name">张三</div>
-                        <div class="member-status">
-                            <span class="status-indicator status-online"></span>在线
-                        </div>
-                    </div>
-                </div>
-                <div class="team-member">
-                    <div class="member-avatar">李</div>
-                    <div class="member-info">
-                        <div class="member-name">李四</div>
-                        <div class="member-status">
-                            <span class="status-indicator status-online"></span>在线
-                        </div>
-                    </div>
-                </div>
-                <div class="team-member">
-                    <div class="member-avatar">王</div>
-                    <div class="member-info">
-                        <div class="member-name">王五</div>
-                        <div class="member-status">
-                            <span class="status-indicator status-offline"></span>离线
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        // 加载活动动态
-        async function loadActivities() {
-            try {
-                const response = await fetch('/api/collaboration/activities');
-                const activities = await response.json();
-                renderActivities(activities);
-            } catch (error) {
-                console.error('加载活动失败:', error);
-                renderPlaceholderActivities();
-            }
-        }
-
-        function renderActivities(activities) {
-            const feed = document.getElementById('activityFeed');
-            if (!activities || activities.length === 0) {
-                renderPlaceholderActivities();
-                return;
-            }
-
-            feed.innerHTML = activities.map(activity => `
-                <div class="activity-item">
-                    <div class="activity-icon">
-                        <i class="fas fa-${activity.icon}"></i>
-                    </div>
-                    <div class="activity-content">
-                        <div class="activity-title">${activity.title}</div>
-                        <div class="activity-description">${activity.description}</div>
-                        <div class="activity-time">${activity.time}</div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function renderPlaceholderActivities() {
-            const feed = document.getElementById('activityFeed');
-            feed.innerHTML = `
-                <div class="activity-item">
-                    <div class="activity-icon">
-                        <i class="fas fa-file-alt"></i>
-                    </div>
-                    <div class="activity-content">
-                        <div class="activity-title">张三 上传了新文档</div>
-                        <div class="activity-description">上传了"项目需求文档 v2.0.pdf"到共享资源</div>
-                        <div class="activity-time">5分钟前</div>
-                    </div>
-                </div>
-                <div class="activity-item">
-                    <div class="activity-icon">
-                        <i class="fas fa-comment"></i>
-                    </div>
-                    <div class="activity-content">
-                        <div class="activity-title">李四 发表了评论</div>
-                        <div class="activity-description">在"工作流优化方案"中添加了新评论</div>
-                        <div class="activity-time">1小时前</div>
-                    </div>
-                </div>
-                <div class="activity-item">
-                    <div class="activity-icon">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="activity-content">
-                        <div class="activity-title">王五 完成了任务</div>
-                        <div class="activity-description">完成了"API接口文档编写"任务</div>
-                        <div class="activity-time">3小时前</div>
-                    </div>
-                </div>
-            `;
-        }
-
-        // 加载共享资源
-        async function loadResources() {
-            try {
-                const response = await fetch('/api/collaboration/resources');
-                const resources = await response.json();
-                renderResources(resources);
-            } catch (error) {
-                console.error('加载资源失败:', error);
-                renderPlaceholderResources();
-            }
-        }
-
-        function renderResources(resources) {
-            const container = document.getElementById('sharedResources');
-            if (!resources || resources.length === 0) {
-                renderPlaceholderResources();
-                return;
-            }
-
-            container.innerHTML = resources.map(resource => `
-                <div class="resource-card">
-                    <div class="resource-header">
-                        <div class="resource-icon">
-                            <i class="fas fa-${resource.icon}"></i>
-                        </div>
-                        <div class="resource-title">${resource.name}</div>
-                    </div>
-                    <div class="resource-meta">
-                        <span>${resource.owner}</span>
-                        <span>${resource.date}</span>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function renderPlaceholderResources() {
-            const container = document.getElementById('sharedResources');
-            container.innerHTML = `
-                <div class="resource-card">
-                    <div class="resource-header">
-                        <div class="resource-icon">
-                            <i class="fas fa-file-pdf"></i>
-                        </div>
-                        <div class="resource-title">项目需求文档.pdf</div>
-                    </div>
-                    <div class="resource-meta">
-                        <span>张三</span>
-                        <span>今天</span>
-                    </div>
-                </div>
-                <div class="resource-card">
-                    <div class="resource-header">
-                        <div class="resource-icon">
-                            <i class="fas fa-code"></i>
-                        </div>
-                        <div class="resource-title">代码片段集合</div>
-                    </div>
-                    <div class="resource-meta">
-                        <span>李四</span>
-                        <span>昨天</span>
-                    </div>
-                </div>
-                <div class="resource-card">
-                    <div class="resource-header">
-                        <div class="resource-icon">
-                            <i class="fas fa-image"></i>
-                        </div>
-                        <div class="resource-title">UI设计稿</div>
-                    </div>
-                    <div class="resource-meta">
-                        <span>王五</span>
-                        <span>2天前</span>
-                    </div>
-                </div>
-            `;
-        }
-
-        // 加载评论
-        async function loadComments() {
-            try {
-                const response = await fetch('/api/collaboration/comments');
-                const comments = await response.json();
-                renderComments(comments);
-            } catch (error) {
-                console.error('加载评论失败:', error);
-                renderPlaceholderComments();
-            }
-        }
-
-        function renderComments(comments) {
-            const section = document.getElementById('commentSection');
-            if (!comments || comments.length === 0) {
-                renderPlaceholderComments();
-                return;
-            }
-
-            section.innerHTML = comments.map(comment => `
-                <div class="comment-item">
-                    <div class="comment-avatar">${comment.author.charAt(0)}</div>
-                    <div class="comment-content">
-                        <div class="comment-header">
-                            <span class="comment-author">${comment.author}</span>
-                            <span class="comment-time">${comment.time}</span>
-                        </div>
-                        <div class="comment-text">${comment.text}</div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function renderPlaceholderComments() {
-            const section = document.getElementById('commentSection');
-            section.innerHTML = `
-                <div class="comment-item">
-                    <div class="comment-avatar">张</div>
-                    <div class="comment-content">
-                        <div class="comment-header">
-                            <span class="comment-author">张三</span>
-                            <span class="comment-time">10分钟前</span>
-                        </div>
-                        <div class="comment-text">这个方案看起来不错，我们可以先做一个原型验证一下。</div>
-                    </div>
-                </div>
-                <div class="comment-item">
-                    <div class="comment-avatar">李</div>
-                    <div class="comment-content">
-                        <div class="comment-header">
-                            <span class="comment-author">李四</span>
-                            <span class="comment-time">30分钟前</span>
-                        </div>
-                        <div class="comment-text">同意，我可以负责前端部分的开发。</div>
-                    </div>
-                </div>
-            `;
-        }
-
-        // 切换标签页
-        function switchTab(tabName) {
-            // 隐藏所有标签页
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-
-            // 显示选中的标签页
-            if (tabName === 'activity') {
-                document.getElementById('activityTab').classList.add('active');
-                document.querySelectorAll('.tab')[0].classList.add('active');
-            } else if (tabName === 'resources') {
-                document.getElementById('resourcesTab').classList.add('active');
-                document.querySelectorAll('.tab')[1].classList.add('active');
-                loadResources();
-            } else if (tabName === 'comments') {
-                document.getElementById('commentsTab').classList.add('active');
-                document.querySelectorAll('.tab')[2].classList.add('active');
-                loadComments();
-            }
-        }
-
-        // 选择成员
-        function selectMember(memberId) {
-            document.querySelectorAll('.team-member').forEach(member => {
-                member.classList.remove('active');
-            });
-            event.currentTarget.classList.add('active');
-        }
-
-        // 邀请成员
-        function inviteMembers() {
-            alert('邀请成员功能开发中...');
-        }
-
-        // 发表评论
-        async function postComment() {
-            const input = document.getElementById('commentInput');
-            const text = input.value.trim();
-
-            if (!text) {
-                alert('请输入评论内容');
-                return;
-            }
-
-            try {
-                await fetch('/api/collaboration/comments', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text })
-                });
-
-                input.value = '';
-                loadComments();
-            } catch (error) {
-                console.error('发表评论失败:', error);
-                alert('发表评论失败，请重试');
-            }
-        }
-
-        // 页面加载时初始化
-        document.addEventListener('DOMContentLoaded', () => {
-            loadTeamMembers();
-            loadActivities();
+            renderMetrics();
+            renderWorkbench();
+            await refreshCollaborationBoard();
         });
+
+        async function refreshCollaborationBoard() {
+            state.usingDemo = false;
+            await loadSessions();
+            renderMetrics();
+            renderResources();
+        }
+
+        async function loadSessions() {
+            try {
+                const response = await fetch("/api/collaboration/sessions");
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok || data.success === false) {
+                    throw new Error(data.error || "加载会话失败");
+                }
+                state.sessions = Array.isArray(data.sessions) ? data.sessions : [];
+            } catch (error) {
+                console.error("加载协作会话失败:", error);
+                state.sessions = [];
+            }
+
+            if (!state.sessions.length) {
+                loadDemoWorkspace();
+                return;
+            }
+
+            if (!state.selectedSessionId || !state.sessions.some((item) => item.session_id === state.selectedSessionId)) {
+                state.selectedSessionId = state.sessions[0].session_id;
+            }
+
+            await selectSession(state.selectedSessionId, false);
+            renderSessionList();
+        }
+
+        function loadDemoWorkspace() {
+            state.usingDemo = true;
+            state.sessions = deepClone(demoSessions);
+            state.selectedSessionId = state.sessions[0]?.session_id || "";
+            state.selectedSession = state.sessions[0] ? { ...state.sessions[0] } : null;
+            if (state.selectedSession?.workflow_id) {
+                document.getElementById("workflowIdInput").value = state.selectedSession.workflow_id;
+            }
+            document.getElementById("commentUserInput").value = "演示协作者";
+            document.getElementById("commentNodeInput").value = "global";
+            state.comments = deepClone(demoCommentsByWorkflow[state.selectedSession?.workflow_id] || []);
+            renderSessionList();
+            renderMembers();
+            renderMetrics();
+            renderSignals();
+            renderTimeline();
+            renderChecklist();
+            renderNotes();
+            renderWorkbench();
+            renderResources();
+            renderComments();
+            updateScopeTag();
+            showToast("已填充演示协作数据");
+        }
+
+        async function selectSession(sessionId, shouldRender = true) {
+            state.selectedSessionId = sessionId;
+            const summary = state.sessions.find((item) => item.session_id === sessionId) || null;
+
+            if (state.usingDemo) {
+                state.selectedSession = summary ? { ...summary } : null;
+                updateWorkflowInputFromSelection();
+                state.comments = deepClone(demoCommentsByWorkflow[state.selectedSession?.workflow_id] || []);
+                if (shouldRender) {
+                    renderSessionList();
+                }
+                renderMembers();
+                renderMetrics();
+                renderSignals();
+                renderTimeline();
+                renderChecklist();
+                renderNotes();
+                renderWorkbench();
+                renderResources();
+                renderComments();
+                updateScopeTag();
+                return;
+            }
+
+            try {
+                const [sessionResp, usersResp] = await Promise.all([
+                    fetch(`/api/collaboration/sessions/${sessionId}`),
+                    fetch(`/api/collaboration/sessions/${sessionId}/users`),
+                ]);
+                const sessionData = await sessionResp.json().catch(() => ({}));
+                const usersData = await usersResp.json().catch(() => ({}));
+                const detailed = sessionResp.ok && sessionData.success !== false ? sessionData.session : {};
+                const users = usersResp.ok && usersData.success !== false ? (usersData.users || []) : [];
+                state.selectedSession = {
+                    ...(summary || {}),
+                    ...(detailed || {}),
+                    users,
+                };
+            } catch (error) {
+                console.error("加载会话详情失败:", error);
+                state.selectedSession = summary ? { ...summary, users: summary.users || [] } : null;
+            }
+
+            updateWorkflowInputFromSelection();
+            await loadComments();
+
+            if (shouldRender) {
+                renderSessionList();
+            }
+            renderMembers();
+            renderMetrics();
+            renderSignals();
+            renderTimeline();
+            renderChecklist();
+            renderNotes();
+            renderWorkbench();
+            updateScopeTag();
+        }
+
+        function renderMetrics() {
+            const metricGrid = document.getElementById("metricGrid");
+            const sessions = state.sessions;
+            const onlineUsers = new Set();
+            let operations = 0;
+            sessions.forEach((session) => {
+                operations += Number(session.operation_count || 0);
+                (session.users || []).forEach((user) => onlineUsers.add(user.user_id || user.username));
+            });
+            const metrics = [
+                { label: "活跃会话", value: sessions.length, hint: "当前已创建的协作上下文" },
+                { label: "在线成员", value: onlineUsers.size, hint: "5 分钟内有活动的协作者" },
+                { label: "累计操作", value: operations, hint: "会话中的编辑或移动操作数" },
+                { label: "评论条数", value: state.comments.length, hint: "当前工作流/节点范围内的讨论" },
+            ];
+            metricGrid.innerHTML = metrics.map((item) => `
+                <div class="metric-card">
+                    <span>${escapeHtml(item.label)}</span>
+                    <strong>${escapeHtml(String(item.value))}</strong>
+                    <span>${escapeHtml(item.hint)}</span>
+                </div>
+            `).join("");
+        }
+
+        function renderSessionList() {
+            const list = document.getElementById("sessionList");
+            const tag = document.getElementById("sessionCountTag");
+            tag.textContent = `${state.sessions.length} 个会话${state.usingDemo ? " · Demo" : ""}`;
+
+            if (!state.sessions.length) {
+                list.innerHTML = '<div class="empty-card">还没有协作会话。先在上方输入工作流 ID 并创建一条会话，后面的成员、时间线和讨论区会自动联动。</div>';
+                return;
+            }
+
+            list.innerHTML = state.sessions.map((session) => `
+                <div class="session-card ${session.session_id === state.selectedSessionId ? "is-active" : ""}" onclick="selectSession('${session.session_id}')">
+                    <div class="session-head">
+                        <div>
+                            <div class="session-title">${escapeHtml(session.workflow_id || "未命名工作流")}</div>
+                            <div class="session-meta">${escapeHtml(shortSessionId(session.session_id))} · ${escapeHtml(formatTime(session.created_at))}</div>
+                        </div>
+                        <span class="pill ${Number(session.active_user_count || 0) > 0 ? "is-success" : "is-warn"}">
+                            <i class="fas fa-user-group"></i><span>${escapeHtml(String(session.active_user_count || 0))}</span>
+                        </span>
+                    </div>
+                    <div class="pill-row">
+                        <span class="pill"><i class="fas fa-code-branch"></i><span>版本 ${escapeHtml(String(session.version || 0))}</span></span>
+                        <span class="pill"><i class="fas fa-wave-square"></i><span>操作 ${escapeHtml(String(session.operation_count || 0))}</span></span>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        function renderMembers() {
+            const list = document.getElementById("memberList");
+            const users = state.selectedSession?.users || [];
+            if (!users.length) {
+                list.innerHTML = [
+                    buildMemberCard({ username: "流程负责人", color: "#0f62fe", online: true, hint: "负责推进版本和交付节奏" }),
+                    buildMemberCard({ username: "前端联调", color: "#1363df", online: true, hint: "负责页面、交互和接口联调" }),
+                    buildMemberCard({ username: "后端接口", color: "#b45309", online: false, hint: "负责 API 能力和发布风险控制" }),
+                ].join("");
+                return;
+            }
+
+            list.innerHTML = users.map((user) => buildMemberCard({
+                username: user.username,
+                color: user.color,
+                online: true,
+                hint: user.cursor_position ? `光标：${JSON.stringify(user.cursor_position)}` : "当前在线，尚未上报光标位置",
+            })).join("");
+        }
+
+        function buildMemberCard(member) {
+            return `
+                <div class="member-card">
+                    <div class="avatar" style="background:${escapeHtml(member.color || '#0f62fe')}">${escapeHtml(initials(member.username || "协"))}</div>
+                    <div>
+                        <div class="member-head">
+                            <div class="member-name">${escapeHtml(member.username || "未知成员")}</div>
+                            <div class="member-status">
+                                <span class="status-dot ${member.online ? "is-online" : ""}"></span>
+                                <span class="member-meta">${member.online ? "在线" : "待加入"}</span>
+                            </div>
+                        </div>
+                        <div class="member-meta">${escapeHtml(member.hint || "暂无说明")}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSignals() {
+            const grid = document.getElementById("signalGrid");
+            const session = state.selectedSession;
+            const items = session ? [
+                { title: "当前工作流", body: session.workflow_id || "未指定", tone: "success" },
+                { title: "协作版本", body: `v${session.version || 0} · 操作 ${session.operation_count || 0}`, tone: "default" },
+                { title: "在线协作者", body: `${(session.users || []).length} 人在线`, tone: (session.users || []).length ? "success" : "warn" },
+                { title: "讨论范围", body: `${session.workflow_id || "-"} / ${resolveNodeId()}`, tone: "default" },
+            ] : [
+                { title: "当前工作流", body: "尚未选择会话", tone: "warn" },
+                { title: "协作版本", body: "创建会话后开始累计", tone: "default" },
+                { title: "在线协作者", body: "先邀请角色进入会话", tone: "warn" },
+                { title: "讨论范围", body: "默认写入 global 节点", tone: "default" },
+            ];
+
+            grid.innerHTML = items.map((item) => `
+                <div class="signal-card">
+                    <strong>${escapeHtml(item.title)}</strong>
+                    <p>${escapeHtml(item.body)}</p>
+                </div>
+            `).join("");
+
+            document.getElementById("activeSessionTag").textContent = session
+                ? `${session.workflow_id || "工作流"} · ${shortSessionId(session.session_id)}`
+                : "未选中会话";
+        }
+
+        function renderTimeline() {
+            const list = document.getElementById("timelineList");
+            const session = state.selectedSession;
+            const items = [];
+
+            if (session) {
+                items.push({
+                    title: "协作会话已接入",
+                    body: `当前会话绑定工作流 ${session.workflow_id || "-"}，版本为 ${session.version || 0}。`,
+                    meta: formatTime(session.created_at),
+                });
+                items.push({
+                    title: "在线成员同步",
+                    body: `${(session.users || []).length} 位成员正在当前协作上下文中。`,
+                    meta: `活跃用户 ${(session.users || []).length} 人`,
+                });
+                if (Number(session.operation_count || 0) > 0) {
+                    items.push({
+                        title: "编辑操作累计",
+                        body: `当前会话已经累计 ${session.operation_count} 次结构或内容操作，可继续围绕同一版本推进。`,
+                        meta: `版本 ${session.version || 0}`,
+                    });
+                }
+            }
+
+            state.comments.slice(0, 3).forEach((comment) => {
+                items.push({
+                    title: `${comment.username || comment.author || "协作者"} 追加了评论`,
+                    body: comment.content || comment.text || "补充了新的协作说明。",
+                    meta: formatIsoTime(comment.timestamp) || "刚刚",
+                });
+            });
+
+            if (!items.length) {
+                list.innerHTML = '<div class="empty-card">现在还没有足够的协作事件。先创建一条会话或发送评论，这里会把推进轨迹串起来。</div>';
+                return;
+            }
+
+            list.innerHTML = items.map((item) => `
+                <div class="timeline-item">
+                    <div class="timeline-title">${escapeHtml(item.title)}</div>
+                    <div class="timeline-body">${escapeHtml(item.body)}</div>
+                    <div class="timeline-meta">${escapeHtml(item.meta || "")}</div>
+                </div>
+            `).join("");
+        }
+
+        function renderChecklist() {
+            const list = document.getElementById("checkList");
+            const session = state.selectedSession;
+            const items = [
+                { icon: "fa-flag-checkered", title: "确认协作目标", copy: session ? `当前目标围绕工作流 ${session.workflow_id || "-"} 继续推进。` : "先明确本轮要协作的是哪条工作流或哪个节点。" },
+                { icon: "fa-user-check", title: "补齐角色到位", copy: session && (session.users || []).length ? `已有 ${(session.users || []).length} 人在线，建议继续补齐评审和交付角色。` : "当前缺少在线协作者，建议补齐负责人、联调和验收角色。" },
+                { icon: "fa-comment-dots", title: "沉淀评论结论", copy: state.comments.length ? `当前已有 ${state.comments.length} 条评论，建议提炼成结论和下一步动作。` : "评论区还很空，先补一条面向交接的说明更稳。" },
+            ];
+
+            list.innerHTML = items.map((item) => `
+                <div class="check-item">
+                    <div class="check-icon"><i class="fas ${escapeHtml(item.icon)}"></i></div>
+                    <div>
+                        <div class="check-title">${escapeHtml(item.title)}</div>
+                        <div class="check-copy">${escapeHtml(item.copy)}</div>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        function renderNotes() {
+            const list = document.getElementById("noteList");
+            const session = state.selectedSession;
+            const notes = [
+                {
+                    title: "会话接力建议",
+                    body: session ? `如果需要换人接手，优先把 ${session.workflow_id || "当前工作流"} 的关键节点和评论摘要补齐。` : "没有会话时先建协作上下文，后面的评论和在线成员才有归属。"
+                },
+                {
+                    title: "发布风险提醒",
+                    body: "协作完成后，建议同步确认接口变更、资源归档和回滚说明，别让结论只停在讨论区里。"
+                },
+                {
+                    title: "资源补位",
+                    body: "共享资源里优先沉淀联调说明、工作流图和验收口径，这三类最影响多人协作效率。"
+                },
+            ];
+
+            list.innerHTML = notes.map((note) => `
+                <div class="note-card">
+                    <div class="session-title">${escapeHtml(note.title)}</div>
+                    <div class="session-meta">${escapeHtml(note.body)}</div>
+                </div>
+            `).join("");
+        }
+
+        function renderResources() {
+            const grid = document.getElementById("resourceGrid");
+            const session = state.selectedSession;
+            const resources = [...presetResources];
+
+            if (session) {
+                resources.unshift(
+                    { icon: "fa-sitemap", title: `${session.workflow_id || "当前工作流"} 结构快照`, owner: "协作会话", status: "同步中", tone: "success", copy: `当前版本 ${session.version || 0}，累计操作 ${session.operation_count || 0}。` },
+                    { icon: "fa-users-viewfinder", title: "在线成员视图", owner: "协作会话", status: `${(session.users || []).length} 人`, tone: "warn", copy: "方便快速判断当前有没有足够的人力继续推进。"}
+                );
+            }
+
+            if (state.usingDemo) {
+                resources.unshift(
+                    { icon: "fa-bullseye", title: "本轮目标板", owner: "Demo", status: "演示中", tone: "success", copy: "展示多人协作下如何围绕同一目标分工推进和同步评论。" },
+                    { icon: "fa-clipboard-list", title: "验收口径样例", owner: "Demo", status: "示例", tone: "warn", copy: "给页面提供一个完整的验收与交接参考，不依赖真实数据也能看到效果。" }
+                );
+            }
+
+            grid.innerHTML = resources.map((resource) => `
+                <div class="resource-card">
+                    <div class="resource-head">
+                        <div style="display:flex; gap:12px; align-items:center;">
+                            <div class="resource-icon"><i class="fas ${escapeHtml(resource.icon)}"></i></div>
+                            <div>
+                                <div class="resource-title">${escapeHtml(resource.title)}</div>
+                                <div class="resource-meta">${escapeHtml(resource.owner)}</div>
+                            </div>
+                        </div>
+                        <span class="pill ${resource.tone === "success" ? "is-success" : resource.tone === "warn" ? "is-warn" : resource.tone === "danger" ? "is-danger" : ""}">${escapeHtml(resource.status)}</span>
+                    </div>
+                    <div class="resource-meta">${escapeHtml(resource.copy)}</div>
+                </div>
+            `).join("");
+        }
+
+        function renderWorkbench() {
+            const stageGrid = document.getElementById("stageGrid");
+            const roleGrid = document.getElementById("roleGrid");
+            const riskGrid = document.getElementById("riskGrid");
+            const workflowId = state.selectedSession?.workflow_id || "";
+            const demoPack = demoWorkbenchByWorkflow[workflowId];
+
+            const fallbackStages = [
+                { kicker: "Stage 01", title: "建立协作上下文", copy: "先把会话、成员和评论范围固定下来。", progress: 100, active: false, status: "已完成" },
+                { kicker: "Stage 02", title: "推进主任务", copy: "围绕当前工作流继续补参数、资源和交接说明。", progress: state.selectedSession ? 62 : 24, active: true, status: "进行中" },
+                { kicker: "Stage 03", title: "形成交付闭环", copy: "沉淀结论、验收口径和回滚说明。", progress: state.comments.length ? 40 : 10, active: false, status: "待推进" },
+            ];
+            const fallbackRoles = [
+                { kicker: "Owner", title: "负责人", copy: "负责定目标、压优先级和确认交付口径。", badge: "目标管理" },
+                { kicker: "Builder", title: "执行人", copy: "负责把页面、接口和资源沉淀到位。", badge: "推进执行" },
+                { kicker: "Gate", title: "验收人", copy: "负责回归、风险确认和结果验收。", badge: "验收闭环" },
+            ];
+            const fallbackRisks = [
+                { kicker: "Risk 01", title: "会话信息不足", copy: "如果没有明确 workflow 和 node 范围，评论很容易失焦。", badge: "基础风险" },
+                { kicker: "Risk 02", title: "多人意见未收敛", copy: "没有形成清单和时间线时，协作容易停在对话层。", badge: "持续关注" },
+            ];
+
+            const stages = demoPack?.stages || fallbackStages;
+            const roles = demoPack?.roles || fallbackRoles;
+            const risks = demoPack?.risks || fallbackRisks;
+
+            stageGrid.innerHTML = stages.map((item) => `
+                <div class="stage-card ${item.active ? "is-active" : ""}">
+                    <div class="stage-kicker">${escapeHtml(item.kicker)}</div>
+                    <div class="stage-title">${escapeHtml(item.title)}</div>
+                    <div class="stage-copy">${escapeHtml(item.copy)}</div>
+                    <div class="progress-track">
+                        <div class="progress-fill" style="width:${Math.max(0, Math.min(100, Number(item.progress || 0)))}%"></div>
+                    </div>
+                    <div class="pill-row">
+                        <span class="pill ${item.active ? "is-success" : "is-warn"}">${escapeHtml(item.status || "进行中")}</span>
+                        <span class="pill">${escapeHtml(String(item.progress || 0))}%</span>
+                    </div>
+                </div>
+            `).join("");
+
+            roleGrid.innerHTML = roles.map((item) => `
+                <div class="role-card">
+                    <div class="role-kicker">${escapeHtml(item.kicker)}</div>
+                    <div class="role-title">${escapeHtml(item.title)}</div>
+                    <div class="role-copy">${escapeHtml(item.copy)}</div>
+                    <div class="pill-row">
+                        <span class="pill is-success">${escapeHtml(item.badge || "协作角色")}</span>
+                    </div>
+                </div>
+            `).join("");
+
+            riskGrid.innerHTML = risks.map((item) => `
+                <div class="risk-card">
+                    <div class="risk-kicker">${escapeHtml(item.kicker)}</div>
+                    <div class="risk-title">${escapeHtml(item.title)}</div>
+                    <div class="risk-copy">${escapeHtml(item.copy)}</div>
+                    <div class="pill-row">
+                        <span class="pill ${String(item.badge || "").includes("高") ? "is-danger" : "is-warn"}">${escapeHtml(item.badge || "关注项")}</span>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        async function loadComments() {
+            const workflowId = resolveWorkflowId();
+            const nodeId = resolveNodeId();
+            updateScopeTag();
+
+            if (state.usingDemo) {
+                state.comments = deepClone(demoCommentsByWorkflow[workflowId] || []);
+                renderComments();
+                renderMetrics();
+                renderTimeline();
+                renderChecklist();
+                return;
+            }
+
+            if (!workflowId) {
+                state.comments = [];
+                renderComments();
+                renderMetrics();
+                return;
+            }
+
+            try {
+                const params = new URLSearchParams({ workflow_id: workflowId, node_id: nodeId });
+                const response = await fetch(`/api/collaboration/comments?${params.toString()}`);
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok || data.success === false) {
+                    throw new Error(data.error || "加载评论失败");
+                }
+                state.comments = Array.isArray(data.comments) ? data.comments : [];
+            } catch (error) {
+                console.error("加载评论失败:", error);
+                state.comments = [];
+            }
+
+            renderComments();
+            renderMetrics();
+            renderTimeline();
+            renderChecklist();
+        }
+
+        function renderComments() {
+            const list = document.getElementById("commentList");
+            if (!state.comments.length) {
+                list.innerHTML = '<div class="empty-card">当前范围内还没有评论。你可以直接在下方补一条协作说明，它会挂到当前工作流和节点范围里。</div>';
+                return;
+            }
+
+            list.innerHTML = state.comments.map((comment) => `
+                <div class="comment-card">
+                    <div class="comment-head">
+                        <div style="display:flex; gap:12px; align-items:center;">
+                            <div class="avatar">${escapeHtml(initials(comment.username || comment.author || "协"))}</div>
+                            <div>
+                                <div class="comment-author">${escapeHtml(comment.username || comment.author || "未知作者")}</div>
+                                <div class="comment-meta">${escapeHtml(formatIsoTime(comment.timestamp) || "刚刚")} · node ${escapeHtml(comment.node_id || resolveNodeId())}</div>
+                            </div>
+                        </div>
+                        <span class="pill"><i class="fas fa-message"></i><span>${escapeHtml((comment.replies || []).length.toString())} 回复</span></span>
+                    </div>
+                    <div class="comment-body">${escapeHtml(comment.content || comment.text || "")}</div>
+                    ${(comment.replies || []).length ? `
+                        <div class="reply-list">
+                            ${(comment.replies || []).map((reply) => `
+                                <div class="reply-item">
+                                    <strong>${escapeHtml(reply.username || "协作者")}</strong> · ${escapeHtml(formatIsoTime(reply.timestamp) || "刚刚")}<br>
+                                    ${escapeHtml(reply.content || "")}
+                                </div>
+                            `).join("")}
+                        </div>
+                    ` : ""}
+                </div>
+            `).join("");
+        }
+
+        async function createSessionFromHero() {
+            const workflowId = resolveWorkflowId();
+            if (!workflowId) {
+                showToast("先输入 Workflow ID");
+                return;
+            }
+
+            try {
+                const response = await fetch("/api/collaboration/sessions", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ workflow_id: workflowId }),
+                });
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok || data.success === false) {
+                    throw new Error(data.error || "创建会话失败");
+                }
+                showToast("已创建协作会话");
+                await refreshCollaborationBoard();
+                if (data.session?.session_id) {
+                    await selectSession(data.session.session_id);
+                    renderSessionList();
+                }
+            } catch (error) {
+                console.error("创建协作会话失败:", error);
+                showToast(error.message || "创建会话失败");
+            }
+        }
+
+        async function postComment() {
+            const workflowId = resolveWorkflowId();
+            const nodeId = resolveNodeId();
+            const content = document.getElementById("commentInput").value.trim();
+            const username = (document.getElementById("commentUserInput").value || "").trim() || "协作者";
+
+            if (!workflowId) {
+                showToast("先创建或选择一条协作会话");
+                return;
+            }
+            if (!content) {
+                showToast("先输入评论内容");
+                return;
+            }
+
+            try {
+                const response = await fetch("/api/collaboration/comments", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        workflow_id: workflowId,
+                        node_id: nodeId,
+                        user_id: `user_${username}`,
+                        username,
+                        content,
+                    }),
+                });
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok || data.success === false) {
+                    throw new Error(data.error || "发送评论失败");
+                }
+                document.getElementById("commentInput").value = "";
+                state.usingDemo = false;
+                showToast("评论已发送");
+                await loadComments();
+            } catch (error) {
+                console.error("发送评论失败:", error);
+                showToast(error.message || "发送评论失败");
+            }
+        }
+
+        async function seedDemoComment() {
+            const demo = [
+                "建议先对齐工作流输入输出，再安排多人并行补节点参数。",
+                "当前版本建议先冻结结构，再继续补接口说明和联调口径。",
+                "需要补一份验收清单，避免评论区意见没有形成可执行动作。"
+            ];
+            document.getElementById("commentInput").value = demo[Math.floor(Math.random() * demo.length)];
+            await postComment();
+        }
+
+        function resolveWorkflowId() {
+            return (state.selectedSession?.workflow_id || document.getElementById("workflowIdInput").value || "").trim();
+        }
+
+        function resolveNodeId() {
+            return (document.getElementById("commentNodeInput").value || "global").trim() || "global";
+        }
+
+        function updateWorkflowInputFromSelection() {
+            if (state.selectedSession?.workflow_id) {
+                document.getElementById("workflowIdInput").value = state.selectedSession.workflow_id;
+            }
+        }
+
+        function updateScopeTag() {
+            document.getElementById("commentScopeTag").textContent = `workflow: ${resolveWorkflowId() || "-"} / node: ${resolveNodeId()}`;
+        }
+
+        function shortSessionId(sessionId) {
+            return sessionId ? `${sessionId.slice(0, 8)}...` : "-";
+        }
+
+        function formatTime(timestamp) {
+            if (!timestamp) return "-";
+            const date = new Date(Number(timestamp) * 1000);
+            if (Number.isNaN(date.getTime())) return "-";
+            return date.toLocaleString("zh-CN", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+        }
+
+        function formatIsoTime(value) {
+            if (!value) return "";
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return "";
+            return date.toLocaleString("zh-CN", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+        }
+
+        function initials(value) {
+            return String(value || "?").trim().slice(0, 1).toUpperCase();
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+        }
+
+        let toastTimer = null;
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.textContent = message;
+            toast.classList.add("is-visible");
+            window.clearTimeout(toastTimer);
+            toastTimer = window.setTimeout(() => {
+                toast.classList.remove("is-visible");
+            }, 2200);
+        }
+
+        function deepClone(value) {
+            return JSON.parse(JSON.stringify(value));
+        }
+
+        window.selectSession = selectSession;
+        window.createSessionFromHero = createSessionFromHero;
+        window.refreshCollaborationBoard = refreshCollaborationBoard;
+        window.loadDemoWorkspace = loadDemoWorkspace;
+        window.postComment = postComment;
+        window.seedDemoComment = seedDemoComment;
     </script>
 </body>
 </html>
