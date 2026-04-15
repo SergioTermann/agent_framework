@@ -1338,33 +1338,33 @@ MODULE_ENTRY_CONFIG = {
     "weather-siting": {
         "tone": "flow",
         "icon": "air",
-        "home_description": "围绕候选区收敛、工程复筛和投前结论组织的一条站址决策链。",
+        "home_description": "风场选址决策台。",
         "footer": "资源筛选 / 工程复筛 / 优选备选",
-        "portal_summary": "围绕候选区收敛、工程复筛和投前结论的风场选址工作台。",
+        "portal_summary": "资源筛选、工程复筛、投前定版。",
         "highlights": ["资源筛选", "工程复筛", "优选/备选/踏勘"],
     },
     "smart-workorder": {
         "tone": "collab",
         "icon": "assignment",
-        "home_description": "围绕受理分级、责任派发、现场留痕、验收回执和经验沉淀组织的闭环指挥台。",
+        "home_description": "现场工单指挥台。",
         "footer": "受理 / 派单 / 验收沉淀",
-        "portal_summary": "围绕受理、派单、执行、验收和复盘闭环组织的工单指挥台。",
+        "portal_summary": "受理派单、现场执行、验收归档。",
         "highlights": ["受理分级", "责任派单", "验收沉淀"],
     },
     "power-trading": {
         "tone": "publish",
         "icon": "query_stats",
-        "home_description": "围绕市场、策略、风控三层展开，支持盘前建模、主备策略和盘后复盘的交易指挥台。",
+        "home_description": "电力交易策略台。",
         "footer": "盘前建模 / 主备策略 / 偏差风控",
-        "portal_summary": "围绕市场、策略、风控三层展开的电力交易策略工作台。",
+        "portal_summary": "盘前建模、交易执行、偏差风控。",
         "highlights": ["盘前建模", "主/备策略", "偏差风控"],
     },
     "smart-office": {
         "tone": "capability",
         "icon": "workspaces",
-        "home_description": "围绕纪要、任务、知识沉淀三段闭环组织的协同工作台，强调会后动作收口而不是只生成文档。",
+        "home_description": "经营协同办公台。",
         "footer": "纪要 / 任务认领 / 知识归档",
-        "portal_summary": "围绕纪要、任务、知识沉淀三段闭环组织的智慧办公协同台。",
+        "portal_summary": "纪要生成、任务推进、知识归档。",
         "highlights": ["会议纪要", "任务认领", "知识归档"],
     },
 }
@@ -1432,42 +1432,42 @@ def _build_home_business_modules() -> list[dict]:
 
 PORTAL_SECTIONS = [
     {
+        "title": "业务模块",
+        "summary": "风场经营主入口。",
+        "items": [
+            {"name": "风场选址", "href": "/modules/weather-siting/app", "summary": "资源筛选、工程复筛、投前定版。"},
+            {"name": "智能工单", "href": "/modules/smart-workorder/app", "summary": "受理派单、现场执行、验收归档。"},
+            {"name": "智能值守", "href": "/data-platform", "summary": "监控总览、告警联动、巡检交接。"},
+            {"name": "电力交易", "href": "/modules/power-trading/app", "summary": "盘前建模、交易执行、偏差风控。"},
+            {"name": "智慧办公", "href": "/modules/smart-office/app", "summary": "纪要生成、任务推进、知识归档。"},
+        ],
+    },
+    {
         "title": "AI 助手",
-        "summary": "对话、诊断、协作和开发版助手入口。",
+        "summary": "助手与协作入口。",
         "items": [
             {"name": "智能运维助手", "href": "/maintenance-assistant", "summary": "统一问答、诊断和运维建议入口。"},
             {"name": "开发版助手", "href": "/dev/assistant", "summary": "可编辑配置的开发版助手。"},
             {"name": "简易对话", "href": "/chat", "summary": "轻量聊天页。"},
-            {"name": "多 Agent 协作", "href": "/multi-agent", "summary": "多智能体协同工作入口。"},
-        ],
-    },
-    {
-        "title": "业务模块",
-        "summary": "围绕主线流程组织的业务模块入口，点击后直接进入当前模块页面。",
-        "items": [
-            {"name": "风场选址", "href": "/modules/weather-siting/app", "summary": "围绕候选区收敛、工程复筛和投前结论的风场选址工作台。"},
-            {"name": "智能工单", "href": "/modules/smart-workorder/app", "summary": "围绕受理、派单、执行、验收和复盘闭环组织的工单指挥台。"},
-            {"name": "智能值守", "href": "/data-platform", "summary": "监控大屏和值守场景。"},
-            {"name": "电力交易", "href": "/modules/power-trading/app", "summary": "围绕市场、策略、风控三层展开的电力交易策略工作台。"},
-            {"name": "智慧办公", "href": "/modules/smart-office/app", "summary": "围绕纪要、任务、知识沉淀三段闭环组织的智慧办公协同台。"},
+            {"name": "多智能体协作", "href": "/multi-agent", "summary": "多智能体协同工作入口。"},
         ],
     },
     {
         "title": "知识与流程",
-        "summary": "知识库、插件、工作流和应用能力。",
+        "summary": "知识与编排入口。",
         "items": [
             {"name": "知识库", "href": "/knowledge", "summary": "知识库管理与检索。"},
             {"name": "本体可视化", "href": "/ontology", "summary": "本体与关系结构展示。"},
             {"name": "插件市场", "href": "/plugins", "summary": "插件浏览与管理。"},
             {"name": "应用中心", "href": "/apps", "summary": "平台应用与工具入口。"},
             {"name": "技能创建器", "href": "/skill-creator", "summary": "快速创建技能配置。"},
-            {"name": "可视化工作流", "href": "/workflow", "summary": "统一工作流编排入口，覆盖可视化与复杂流程配置。"},
+            {"name": "可视化工作流", "href": "/workflow", "summary": "工作流编排与流程搭建。"},
             {"name": "协作管理", "href": "/collaboration", "summary": "团队协作与流程管理。"},
         ],
     },
     {
         "title": "分析与运营",
-        "summary": "监控、分析、日志、任务和文档类页面。",
+        "summary": "分析与运营入口。",
         "items": [
             {"name": "分析面板", "href": "/analytics", "summary": "分析看板与业务数据汇总。"},
             {"name": "管理后台", "href": "/dashboard", "summary": "后台管理总览。"},
@@ -1480,22 +1480,22 @@ PORTAL_SECTIONS = [
             {"name": "文档中心", "href": "/documents", "summary": "文档与资料管理。"},
             {"name": "代码片段", "href": "/code-snippets", "summary": "代码片段存取与复用。"},
             {"name": "提示词库", "href": "/prompts", "summary": "提示词管理入口。"},
-            {"name": "Webhook 管理", "href": "/webhooks", "summary": "Webhook 配置与查看。"},
-            {"name": "HTTP 工具", "href": "/http-tools", "summary": "HTTP 请求调试与测试。"},
+            {"name": "回调管理", "href": "/webhooks", "summary": "回调配置与查看。"},
+            {"name": "网络调试", "href": "/http-tools", "summary": "网络请求调试与测试。"},
         ],
     },
     {
         "title": "模型与实验",
-        "summary": "推理、微调、训练和实验相关页面。",
+        "summary": "训练与实验入口。",
         "items": [
             {"name": "因果推理", "href": "/causal-reasoning", "summary": "因果推理引擎页面。"},
             {"name": "因果链", "href": "/causal-chain", "summary": "因果链路分析。"},
             {"name": "因果树", "href": "/causal-tree", "summary": "因果树实验与示例。"},
             {"name": "高级推理", "href": "/reasoning", "summary": "推理实验页面。"},
             {"name": "模型微调", "href": "/finetune", "summary": "微调任务配置页面。"},
-            {"name": "A/B 测试", "href": "/ab-testing", "summary": "实验对比和评估。"},
-            {"name": "LLM 强化学习", "href": "/llm-rl", "summary": "RLHF / LLM-RL 入口。"},
-            {"name": "训练流水线", "href": "/pipeline", "summary": "SFT 到 RLHF 的统一流水线。"},
+            {"name": "对比实验", "href": "/ab-testing", "summary": "实验对比和评估。"},
+            {"name": "模型强化学习", "href": "/llm-rl", "summary": "强化学习与对齐实验入口。"},
+            {"name": "训练流水线", "href": "/pipeline", "summary": "SFT 到 RLHF 流水线。"},
             {"name": "多模态", "href": "/multimodal", "summary": "多模态能力页面。"},
             {"name": "记忆系统", "href": "/memory", "summary": "持久化记忆与观察面板。"},
             {"name": "发布管理", "href": "/publish", "summary": "发布与交付入口。"},
@@ -1504,11 +1504,11 @@ PORTAL_SECTIONS = [
     },
     {
         "title": "平台与账号",
-        "summary": "开发控制台、系统设置与账号页面。",
+        "summary": "平台与账号入口。",
         "items": [
             {"name": "开发控制台", "href": "/dev", "summary": "平台开发总入口。"},
             {"name": "设置", "href": "/settings", "summary": "平台设置页面。"},
-            {"name": "API Keys", "href": "/api-keys", "summary": "API 密钥管理。"},
+            {"name": "接口密钥", "href": "/api-keys", "summary": "平台接口密钥管理。"},
             {"name": "扩展管理", "href": "/extensions", "summary": "扩展与能力管理。"},
             {"name": "登录", "href": "/login", "summary": "用户登录页面。"},
             {"name": "注册", "href": "/register", "summary": "用户注册页面。"},
@@ -1533,7 +1533,10 @@ def _live_portal_sections() -> list[dict]:
                         "name": entry["name"],
                         "href": entry["app_href"],
                         "summary": entry["portal_summary"],
+                        "tone": entry["tone"],
                         "icon": entry["icon"],
+                        "footer": entry["footer"],
+                        "pills": entry["pills"],
                         "highlights": entry["highlights"],
                         "metrics": entry["metrics"],
                         "workbench_href": entry["workbench_href"],
@@ -1542,7 +1545,23 @@ def _live_portal_sections() -> list[dict]:
                         "primary_label": MODULE_WORKSPACES[slug]["primary_label"],
                     }
                 )
-        live_items.insert(2, {"name": "智能值守", "href": "/data-platform", "summary": "监控大屏和值守场景。"})
+        live_items.insert(
+            2,
+            {
+                "name": "智能值守",
+                "href": "/data-platform",
+                "summary": "监控总览、告警联动、巡检交接。",
+                "tone": "observe",
+                "icon": "monitoring",
+                "footer": "监控 / 告警 / 巡检 / 交接",
+                "pills": ["18 条 告警", "8/11 巡检", "2h 换班窗口"],
+                "metrics": ["18 条 告警", "8/11 巡检", "2h 换班窗口"],
+                "highlights": ["监控总览", "联动处置", "交接班跟踪"],
+                "secondary_href": "/monitoring",
+                "secondary_label": "监控面板",
+                "primary_label": "进入值守大屏",
+            },
+        )
         section["items"] = live_items
         break
     return sections

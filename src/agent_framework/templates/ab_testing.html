@@ -48,6 +48,45 @@
             backdrop-filter: blur(16px);
         }
 
+        .header-main {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .header-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 14px;
+            border-radius: 999px;
+            border: 1px solid var(--theme-border);
+            background: rgba(255,255,255,0.7);
+            color: var(--theme-text);
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .header-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 14px;
+            border-radius: 999px;
+            background: rgba(19, 99, 223, 0.10);
+            color: var(--theme-accent-deep);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
         .header h1 {
             font-size: 28px;
             background: linear-gradient(135deg, var(--theme-accent-deep), var(--theme-accent));
@@ -113,6 +152,11 @@
         .status-draft {
             background: #f3f4f6;
             color: #6b7280;
+        }
+
+        .status-paused {
+            background: rgba(217, 119, 6, 0.12);
+            color: #b45309;
         }
 
         .variants-comparison {
@@ -203,6 +247,20 @@
             border-color: var(--theme-accent);
         }
 
+        .btn-danger {
+            padding: 8px 16px;
+            border: 1px solid rgba(239, 68, 68, 0.18);
+            background: rgba(239, 68, 68, 0.08);
+            color: #dc2626;
+            border-radius: 14px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.14);
+        }
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -230,18 +288,374 @@
             color: var(--theme-muted);
             font-size: 14px;
         }
+
+        .section-card {
+            background: var(--theme-surface);
+            border-radius: 22px;
+            border: 1px solid var(--theme-border);
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 18px 42px -28px rgba(34, 44, 63, 0.16);
+            backdrop-filter: blur(16px);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 18px;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .demo-card {
+            position: relative;
+            padding: 22px;
+            border-radius: 20px;
+            overflow: hidden;
+            min-height: 320px;
+            background:
+                linear-gradient(180deg, rgba(255,255,255,0.94), rgba(255,255,255,0.86)),
+                var(--demo-bg, linear-gradient(135deg, rgba(19,99,223,0.14), rgba(96,165,250,0.08)));
+            border: 1px solid rgba(255,255,255,0.72);
+        }
+
+        .demo-card::after {
+            content: '';
+            position: absolute;
+            width: 160px;
+            height: 160px;
+            top: -70px;
+            right: -60px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.48);
+        }
+
+        .demo-topline,
+        .demo-actions,
+        .demo-card h3,
+        .demo-card p,
+        .demo-metrics,
+        .demo-variants {
+            position: relative;
+            z-index: 1;
+        }
+
+        .demo-topline {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .demo-tag,
+        .demo-stage {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 6px 11px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .demo-tag {
+            background: rgba(255,255,255,0.78);
+            color: var(--theme-accent-deep);
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+
+        .demo-stage {
+            background: rgba(32, 42, 54, 0.08);
+            color: var(--theme-text);
+        }
+
+        .demo-card h3 {
+            font-size: 20px;
+            margin: 0 0 10px;
+        }
+
+        .demo-card p {
+            color: var(--theme-muted);
+            line-height: 1.65;
+            font-size: 13px;
+            margin: 0;
+        }
+
+        .demo-metrics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 16px 0;
+        }
+
+        .demo-metrics span {
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.78);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .demo-variants {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .demo-variant {
+            border-radius: 16px;
+            background: rgba(255,255,255,0.68);
+            border: 1px solid rgba(101, 120, 144, .12);
+            padding: 12px;
+        }
+
+        .demo-variant strong {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+
+        .demo-variant small {
+            display: block;
+            color: var(--theme-muted);
+            line-height: 1.55;
+        }
+
+        .demo-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .demo-actions button {
+            flex: 1;
+        }
+
+        .toast {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            padding: 14px 18px;
+            border-radius: 14px;
+            background: #202a36;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 18px 42px -24px rgba(34, 44, 63, 0.32);
+            opacity: 0;
+            transform: translateY(16px);
+            pointer-events: none;
+            transition: all .2s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.42);
+            backdrop-filter: blur(6px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            width: min(920px, 100%);
+            max-height: 88vh;
+            overflow-y: auto;
+            background: #fff;
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 32px 80px -40px rgba(15, 23, 42, 0.42);
+        }
+
+        .modal-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .modal-subtitle {
+            color: var(--theme-muted);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .form-row {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-row.full {
+            grid-column: 1 / -1;
+        }
+
+        .form-row label {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .form-row input,
+        .form-row textarea {
+            width: 100%;
+            border: 1px solid var(--theme-border);
+            border-radius: 14px;
+            padding: 12px 14px;
+            font: inherit;
+            color: var(--theme-text);
+            background: rgba(255,255,255,0.96);
+            resize: vertical;
+        }
+
+        .form-row textarea {
+            min-height: 92px;
+        }
+
+        .helper-text {
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .switch-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            background: rgba(19, 99, 223, 0.06);
+            border: 1px solid rgba(19, 99, 223, 0.10);
+        }
+
+        .variant-editor-list {
+            display: grid;
+            gap: 14px;
+            margin-top: 16px;
+        }
+
+        .variant-editor-card {
+            border: 1px solid var(--theme-border);
+            border-radius: 18px;
+            padding: 16px;
+            background: rgba(246, 250, 255, 0.72);
+        }
+
+        .variant-editor-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .variant-editor-head strong {
+            font-size: 14px;
+        }
+
+        .traffic-summary {
+            margin-top: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            padding: 12px 14px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.8);
+            border: 1px solid var(--theme-border);
+            color: var(--theme-muted);
+            font-size: 13px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 1100px) {
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 16px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <div>
+            <div class="header-main">
+                <div class="header-nav">
+                    <a class="header-link" href="{{ url_for('developer_home') }}">
+                        <i class="fas fa-arrow-left"></i> 返回开发台
+                    </a>
+                    <div class="header-pill">
+                        <i class="fas fa-vials"></i> 内置 3 个 A/B demo，可一键导入
+                    </div>
+                </div>
+                <div>
                 <h1>🧪 A/B 测试平台</h1>
                 <p>对比不同模型、提示词的效果，数据驱动优化AI性能</p>
+                </div>
             </div>
             <button class="btn-primary" onclick="createExperiment()">
                 <i class="fas fa-flask"></i> 创建实验
             </button>
+        </div>
+
+        <div class="section-card">
+            <div class="section-title">
+                <i class="fas fa-swatchbook" style="color: var(--theme-accent);"></i>
+                Demo 样例
+            </div>
+            <div class="demo-grid" id="demoGrid"></div>
         </div>
 
         <div class="stats-grid">
@@ -268,17 +682,243 @@
         </div>
     </div>
 
+    <div class="toast" id="toast"></div>
+
+    <div class="modal-overlay" id="createExperimentModal" onclick="if (event.target === this) hideCreateModal()">
+        <div class="modal">
+            <div class="modal-head">
+                <div>
+                    <div class="modal-title">创建 A/B 实验</div>
+                    <div class="modal-subtitle">配置实验名称、目标和变体流量分配。至少需要 2 个变体，流量总和必须等于 100%。</div>
+                </div>
+                <button class="btn-secondary" onclick="hideCreateModal()">
+                    <i class="fas fa-xmark"></i> 关闭
+                </button>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-row">
+                    <label for="experimentName">实验名称</label>
+                    <input id="experimentName" type="text" placeholder="例如：客服回复语气 A/B">
+                </div>
+                <div class="form-row">
+                    <label for="experimentAutoStart">启动方式</label>
+                    <div class="switch-row">
+                        <input id="experimentAutoStart" type="checkbox">
+                        <span>创建后立即开始实验</span>
+                    </div>
+                </div>
+                <div class="form-row full">
+                    <label for="experimentDescription">实验描述</label>
+                    <textarea id="experimentDescription" placeholder="描述测试目标、场景、核心对比指标和你想验证的假设。"></textarea>
+                    <div class="helper-text">建议写清楚测试场景、目标人群和评判指标，方便后续看板解读。</div>
+                </div>
+            </div>
+
+            <div class="traffic-summary">
+                <span id="trafficSummaryText">当前总流量：100%</span>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <button class="btn-secondary" onclick="rebalanceVariantTraffic()">
+                        <i class="fas fa-scale-balanced"></i> 平均分配
+                    </button>
+                    <button class="btn-secondary" onclick="addVariantEditor()">
+                        <i class="fas fa-plus"></i> 新增变体
+                    </button>
+                </div>
+            </div>
+
+            <div class="variant-editor-list" id="variantEditorList"></div>
+
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="hideCreateModal()">取消</button>
+                <button class="btn-primary" onclick="submitCreateExperiment()">
+                    <i class="fas fa-check"></i> 保存实验
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        const DEMO_EXPERIMENTS = [
+            {
+                name: '客服回复语气 A/B',
+                description: '验证“简洁直答”与“共情解释”两套客服提示词，在投诉场景里的满意度和解决率差异。',
+                tag: 'Support',
+                theme: 'linear-gradient(135deg, rgba(19,99,223,0.18), rgba(96,165,250,0.10), rgba(255,255,255,0.22))',
+                objective: '提升投诉场景满意度',
+                metric: '满意率 / 首响转化',
+                status: '适合立即开跑',
+                variants: [
+                    { name: 'A · 简洁直答', description: '先给结论与处理动作，减少解释长度。', workflow_id: 'support-brief', traffic_percentage: 50 },
+                    { name: 'B · 共情解释', description: '增加安抚语和处理原因说明，强调体验修复。', workflow_id: 'support-empathy', traffic_percentage: 50 }
+                ]
+            },
+            {
+                name: '运维诊断提示词 A/B',
+                description: '比较“先给结论”与“先列排查链路”两种诊断输出框架，对工程师执行效率和误判率的影响。',
+                tag: 'Ops',
+                theme: 'linear-gradient(135deg, rgba(16,185,129,0.18), rgba(20,184,166,0.10), rgba(255,255,255,0.22))',
+                objective: '降低误判与返工',
+                metric: '一次闭环率 / 平均处理时长',
+                status: '适合专业场景演示',
+                variants: [
+                    { name: 'A · 结果优先', description: '先输出最可能根因，再补证据和建议动作。', workflow_id: 'ops-result-first', traffic_percentage: 50 },
+                    { name: 'B · 链路优先', description: '先展示排查链路，再给最终判断与风险提示。', workflow_id: 'ops-chain-first', traffic_percentage: 50 }
+                ]
+            },
+            {
+                name: '知识助理路由 A/B',
+                description: '验证“直接生成回答”与“检索后回答”两种路由策略，在企业制度问答中的准确率和响应速度平衡。',
+                tag: 'Knowledge',
+                theme: 'linear-gradient(135deg, rgba(217,119,6,0.20), rgba(251,191,36,0.10), rgba(255,255,255,0.22))',
+                objective: '平衡准确率和时延',
+                metric: '正确率 / 平均响应时延',
+                status: '适合管理侧展示',
+                variants: [
+                    { name: 'A · 直答模式', description: '优先基于模型已有能力直接回答，追求更快响应。', workflow_id: 'kb-direct-answer', traffic_percentage: 50 },
+                    { name: 'B · 检索增强', description: '先查制度库，再生成答案并附引用依据。', workflow_id: 'kb-rag-answer', traffic_percentage: 50 }
+                ]
+            }
+        ];
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            clearTimeout(window.__abToastTimer);
+            window.__abToastTimer = setTimeout(() => toast.classList.remove('show'), 2400);
+        }
+
+        function esc(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        let experimentDraftVariants = [];
+
+        function renderDemoGallery() {
+            const grid = document.getElementById('demoGrid');
+            grid.innerHTML = DEMO_EXPERIMENTS.map((demo, index) => `
+                <div class="demo-card" style="--demo-bg:${demo.theme};">
+                    <div class="demo-topline">
+                        <span class="demo-tag"><i class="fas fa-vial"></i> ${esc(demo.tag)}</span>
+                        <span class="demo-stage">${esc(demo.status)}</span>
+                    </div>
+                    <h3>${esc(demo.name)}</h3>
+                    <p>${esc(demo.description)}</p>
+                    <div class="demo-metrics">
+                        <span>目标：${esc(demo.objective)}</span>
+                        <span>指标：${esc(demo.metric)}</span>
+                    </div>
+                    <div class="demo-variants">
+                        ${demo.variants.map(variant => `
+                            <div class="demo-variant">
+                                <strong>${esc(variant.name)}</strong>
+                                <small>${esc(variant.description)}</small>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="demo-actions">
+                        <button class="btn-primary" onclick="importDemoExperiment(${index}, false)">
+                            <i class="fas fa-file-import"></i> 导入草稿
+                        </button>
+                        <button class="btn-secondary" onclick="importDemoExperiment(${index}, true)">
+                            <i class="fas fa-play"></i> 导入并开始
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function apiJson(url, options = {}) {
+            const response = await fetch(url, {
+                headers: { 'Content-Type': 'application/json' },
+                ...options,
+                body: options.body ? JSON.stringify(options.body) : undefined
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                throw new Error(data.error || '请求失败');
+            }
+            return data;
+        }
+
+        async function importDemoExperiment(index, autoStart) {
+            const demo = DEMO_EXPERIMENTS[index];
+            if (!demo) return;
+            try {
+                const created = await apiJson('/api/ab-testing/tests', {
+                    method: 'POST',
+                    body: {
+                        name: autoStart ? `${demo.name} · 运行版` : `${demo.name} · 草稿`,
+                        description: demo.description,
+                        variants: demo.variants
+                    }
+                });
+                if (autoStart && created.test?.test_id) {
+                    await apiJson(`/api/ab-testing/tests/${created.test.test_id}/start`, { method: 'POST' });
+                }
+                showToast(autoStart ? 'Demo 已导入并开始' : 'Demo 已导入为草稿');
+                await loadExperiments();
+            } catch (error) {
+                console.error('导入 demo 失败:', error);
+                showToast(`导入失败：${error.message || '未知错误'}`);
+            }
+        }
+
+        async function hydrateExperiment(test) {
+            const [detailRes, resultRes, winnerRes] = await Promise.all([
+                apiJson(`/api/ab-testing/tests/${test.test_id}`),
+                apiJson(`/api/ab-testing/tests/${test.test_id}/results`).catch(() => ({ results: [] })),
+                apiJson(`/api/ab-testing/tests/${test.test_id}/winner`).catch(() => ({ winner_id: null }))
+            ]);
+            const detail = detailRes.test || {};
+            const results = Array.isArray(resultRes.results) ? resultRes.results : [];
+            const winnerId = winnerRes.winner_id || null;
+            const resultMap = new Map(results.map(item => [item.variant_id, item]));
+            const variants = (detail.variants || []).map((variant, idx) => {
+                const result = resultMap.get(variant.variant_id) || {};
+                const requestCount = Number(result.request_count || 0);
+                const successRate = requestCount ? Number(result.success_rate || 0) * 100 : 0;
+                const customMetrics = result.metrics || {};
+                const avgScore = customMetrics.avg_score ?? customMetrics.score ?? (requestCount ? (successRate / 20).toFixed(1) : '0.0');
+                const confidence = requestCount >= 100 ? '95%' : requestCount >= 40 ? '82%' : requestCount > 0 ? '68%' : '0%';
+                return {
+                    name: variant.name,
+                    sample_count: requestCount,
+                    conversion_rate: `${successRate.toFixed(1)}%`,
+                    avg_score: typeof avgScore === 'number' ? avgScore.toFixed(1) : avgScore,
+                    confidence,
+                    is_control: idx === 0,
+                    is_winner: winnerId === variant.variant_id
+                };
+            });
+            return {
+                id: test.test_id,
+                name: test.name,
+                description: test.description,
+                status: test.status,
+                variants,
+                total_requests: Number(test.total_requests || 0)
+            };
+        }
+
         // 加载实验列表
         async function loadExperiments() {
             try {
-                const response = await fetch('/api/ab-testing/experiments');
-                const experiments = await response.json();
+                const payload = await apiJson('/api/ab-testing/tests');
+                const tests = Array.isArray(payload.tests) ? payload.tests : [];
+                const experiments = await Promise.all(tests.map(hydrateExperiment));
                 renderExperiments(experiments);
                 updateStats(experiments);
             } catch (error) {
                 console.error('加载实验失败:', error);
                 renderPlaceholder();
+                updateStats([]);
             }
         }
 
@@ -306,8 +946,10 @@
                             <div class="variant-card">
                                 <div class="variant-header">
                                     <div class="variant-name">${variant.name}</div>
-                                    ${variant.is_winner ? '<span class="winner-badge"><i class="fas fa-trophy"></i> 获胜</span>' : ''}
-                                    ${variant.is_control ? '<span class="variant-badge">对照组</span>' : '<span class="variant-badge">实验组</span>'}
+                                    <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
+                                        ${variant.is_winner ? '<span class="winner-badge"><i class="fas fa-trophy"></i> 获胜</span>' : ''}
+                                        ${variant.is_control ? '<span class="variant-badge">对照组</span>' : '<span class="variant-badge">实验组</span>'}
+                                    </div>
                                 </div>
                                 <div class="metric-row">
                                     <span class="metric-label">样本数</span>
@@ -330,11 +972,11 @@
                     </div>
 
                     <div class="experiment-actions">
-                        <button class="btn-secondary" onclick="viewDetails('${exp.id}')">
-                            <i class="fas fa-chart-line"></i> 查看详情
-                        </button>
-                        <button class="btn-secondary" onclick="exportResults('${exp.id}')">
-                            <i class="fas fa-download"></i> 导出结果
+                    <button class="btn-secondary" onclick="viewDetails('${exp.id}')">
+                        <i class="fas fa-chart-line"></i> 查看详情
+                    </button>
+                    <button class="btn-secondary" onclick="exportResults('${exp.id}')">
+                        <i class="fas fa-download"></i> 导出结果
                         </button>
                         ${exp.status === 'running' ? `
                             <button class="btn-secondary" onclick="stopExperiment('${exp.id}')">
@@ -351,7 +993,7 @@
                 <div class="experiment-card" style="text-align: center; padding: 60px;">
                     <i class="fas fa-flask" style="font-size: 64px; color: #cbd5e1; margin-bottom: 20px;"></i>
                     <h3 style="color: #64748b; margin-bottom: 12px;">暂无实验</h3>
-                    <p style="color: #94a3b8; margin-bottom: 24px;">创建你的第一个 A/B 测试实验，开始优化AI性能</p>
+                    <p style="color: #94a3b8; margin-bottom: 24px;">先从上面的 demo 导入一组实验，或者手动创建你的第一个 A/B 测试。</p>
                     <button class="btn-primary" onclick="createExperiment()">
                         <i class="fas fa-plus"></i> 创建实验
                     </button>
@@ -363,41 +1005,222 @@
             const total = experiments.length;
             const running = experiments.filter(e => e.status === 'running').length;
             const completed = experiments.filter(e => e.status === 'completed').length;
+            const improvementList = experiments
+                .map(exp => {
+                    if (!Array.isArray(exp.variants) || exp.variants.length < 2) return 0;
+                    const base = parseFloat(String(exp.variants[0].conversion_rate || '0').replace('%', '')) || 0;
+                    const best = Math.max(...exp.variants.map(v => parseFloat(String(v.conversion_rate || '0').replace('%', '')) || 0));
+                    if (!base) return best;
+                    return ((best - base) / base) * 100;
+                })
+                .filter(value => Number.isFinite(value));
+            const avgImprovement = improvementList.length
+                ? `${(improvementList.reduce((sum, value) => sum + value, 0) / improvementList.length).toFixed(1)}%`
+                : '0%';
 
             document.getElementById('totalExperiments').textContent = total;
             document.getElementById('runningExperiments').textContent = running;
             document.getElementById('completedExperiments').textContent = completed;
+            document.getElementById('avgImprovement').textContent = avgImprovement;
         }
 
         function getStatusText(status) {
             const statusMap = {
                 'running': '进行中',
                 'completed': '已完成',
-                'draft': '草稿'
+                'draft': '草稿',
+                'paused': '已暂停'
             };
             return statusMap[status] || status;
         }
 
+        function defaultVariantDraft(index, traffic = 50) {
+            const names = ['对照组', '实验组', '实验组 C', '实验组 D'];
+            return {
+                name: names[index] || `实验组 ${index + 1}`,
+                description: '',
+                workflow_id: '',
+                traffic_percentage: traffic
+            };
+        }
+
+        function openCreateModal(prefill = null) {
+            const modal = document.getElementById('createExperimentModal');
+            const nameInput = document.getElementById('experimentName');
+            const descInput = document.getElementById('experimentDescription');
+            const autoStartInput = document.getElementById('experimentAutoStart');
+
+            nameInput.value = prefill?.name || '';
+            descInput.value = prefill?.description || '';
+            autoStartInput.checked = Boolean(prefill?.autoStart);
+
+            experimentDraftVariants = prefill?.variants
+                ? prefill.variants.map(item => ({ ...item }))
+                : [defaultVariantDraft(0, 50), defaultVariantDraft(1, 50)];
+
+            renderVariantEditors();
+            modal.classList.add('active');
+        }
+
+        function hideCreateModal() {
+            document.getElementById('createExperimentModal').classList.remove('active');
+        }
+
         function createExperiment() {
-            alert('创建实验功能开发中...');
+            openCreateModal();
+        }
+
+        function renderVariantEditors() {
+            const container = document.getElementById('variantEditorList');
+            container.innerHTML = experimentDraftVariants.map((variant, index) => `
+                <div class="variant-editor-card">
+                    <div class="variant-editor-head">
+                        <strong>变体 ${String.fromCharCode(65 + index)}</strong>
+                        ${experimentDraftVariants.length > 2 ? `
+                            <button class="btn-danger" onclick="removeVariantEditor(${index})">
+                                <i class="fas fa-trash"></i> 删除
+                            </button>
+                        ` : ''}
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-row">
+                            <label>变体名称</label>
+                            <input type="text" data-variant-field="name" data-variant-index="${index}" value="${esc(variant.name)}" placeholder="例如：A · 简洁直答">
+                        </div>
+                        <div class="form-row">
+                            <label>流量占比</label>
+                            <input type="number" min="1" max="100" step="1" data-variant-field="traffic_percentage" data-variant-index="${index}" value="${esc(variant.traffic_percentage)}">
+                        </div>
+                        <div class="form-row full">
+                            <label>Workflow ID / 路由标识</label>
+                            <input type="text" data-variant-field="workflow_id" data-variant-index="${index}" value="${esc(variant.workflow_id)}" placeholder="例如：support-empathy / kb-rag-answer">
+                        </div>
+                        <div class="form-row full">
+                            <label>变体说明</label>
+                            <textarea data-variant-field="description" data-variant-index="${index}" placeholder="简要说明该变体的提示词风格、模型选择或路由策略。">${esc(variant.description)}</textarea>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            updateTrafficSummary();
+        }
+
+        function collectVariantEditors() {
+            return experimentDraftVariants.map((variant, index) => {
+                const pick = (field) => document.querySelector(`[data-variant-field="${field}"][data-variant-index="${index}"]`);
+                return {
+                    name: pick('name')?.value.trim() || '',
+                    description: pick('description')?.value.trim() || '',
+                    workflow_id: pick('workflow_id')?.value.trim() || '',
+                    traffic_percentage: Number(pick('traffic_percentage')?.value || 0)
+                };
+            });
+        }
+
+        function updateTrafficSummary() {
+            const variants = collectVariantEditors();
+            const total = variants.reduce((sum, item) => sum + Number(item.traffic_percentage || 0), 0);
+            const summary = document.getElementById('trafficSummaryText');
+            summary.textContent = `当前总流量：${total}%`;
+            summary.style.color = Math.abs(total - 100) < 0.01 ? '#166534' : '#b45309';
+        }
+
+        function addVariantEditor() {
+            experimentDraftVariants = collectVariantEditors();
+            experimentDraftVariants.push(defaultVariantDraft(experimentDraftVariants.length, 0));
+            renderVariantEditors();
+        }
+
+        function removeVariantEditor(index) {
+            experimentDraftVariants = collectVariantEditors().filter((_, itemIndex) => itemIndex !== index);
+            renderVariantEditors();
+        }
+
+        function rebalanceVariantTraffic() {
+            experimentDraftVariants = collectVariantEditors();
+            const count = experimentDraftVariants.length || 1;
+            const base = Math.floor(100 / count);
+            let rest = 100 - (base * count);
+            experimentDraftVariants = experimentDraftVariants.map((variant) => {
+                const traffic = base + (rest > 0 ? 1 : 0);
+                if (rest > 0) rest -= 1;
+                return { ...variant, traffic_percentage: traffic };
+            });
+            renderVariantEditors();
+        }
+
+        async function submitCreateExperiment() {
+            const name = document.getElementById('experimentName').value.trim();
+            const description = document.getElementById('experimentDescription').value.trim();
+            const autoStart = document.getElementById('experimentAutoStart').checked;
+            const variants = collectVariantEditors();
+            const totalTraffic = variants.reduce((sum, item) => sum + Number(item.traffic_percentage || 0), 0);
+
+            if (!name) {
+                showToast('请先填写实验名称');
+                return;
+            }
+            if (variants.length < 2) {
+                showToast('至少需要 2 个变体');
+                return;
+            }
+            if (variants.some(item => !item.name || !item.workflow_id)) {
+                showToast('每个变体都需要名称和 Workflow ID');
+                return;
+            }
+            if (variants.some(item => item.traffic_percentage <= 0)) {
+                showToast('每个变体的流量必须大于 0');
+                return;
+            }
+            if (Math.abs(totalTraffic - 100) > 0.01) {
+                showToast('流量总和必须等于 100%');
+                return;
+            }
+
+            try {
+                const created = await apiJson('/api/ab-testing/tests', {
+                    method: 'POST',
+                    body: { name, description, variants }
+                });
+                if (autoStart && created.test?.test_id) {
+                    await apiJson(`/api/ab-testing/tests/${created.test.test_id}/start`, { method: 'POST' });
+                }
+                hideCreateModal();
+                showToast(autoStart ? '实验已创建并开始' : '实验草稿已创建');
+                await loadExperiments();
+            } catch (error) {
+                console.error('创建实验失败:', error);
+                showToast(`创建失败：${error.message || '未知错误'}`);
+            }
         }
 
         function viewDetails(id) {
-            window.location.href = `/ab-testing/${id}`;
+            showToast(`实验 ${id} 的详情页还没接入，先看卡片指标。`);
         }
 
         function exportResults(id) {
-            window.location.href = `/api/ab-testing/experiments/${id}/export`;
+            showToast(`实验 ${id} 的导出接口还没接入。`);
         }
 
         function stopExperiment(id) {
             if (confirm('确定要停止这个实验吗？')) {
-                fetch(`/api/ab-testing/experiments/${id}/stop`, { method: 'POST' })
-                    .then(() => loadExperiments());
+                fetch(`/api/ab-testing/tests/${id}/stop`, { method: 'POST' })
+                    .then(() => loadExperiments())
+                    .catch(error => {
+                        console.error('停止实验失败:', error);
+                        showToast('停止实验失败');
+                    });
             }
         }
 
+        document.addEventListener('input', (event) => {
+            if (event.target.matches('[data-variant-field]')) {
+                updateTrafficSummary();
+            }
+        });
+
         // 页面加载时获取数据
+        renderDemoGallery();
         loadExperiments();
     </script>
 </body>

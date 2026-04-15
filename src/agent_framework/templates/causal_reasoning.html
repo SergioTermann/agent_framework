@@ -10,38 +10,38 @@
         body { overflow-y: auto; }
 
         .container {
-            max-width: 2200px;
+            max-width: 1680px;
             margin: 0 auto;
-            padding: 30px 80px 80px;
+            padding: 24px 28px 72px;
             position: relative;
             z-index: 5;
-            font-size: 17px;
+            font-size: 16px;
         }
 
         .causal-hub {
             display: grid;
-            gap: 20px;
+            gap: 24px;
             margin-bottom: 32px;
         }
 
         .hub-hero {
             display: grid;
-            grid-template-columns: minmax(0, 1.2fr) 360px;
-            gap: 20px;
+            grid-template-columns: minmax(0, 1.28fr) minmax(320px, 0.72fr);
+            gap: 24px;
             align-items: stretch;
         }
 
         .hero-main {
             position: relative;
             overflow: hidden;
-            padding: 34px;
-            border-radius: 20px;
+            padding: 34px 36px;
+            border-radius: 28px;
             background:
-                radial-gradient(circle at 88% 16%, rgba(52,152,219,0.18), transparent 18%),
-                radial-gradient(circle at 18% 16%, rgba(155,89,182,0.12), transparent 18%),
+                radial-gradient(circle at 88% 16%, rgba(52,152,219,0.20), transparent 22%),
+                radial-gradient(circle at 18% 16%, rgba(155,89,182,0.10), transparent 18%),
                 linear-gradient(135deg, rgba(255,255,255,0.98), rgba(245,249,255,0.94));
-            border: 1px solid rgba(184, 134, 11, 0.14);
-            box-shadow: 0 10px 28px rgba(52,152,219,0.08);
+            border: 1px solid rgba(52,152,219,0.12);
+            box-shadow: 0 24px 54px -38px rgba(52,152,219,0.34);
         }
 
         .hero-kicker {
@@ -60,8 +60,8 @@
 
         .hero-main h2 {
             margin: 18px 0 12px;
-            font-size: clamp(2.2em, 3.2vw, 3.2em);
-            line-height: 1.04;
+            font-size: clamp(2.2rem, 4vw, 3.6rem);
+            line-height: 1.02;
             color: #22384f;
             letter-spacing: -0.04em;
         }
@@ -70,20 +70,20 @@
             margin: 0;
             max-width: 920px;
             color: #6b7f95;
-            font-size: 16px;
-            line-height: 1.9;
+            font-size: 1rem;
+            line-height: 1.85;
         }
 
         .hero-metric-grid {
             margin-top: 24px;
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 12px;
+            gap: 14px;
         }
 
         .hero-metric {
             padding: 16px 18px;
-            border-radius: 16px;
+            border-radius: 18px;
             background: rgba(255,255,255,0.84);
             border: 1px solid rgba(52,152,219,0.12);
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.78);
@@ -120,10 +120,10 @@
 
         .hero-side-card {
             padding: 24px;
-            border-radius: 18px;
+            border-radius: 22px;
             background: rgba(255,255,255,0.96);
-            border: 1px solid rgba(184, 134, 11, 0.14);
-            box-shadow: 0 8px 24px rgba(52,152,219,0.08);
+            border: 1px solid rgba(52,152,219,0.12);
+            box-shadow: 0 18px 34px -30px rgba(52,152,219,0.26);
         }
 
         .hero-side-card h3 {
@@ -253,22 +253,6 @@
             line-height: 1.7;
         }
 
-        /* ── Header ── */
-        .page-header {
-            text-align: center;
-            margin-bottom: 50px;
-            padding-top: 65px;
-        }
-        .page-header h1 {
-            font-size: 3.8em;
-            margin-bottom: 12px;
-            background: linear-gradient(135deg, #2c3e50 0%, #3498db 50%, #9b59b6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 300;
-        }
-        .page-header p { color: #7f8c8d; font-size: 1.35em; }
-
         /* ── 返回按钮 ── */
         .nav-bar {
             position: fixed; top: 15px; left: 20px; z-index: 100;
@@ -277,43 +261,49 @@
         /* ── Tabs ── */
         .tabs {
             display: flex;
-            gap: 0;
-            margin-bottom: 35px;
+            gap: 10px;
+            margin-bottom: 26px;
+            padding: 10px;
             background: rgba(255,255,255,0.95);
-            border-radius: 14px;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(184, 134, 11, 0.1);
-            border: 1px solid rgba(184, 134, 11, 0.15);
+            border-radius: 22px;
+            overflow-x: auto;
+            box-shadow: 0 20px 40px -34px rgba(52,152,219,0.28);
+            border: 1px solid rgba(52,152,219,0.12);
+            position: sticky;
+            top: 16px;
+            z-index: 20;
+            backdrop-filter: blur(14px);
         }
         .tab {
             flex: 1;
-            padding: 22px 14px;
+            min-width: 128px;
+            padding: 18px 14px 16px;
             background: transparent;
             border: none;
             cursor: pointer;
-            font-size: 16px;
-            color: #7f8c8d;
+            font-size: 15px;
+            color: #708295;
             transition: all 0.3s;
             text-align: center;
-            border-bottom: 3px solid transparent;
+            border-radius: 16px;
             font-family: inherit;
         }
         .tab:hover { background: rgba(52,152,219,0.05); color: #2c3e50; }
         .tab.active {
             color: #3498db;
-            background: rgba(52,152,219,0.08);
-            border-bottom-color: #3498db;
-            font-weight: 600;
+            background: linear-gradient(180deg, rgba(52,152,219,0.10), rgba(52,152,219,0.04));
+            box-shadow: inset 0 0 0 1px rgba(52,152,219,0.18);
+            font-weight: 700;
         }
-        .tab .tab-icon { display: block; font-size: 26px; margin-bottom: 6px; }
+        .tab .tab-icon { display: block; font-size: 24px; margin-bottom: 8px; }
 
         /* ── Tab content ── */
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
         .tab-content.active:not(#tab-graph) {
             display: grid;
-            grid-template-columns: 460px minmax(0, 1fr);
-            gap: 20px;
+            grid-template-columns: minmax(420px, 460px) minmax(0, 1fr);
+            gap: 24px;
             align-items: start;
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
@@ -322,11 +312,11 @@
         .panel {
             background: rgba(255,255,255,0.95);
             backdrop-filter: blur(20px);
-            border-radius: 14px;
-            padding: 38px;
-            margin-bottom: 24px;
-            box-shadow: 0 4px 20px rgba(184, 134, 11, 0.1);
-            border: 1px solid rgba(184, 134, 11, 0.15);
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 0;
+            box-shadow: 0 24px 44px -34px rgba(52,152,219,0.28);
+            border: 1px solid rgba(52,152,219,0.12);
         }
 
         .tab-content.active:not(#tab-graph) .panel:first-child {
@@ -385,9 +375,9 @@
             line-height: 1.7;
         }
         .panel h3 {
-            font-size: 1.4em;
+            font-size: 1.45rem;
             color: #2c3e50;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             padding-bottom: 12px;
             border-bottom: 2px solid rgba(52,152,219,0.15);
         }
@@ -477,12 +467,15 @@
 
         /* ── Results ── */
         .result-area {
-            min-height: 260px;
+            min-height: 560px;
             position: relative;
             overflow: hidden;
+            background:
+                linear-gradient(180deg, rgba(255,255,255,0.98), rgba(246,250,255,0.96)),
+                radial-gradient(circle at top right, rgba(52,152,219,0.08), transparent 26%);
         }
         .result-placeholder {
-            text-align: center; padding: 90px 20px;
+            text-align: center; padding: 120px 24px;
             color: #bdc3c7;
         }
         .result-placeholder .placeholder-icon { font-size: 56px; margin-bottom: 14px; }
@@ -910,7 +903,7 @@
         .split-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
         #tab-graph.active {
             display: grid;
-            gap: 20px;
+            gap: 24px;
         }
         @media (max-width: 1400px) {
             .mode-deck {
@@ -930,15 +923,15 @@
             .form-grid,
             .hero-metric-grid,
             .input-support-grid { grid-template-columns: 1fr; }
-            .tabs { flex-wrap: wrap; }
-            .tab { flex: none; width: calc(33.33% - 0px); }
+            .tabs { flex-wrap: nowrap; }
+            .tab { flex: none; width: 140px; }
             .tab-content.active:not(#tab-graph) .panel:first-child {
                 position: static;
             }
         }
         @media (max-width: 640px) {
             .container { padding: 20px 16px 40px; }
-            .tab { width: 50%; }
+            .tab { width: 128px; }
             .hero-main,
             .hero-side-card,
             .panel {
@@ -983,33 +976,81 @@
     </svg>
 
     <div class="container">
-        <!-- Header -->
-        <div class="page-header">
-            <h1>因果推理引擎</h1>
-            <p>LLM 驱动的多维度因果分析 &middot; 支持因果链、反事实、预测、根因、干预五大推理模式</p>
-        </div>
-
         <section class="causal-hub">
+            <div class="hub-hero">
+                <div class="hero-main">
+                    <div class="hero-kicker">因果推理工作台</div>
+                    <h2>多模式因果推演台</h2>
+                    <p>一页切换因果链、反事实、效果预测、根因追溯和干预评估。适合风场经营、设备诊断、策略复盘与方案评审场景。</p>
+                    <div class="hero-metric-grid">
+                        <div class="hero-metric">
+                            <strong>5</strong>
+                            <span>推理模式</span>
+                            <small>链路、反事实、预测、根因、干预同页联动。</small>
+                        </div>
+                        <div class="hero-metric">
+                            <strong>1 张</strong>
+                            <span>推理总台</span>
+                            <small>输入、分析、结果和图谱沉淀集中呈现。</small>
+                        </div>
+                        <div class="hero-metric">
+                            <strong>双栏</strong>
+                            <span>稳定阅读区</span>
+                            <small>左侧组织输入，右侧承接推理结果与图形。</small>
+                        </div>
+                        <div class="hero-metric">
+                            <strong>图谱化</strong>
+                            <span>可持续沉淀</span>
+                            <small>推理历史、节点统计和导出动作统一管理。</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-side">
+                    <article class="hero-side-card">
+                        <h3>典型任务</h3>
+                        <p>把风场异常、收益波动、调度结果和技改动作拆成可解释的因果路径。</p>
+                        <div class="hero-status-list">
+                            <div class="hero-status-item">
+                                <strong>诊断</strong>
+                                <span>告警、停机、性能偏差追因</span>
+                            </div>
+                            <div class="hero-status-item">
+                                <strong>经营</strong>
+                                <span>收益变化、策略效果、价格联动</span>
+                            </div>
+                            <div class="hero-status-item">
+                                <strong>评估</strong>
+                                <span>干预前后、替代路径、执行风险</span>
+                            </div>
+                        </div>
+                    </article>
+                    <article class="hero-side-card">
+                        <h3>阅读方式</h3>
+                        <p>先选模式，再填关键变量。页面会把链路节点、假设、概率、证据和图谱管理分层展开。</p>
+                    </article>
+                </div>
+            </div>
+
             <div class="workflow-strip">
                 <article class="workflow-stage">
-                    <span>Step 01</span>
-                    <strong>定义原因、结果和上下文</strong>
-                    <p>把对象、动作和结果描述清楚，系统才能生成更稳的因果链路。</p>
+                    <span>步骤 01</span>
+                    <strong>定义起点、终点与约束</strong>
+                    <p>先把事件对象、目标结果和背景边界说清楚。</p>
                 </article>
                 <article class="workflow-stage">
-                    <span>Step 02</span>
-                    <strong>生成链路与关键假设</strong>
-                    <p>推理不只给结论，也会同步暴露中间环节、假设和证据线索。</p>
+                    <span>步骤 02</span>
+                    <strong>展开链路与关键假设</strong>
+                    <p>结果不只给结论，也同步展示中间环节和证据线索。</p>
                 </article>
                 <article class="workflow-stage">
-                    <span>Step 03</span>
-                    <strong>比较替代路径与风险</strong>
-                    <p>切到反事实、预测或干预模式，继续看其他可能走向和代价。</p>
+                    <span>步骤 03</span>
+                    <strong>比较分支、概率与风险</strong>
+                    <p>切到反事实、预测或干预模式继续推演其他走向。</p>
                 </article>
                 <article class="workflow-stage">
-                    <span>Step 04</span>
-                    <strong>沉淀到图谱和历史视图</strong>
-                    <p>把一次推理变成后续可复查、可编辑、可导出的知识资产。</p>
+                    <span>步骤 04</span>
+                    <strong>沉淀图谱与历史资产</strong>
+                    <p>一次推理可继续复查、导出、编辑和沉淀。</p>
                 </article>
             </div>
 
@@ -1072,7 +1113,7 @@
         <!-- ═══════════ Tab 1: 因果链分析 ═══════════ -->
         <div class="tab-content active" id="tab-chain">
             <div class="panel">
-                <div class="panel-kicker">Chain Analysis Mode</div>
+                <div class="panel-kicker">因果链模式</div>
                 <h3>因果链分析</h3>
                 <p class="panel-lead">分析从原因到结果的完整因果链路，识别中间环节、关键假设、因果机制和替代路径。</p>
                 <div class="input-support-grid">
@@ -1122,7 +1163,7 @@
         <!-- ═══════════ Tab 2: 反事实推理 ═══════════ -->
         <div class="tab-content" id="tab-counterfactual">
             <div class="panel">
-                <div class="panel-kicker">Counterfactual Reasoning</div>
+                <div class="panel-kicker">反事实模式</div>
                 <h3>反事实推理</h3>
                 <p class="panel-lead">探索“如果原因不同，结果会怎样”的假设场景，比较实际路径与替代路径的差异。</p>
                 <div class="input-support-grid">
@@ -1176,7 +1217,7 @@
         <!-- ═══════════ Tab 3: 效果预测 ═══════════ -->
         <div class="tab-content" id="tab-prediction">
             <div class="panel">
-                <div class="panel-kicker">Prediction Mode</div>
+                <div class="panel-kicker">预测模式</div>
                 <h3>效果预测</h3>
                 <p class="panel-lead">给定原因或事件，预测可能产生的多种结果，适合提前看正向与负向分支。</p>
                 <div class="input-support-grid">
@@ -1230,7 +1271,7 @@
         <!-- ═══════════ Tab 4: 根因分析 ═══════════ -->
         <div class="tab-content" id="tab-rootcause">
             <div class="panel">
-                <div class="panel-kicker">Root Cause Mode</div>
+                <div class="panel-kicker">根因模式</div>
                 <h3>根因分析</h3>
                 <p class="panel-lead">从观察到的现象追溯根本原因，支持 5-Why 和鱼骨图式思路，适合故障、异常和经营偏差分析。</p>
                 <div class="input-support-grid">
@@ -1284,7 +1325,7 @@
         <!-- ═══════════ Tab 5: 干预分析 ═══════════ -->
         <div class="tab-content" id="tab-intervention">
             <div class="panel">
-                <div class="panel-kicker">Intervention Planner</div>
+                <div class="panel-kicker">干预模式</div>
                 <h3>干预分析</h3>
                 <p class="panel-lead">评估干预措施的因果影响，包括直接效果、间接效果、实施条件和潜在副作用。</p>
                 <div class="input-support-grid">
@@ -1338,7 +1379,7 @@
         <!-- ═══════════ Tab 6: 图谱总览 ═══════════ -->
         <div class="tab-content" id="tab-graph">
             <div class="panel">
-                <div class="panel-kicker">Graph Command Center</div>
+                <div class="panel-kicker">图谱总览</div>
                 <h3>图谱总览与管理中心</h3>
                 <p class="panel-lead">这里汇总历史推理沉淀、图谱规模、因果节点分布和导出管理动作，适合复盘与资产化沉淀。</p>
             </div>

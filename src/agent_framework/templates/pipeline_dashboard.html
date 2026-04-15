@@ -467,11 +467,224 @@
             font-size: 13px;
         }
 
+        .header-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .header-nav-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 14px;
+            border-radius: 999px;
+            border: 1px solid var(--pd-border);
+            background: rgba(255,255,255,0.7);
+            color: var(--pd-text);
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .header-nav-link:hover {
+            background: #fff;
+            box-shadow: var(--pd-shadow);
+        }
+
+        .demo-note {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--pd-accent-deep);
+            background: rgba(255,255,255,0.72);
+            border: 1px solid rgba(19, 99, 223, 0.12);
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .demo-card {
+            position: relative;
+            padding: 22px;
+            border-radius: 20px;
+            overflow: hidden;
+            min-height: 320px;
+            background:
+                linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.82)),
+                var(--demo-bg, linear-gradient(135deg, rgba(19,99,223,0.12), rgba(96,165,250,0.10)));
+            border: 1px solid rgba(255,255,255,0.7);
+            box-shadow: 0 22px 50px -32px rgba(34, 44, 63, 0.28);
+        }
+
+        .demo-card::after {
+            content: '';
+            position: absolute;
+            right: -44px;
+            top: -56px;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.42);
+            filter: blur(2px);
+        }
+
+        .demo-topline {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 18px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .demo-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--pd-accent-deep);
+            background: rgba(255,255,255,0.76);
+        }
+
+        .demo-stage-chip {
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--pd-text);
+            background: rgba(32, 42, 54, 0.08);
+        }
+
+        .demo-card h3 {
+            position: relative;
+            z-index: 1;
+            font-family: 'Manrope', sans-serif;
+            font-size: 20px;
+            line-height: 1.2;
+            margin-bottom: 10px;
+        }
+
+        .demo-card p {
+            position: relative;
+            z-index: 1;
+            font-size: 13px;
+            color: var(--text2);
+            line-height: 1.65;
+        }
+
+        .demo-meta {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 16px 0 18px;
+        }
+
+        .demo-meta span {
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            background: rgba(255,255,255,0.76);
+            color: var(--pd-text);
+        }
+
+        .demo-flow {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+
+        .demo-flow-step {
+            padding: 10px 8px;
+            border-radius: 14px;
+            min-height: 76px;
+            background: rgba(255,255,255,0.65);
+            border: 1px solid rgba(255,255,255,0.56);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .demo-flow-step strong {
+            font-size: 12px;
+            line-height: 1.3;
+        }
+
+        .demo-flow-step small {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .demo-flow-step.done small { color: var(--pd-success); }
+        .demo-flow-step.active {
+            background: rgba(19, 99, 223, 0.10);
+            border-color: rgba(19, 99, 223, 0.18);
+        }
+        .demo-flow-step.active small { color: var(--pd-accent); }
+        .demo-flow-step.pending small { color: var(--text3); }
+
+        .demo-actions {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .demo-actions .btn {
+            flex: 1;
+            justify-content: center;
+        }
+
+        .demo-brief {
+            margin-top: 12px;
+            font-size: 12px;
+            color: var(--text3);
+        }
+
         @media (max-width: 640px) {
             body { padding: 20px 16px 60px; }
             .header { padding: 24px 20px; }
             .header h1 { font-size: 1.6em; }
             .form-row-inline { flex-direction: column; }
+        }
+
+        @media (max-width: 1100px) {
+            .demo-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 820px) {
+            .header-nav {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .demo-flow {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
         }
     </style>
 </head>
@@ -479,8 +692,23 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
+            <div class="header-nav">
+                <a class="header-nav-link" href="{{ url_for('developer_home') }}">
+                    <i class="fas fa-arrow-left"></i> 返回开发台
+                </a>
+                <div class="demo-note">
+                    <i class="fas fa-compass-drafting"></i> 内置 3 个 demo 场景，可直接套用
+                </div>
+            </div>
             <h1><i class="fas fa-route"></i> SFT-RLHF 训练流水线</h1>
             <p>SFT 微调 &rarr; 启动模型 &rarr; 偏好收集 &rarr; 奖励模型训练 &rarr; DPO 微调 &mdash; 形成完整闭环</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title">
+                <i class="fas fa-swatchbook"></i> Demo 样例
+            </div>
+            <div id="demoGallery" class="demo-grid"></div>
         </div>
 
         <!-- Pipeline List / Create -->
@@ -769,6 +997,45 @@ const STAGES = [
     {key:'dpo', name:'DPO', icon:'fa-rocket', desc:'Export DPO data and run the second fine-tune'},
 ];
 
+const DEMO_PIPELINES = [
+    {
+        tag: 'Customer Support',
+        icon: 'fa-headset',
+        name: '客服助手对齐',
+        summary: '面向在线客服场景的标准闭环，先把历史问答做 SFT，再用高价值投诉与复杂问法做偏好对齐。',
+        baseModel: 'Qwen/Qwen2.5-7B-Instruct',
+        sftTaskId: '',
+        currentStage: 1,
+        meta: ['8k 指令样本', 'vLLM 对外服务', '偏好对比 2 轮'],
+        brief: '适合先做首版 Demo，验证回复语气、拒答边界和长尾问法稳定性。',
+        theme: 'linear-gradient(135deg, rgba(19,99,223,0.16), rgba(96,165,250,0.12), rgba(255,255,255,0.22))',
+    },
+    {
+        tag: 'Ops Copilot',
+        icon: 'fa-wind',
+        name: '风电运维 Copilot',
+        summary: '针对运维问答、故障建议和工单辅助的训练链路，偏好阶段重点校正术语准确性与风险提示口径。',
+        baseModel: 'deepseek-ai/DeepSeek-R1-Distill-Qwen-7B',
+        sftTaskId: '',
+        currentStage: 2,
+        meta: ['行业知识增强', '人工 A/B 标注', '安全提示优先'],
+        brief: '适合展示专业领域模型如何从“能答”走到“答得稳”。',
+        theme: 'linear-gradient(135deg, rgba(16,185,129,0.16), rgba(20,184,166,0.12), rgba(255,255,255,0.22))',
+    },
+    {
+        tag: 'Enterprise Knowledge',
+        icon: 'fa-building',
+        name: '企业知识助理',
+        summary: '面向制度问答、流程辅导和内部知识查询的训练示例，突出低成本构建首版可用内训助手。',
+        baseModel: 'Qwen/Qwen2.5-3B-Instruct',
+        sftTaskId: 'demo-sft-kb-001',
+        currentStage: 4,
+        meta: ['已有 SFT 产物', '奖励模型完成', '准备导出 DPO'],
+        brief: '适合给业务侧演示闭环已跑通后的最终交付形态。',
+        theme: 'linear-gradient(135deg, rgba(217,119,6,0.18), rgba(251,191,36,0.10), rgba(255,255,255,0.22))',
+    },
+];
+
 let currentPipeline = null;
 let pipelines = [];
 let lastRegisterModels = [];
@@ -797,6 +1064,47 @@ function endpointTypeLabel(type) {
 
 function backendLabel(backend) {
     return ({xinference:'Xinference', vllm:'vLLM', manual:'OpenAI Compatible'})[backend] || (backend || '-');
+}
+
+function stageStateForDemo(demo, index) {
+    if (index < demo.currentStage) return 'done';
+    if (index === demo.currentStage) return 'active';
+    return 'pending';
+}
+
+function renderDemoGallery() {
+    const el = document.getElementById('demoGallery');
+    if (!el) return;
+    el.innerHTML = DEMO_PIPELINES.map((demo, index) => `
+        <div class="demo-card" style="--demo-bg:${demo.theme};">
+            <div class="demo-topline">
+                <span class="demo-label"><i class="fas ${demo.icon}"></i> ${demo.tag}</span>
+                <span class="demo-stage-chip">当前演示到 ${STAGES[demo.currentStage].name}</span>
+            </div>
+            <h3>${demo.name}</h3>
+            <p>${demo.summary}</p>
+            <div class="demo-meta">
+                ${demo.meta.map(item => `<span>${item}</span>`).join('')}
+            </div>
+            <div class="demo-flow">
+                ${STAGES.map((stage, stageIndex) => `
+                    <div class="demo-flow-step ${stageStateForDemo(demo, stageIndex)}">
+                        <small>${stageStateForDemo(demo, stageIndex) === 'done' ? '已完成' : stageStateForDemo(demo, stageIndex) === 'active' ? '当前' : '待进入'}</small>
+                        <strong>${stage.name}</strong>
+                    </div>
+                `).join('')}
+            </div>
+            <div class="demo-actions">
+                <button class="btn btn-primary btn-sm" onclick="createDemoPipeline(${index})">
+                    <i class="fas fa-bolt"></i> 一键创建
+                </button>
+                <button class="btn btn-outline btn-sm" onclick="applyDemoToForm(${index})">
+                    <i class="fas fa-pen-ruler"></i> 套用到表单
+                </button>
+            </div>
+            <div class="demo-brief">${demo.brief}</div>
+        </div>
+    `).join('');
 }
 
 function setSelectOptions(selectId, models, emptyText='No models found') {
@@ -882,6 +1190,35 @@ async function createPipeline() {
     } else {
         showToast('Create failed: ' + (r.error || 'unknown error'));
     }
+}
+
+function applyDemoToForm(index) {
+    const demo = DEMO_PIPELINES[index];
+    if (!demo) return;
+    document.getElementById('newPipelineName').value = demo.name;
+    document.getElementById('newBaseModel').value = demo.baseModel;
+    document.getElementById('newSftTaskId').value = demo.sftTaskId || '';
+    showCreateModal();
+}
+
+async function createDemoPipeline(index) {
+    const demo = DEMO_PIPELINES[index];
+    if (!demo) return;
+    const r = await api('/api/pipeline/create', {
+        method: 'POST',
+        body: {
+            name: `${demo.name} 演示版`,
+            base_model: demo.baseModel,
+            sft_task_id: demo.sftTaskId || ''
+        }
+    });
+    if (!r.success) {
+        showToast('Demo create failed: ' + (r.error || 'unknown error'));
+        return;
+    }
+    showToast(`已创建 demo：${demo.name}`);
+    await loadPipelines();
+    await openPipeline(r.data.id);
 }
 
 async function openPipeline(id) {
@@ -1323,6 +1660,7 @@ async function removeEndpoint(id) {
 
 toggleRegisterBackendFields();
 toggleStartBackendFields();
+renderDemoGallery();
 loadPipelines();
 </script>
 
