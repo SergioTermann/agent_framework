@@ -67,26 +67,14 @@
         }
 
         .app-container {
-            display: flex;
+            display: block;
             min-height: 100vh;
             position: relative;
             z-index: 1;
         }
 
         .sidebar {
-            position: sticky;
-            top: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            width: 16rem;
-            height: 100vh;
-            padding: 24px 16px;
-            overflow-y: auto;
-            background: rgba(240, 245, 252, 0.86);
-            backdrop-filter: blur(18px);
-            border-right: 1px solid rgba(219, 228, 240, 0.78);
-            box-shadow: 10px 0 40px rgba(16, 35, 63, 0.04);
+            display: none;
         }
 
         .sidebar-header {
@@ -300,7 +288,7 @@
             flex: 1;
             overflow-y: auto;
             padding: 32px 24px 40px;
-            max-width: 1440px;
+            max-width: none;
             width: 100%;
             margin: 0 auto;
         }
@@ -395,65 +383,6 @@
 </head>
 <body{% if embedded %} class="is-embedded"{% endif %}>
     <div class="app-container">
-        {% if not embedded %}
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <a class="sidebar-logo" href="/">
-                    <span class="sidebar-mark material-symbols-outlined">extension</span>
-                    <span class="sidebar-copy">
-                        <strong>插件市场</strong>
-                        <small>能力目录 / 接入管理</small>
-                    </span>
-                </a>
-            </div>
-            <a class="sidebar-primary" href="/">
-                <span class="material-symbols-outlined">space_dashboard</span>
-                <span>返回开发控制台</span>
-            </a>
-            <nav class="sidebar-nav" aria-label="插件市场导航">
-                <div class="nav-section-label">平台入口</div>
-                <a href="/" class="nav-item">
-                    <span class="material-symbols-outlined">home</span>
-                    <span>首页</span>
-                </a>
-                <a href="/chat" class="nav-item">
-                    <span class="material-symbols-outlined">chat</span>
-                    <span>对话助手</span>
-                </a>
-                <a href="/visual_workflow" class="nav-item">
-                    <span class="material-symbols-outlined">hub</span>
-                    <span>工作流编排</span>
-                </a>
-                <a href="/knowledge" class="nav-item">
-                    <span class="material-symbols-outlined">library_books</span>
-                    <span>知识库</span>
-                </a>
-                <a href="/plugins" class="nav-item active">
-                    <span class="material-symbols-outlined">extension</span>
-                    <span>插件市场</span>
-                </a>
-            </nav>
-            <div class="sidebar-footer">
-                <div class="nav-section-label">常用视图</div>
-                <a href="/settings" class="nav-item">
-                    <span class="material-symbols-outlined">settings</span>
-                    <span>平台设置</span>
-                </a>
-                <a href="/logs" class="nav-item">
-                    <span class="material-symbols-outlined">receipt_long</span>
-                    <span>日志中心</span>
-                </a>
-                <div class="sidebar-user">
-                    <span class="sidebar-user-mark"></span>
-                    <div>
-                        <strong>插件目录</strong>
-                        <small>plugin catalog</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-
         <div class="main-content">
             {% if not embedded %}
             <div class="header">

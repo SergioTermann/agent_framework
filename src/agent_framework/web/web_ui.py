@@ -1894,16 +1894,19 @@ def portal_home():
     current_target = _resolve_portal_target(request.args.get("target"))
     if current_target:
         return redirect(current_target)
-    current_item = _find_portal_item(current_target)
-    portal_sections = _build_portal_sections(current_target)
+    portal_sections = _build_portal_sections()
     total_features = sum(len(section["items"]) for section in portal_sections)
     return render_template(
         'portal.html',
         portal_sections=portal_sections,
         portal_total_features=total_features,
-        current_target=current_target,
-        current_item=current_item,
     )
+
+
+@app.route('/simple')
+def simple_home():
+    """简洁主页 - 左侧功能导航，右侧对话界面"""
+    return render_template('simple_home.html')
 
 
 @app.route('/user')

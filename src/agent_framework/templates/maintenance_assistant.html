@@ -300,7 +300,7 @@
     }
 
     .assistant-layout {
-      grid-template-columns: minmax(0, 1.12fr) minmax(320px, .72fr);
+      grid-template-columns: minmax(0, 1fr);
     }
 
     .side-stack {
@@ -585,24 +585,6 @@
           </div>
         </section>
       </div>
-      <aside class="side-stack">
-        <section class="card side-card">
-          <h3>路由信息</h3>
-          <div class="empty" id="routePanel">发送问题后，这里会显示当前轮次的模型路由、模式选择和会话信息。</div>
-        </section>
-        <section class="card side-card">
-          <h3>因果分析</h3>
-          <div class="empty" id="causalPanel">启用因果推断后，这里会显示根因候选、影响因素和推荐动作。</div>
-        </section>
-        <section class="card side-card">
-          <h3>检索结果</h3>
-          <div class="empty" id="retrievalPanel">发送问题后，这里会展示知识片段、记忆命中和会话摘要。</div>
-        </section>
-        <section class="card side-card">
-          <h3>模型策略</h3>
-          <div class="empty" id="modelPanel">这里会展示微调路由、RLHF 状态以及当前模型来源。</div>
-        </section>
-      </aside>
     </div>
   </div>
   <script>

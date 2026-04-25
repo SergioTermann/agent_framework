@@ -10,7 +10,7 @@ function bindPortalDialog() {
 
     const syncHeight = () => {
         input.style.height = "auto";
-        input.style.height = `${Math.max(input.scrollHeight, 168)}px`;
+        input.style.height = `${Math.max(input.scrollHeight, 120)}px`;
     };
 
     try {
@@ -19,7 +19,7 @@ function bindPortalDialog() {
             input.value = draft;
         }
     } catch (error) {
-        console.warn("portal draft unavailable", error);
+        console.warn("开始页草稿恢复失败", error);
     }
 
     syncHeight();
@@ -42,7 +42,7 @@ function bindPortalDialog() {
         try {
             sessionStorage.setItem(draftKey, input.value);
         } catch (error) {
-            console.warn("portal draft unavailable", error);
+            console.warn("开始页草稿保存失败", error);
         }
     });
 
@@ -57,12 +57,14 @@ function bindPortalDialog() {
         event.preventDefault();
 
         const prompt = input.value.trim();
-        if (prompt) {
-            sessionStorage.setItem("portal_prompt", prompt);
-            sessionStorage.setItem("portal_module", "guide");
-            sessionStorage.removeItem(draftKey);
+        if (!prompt) {
+            input.focus();
+            return;
         }
 
+        sessionStorage.setItem("portal_prompt", prompt);
+        sessionStorage.setItem("portal_module", "guide");
+        sessionStorage.removeItem(draftKey);
         window.location.href = "/maintenance-assistant";
     });
 }

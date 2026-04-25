@@ -79,12 +79,12 @@ def test_portal_page_is_available():
 
     assert response.status_code == 200
     html = response.get_data(as_text=True)
-    assert "Luminous Intelligence" in html
-    assert "Windrise Domain - AI Technical Suite" in html
+    assert "统一对话入口" in html
+    assert "风起时域智能助手" in html
     assert 'id="portal-dialog-form"' in html
     assert 'id="route-search"' in html
     assert "/maintenance-assistant" in html
-    assert "Gearbox Overheating" in html
+    assert "齿轮箱运行 3 小时后持续过热" in html
 
 
 def test_developer_home_uses_light_console_layout():
