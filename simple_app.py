@@ -39,6 +39,15 @@ def home_image():
         return send_file(image_path, mimetype='image/png')
     return "Image not found", 404
 
+# 添加 logo 图片路由
+@app.route('/logo.png')
+def logo_image():
+    """提供 logo 图片"""
+    image_path = repo_root / 'logo.png'
+    if image_path.exists():
+        return send_file(image_path, mimetype='image/png')
+    return "Image not found", 404
+
 
 if __name__ == '__main__':
     print("=" * 60)
