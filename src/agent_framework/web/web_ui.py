@@ -7,12 +7,13 @@ import asyncio
 import logging
 import threading
 import uuid
+import urllib.request
 from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlparse
 
-from flask import Flask, render_template, request, jsonify, redirect, url_for, send_file, send_from_directory
+from flask import Flask, render_template, request, jsonify, redirect, url_for, send_file, send_from_directory, Response
 from flask_socketio import SocketIO, emit
 
 from agent_framework.agent import AgentBuilder
@@ -2007,6 +2008,50 @@ def api_chat():
     except Exception as e:
         logger.error(f"Chat API error: {e}")
         return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/dify/chat-messages', methods=['POST'])
+def dify_proxy():
+    """代理转发 Dify API，避免前端直连 localhost"""
+    try:
+        import http.client
+        import json as _json
+
+        req_data = request.get_data()
+        conn = http.client.HTTPConnection('localhost', 3080, timeout=120)
+        conn.request(
+            'POST',
+            '/v1/chat-messages',
+            body=req_data,
+            headers={
+                'Content-Type': 'application/json',
+                'Authorization': request.headers.get('Authorization', ''),
+            },
+        )
+        resp = conn.getresponse()
+
+        def generate():
+            try:
+                while True:
+                    chunk = resp.read(256)
+                    if not chunk:
+                        break
+                    yield chunk
+            finally:
+                conn.close()
+
+        return Response(
+            generate(),
+            status=resp.status,
+            content_type=resp.getheader('Content-Type', 'text/event-stream'),
+            headers={
+                'Cache-Control': 'no-cache',
+                'X-Accel-Buffering': 'no',
+            },
+        )
+    except Exception as e:
+        logger.error(f"Dify proxy error: {e}")
+        return jsonify({'error': str(e)}), 502
 
 
 @app.route('/multi-agent')

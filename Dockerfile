@@ -22,7 +22,6 @@ COPY plugins ./plugins
 COPY rust_extensions ./rust_extensions
 COPY go_services ./go_services
 COPY .env.example ./
-COPY data ./data
 
 RUN uv sync --no-dev
 
